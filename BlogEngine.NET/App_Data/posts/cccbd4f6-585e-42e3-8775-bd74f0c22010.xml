@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>WCF  Nedir ? (Windows Communication Foundation)</title>
+  <description>&amp;nbsp;
+&amp;nbsp;
+
+.Net Framework 3.0 ile birlikte gelmiştir.
+Farklı platformlar arasında iletişim sağla</description>
+  <content>&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: Verdana, sans-serif; font-size: medium;"&gt;.Net Framework 3.0 ile birlikte gelmiştir.&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span style="font-family: Verdana, sans-serif; font-size: medium;"&gt;Farklı platformlar arasında iletişim sağlamak ve Service Oriented Architecture &amp;ndash; SOA i&amp;ccedil;in uygulamalar geliştirmek i&amp;ccedil;in geliştirilmiştir.&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span style="font-family: Verdana, sans-serif; font-size: medium;"&gt;Web servisini yayımlamak i&amp;ccedil;in HTTP, WSHTTP gibi protokoller kullanılabilir.&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span style="font-family: Verdana, sans-serif; font-size: medium;"&gt;Servisler IIS &amp;uuml;zerinde http kuralları kullanılarak yayınlanabilir, ya da Windows &amp;uuml;zerinde TCP - Pipe gibi y&amp;ouml;ntemlerle barındırılabilir.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 18.0pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;WCF ana hatlarıyla 3 kısma ayrılır (A-B-C)&lt;/span&gt;&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoListParagraphCxSpFirst" style="margin-left: 54.0pt; mso-add-space: auto; text-indent: -18.0pt; mso-list: l3 level1 lfo2;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;&lt;strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;1.&lt;span style="font-weight: normal; font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;/span&gt;&lt;/strong&gt;&lt;!--[endif]--&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Address&lt;/span&gt;&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoListParagraphCxSpMiddle" style="margin-left: 53.4pt; mso-add-space: auto; text-indent: -18.0pt; mso-list: l0 level1 lfo3;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;&lt;span class="apple-converted-space"&gt;-&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;/span&gt;&lt;!--[endif]--&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Bir servisin nerede olduğunu, hangi protokol ile yayınlama yaptığını bildiren bilgidir. Aktif olarak &amp;ccedil;alışan her servis WCF&amp;rsquo;ye g&amp;ouml;re eşsiz bir adrese sahip olmalıdır.&lt;span class="apple-converted-space"&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoListParagraphCxSpMiddle" style="margin-left: 54.0pt; mso-add-space: auto;"&gt;&lt;span class="apple-converted-space" style="font-size: medium;"&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoListParagraphCxSpLast" style="margin-left: 54.0pt; mso-add-space: auto;"&gt;&lt;span class="apple-converted-space" style="font-size: medium;"&gt;&lt;span style="text-decoration: underline;"&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;WCF servisine ulaşabilmek i&amp;ccedil;in kullanılabilecek protokoller;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;-&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;!--[endif]--&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;HTTP (http:// veya https://)&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;-&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;!--[endif]--&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;TCP (net.tcp://)&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;-&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;!--[endif]--&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Peer&amp;nbsp;2 Peer (net.p2p://)&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;-&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;!--[endif]--&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;IPC (net.pipe://)&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;-&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;!--[endif]--&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;MSMQ (net.msmq://)&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoListParagraph" style="margin-left: 54.0pt; mso-add-space: auto; text-indent: -18.0pt; mso-list: l3 level1 lfo2;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;&lt;strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;2.&lt;span style="font-weight: normal; font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;/span&gt;&lt;/strong&gt;&lt;!--[endif]--&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Binding&lt;/span&gt;&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;-&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;!--[endif]--&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Uygulamalar tarafından veri g&amp;ouml;ndermek ya da veri almak i&amp;ccedil;in servis ile nasıl iletişime ge&amp;ccedil;ileceğinin tanımlandığı b&amp;ouml;l&amp;uuml;m. WCF hizmetleri i&amp;ccedil;in kullanılabilecek &amp;ouml;n tanımlı binding&amp;rsquo; ler;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 14.2pt;"&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&lt;img style="font-size: 10px; display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=%2f2013%2f05%2f2142.png" alt="" width="819" height="319" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 14.2pt;"&gt;&lt;span style="font-family: Verdana, sans-serif; font-size: medium;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoListParagraphCxSpFirst" style="margin-left: 54.0pt; mso-add-space: auto; text-indent: -18.0pt; mso-list: l3 level1 lfo2;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;&lt;strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;3.&lt;span style="font-weight: normal; font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;/span&gt;&lt;/strong&gt;&lt;!--[endif]--&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Contract&lt;/span&gt;&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoListParagraphCxSpLast" style="text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;-&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;!--[endif]--&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Bir servisin ne iş yaptığının bilinmesinde rol oynar. Bazı s&amp;ouml;zleşmeler şunlardır:&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;&lt;span style="font-family: Symbol;"&gt;&amp;middot;&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;/span&gt;&lt;!--[endif]--&gt;&lt;strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Servis s&amp;ouml;zleşmesi (Service Contract):&lt;/span&gt;&lt;/strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;&amp;nbsp;Servis ile yaratılacak olan operasyonların tanımlanmasında kullanılır.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre style="margin-left: 53.4pt; line-height: 10.8pt; background-position: initial initial; background-repeat: initial initial;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="color: #222222;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; [ServiceContract]
+
+&amp;nbsp;&amp;nbsp; public interface IService1
+
+&amp;nbsp;&amp;nbsp; { }&lt;/pre&gt;
+&lt;pre style="margin-left: 53.4pt; line-height: 10.8pt; background-position: initial initial; background-repeat: initial initial;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="color: #222222;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;&lt;span style="font-family: Symbol;"&gt;&amp;middot;&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;/span&gt;&lt;!--[endif]--&gt;&lt;strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Veri S&amp;ouml;zleşmesi (Data Contract):&lt;/span&gt;&lt;/strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;&amp;nbsp;Servis i&amp;ccedil;erisinde bulunan class&amp;rsquo;ları tanımlamak i&amp;ccedil;in kullanılır&lt;/span&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;. Sınıfların &amp;uuml;yeleri&lt;span class="apple-converted-space"&gt;&amp;nbsp;&lt;/span&gt;&lt;strong&gt;Data Member&lt;/strong&gt;&lt;span class="apple-converted-space"&gt;&amp;nbsp;&lt;/span&gt;olarak tanımlanır.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoListParagraphCxSpFirst" style="margin: 0cm 0cm 0.0001pt 53.4pt; line-height: 10.8pt; background-position: initial initial; background-repeat: initial initial;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;nbsp;&amp;nbsp; [DataContract]
+&amp;nbsp;&amp;nbsp; public class MyClass
+&amp;nbsp;&amp;nbsp; { }
+&amp;nbsp;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;nbsp;[DataMember]
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;nbsp;&amp;nbsp;public string StringValue
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;nbsp;{
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;get { return stringValue; }
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;nbsp;&amp;nbsp;set { stringValue = value; }
+
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;nbsp;}&lt;/pre&gt;
+&lt;p class="MsoListParagraph" style="margin: 0cm 0cm 0.0001pt 53.4pt; line-height: 10.8pt; background-position: initial initial; background-repeat: initial initial;"&gt;&lt;span style="font-size: medium; font-family: 'Courier New'; color: #222222;"&gt;&lt;br /&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;&lt;span style="font-family: Symbol;"&gt;&amp;middot;&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;/span&gt;&lt;!--[endif]--&gt;&lt;strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Hata S&amp;ouml;zleşmesi (Fault Contract):&lt;/span&gt;&lt;/strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;&amp;nbsp;Servis tarafından tanımlanacak olan hatalar bu yolla tanımlanır.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-indent: -18pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;!-- [if !supportLists]--&gt;&lt;span style="font-family: Symbol;"&gt;&amp;middot;&lt;span style="font-family: 'Times New Roman';"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;/span&gt;&lt;/span&gt;&lt;!--[endif]--&gt;&lt;strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Mesaj S&amp;ouml;zleşmesi (Message Contract):&lt;/span&gt;&lt;/strong&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;&amp;nbsp;Servisler ile mesajlar arasında iletişim kurulmasını sağlar.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 53.4pt; text-align: center;" align="center"&gt;&lt;span style="font-size: medium;"&gt;&lt;img src="/image.axd?picture=%2f2013%2f05%2f453.jpg" alt="" width="568" height="183" /&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Endpoints&lt;/span&gt;&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-family: Verdana, sans-serif; font-size: medium;"&gt;Clients ile Host arasındaki iletişimi şağlamak i&amp;ccedil;in kullanılan bir aray&amp;uuml;zd&amp;uuml;r. Her endpoint&amp;rsquo;in kendi adresi vardır ve bu adresin benzersiz olması i&amp;ccedil;in servisin kendi ana adresine eklenmektedir. Bir WCF servisini aslında endpoint topluluğu olarak d&amp;uuml;ş&amp;uuml;nebiliriz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;&lt;span style="font-family: Verdana, sans-serif;"&gt;Behaviors&lt;/span&gt;&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-family: Verdana, sans-serif; font-size: medium;"&gt;Servis davranışları, servislerin veya istemcilerin fonksiyonelliklerini arttırmak i&amp;ccedil;in kullanılırlar. &amp;Ouml;rneğin servislerin metadata bilgisinin paylaşılıp paylaşılamayacağı, ekstra g&amp;uuml;venlik eklenmesi, tracking tracing logging gibi bilgilerin tutulması, parametre ve mesajların validasyonları, hata alındığı durumlarda detayları exception bilgisinin istemci tarafına g&amp;ouml;nderilip g&amp;ouml;nderilemeyeceği gibi.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-family: Verdana, sans-serif; font-size: medium;"&gt;Yeni bir WCF hizmeti tanımlarken ilk olarak sunulması hedeflenen fonsiyonaliteler netleştirilip ve bir contract ile duyurulur. Bu contract&amp;rsquo; lar &lt;strong&gt;interface&lt;/strong&gt;&amp;rsquo;lerin i&amp;ccedil;erisine yazılırlar.&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;nbsp; [ServiceContract] //Contrat&amp;rsquo;ın bir hizmette kullanılacağını belirtmek i&amp;ccedil;in interface&amp;rsquo;in &amp;uuml;st kısmına ServiceContract yazılır
+&amp;nbsp;&amp;nbsp;&amp;nbsp; public&amp;nbsp;interface&amp;nbsp;IServiceImpl
+&amp;nbsp;&amp;nbsp;&amp;nbsp; {
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; [OperationContract] //Oluşturulan metodların service tarafından kullanılabilmesi i&amp;ccedil;in uygulanan etikettir.
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; bool SaveData(string Val); //string tipinde bir parametre alarak gelen değeri kaydeden bir metod.
+&amp;nbsp;
+//XML ya da JSON formatında internet &amp;uuml;zerinde ya da local&amp;rsquo;de veri yayınlamak istediğimizde aşağıda bulunan kodlara benzer yapılar kullanılır.
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; [OperationContract]
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; [WebInvoke(Method = "GET",&amp;nbsp; //GET metodunun kullanılacağı belirtildi.
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; ResponseFormat = WebMessageFormat.Xml, //Geriye d&amp;ouml;nen veri XML formatındadır.
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; BodyStyle = WebMessageBodyStyle.Wrapped,
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; UriTemplate = "xml")]&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; //Url&amp;rsquo;de bu metodun &amp;ccedil;ağırılmasını sağlayacak string
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; List&amp;lt;Employee&amp;gt; XMLData();&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; //Geri d&amp;ouml;n&amp;uuml;ş tipi ile birlikte Metod ismi.
+&amp;nbsp;&amp;nbsp;&amp;nbsp; }
+
+&amp;nbsp;
+//Belirtilmiş olan kontratlara uygun metodlar class i&amp;ccedil;erisine yazılır.
+namespace MyService
+{
+&amp;nbsp;&amp;nbsp;&amp;nbsp; public&amp;nbsp;class&amp;nbsp;ServiceImpl : IServiceImpl
+&amp;nbsp;&amp;nbsp;&amp;nbsp; {
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; public&amp;nbsp;bool SaveData(string val)&amp;nbsp; //interface i&amp;ccedil;erisinde tanımlanan servis kontratı.
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; {
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; return&amp;nbsp;true;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; }
+&amp;nbsp;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; public&amp;nbsp;List&amp;lt;Employee&amp;gt; XMLData()//interface i&amp;ccedil;erisinde tanımlanan XMLData servis kontratı
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; {
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;  return new&amp;nbsp;List&amp;lt;Employee&amp;gt;();&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; }
+&amp;nbsp; &amp;nbsp;}
+}&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-family: Verdana, sans-serif; font-size: medium;"&gt;Proje i&amp;ccedil;erisinde bulunan app.config/Web.config sayfaları i&amp;ccedil;erisinde kullanılacak kontratlar endpoint&amp;rsquo; ler i&amp;ccedil;erisinde tanımlanır ve servis yayınlanmaya hazır hale getirilir.&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:xml;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;lt;servicename="Services.ServiceImpl "behaviorConfiguration="ServiceBehaviour"&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;endpointaddress=""binding="webHttpBinding"contract="Services.IServiceImpl "behaviorConfiguration="web"&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;/endpoint&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;/service&amp;gt;xm&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;&lt;span style="line-height: 115%; font-family: Verdana, sans-serif;"&gt;Endpoint&lt;/span&gt;&lt;/strong&gt;&lt;span style="line-height: 115%; font-family: Verdana, sans-serif;"&gt; ile servisi hangi adres, protokol ve kontrat ile yayınlayacağımızı belirtmekteyiz.&amp;nbsp; Bu kullanım hizmet sınıfını birden fazla kontrat ile farklı farklı adres ve protokollerle yayınlayabilme olanağı sağlamaktadır.&lt;/span&gt;&lt;/span&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-04-07 14:10:00</pubDate>
+  <lastModified>2020-01-20 08:22:35</lastModified>
+  <raters>3</raters>
+  <rating>4.666667</rating>
+  <slug>WCF-(Windows-Communication-Foundation)</slug>
+  <tags>
+    <tag>wcf</tag>
+    <tag>wcf nedir</tag>
+    <tag>c#</tag>
+    <tag>webservice</tag>
+    <tag>servicecontract</tag>
+    <tag>endpoint</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+  </categories>
+  <notifications />
+</post>

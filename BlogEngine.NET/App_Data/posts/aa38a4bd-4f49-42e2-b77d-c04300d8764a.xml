@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>.Net Core 2.0 to 2.1 Migration Nasıl Yapılır</title>
+  <description>Microsoft .Net Core 2.1  SDK'sını ve bu sdk ile uyumlu çalışan kütüphanelerini nuget üzerinden yayınlayalı nerdeyse 3 ay oldu gibi ve hem 2.0'da karşılaştığımız bazı sorunların (HttpClient vb) giderilmesi hemde gözle görülür bir performans artışı açısından .Net Core 2.1 oldukça önem arz etmekte.</description>
+  <content>&lt;p&gt;Microsoft .Net Core 2.1&amp;nbsp; SDK'sını ve bu sdk ile uyumlu &amp;ccedil;alışan k&amp;uuml;t&amp;uuml;phanelerini nuget &amp;uuml;zerinden yayınlayalı nerdeyse 3 ay oldu gibi ve hem 2.0'da karşılaştığımız bazı sorunların (HttpClient vb) giderilmesi hemde g&amp;ouml;zle g&amp;ouml;r&amp;uuml;l&amp;uuml;r bir performans artışı a&amp;ccedil;ısından .Net Core 2.1 olduk&amp;ccedil;a &amp;ouml;nem arz etmekte.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;.Net Core 2.1&amp;nbsp;kullanarak yeni bir uygulama geliştirmek i&amp;ccedil;in sdk'iniz y&amp;uuml;kl&amp;uuml; olduğu taktirde vs 2017 kullanarak uygulamalar geliştirebilirsiniz. Mevcut 2.0 uygulamaların 2.1'e migrate edilmesi durumunda yapılacak bir ka&amp;ccedil; işlem bulunmakta.&lt;/p&gt;
+&lt;p&gt;Bu yazıda mevcut .net core 2.0 web uygulamamızı nasıl 2.1'e y&amp;uuml;kseltebiliriz inceleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;ASP.NET Core 2.1 SDK&amp;nbsp;Kurulumu&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;.net core veya asp.net core 2.1 uygulaması geliştirmek i&amp;ccedil;in ilk olarak 2.1 SDK'yı&amp;nbsp;&lt;a href="https://www.microsoft.com/net/learn/web/get-started-with-aspnet-tutorial"&gt;bu adresten&lt;/a&gt;&amp;nbsp;indirip kurmamız gerekmekte. A&amp;ccedil;ılan sayfada&amp;nbsp;&lt;strong&gt;Download .NET SDK&lt;/strong&gt;&amp;nbsp;butonuna tıklayarak indirme işlemi bittikten sonra aşağıdaki gibi şuan ki mevcut dağıtılan 2.1.302 versiyonunun kurulumunu başlatalım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/_netcore_sdk_21_install.png" alt="" width="426" height="315" /&gt;&lt;/p&gt;
+&lt;p&gt;Kurulum işlemi tamamalandıktan sonra completed ekranı aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/_netcore_sdk_21_install_completed.png" alt="" width="426" height="315" /&gt;&lt;/p&gt;
+&lt;p&gt;Kurulumdan emin olmak i&amp;ccedil;in&amp;nbsp;command prompt'ta &lt;strong&gt;dotnet --info&lt;/strong&gt; yazarak kurulu olan sdk bilgilerine erişebiliriz. Bende 2.1.300 versiyonu y&amp;uuml;kl&amp;uuml; olduğundan o s&amp;uuml;r&amp;uuml;me ait bilgiler g&amp;ouml;r&amp;uuml;nmekte.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/netcore_cmd_info_vers.png" alt="" width="354" height="179" /&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;Set Proejct Target Framework to 2.1&amp;nbsp;in Solution&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;SDK&amp;nbsp;kurulumu tamamlandıktan sonra solution'da bulunan&amp;nbsp;mevcut projemizi 2.0 ile geliştirdiğimiz i&amp;ccedil;in .csprj dosyasında TargetFramework olarak 2.0 yazmakta. Bilgisayarımızda y&amp;uuml;kl&amp;uuml; Sdk'lar aşağıdaki gibi listeleneceklerdir projeyi 2.1'e &amp;ccedil;ekebilmek i&amp;ccedil;in solution'da bulunan projenin properties'lerine giderek a&amp;ccedil;ılan ekranda dropdown'dan TargetFramework olarak 2.1 set edip projemizi build edelim.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/_netcore_sdk_21_install_vs_target_fmrk.png" alt="" width="628" height="243" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Yukarıda bahsettiğimiz gibi .csprj dosyasına baktığımzıda artık .Net Core 2.1 yazılı olduğunu g&amp;ouml;receğiz.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&lt;img src="/image.axd?picture=/2018/_netcore_sdk_21_vs_csprj.png" alt="" width="754" height="117" /&gt;&lt;/p&gt;
+&lt;p&gt;Şimdi ise son adım olarak projede 2.0 sdk ile uyumlu kullanılan .Net Core k&amp;uuml;t&amp;uuml;phanelerini 2.0'dan 2.1'e update etme işlemi var. Bunun i&amp;ccedil;in ilk olarak 2.0 ile birlikte&amp;nbsp;default gelen&lt;strong&gt;&amp;nbsp;AspNetCore.All&amp;nbsp;&lt;/strong&gt;k&amp;uuml;t&amp;uuml;phanesi yerini&amp;nbsp;&lt;strong&gt;AspNetCore.App&lt;/strong&gt;'a bırakmakta. Bunun i&amp;ccedil;in&amp;nbsp;AspNetCore.All referansını silip&amp;nbsp;AspNetCore.App'i projemize kuralım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2018/_netcore_sdk_21_install_vs_target_coreapp_nuget.png" alt="" width="707" height="265" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Bu k&amp;uuml;t&amp;uuml;phane dışında projenizde kullandığınız diğer Microsoft tarafından yayınlanan EntityFramework.Core gibi k&amp;uuml;t&amp;uuml;phaneleride 2.1 versiyonuna update etmeniz gerekmekte.&lt;/p&gt;
+&lt;p&gt;B&amp;uuml;t&amp;uuml;n&amp;nbsp;k&amp;uuml;t&amp;uuml;phaneleri g&amp;uuml;ncelledikten sonra y&amp;uuml;kl&amp;uuml; olan 2.0 SDK'yı da&amp;nbsp;silip geliştirmelerinize devam edebilirsiniz.&lt;/p&gt;
+&lt;p&gt;Yazının başında da bahsettiğim gibi .net core 2.1 ile birlikte 2.0'da bulunan bazı k&amp;uuml;t&amp;uuml;phanelerdeki g&amp;ouml;zle g&amp;ouml;r&amp;uuml;l&amp;uuml;r performans sıkıntılarının &amp;ccedil;&amp;ouml;z&amp;uuml;m&amp;uuml; ve yeni feature'lar i&amp;ccedil;ermesi bakımından olduk&amp;ccedil;a&amp;nbsp;&amp;ouml;nemlidir ve bir an &amp;ouml;nce migration'ı yapmak biz 2.0 kullananların yararına olacaktır.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-07-26 00:45:00</pubDate>
+  <lastModified>2020-01-20 08:22:12</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>net-core-2-0-to-2-1-migration</slug>
+  <tags>
+    <tag>20 to 21 migration</tag>
+    <tag>.net core migration</tag>
+    <tag>.net core 2.0 to 2.1 migration</tag>
+    <tag>2.1.302 sdk </tag>
+    <tag>.net core 2.1 migration</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+  </categories>
+  <notifications />
+</post>

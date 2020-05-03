@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Dapper ORM Nedir</title>
+  <description>Object relational mappers (ORMs); ilişkisel veritabanları ile programlama dillerinin nesne modelleri arasındaki uyumsuzluğu ortadan kaldırmak, kod ile database arasındaki uyumu %100 sağlamak için yazılım dünyasında uzun süredir kullanılmaktadırlar.</description>
+  <content>&lt;p&gt;Object relational mappers (ORMs);&amp;nbsp;ilişkisel veritabanları ile programlama dillerinin&amp;nbsp;nesne modelleri arasındaki uyumsuzluğu ortadan kaldırmak, kod ile database arasındaki uyumu %100 sağlamak i&amp;ccedil;in yazılım d&amp;uuml;nyasında uzun s&amp;uuml;redir kullanılmaktadırlar. Daha &amp;ouml;nceki ORM yazımızda &lt;a href="http://www.canertosuner.com/post/fluent-nhibernate-nedir-ve-kullanimi"&gt;Fluent NHibernate Nedir ve Kullanımı&lt;/a&gt;&amp;nbsp;konusuna değinmiştik. Bu yazımızda ise bir&amp;ccedil;ok kişi tarafından en hızlı ORM olarak kabul edilen Dapper'ı inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;Dapper, Stack Overflow ekibi tarafından open-source&amp;nbsp;geliştirilen lightweight bir ORM'dir. Dapper, lightweight&amp;nbsp;olması sebebiyle diğer ORM'lere kıyasla &amp;ccedil;ok daha hızlıdır.&lt;/p&gt;
+&lt;p&gt;Dapper, performans ve kullanım kolaylığı sağlaması d&amp;uuml;ş&amp;uuml;n&amp;uuml;lerek geliştirilmiş bir ORM dir. Transaction, stored procedure yada bulk insery kullanarak static ve dynamic object binding yapabilmemizi sağlar.&lt;/p&gt;
+&lt;h3&gt;Dapper&amp;nbsp;Kullanımı&lt;/h3&gt;
+&lt;p&gt;Dapper kullanımı i&amp;ccedil;in &amp;ouml;rnek basit bir app. geliştirelim. İlk olarak Vs'da &lt;strong&gt;Dapper_Sample&lt;/strong&gt; adında bir ConsoleApp oluşturalım. Sonrasında nuget &amp;uuml;zerinden &lt;a href="https://www.nuget.org/packages/Dapper"&gt;Dapper&lt;/a&gt;'ı projemize indirip kuralım.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;nbsp;Install-Package Dapper -Version&amp;nbsp;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Kurulum işlemi tamamlandıktan sonra &amp;ouml;rneğimiz şu şekilde olsun; &lt;strong&gt;ContosoCorp&lt;/strong&gt; adında bir db ve bu db de &lt;strong&gt;Customer&lt;/strong&gt; adında bir tablomuz olsun ve dapper kullanarak repository class ile bu tablo &amp;uuml;zerinde CRUD işlemleri yapalım.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;ncelikle&amp;nbsp;&lt;strong&gt;ContosoCorp&lt;/strong&gt;&amp;nbsp;db si i&amp;ccedil;in table create script'ini aşağıdaki gibi yazıp&amp;nbsp;execute edelim ve Customer tablomuz&amp;nbsp;oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:sql;auto-links:false;toolbar:false" contenteditable="false"&gt;create table Customer
+(
+ Id uniqueidentifier,
+ FirstName nvarchar(50) not null,
+ LastName nvarchar(50) not null,
+ Email nvarchar(50) not null
+)&lt;/pre&gt;
+&lt;p&gt;İlk olarak tablomuza karşılık gelen Customer entity'sini aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class Customer
+    {
+        public Guid Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi ise CRUD işlemleri i&amp;ccedil;in CustomerRepository adında&amp;nbsp;bir class oluşturalım ve i&amp;ccedil;erisini CRUD metotlarını tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CustomerRepository
+    {
+        protected SqlConnection GetOpenConnection()
+        {
+            var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["ContosoCorpDbConn"].ConnectionString);
+            connection.Open();
+            return connection;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Config dosyamızda&amp;nbsp;kullanacağımız db i&amp;ccedil;in gerekli olan conn. string'inin&amp;nbsp;&lt;strong&gt;ContosoCorpDbConn&lt;/strong&gt; adıyla yazılı olduğunu varsayalım ve&amp;nbsp;GetOpenConnection() metodu ile repository metotlarında kullanacağımız SqlConnection yaratacağız.&lt;/p&gt;
+&lt;p&gt;Dapper'da bulunan&lt;strong&gt; Query() &lt;/strong&gt;metodu&amp;nbsp;veritabanından&amp;nbsp;retrieve data işlemini yani veri almamızı sağlayan ve model mapping'i yaparak modellerimizi dolduran&amp;nbsp;metoddur. Aşağıda yazacağımız &lt;strong&gt;All()&lt;/strong&gt; metodu ile&amp;nbsp;Customer tablosunda bulunan b&amp;uuml;t&amp;uuml;n kayıtları select edeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public IEnumerable&amp;lt;Customer&amp;gt; All()
+        {
+            using (var conn = GetOpenConnection())
+            {
+                return conn.Query&amp;lt;Customer&amp;gt;("Select * From Customer").ToList();
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;İkinci metot olarak Id parametresi alarak geriye tek bir Customer objesi return eden Get() metodunu yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public Customer Get(Guid id)
+        {
+            using (var conn = GetOpenConnection())
+            {
+                return conn.Query&amp;lt;Customer&amp;gt;("Select * From Customer WHERE Id = @Id", new { id }).SingleOrDefault();
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Dapper'da bulunan &lt;strong&gt;Execute()&lt;/strong&gt; metodu ise db de insert, update veya delete işlemlerinde kullanılır. Aşağıda yazacağımız metot&amp;nbsp;ile parametre olarak verilen customer nesnesini insert edeceğiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public void Insert(Customer customer)
+        {
+            using (var conn = GetOpenConnection())
+            {
+                string sqlQuery = "INSERT Customer(FirstName,LastName,Email) Values(@FirstName,@LastName,@Email)";
+                conn.Execute(sqlQuery, customer);
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre ado.net'e aşinalığı olan kişiler aslında bir nevi ado.net yazdığımızı g&amp;ouml;receklerdir &amp;ccedil;&amp;uuml;nk&amp;uuml; dapper'ın temelinde Ado&amp;ccedil;Net vardır. Son metot olarak dapper ile yukarıda yazdığımız All() metodunu birde &lt;strong&gt;stored-procedure&lt;/strong&gt; kullanarak yazalım. İlk olarak db &amp;uuml;zerinden aşağıdaki gibi&amp;nbsp;&lt;strong&gt;GetAllCustomersSP&lt;/strong&gt; adında stored-procedure'&amp;uuml; tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;CREATE PROCEDURE GetAllCustomersSP
+AS
+BEGIN
+    SELECT * FROM Customer
+END&lt;/pre&gt;
+&lt;p&gt;Sonrasında bu procedure'&amp;uuml; execute eden repository metodunu yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public IEnumerable&amp;lt;Customer&amp;gt; AllUsingSp()
+        {
+            using (var conn = GetOpenConnection())
+            {
+                return conn.Query&amp;lt;Customer&amp;gt;("GetAllCustomersSP", commandType: CommandType.StoredProcedure).ToList();
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;Repository metotlarını tanımladık sırada bu metotları kullanmak var. Program.cs i&amp;ccedil;erisinde bu metotları&amp;nbsp;call ederek yazdığımız kodları test edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        static void Main(string[] args)
+        {
+            var custRepo = new CustomerRepository();
+
+            var customer1 = new Customer { Id = Guid.NewGuid(), FirstName = "Caner", LastName = "Tosuner", Email = "info@canertosuner.com" };
+            var customer2 = new Customer { Id = Guid.NewGuid(), FirstName = "Berker", LastName = "S&amp;ouml;nmez", Email = "info@berkersonmez.com" };
+
+            custRepo.Insert(customer1);
+            custRepo.Insert(customer2);
+
+            //returns 2 records
+            var allCustomersUsingQuery = custRepo.All();
+
+            //returns 2 records
+            var allCustomersUsingSp = custRepo.AllUsingSp();
+
+            Console.ReadLine();
+        }&lt;/pre&gt;
+&lt;p&gt;Projemizi run ettiğimizde Customer tablosuna sırasıyla 2 kayıt atacaktır ve sonrasında &lt;strong&gt;All()&lt;/strong&gt; ve&amp;nbsp;&lt;strong&gt;AllUsingSp()&amp;nbsp;&lt;/strong&gt;metotlarını kullanarak tabloya select sorgusu yaptığımızda bize yukarıda kaydettiğimiz 2 kaydı return edecektir.&lt;/p&gt;
+&lt;p&gt;Dapper aynı zamanda transactional işlemleri de destekler. UnitOfWork pattern'i&amp;nbsp;&lt;strong&gt;BeginTransaction()&lt;/strong&gt; ve&amp;nbsp;&lt;strong&gt;EndTransaction()&lt;/strong&gt; metotlarını kullanarak uygulanabilir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Not :&lt;/strong&gt;&lt;/span&gt; Nuget de bulunan &lt;strong&gt;DapperExtensions&amp;nbsp;&lt;/strong&gt;k&amp;uuml;t&amp;uuml;phanesi kullanarak gerekli mapping işlemlerini yaptıktan sonra repository metotları i&amp;ccedil;erisinde sql komutları yerine&amp;nbsp;aşağıdaki gibi bir kullanımda mevcut. Ancak bu mapping &amp;uuml;zerinden table/column generate işlemi olmamakta sadece mapping işlemini sağlamakta.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Install-Package DapperExtensions&amp;nbsp;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CustomerMapper : ClassMapper&amp;lt;Customer&amp;gt;
+    {
+        public CustomerMapper()
+        {
+            base.Table("Customer");
+            Map(f =&amp;gt; f.Id).Key(KeyType.Guid);
+            Map(f =&amp;gt; f.FirstName);
+            Map(f =&amp;gt; f.LastName);
+            Map(f =&amp;gt; f.Email);
+        }
+    }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public IEnumerable&amp;lt;Customer&amp;gt; All()
+        {
+            using (var conn = GetOpenConnection())
+            {
+                return conn.GetList&amp;lt;Customer&amp;gt;().ToList();
+            }
+        }
+
+        public Customer Get(Guid id)
+        {
+            using (var conn = GetOpenConnection())
+            {
+                return conn.Get&amp;lt;Customer&amp;gt;(id);
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Dapper son derece geliştirmesi kolay ve kullanışlı bir ORM&amp;nbsp;dir.&amp;nbsp;NHibernate ve EntityFramework'de olduğu gibi model mapping'inizden&amp;nbsp;table/column&amp;nbsp;generate etmez ancak sql sorgularını olduk&amp;ccedil;a hızlı bir şekilde execute eder ve result'larını POCO class'larınıza map'ler. Bu &amp;ouml;zelliğiyle developer'lar arasında olduk&amp;ccedil;a pop&amp;uuml;lerdir.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-10-31 21:23:00</pubDate>
+  <lastModified>2017-10-30 10:38:54</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>dapper-orm-nedir</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

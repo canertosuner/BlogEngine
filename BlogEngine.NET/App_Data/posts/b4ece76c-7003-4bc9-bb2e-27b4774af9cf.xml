@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core 2.2 to 3.1 Migration and Autofac Configuration</title>
+  <description>Asp .Net Core hayatımıza gireli epeyce bir süre oldu ve Microsoft hızlı ve emin adımlarla declare ettiği milestone'larını geliştirmeye devam etmekte. Öncelikle v1.x ardından v2.x sürümlerini kullanmıştık ve son olarak ise en güncel kararlı sürüm olan v3.x çıktı. Yakşalık 1.5 yıldır gerek kendi projelerimde gerekse iş yerinde geliştirdiğimiz bütün projelerde 3.0'dan önceki</description>
+  <content>&lt;p&gt;Asp .Net Core hayatımıza gireli epeyce bir s&amp;uuml;re oldu ve Microsoft&amp;nbsp;hızlı ve emin adımlarla declare ettiği&amp;nbsp;&lt;a href="https://github.com/dotnet/aspnetcore/milestones"&gt;milestone&lt;/a&gt;'larını geliştirmeye devam etmekte. &amp;Ouml;ncelikle v1.x ardından v2.x s&amp;uuml;r&amp;uuml;mlerini kullanmıştık ve son olarak ise en g&amp;uuml;ncel kararlı s&amp;uuml;r&amp;uuml;m olan v3.x &amp;ccedil;ıktı. Yakşalık 1.5 yıldır gerek kendi projelerimde gerekse iş yerinde&amp;nbsp;geliştirdiğimiz b&amp;uuml;t&amp;uuml;n projelerde 3.0'dan &amp;ouml;nceki en&amp;nbsp;stabil versiyon olan asp.net core 2.2 kullanıyorduk. v3.0 ve peşinden v3.1 &amp;ccedil;ıkalı &amp;ccedil;ok fazla olmasada artık 2.2 ile develop ettiğimiz&amp;nbsp;bu projeleri v3.1'e migrate etme zamanı gelmiş oldu. v3.1'i microsoft bizlere &lt;a href="https://devblogs.microsoft.com/dotnet/announcing-net-core-3-1/"&gt;şu makale&lt;/a&gt; ile duyurmuş oldu, yeniliklerle ilgili detayları bu makalede bulabilirsiniz.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda mevcutta 2.2 ile&amp;nbsp;geliştirilmiş olan bir WebApi projemizi v3.1'e nasıl migrate ederiz, ne gibi yenilikler var inceliyor olacağız.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;ncelikle .net core 3.x uygulamaları geliştirebilmek i&amp;ccedil;in bilgisayarınızda en az &lt;a href="https://visualstudio.microsoft.com/downloads/"&gt;Visual Studio 16.3&lt;/a&gt;&amp;nbsp;versiyonu ve SDK 3.x bulunmak zorunda. Bilgisayarında kurulu olmayanlar i&amp;ccedil;in visual studio&amp;nbsp;&lt;a href="https://visualstudio.microsoft.com/downloads/"&gt;download sayfası&lt;/a&gt;&amp;nbsp;ve .netCore SDK i&amp;ccedil;in ise bu &lt;a href="https://dotnet.microsoft.com/download/dotnet-core/3.1"&gt;download sayfasına&lt;/a&gt; giderek kurulumlarını yapabilirler.&lt;/p&gt;
+&lt;p&gt;Kurulumları tamamladıktan sonra aşağıdaki gibi &lt;em&gt;&lt;strong&gt;dotnet --info&lt;/strong&gt; &lt;/em&gt;komutu ile birlikte kurulu olan sdk'leri g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebilirler ve ayrıca vs'da target framework bilgisi olarak yine 3.1 versiyonunu g&amp;ouml;rebiliyor olmamız gerekir.&lt;/p&gt;
+&lt;table style="height: 289px;" width="969"&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2020/ntcr_31_mgrtess.PNG" alt="" width="488" height="294" /&gt;&lt;/td&gt;
+&lt;td style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/ntcr_31_mgrtess_2.PNG" alt="" /&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p style="text-align: left;"&gt;Proje &amp;uuml;zerinde yapacağımız değişikliklere gelecek olursak; &amp;ouml;ncelikle kullanmakta olduğumuz projede 3rd party dependency injection tool'u olarak Autofac ve ORM tool'u olarakda Entity.Framework.Core bulunmakta.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Solution'da yer alan Api projemize gelip Edit Project File'a tıkladığımızda aşağıdaki gibi v2.2 i&amp;ccedil;in ilgili bilgileri ve reference'ları g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebiliriz.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&lt;img src="/image.axd?picture=/2020/ntcr_31_mgrtess_3.PNG" alt="" width="451" height="291" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&amp;nbsp;&amp;Ouml;ncelikle yapmamız gereken ilk iş&amp;nbsp;&lt;strong&gt;TargetFramework&lt;/strong&gt;&amp;nbsp;bilgisini 3.1'e &amp;ccedil;ekmek.&lt;/p&gt;
+&lt;pre class="brush:html;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;lt;!--Before--&amp;gt;
+&amp;lt;TargetFramework&amp;gt;netcoreapp2.2&amp;lt;/TargetFramework&amp;gt; 
+
+&amp;lt;!--After--&amp;gt;
+&amp;lt;TargetFramework&amp;gt;netcoreapp3.1&amp;lt;/TargetFramework&amp;gt;
+&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Packages section'a bakacak olursak; 2.2 uygulamalar i&amp;ccedil;in kullandığımız&amp;nbsp;&lt;strong&gt;Microsoft.AspNetCore.App &lt;/strong&gt;artık .netCore sdk'in bir par&amp;ccedil;ası ve uygulamalarımız reference'larına eklememiz gereken bir dll değil ve aynı zamanda EntityFrameworkCore'da doğrudan full paket olarak projelere eklemek yerine daha k&amp;uuml;&amp;ccedil;&amp;uuml;k dll'lere b&amp;ouml;l&amp;uuml;nm&amp;uuml;ş olarak kullanıma sunulmakta.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:xml;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;lt;!--Before--&amp;gt;
+&amp;lt;PackageReference Include="Microsoft.AspNetCore.App" /&amp;gt;
+&amp;lt;PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.0" /&amp;gt;
+&amp;lt;PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" /&amp;gt;
+&amp;lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.0" /&amp;gt;
+&amp;lt;PackageReference Include="Autofac" Version="4.9.2" /&amp;gt;
+&amp;lt;PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.4.0" /&amp;gt;
+
+&amp;lt;!--After--&amp;gt;
+&amp;lt;PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.3" /&amp;gt;
+&amp;lt;PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.3" /&amp;gt;
+&amp;lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" /&amp;gt;
+&amp;lt;PackageReference Include="Autofac" Version="5.1.2" /&amp;gt;
+&amp;lt;PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" /&amp;gt;&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;&lt;strong&gt;.csproj&lt;/strong&gt; dosyasının son halina bakacak olursak;&lt;/p&gt;
+&lt;pre class="brush:xml;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;lt;Project Sdk="Microsoft.NET.Sdk.Web"&amp;gt;
+  &amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;TargetFramework&amp;gt;netcoreapp3.1&amp;lt;/TargetFramework&amp;gt;
+  &amp;lt;/PropertyGroup&amp;gt;
+  &amp;lt;ItemGroup&amp;gt;
+	&amp;lt;PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.3" /&amp;gt;
+	&amp;lt;PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.3" /&amp;gt;
+	&amp;lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" /&amp;gt;
+	&amp;lt;PackageReference Include="Autofac" Version="5.1.2" /&amp;gt;
+	&amp;lt;PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" /&amp;gt;
+  &amp;lt;/ItemGroup&amp;gt;
+  &amp;lt;ItemGroup&amp;gt;
+    &amp;lt;Content Update="appsettings.json"&amp;gt;
+      &amp;lt;CopyToOutputDirectory&amp;gt;Always&amp;lt;/CopyToOutputDirectory&amp;gt;
+    &amp;lt;/Content&amp;gt;
+  &amp;lt;/ItemGroup&amp;gt;
+&amp;lt;/Project&amp;gt;
+&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Diğer bazı &amp;ouml;nemli değişiklikler ise Program.cs ve Startup.cs sınıfları i&amp;ccedil;in ge&amp;ccedil;erli.&amp;nbsp;&lt;/p&gt;
+&lt;h3 style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Program.cs&amp;nbsp;&lt;/strong&gt;&lt;/span&gt;&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;Program.cs de ki değişikler i&amp;ccedil;in doğrusu s&amp;ouml;ylemek gerekirse g&amp;ouml;zle b&amp;ouml;r&amp;uuml;lebilir major bir update yok gibi duruyor ancak Microsoft'un performance i&amp;ccedil;in değindiği bir ka&amp;ccedil; değişiklik var. Bunlardan biri&amp;nbsp;&lt;strong&gt;IWebHostBuilder&lt;/strong&gt; interface'i yerine&amp;nbsp;&lt;span class="pl-en"&gt;&lt;strong&gt;IHostBuilder&amp;nbsp;&lt;/strong&gt;interface'inin kullanılmasını&amp;nbsp;&amp;ouml;nermesi.&amp;nbsp;IWebHostBuilder&amp;nbsp;IWebHost build ederken,&amp;nbsp;IHostBuilder IHost build etmekte ve MS bunun daha performanslı olduğu s&amp;ouml;ylenmekte. IHost, Microsoft.Extensions.Hosting paketine, IWebHostBuilder ise Microsoft.AspNetCore.Hosting paketine aittir.&lt;/span&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Bir diğer değişiklik ise uygulama i&amp;ccedil;erisinde kullandığımız&amp;nbsp;third party dependency injection tool'unun kullanılcağı&amp;nbsp;yine host'u build ederken program.cs i&amp;ccedil;erisinde&amp;nbsp;&lt;strong&gt;UseServiceProviderFactory()&lt;/strong&gt; metodunu kullanarak belirtilmesi gerekmekte. Bizde projemizde Autofac kullandığımızdan host.Build()'dan &amp;ouml;nce bu metodu&amp;nbsp;call etmemiz gerekmekte.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Program.cs'in son haline bakacak olursak;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Program
+{
+    public static void Main(string[] args)
+    {
+        CreateWebHostBuilder(args).Build().Run();
+    }
+
+    public static IHostBuilder CreateWebHostBuilder(string[] args) =&amp;gt;
+        Host.CreateDefaultBuilder(args)
+            .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+            .ConfigureWebHostDefaults(webHostBuilder =&amp;gt; { webHostBuilder.UseStartup&amp;lt;Startup&amp;gt;(); });
+}&lt;/pre&gt;
+&lt;h3 style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Startup.cs&amp;nbsp;&lt;/strong&gt;&lt;/span&gt;&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;Startup.cs de ki değişiklere bakacak olursak;&amp;nbsp;Startup sınıfı default constructor ile geliyor ancak kullanmak zorunda değiliz.&lt;/p&gt;
+&lt;pre class="brush:html;auto-links:false;toolbar:false" contenteditable="false"&gt;//you don't have to use it if it's not necessary
+public Startup(IConfiguration configuration)
+{
+    Configuration = configuration;
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Bir diğer değişiklik&amp;nbsp;IConfiguration. Microsoft v2.2'de&amp;nbsp;IConfigurationRoot'un kullanılmasını &amp;ouml;neriyordu, v3.1 ile default IConfiguration const. inject edilmiş olarak gelmekte ancak kullanma mecburiyetiniz tabikide yok ihtiyaca g&amp;ouml;re&amp;nbsp;IConfigurationRoot'u da kullanabilirsiniz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;//Before
+public IConfigurationRoot Configuration { get; }
+
+//After
+public IConfiguration Configuration { get; }&lt;/pre&gt;
+&lt;h3 style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;3rd Party DI Container Conf.&lt;/span&gt;&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;Bir diğer &amp;ouml;nemli değişiklik ise ConfigureServices metodu ile ilgili. v2.2'de&amp;nbsp;ConfigureServices metodu default &lt;strong&gt;void&lt;/strong&gt; olarak tanımlıydı ancak projelerimizde&amp;nbsp;3rd party dependency injection tool'u kullanmak istersek return type'ını IServiceProvider interface'ine d&amp;ouml;n&amp;uuml;şt&amp;uuml;r&amp;uuml;p ilgili DI tool'unun instane'ını d&amp;ouml;nerek bu tool'u kullanıma sokabiliyorduk.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;v3.x ile birlikte&amp;nbsp;ConfigureServices metodu void olmaya zorlanmış ve herhangi bir geri d&amp;ouml;n&amp;uuml;ş değeri almamakta. Peki ya yazımızın başındada belirttiğimiz gibi projemizde Autofac kullanıyoruz ve autofac'i bir şekilde gerekli konfigurasyonlarla birlikte ayağa kaldırmamız gerekiyorsa?&amp;nbsp;Bunun i&amp;ccedil;in Autofac'in &lt;a href="https://autofaccn.readthedocs.io/en/latest/integration/aspnetcore.html"&gt;d&amp;ouml;k&amp;uuml;manlarında &lt;/a&gt;da belrtildiği &amp;uuml;zre Startup.cs i&amp;ccedil;erisinde g&amp;ouml;r&amp;uuml;n&amp;uuml;rde olmasada&amp;nbsp;&lt;strong&gt;ConfigureContainer&lt;/strong&gt; metodu bulunmakta. Bu metod runtime'da&amp;nbsp;build edilen bir metod ve autofac i&amp;ccedil;in ilgili registration'ları bu metod i&amp;ccedil;erisinde yapabileceğimiz s&amp;ouml;ylenmekte.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;  // ConfigureContainer is where you can register things directly
+  // with Autofac. This runs after ConfigureServices so the things
+  // here will override registrations made in ConfigureServices.
+  // Don't build the container; that gets done for you by the factory.
+  public void ConfigureContainer(ContainerBuilder builder)
+  {
+    // Register your own things directly with Autofac, like:
+    builder.RegisterModule(new MyApplicationModule());
+  }&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;ContainerBuilder build-in-time'da kendisi otomatik olarak .Build() metodunu call eder ve uygulama i&amp;ccedil;in ge&amp;ccedil;erli olan ILifeTimeScope'u ayağa kaldırır.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;ConfigureContainer metodunu Startup.cs i&amp;ccedil;erisinde kullanmak yerine Program.cs i&amp;ccedil;erisinde de kullanabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;.UseServiceProviderFactory().ConfigureContainer&amp;lt;ContainerBuilder&amp;gt;(builder =&amp;gt; { builder.RegisterModule(new MyApplicationModule()); })&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;diyerekte parantez i&amp;ccedil;inde DI tanımlamalarımızı yapabiliriz.&lt;/p&gt;
+&lt;h3 style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;AddControllers()&lt;/span&gt;&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;WebApi projeleri i&amp;ccedil;in bazı Mvc &amp;ouml;zelliklerini kullanabilmemize olanak sağlayan AddMvc() metodu yerine &amp;ccedil;ok daha lightweight bir versiyon olan &lt;strong&gt;AddControllers()&lt;/strong&gt; metodu gelmekte ve AddMvc() hi&amp;ccedil; kullanmasakta bir s&amp;uuml;r&amp;uuml; extra referansı projelerimize eklemekteydi dolayısıyla bundan kurtulmuş olduk g&amp;uuml;zel bir yenilik.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;services.AddControllers(options =&amp;gt; options.Filters.Add(typeof(ValidateModelAttribute)))
+    .AddNewtonsoftJson(options =&amp;gt;
+        options.SerializerSettings.ContractResolver = new DefaultContractResolver());&lt;/pre&gt;
+&lt;h3 style="text-align: left;"&gt;UseRouting()&amp;nbsp;&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;v2.2'de Routing tanımlamalarını UseMvc() metodunu kullanarak yapabilmekteydik. v3.1 ile birlikte&amp;nbsp;UseRouting() ve UseEndpoints() metodlarını kullanarak conf. edebilmemizi sağlamakta.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;//Before
+ app.UseMvc(routes =&amp;gt;
+            {
+                routes.MapRoute("DefaultApi", "api/{controller}/{id}");
+            });
+			
+//After
+  app.UseRouting();
+  app.UseEndpoints(endpoints =&amp;gt;
+  {
+      endpoints.MapControllerRoute("DefaultApi", "api/{controller}/{id}");
+      endpoints.MapHealthChecks("/health");
+  });&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Bu ve bunu gibi irili ufaklı bir &amp;ccedil;ok yenilikle v3.1 hayatımıza girmiş bulunmakta. v2.1'den v2.2'ye ge&amp;ccedil;iş yaparkenkinden biraz daha fazla ama implement etmesi olduk&amp;ccedil;a basit yeniliklerle 2.2'den 3.1'e ge&amp;ccedil;iş yapabilmekteyiz. &amp;Ccedil;ok daha detaylı bilgiye microsoft'un &lt;a href="https://docs.microsoft.com/en-US/dotnet/core/compatibility/2.2-3.1"&gt;bu sayfasındaki&lt;/a&gt;&amp;nbsp;makalesinde bulabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2020-04-18 13:00:00</pubDate>
+  <lastModified>2020-04-18 13:30:32</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>migrate-from-asp-net-core-22-to-31-and-autofac-configuration</slug>
+  <tags>
+    <tag>asp.net core 3.1</tag>
+    <tag>migrate 2.2 to 3.1</tag>
+    <tag>Aspnetcore</tag>
+    <tag>dotnet core</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>12fb8d4e-b852-4059-a0cb-9565196e4f88</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>.Net Core Register All At Once</title>
+  <description>http://chapsas.com/clean-up-your-net-core-startup-with-scrutor/</description>
+  <content>&lt;p&gt;.Net Core projelerinde&amp;nbsp;dependency injection uygularken eğer built-in container'ı kullanıyorsanız ve onlarca Service,Repository veyahut manager vb. interface/implementasyon'u varsa bunları container'a register etmek biraz uğraştırıyor. Sebebi ise castleWindsor veya Autofac gibi DI Tool'larından alışkın olduğumuz register-all-at-once gibi bir &amp;ouml;zelliği şuan i&amp;ccedil;in bulunmamakta. Yani aşağıdaki gibi her bir isterface ve onun implementasyonu i&amp;ccedil;in ayrı ayrı registration tanımlanması gerekmekte.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;services.AddSingleton&amp;lt;IUserService, UserService&amp;gt;();
+services.AddSingleton&amp;lt;ICustomerService, CustomerService&amp;gt;();
+services.AddSingleton&amp;lt;IProductService, ProductService&amp;gt;();
+services.AddSingleton&amp;lt;IEmployeeService, EmployeeService&amp;gt;();
+services.AddTransient&amp;lt;IUserManager, UserManager&amp;gt;();
+services.AddTransient&amp;lt;ICustomerManager, CustomerManager&amp;gt;();
+services.AddTransient&amp;lt;IProductManager, ProductManager&amp;gt;();
+services.AddTransient&amp;lt;IEmployeeManager, EmployeeManager&amp;gt;();
+...&lt;/pre&gt;
+&lt;p&gt;Ancak kısa s&amp;uuml;re &amp;ouml;nce github'da paylaşılan ve nuget &amp;uuml;zerinden de install edilebilen bir k&amp;uuml;t&amp;uuml;phane yayınlandı.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href="https://github.com/khellang/Scrutor"&gt;Scrutor&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Scrutor&amp;nbsp;"Assembly scanning and decoration extensions for Microsoft.Extensions.DependencyInjection" şeklinde tanımlanmakta ve bu k&amp;uuml;t&amp;uuml;phane ile aynısı olmasada CastleWindsor ve Autofac de olduğu&amp;nbsp;registration işlemi basitleşiyor. Projenize install ettikten sonra registration tanımlarken belirtiğiniz interface'in bulunduğu b&amp;uuml;t&amp;uuml;n assembly'leri scan edip bağımlılıkları inject etmekte.&lt;/p&gt;
+&lt;p&gt;Yukarıda built-in container kullanarak register ettiğimiz bağımlılıkları scrutor kullanarak aşağıdaki gibi de yapabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;services.Scan(scan =&amp;gt; scan  
+  .FromAssemblyOf&amp;lt;IAssemblyMarker&amp;gt;()
+  
+   // ISingletonLifetime adında bir interface tanımlayıp container'a single instance olarak register olmasını istediğimiz dependency'leri bu interface'den inherit ederek doğrudan register edebilmekteyiz.
+  .AddClasses(classes =&amp;gt; classes.AssignableTo&amp;lt;ISingletonLifetime&amp;gt;())
+  .AsImplementedInterfaces()
+  .WithSingletonLifetime()
+  
+   // ITransientLifetime adında bir interface tanımlayıp container'a transientLifeTime'ına sahip olmasını istediğimiz dependency'leri bu interface'den inherit ederek doğrudan register edebilmekteyiz.
+  .AddClasses(classes =&amp;gt; classes.AssignableTo&amp;lt;ITransientLifetime&amp;gt;())
+  .AsImplementedInterfaces()
+  .WithTransientLifetime());
+  
+    
+  public interface ICustomerService : ISingletonLifetime
+  { }
+      
+  public interface ICustomerManager : ITransientLifetime
+  { }&lt;/pre&gt;
+&lt;p&gt;Scrutor startUp anında assembly'i&amp;nbsp;scan edip&amp;nbsp;ITransientLifetime ve&amp;nbsp;ISingletonLifetime interface'lerini ve onların implementedInterface'lerini bularak&amp;nbsp;implementasyonlarını doğrudan container'a register eder.&lt;/p&gt;
+&lt;p&gt;Scrutor doğru kullanıldığı takdirde olduk&amp;ccedil;a başarılı bir k&amp;uuml;t&amp;uuml;phanedir ve bizleri dependecny injection konusunda belli başlı bazı zorluklardan kurtarabilmektedir.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-04-26 15:17:00</pubDate>
+  <lastModified>2018-05-04 06:12:29</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>net-core-register-all-at-once</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

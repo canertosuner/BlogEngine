@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>OptimisticLock using Fluent NHibernate</title>
+  <description>OptimisticLock ve PessimisticLock konuları hakkında Optimistic Lock Nedir ? Pessimistic Lock Nedir ? Data concurrency yazımızda bahsetmiştik. Kısaca hatırlatmak gerekirse;farklı thread'ler de aynı row üzerinde işlem yapılırken herhangi bir lock işlemi olmadan update edilmek istenen verinin bayat</description>
+  <content>&lt;p&gt;OptimisticLock ve PessimisticLock konuları hakkında&amp;nbsp;&lt;strong&gt;&lt;a href="/post/optimistic-lock-nedir-pessimistic-lock-nedir-data-concurrency"&gt;Optimistic Lock Nedir ? Pessimistic Lock Nedir ? Data concurrency&lt;/a&gt;&amp;nbsp;&lt;/strong&gt;yazımızda bahsetmiştik. Kısaca hatırlatmak gerekirse;farklı thread'ler de aynı row &amp;uuml;zerinde işlem yapılırken herhangi bir lock işlemi olmadan update edilmek istenen verinin bayat olup olmadığını o verinin kayıtlı olduğu tabloda yer alan versiyon numarası olarak da adlandırılan bir column'da bulunan değeri kontrol eder ve eğer versiyon eşleşmiyorsa yani veri bayat ise işlem geri &amp;ccedil;ekilir.&lt;/p&gt;
+&lt;p&gt;Bu yazıda ise Nhibernate&amp;nbsp;kullanarak optimistic lock nasıl yapılır bunu inceleyeceğiz. Daha &amp;ouml;nceki&amp;nbsp;&lt;strong&gt;&lt;a href="/post/unit-of-work-interceptor-castle-windsor-nhibernate-ve-generic-repository"&gt;Unit of Work Interceptor, Castle Windsor, NHibernate ve Generic Repository&lt;/a&gt;&amp;nbsp;&lt;/strong&gt;yazısında geliştirdiğimiz proje&amp;nbsp;&amp;uuml;zerinden ilerleyelim. Bir web api projesi&amp;nbsp;oluşturmuştuk ve nuget &amp;uuml;zerinden Fluent Nhibernate'i y&amp;uuml;klemiştik. İ&amp;ccedil;erisinde User ve Address adında iki tane tablomuz bulunuyordu. Nhibernate i&amp;ccedil;in optimistic lock konfigurasyonu mapping işlemi yapılırken belirtiliyor. Bizde &amp;ouml;ncelikle versiyonlamak veya optimistic lock uygulamak istediğimiz entity'ler i&amp;ccedil;in bir base model oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public abstract class VersionedEntity
+    {
+        public virtual int EntityVersion { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;User modelimiz ise yukarıda tanımladığımız modelden inherit olsun ve aşağıdaki gibi UserMapping.cs i&amp;ccedil;erisinde konfigurasyonlarımızı yapalım.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class User : VersionedEntity
+    {
+        public virtual int Id { get; set; }
+        public virtual string Name { get; set; }
+        public virtual string SurName { get; set; }
+    }
+
+    public class UserMap : ClassMap&amp;lt;User&amp;gt;
+    {
+        public UserMap()
+        {
+            Table("Users");
+            Id(x =&amp;gt; x.Id);
+            Map(x =&amp;gt; x.Name);
+            Map(x =&amp;gt; x.SurName);
+
+            // versiyon işlemi i&amp;ccedil;in kullanılacak column
+            Version(X =&amp;gt; X.EntityVersion);
+            
+            // optimistic lock'ı versiyonlama &amp;uuml;zerinden aktif hale getiriyoruz
+            OptimisticLock.Version();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Database de Users tablomuzda&amp;nbsp;&lt;strong&gt;EntityVersion&amp;nbsp;&lt;/strong&gt;adında bir column&amp;nbsp;yaratılacak ve bu column o row i&amp;ccedil;in yapılan her bir update işleminde 1 artacaktır.&lt;/p&gt;
+&lt;p&gt;Konfigurasyon&amp;nbsp;işlemi bu kadar şimdi test yapalım. Aşağıdaki gibi AddnewUser metoduna postman &amp;uuml;zerinden sırayla 1 insert 2 get 2 put(update) request'i atalım.&lt;/p&gt;
+&lt;p&gt;İlk insert işlemi sonrasında db deki kayıt aşağıdaki gibi EntityVersion= 1 şeklinde olacaktır.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/opt_lock_v_one.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Sonrasında ardı ardına 2 get işlemi yapıp db deki kaydı alalım ve sonrasındaki ilk update işlemi sonrasında kaydımız aşağıdaki gibi EntityVersion = 2 şeklinde g&amp;uuml;ncellenecektir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/opt_lock_v_two_2.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;İkinci get işlemini yapan transaction i&amp;ccedil;in yani &amp;uuml;stte update yapılmışken eline stale/bayat veriye sahipken update işlemi yapmaya &amp;ccedil;alıştığında diğer bir değişle db de ki EntityVersion = 2 iken ikinci işlemin elinde EntityVersion = 1 olan kayıt varken update yapmaya &amp;ccedil;alıştığında aşağıdaki gibi bir exception throw edilir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/optms_lock_throw_Exp_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Hata mesajı bize o row'un bize başkabir transaction tarafından update veya delete edildiğini belirtmekte. Bu durumu yaşamamak i&amp;ccedil;in ikinci işlem i&amp;ccedil;in tekrardan db de bulunan kayıt get edilip &amp;uuml;zerinden bir update işlemi yapıldığında db deki son g&amp;ouml;r&amp;uuml;nt&amp;uuml;s&amp;uuml; aşağıdaki gibi EntityVersion = 3 şeklinde olacaktır.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/opt_lock_v_three.png" alt="" /&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Optimistic Lock i&amp;ccedil;in&amp;nbsp;yazımız buraya kadar. Yukarıda da belirttiğim gibi &amp;ouml;rnek kodlar&amp;nbsp;&lt;strong&gt;&lt;a href="/post/unit-of-work-interceptor-castle-windsor-nhibernate-ve-generic-repository"&gt;Unit of Work Interceptor, Castle Windsor, NHibernate ve Generic Repository&lt;/a&gt;&amp;nbsp;&lt;/strong&gt;yazısında&amp;nbsp;bulunmakta. Eksik kalan yerler i&amp;ccedil;in ordan devam edebilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-09-15 21:34:00</pubDate>
+  <lastModified>2020-01-20 08:22:15</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>optimisticlock-using-fluent-nhibernate1</slug>
+  <tags>
+    <tag>optimistic lock</tag>
+    <tag>optimistic lock nedir</tag>
+    <tag>nhibernate</tag>
+    <tag>nhibernate versioning</tag>
+    <tag>nhibernate optimisticlock</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>01a365a0-dea4-4805-8375-c19bfa24f287</category>
+  </categories>
+  <notifications />
+</post>

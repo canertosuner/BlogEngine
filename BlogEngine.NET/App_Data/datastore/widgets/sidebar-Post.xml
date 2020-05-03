@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widgets>
+  <widget id="0af0f088-c630-4c81-a7ef-34b9bdfde991" title="Search" showTitle="True">Search</widget>
+  <widget id="0ad6064e-6b8a-40b8-89d8-b42bcaf11d2e" title="CategoryList" showTitle="True">CategoryList</widget>
+  <widget id="ada3ce5a-1ddf-414c-81d3-2a7afb8bf50f" title="MonthList" showTitle="True">MonthList</widget>
+</widgets>

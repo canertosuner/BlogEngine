@@ -1,0 +1,30 @@
+﻿// contacts required fields.
+.required-field {
+    color: red;
+    font-size: 1rem;
+    text-transform: uppercase;
+    margin-right: .25rem;
+    margin-left: .25rem;
+
+    &[style="visibility:hidden;"] {
+        display: none;
+    }
+}
+
+img {
+    max-width: 100%;
+}
+
+strong, label {
+    font-weight: 500;
+}
+
+
+a {
+    color: $color-theme-primary;
+
+    &:hover {
+        color: darken($color-theme-primary, 5);
+        text-decoration: none;
+    }
+}

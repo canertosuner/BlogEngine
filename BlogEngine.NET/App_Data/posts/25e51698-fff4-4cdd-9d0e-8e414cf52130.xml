@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Genfu Framework Kullanarak Test-Dummy Data Oluşturma</title>
+  <description>Genfu; çeşitli konfigurasyonlar tanımlayarak test-data oluşturmanızı sağlayan oldukça complex dummy data oluşturma tanımlamaları yapabileceğimiz bir framework'dür.</description>
+  <content>&lt;p&gt;Bir s&amp;uuml;re &amp;ouml;nce&amp;nbsp;&amp;uuml;zerinde &amp;ccedil;alıştığım bir proje i&amp;ccedil;in Api uygulaması geliştiriyordum ve bu api'de bulunan end-point'leri kullanan ios ve android olmak &amp;uuml;zere 2 tanede client bulunmaktaydı.&amp;nbsp;Uygulamada dışa bağımlılığı bulunan(farklı veri sağlayıcılar) 2 tane Query fonksyinonu geliştirirken dış sağlayıcılar kendi yaptıkları geliştirmeyi yetiştiremediğinden benim &amp;uuml;zerinde &amp;ccedil;alıştığım uygulamadada gecikmeler s&amp;ouml;z konusu olacaktı ve buna engel olmak adına mobile-client&amp;nbsp;yazan arkadaşlara fake-data sağlayarak geliştirmeye devam etme konusunda&amp;nbsp;hemfikir olduk. Tabikide bir loop i&amp;ccedil;erisinde list.Add(new Foo()) demek yerine bu t&amp;uuml;r&amp;nbsp;işler i&amp;ccedil;in&amp;nbsp;k&amp;uuml;t&amp;uuml;phaneler olduğunu farkettim ve &lt;a href="https://github.com/MisterJames/GenFu"&gt;Genfu&lt;/a&gt;&amp;nbsp;k&amp;uuml;t&amp;uuml;phanesini&amp;nbsp;kullanmaya karar verdim.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Genfu&lt;/strong&gt;;&amp;nbsp;&amp;ccedil;eşitli konfigurasyonlar tanımlayarak test-data oluşturmanızı sağlayan olduk&amp;ccedil;a complex tanımlamalar yaratarak kullanabileceğimiz bir framework'd&amp;uuml;r.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2020/ggnfuu_img1.jpg" alt="" width="585" height="329" /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p style="text-align: left;"&gt;&lt;strong&gt;GenFu&lt;/strong&gt;&amp;nbsp;is a library you can use to generate realistic test data. It is composed of several&amp;nbsp;&lt;em&gt;property fillers&lt;/em&gt;&amp;nbsp;that can populate commonly named properties through reflection using an internal database of values or randomly created data. You can override any of the fillers, give&amp;nbsp;&lt;strong&gt;GenFu&lt;/strong&gt;&amp;nbsp;hints on how to fill them.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&amp;Ouml;rneğin product listesi d&amp;ouml;nen bir end-point tasarladığımızı d&amp;uuml;ş&amp;uuml;nelim ve Genfu kullanarak test-data'ları oluşturarak bu endpoint'in return etmesini sağlayalım.&lt;/p&gt;
+&lt;p&gt;Vs'da bir WebApi projesi oluşturduysak, nuget &amp;uuml;zerinden aşağıdaki komutu kullanarak genfu'yu projemiz referanslarına ekleyelim.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;install-package GenFu&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Product sınıfımız aşağıdaki gibi olsun.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class ProductDto
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+    public int Quantity { get; set; }
+    public DateTime ExpireDate { get; set; }
+    public string Code { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;Genfu kullanım olarak olduk&amp;ccedil;a basit. Eğer tek bir product&amp;nbsp;oluşturmak istiyorsak yapmamız gereken,&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;var product = A.New&amp;lt;ProductDto&amp;gt;();&lt;/pre&gt;
+&lt;p&gt;Eğer listOfProduct oluşturmak istiyorsak count bilgisi vererek şu şekidle oluşturabiliriz,&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;var listOfProduct = A.ListOf&amp;lt;ProductDto&amp;gt;(250);&lt;/pre&gt;
+&lt;p&gt;Peki ya fiyatı $18.00 ile $46.00 arasında, ExpireDate'i ileri bir tarih ve Code property&amp;rsquo;sinin Value&amp;rsquo;su&amp;nbsp;şunlardan biri&amp;nbsp;"TR", "UK", "US", "FR", "GE", "NL"&amp;nbsp; olan&amp;nbsp;&amp;uuml;r&amp;uuml;nler oluşturmam gerekiyorsa;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;A.Configure&amp;lt;ProductDto&amp;gt;()
+    .Fill(p =&amp;gt; p.Price)
+    .WithinRange(18, 46);
+
+A.Configure&amp;lt;ProductDto&amp;gt;()
+    .Fill(p =&amp;gt; p.ExpireDate)
+    .AsFutureDate();
+
+var codeList = new List&amp;lt;string&amp;gt;() { "TR", "UK", "US", "FR", "GE", "NL" };
+A.Configure&amp;lt;ProductDto&amp;gt;()
+    .Fill(p =&amp;gt; p.Code).WithRandom(codeList);&lt;/pre&gt;
+&lt;p&gt;Projenizi run edip&amp;nbsp;endpoint'ın d&amp;ouml;nd&amp;uuml;ğ&amp;uuml; result'a bakacak&amp;nbsp;olursak;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[HttpGet]
+public GetAllProductResponse Get()
+{
+    var listOfProduct = A.ListOf&amp;lt;ProductDto&amp;gt;(5);
+
+    return new GetAllProductResponse
+    {
+        ProductList = listOfProduct
+    };
+}&lt;/pre&gt;
+&lt;pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false"&gt;{
+   "productList":[
+      {
+         "id":"f982280d-94cd-4ac5-be3b-3860560dc3c9",
+         "name":"shorts",
+         "price":27.38,
+         "quantity":73,
+         "expireDate":"2020-10-12T17:31:19.3580228+03:00",
+         "code":"NL"
+      },
+      {
+         "id":"21e2ae7f-43ad-4c9f-a9bd-89eb59b885cf",
+         "name":"them",
+         "price":18.79,
+         "quantity":23,
+         "expireDate":"2020-07-28T04:36:29.3604574+03:00",
+         "code":"FR"
+      },
+      {
+         "id":"17769e84-77ea-4a98-884d-1d07a7240eab",
+         "name":"shorts",
+         "price":31.60,
+         "quantity":42,
+         "expireDate":"2020-08-22T06:20:56.3605175+03:00",
+         "code":"GE"
+      },
+      {
+         "id":"32971066-a892-47fd-9680-7d15d954cebc",
+         "name":"shorts",
+         "price":18.59,
+         "quantity":23,
+         "expireDate":"2020-11-09T12:56:16.3605641+03:00",
+         "code":"FR"
+      },
+      {
+         "id":"7e9d1ab1-b753-4a25-9fb0-12364625fd73",
+         "name":"Cardigan",
+         "price":19.23,
+         "quantity":49,
+         "expireDate":"2020-11-21T03:29:26.360619+03:00",
+         "code":"US"
+      }
+   ]
+}&lt;/pre&gt;
+&lt;p&gt;&amp;Ouml;zetleyecek olursak, g&amp;uuml;nl&amp;uuml;k hayatta development yaparken&amp;nbsp;şu c&amp;uuml;mleyi &amp;ccedil;oğumuz duyarız "karşı tarafın servisi hazır değil ama sen geliyomuş gibi yaz.. " yada "sen business layer'ı yazarken client'a &amp;ouml;nden dummy-data ver onlarda devam etsin.." etc. Genfu uygulamalarınız i&amp;ccedil;in sadece endpoint&amp;rsquo;in d&amp;ouml;neceği response i&amp;ccedil;in değil kendi i&amp;ccedil; dependent olduğunuz servis sağlayıcılar i&amp;ccedil;inde&amp;nbsp;fake-data'lar oluşturmanızı sağlayan olduk&amp;ccedil;a fonksiyonel bir k&amp;uuml;t&amp;uuml;phanedir ve sahip olduğu geniş&amp;nbsp;extension method'lar kullanılarak&amp;nbsp;ihtiyacımız olan fixture'ların hemen hemen hepsine &amp;ccedil;&amp;ouml;z&amp;uuml;m olabilir.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/genfu-webapi-test-dummy-data-creation"&gt;Source&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2020-03-22 15:30:00</pubDate>
+  <lastModified>2020-04-01 11:20:05</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>genfu-framework-kullanarak-test-data-olusturma</slug>
+  <tags>
+    <tag>genfu</tag>
+    <tag>fake data</tag>
+    <tag>dummy data</tag>
+    <tag>web api dummy data</tag>
+    <tag>.net core test data</tag>
+    <tag>.net core dummy data</tag>
+    <tag>.net core</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>018aedb2-84ba-46ad-89f2-2d551bf7c063</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

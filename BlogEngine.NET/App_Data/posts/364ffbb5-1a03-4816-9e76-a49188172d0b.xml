@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core 2.1 Https Kullanımı, Yönlendirmesi</title>
+  <description>http://blogs.dotnetgerman.com/
+&amp;nbsp;</description>
+  <content>&lt;p&gt;Klasik Asp.Net'den&amp;nbsp;[RequireHttps] attribute'&amp;uuml; kullanarak konfig&amp;uuml;re edebildiğimiz Https kullanımı Asp.Net Core 1.1 ile gelmiş olsada konfig&amp;uuml;re edilebilmesi olduk&amp;ccedil;a zahmetli bir haldeydi. 2.0 ile ufak bir dokunuş daha yaptılar ancak asıl olması gereken yere 2.1 s&amp;uuml;r&amp;uuml;m&amp;uuml; ile geldi desek &amp;ccedil;ok yanlış olmaz. Asp.Net Core 2.1 ile Https&amp;nbsp;configure ve redirect etme işlemleri olduk&amp;ccedil;a basit&amp;nbsp;bir şekilde&amp;nbsp;yapılabilmekte.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2018/asdczxv_VCbccv_https.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;.Net Core 2.1 kullanarak vs'da bir Asp.Net Core Web Api uygulaması&amp;nbsp;oluşturduğumuzda Kestrel'in dinlediği 2 url default olarak uygulamada gelmekte.&amp;nbsp;&lt;a href="https://localhost:5001"&gt;https://localhost:5001&lt;/a&gt;&amp;nbsp;ve&amp;nbsp;&lt;a href="http://localhost:5000"&gt;http://localhost:5000&lt;/a&gt;&amp;nbsp;.&lt;/p&gt;
+&lt;p&gt;Startup.cs i&amp;ccedil;erisinde set edebileceğimiz Https zorunlu hale getiren ve redirect işlemini yapabilmemizi sağlayan bir ka&amp;ccedil; middleware bulunmakta.&lt;/p&gt;
+&lt;p&gt;İlk middleware&amp;nbsp;&lt;strong&gt;UseHsts()&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;app.UseHsts();&lt;/pre&gt;
+&lt;p&gt;Bu middleware;&amp;nbsp;&lt;strong&gt;man-in-the-middle&lt;/strong&gt;&amp;nbsp;ataklarına karşı &lt;a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security"&gt;HSTS (HTTP Strinct Transport Protocol)&lt;/a&gt;'i&amp;nbsp;aktif eder. Browser'a header'da belli zaman aralıklarında sertifikayı cache'lemesini s&amp;ouml;yleyerek belirtilen time-range'in dışında sertifika&amp;nbsp;değişip değişmediğini kontrol etmekte.&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;Bir diğer middleware ise&amp;nbsp;&lt;strong&gt;UseHttpsRedirection()&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;app.UseHttpsRedirection();&lt;/pre&gt;
+&lt;p&gt;Bu middleware ise&amp;nbsp;&lt;a href="http://localhost:5000/"&gt;http://localhost:5000&lt;/a&gt;'e gelen istekleri&amp;nbsp;&lt;a href="https://localhost:5001/"&gt;https://localhost:5001&lt;/a&gt;&amp;nbsp;adresine redirect eder.&lt;/p&gt;
+&lt;p&gt;Uygulamamızla ilgili http konfigurasyonları yaptık ancak sertifika eksik. Bunun i&amp;ccedil;in development mode'da sertifika satın almadan V.S. 2017 kullanılarak dummy bir sertifika oluşturulabilir. Production i&amp;ccedil;in ise ilgili sertifikayı satın aldıktan sonra Windows Certificate Store'a install edebilir yada proje deploy dosyaları arasında saklayabiliriz.&lt;/p&gt;
+&lt;p&gt;Asp.Net Core uygulamanızın Https connection&amp;nbsp;sağlamak i&amp;ccedil;in diskte bulunan file-certificate'i kullanmasını sağlayabiliriz.&lt;/p&gt;
+&lt;p&gt;Bunun i&amp;ccedil;in Program.cs i&amp;ccedil;erisinde bulunan&amp;nbsp;&lt;strong&gt;CreateWebHostBuilder&lt;/strong&gt; metodunda proje oluşturulurken gelen default konfigurasyon buunmakta.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public static IWebHostBuilder CreateWebHostBuilder(string[] args) =&amp;gt;
+    WebHost.CreateDefaultBuilder(args)
+    .UseStartup&amp;lt;Startup&amp;gt;();&lt;/pre&gt;
+&lt;p&gt;CreateWebHostBuilder metodu olduk&amp;ccedil;a customise edilebilen bir metot ve dilersek bunu aşağıdaki gibi konfig&amp;uuml;re ederek Kestrel'e hangi portları dinleyeceğini s&amp;ouml;yleyip hangisinde Https sertifika&amp;nbsp;tanımlaması yapacağını s&amp;ouml;yleyebiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public static IWebHostBuilder CreateWebHostBuilder(string[] args) =&amp;gt;
+    WebHost.CreateDefaultBuilder(args)
+        .UseKestrel(options =&amp;gt;
+        {
+            options.Listen(IPAddress.Loopback, 5000);
+            options.Listen(IPAddress.Loopback, 5001, listenOptions =&amp;gt;
+            {
+                listenOptions.UseHttps("certificate.pfx", "myAppCertificate");
+            });
+        })
+        .UseStartup&amp;lt;Startup&amp;gt;();&lt;/pre&gt;
+&lt;p&gt;Kestrel &amp;uuml;zerinde &amp;ccedil;alışan uygulamamız i&amp;ccedil;in 5000 ve 5001 portunu dinle, 5001 portu i&amp;ccedil;in ilgili Https tanımlamasını baz al. Bu tanımlamaları Asp.Net Core 2.1 ile birlikte projede yer alan &lt;a href="https://blogs.msdn.microsoft.com/webdev/2018/02/27/asp-net-core-2-1-https-improvements/"&gt;launchSettings.json&lt;/a&gt;&amp;nbsp;dosyasında da yapabildiğimizi unutmayalım.&lt;/p&gt;
+&lt;p&gt;Basit&amp;ccedil;e Asp.Net core uygulamalarında Https kullanımı nasıl olur &amp;ccedil;ok fazla derine inmeden anlatmaya &amp;ccedil;alıştık. Daha fazla detay i&amp;ccedil;in &lt;a href="https://blogs.msdn.microsoft.com/webdev/2018/02/27/asp-net-core-2-1-https-improvements/"&gt;bu adresten&lt;/a&gt; faydalanabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-08-15 11:14:00</pubDate>
+  <lastModified>2018-08-27 15:36:08</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>configuring-https-in-asp-net-core-2-1</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>NULL Object Pattern Nedir ?</title>
+  <description>NULL Object Pattern Gang of Four’s Design Patterns kitabında anlatılmış olup behavioral design pattern'ler den biridir. Bu pattern'in amacı uygulama içeresinde null objeler return etmek yerine ilgili tipin yerine geçen ve expected value'nun null objesi olarak kabul</description>
+  <content>&lt;p&gt;NULL Object Pattern&amp;nbsp;Gang of Four&amp;rsquo;s Design Patterns kitabında anlatılmış olup&amp;nbsp;behavioral design pattern'ler den biridir. Bu pattern'in amacı uygulama i&amp;ccedil;eresinde null objeler return etmek yerine ilgili&amp;nbsp;tipin yerine ge&amp;ccedil;en&amp;nbsp;ve expected value'nun null objesi olarak kabul edilen tipi geriye d&amp;ouml;nmektir&amp;nbsp;diğer bir değişle null yerine daha tutarlı nesneler d&amp;ouml;nmektir. Bu nesne asıl return edilmesi gereken nesnenin null değeri olarak kabul edilirken onunla aynı &amp;ouml;zelliklere sahip değildir, &amp;ccedil;ok daha az bilgi i&amp;ccedil;ermektedir.&amp;nbsp;NULL Object Pattern , s&amp;uuml;reli olarak null kontrol&amp;uuml; yaparak hem server-side hemde client-side i&amp;ccedil;in boilerplate code&amp;nbsp;yazmaya engel olmak amacıyla ortaya &amp;ccedil;ıkmış bir pattern dir.&lt;/p&gt;
+&lt;p&gt;Platform yada dil farketmeksizin geliştirme yaparken s&amp;uuml;rekli olarak nullreferenceexception aldığımız durumlar olmuştur bu durumdan kurtulmak adına obj null mı değil mi diye bir s&amp;uuml;r&amp;uuml; if/else kontrolleri yaparız.&amp;nbsp;Bu pattern'i kullanarak biraz sonraki &amp;ouml;rnekte yapacağımız gibi boilerplate code'lar yazmaktan nasıl kurtulabiliriz bunu inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rneğimizi 2 şekilde ele alalım. İlk olarak geriye null değer return ederek &amp;ccedil;oğunlukla nasıl geliştirme yapıyoruz o case'i ele alalım, sonrasında ise NULL Object Pattern kullanarak nasıl geliştirebiliriz onu inceleyelim.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;ncelikle Customer adında bir nesnemiz var ve repository kullanarak geriye bu&amp;nbsp;nesneyi return edelim.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class Customer
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastNae { get; set; }
+        public int NumberOfChildren { get; set; }
+        public string GetFullName()
+        {
+            return FirstName + " " + LastName;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Service katmanında generic bir repository yapımız varmış gibi varsayalım ve repository &amp;uuml;zerinden&amp;nbsp;GetCustomerByFirstName adında bir metot tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class CustomerService
+    {
+        public Customer GetCustomerByFirstName(string firstName)
+        {
+            return _customerRepository.List(c =&amp;gt; c.FirstName == firstName).FirstOrDefault();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Sonrasında yukarıda tanımladığımız metodu call yaparak geriye customer objesini d&amp;ouml;nelim ve bazı değerleri ekrana yazdıralım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   var customerService = new CustomerService();
+   var customer = customerService.GetCustomerByFirstName("tosuner");
+   Console.WriteLine("FullName : " + customer.GetFullName() + "\nNumber Of Childreen:" + customer.NumberOfChildren);&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki gibi customer'ın null geldiği durumda&lt;strong&gt;&amp;nbsp;exception thrown 'system.nullreferenceexception'&amp;nbsp;&lt;/strong&gt;hatasını &amp;ccedil;oktan aldık gibi yani memory'de değeri assing edilmemiş bir yere erişmeye &amp;ccedil;alışıyoruz. Peki &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak ne yapabilirdik, ilk akla gelen aşağıdaki gibi bir kontrol olacaktır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    var customerService = new CustomerService();
+    var customer = customerService.GetCustomerByFirstName("tosuner");
+    if (customer != null)
+    {
+        Console.WriteLine("FullName : " + customer.GetFullName() + "\nNumber Of Childreen:" + customer.NumberOfChildren);
+    }
+    else
+    {
+        Console.WriteLine("Name : Customer Not Found !" + "\nNumber Of Childreen: 0");
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki gibi bir &amp;ccedil;&amp;ouml;z&amp;uuml;me gittiğimizde customer objesini get ettiğimiz bir s&amp;uuml;r&amp;uuml; yer olduğunu d&amp;uuml;ş&amp;uuml;n&amp;uuml;n&amp;nbsp;ve her yerde s&amp;uuml;rekli olarak null&amp;nbsp;kontrol&amp;uuml; yapıp sonrasında console'a değerleri&amp;nbsp;yazıyor oluruz. Aslında bu şu deme değil;"null kontrol&amp;uuml; yapma arkadaş !" kesinlikle bu değil tabikide ihtiya&amp;ccedil; duyulan yerlerde bu kontrol yapılmalı hatta bir&amp;ccedil;ok case'de null ise throw new CustomBusinessException() vs şeklinde exception'da throw edeceğimiz durumlar olabilir. Demek istediğim yukarıdaki gibi client'a bu kontrol&amp;uuml; olabildiğince bırakmamak.&lt;/p&gt;
+&lt;p&gt;NULL Object Pattern uygulayarak nasıl bir &amp;ccedil;&amp;ouml;z&amp;uuml;m getirirdik ona bakalım. İlk olarak AbstractCustomer adında base sınıfımızı oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public abstract class AbstractCustomer
+    {
+        public abstract int Id { get; set; }
+        public abstract string FirstName { get; set; }
+        public abstract string LastName { get; set; }
+        public abstract int NumberOfChildren { get; set; }
+        public abstract string GetFullName();
+    }&lt;/pre&gt;
+&lt;p&gt;Sonrasında Customer objesini bu sınıftan&amp;nbsp;t&amp;uuml;retelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class Customer : AbstractCustomer
+    {
+        public override string FirstName { get; set; }
+        public override string LastName { get; set; }
+        public override int NumberOfChildren { get; set; }
+        public override int Id { get; set; }
+
+        public override string GetFullName()
+        {
+            return FirstName + " " + LastName;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi ise bu pattern'in getirdiği &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak&amp;nbsp;geriye null value&amp;nbsp;d&amp;ouml;nmeyip asıl return edilmek istenen sınıf yerine onun&amp;nbsp;null olduğunu belirten bir sınıf geriye d&amp;ouml;nelim. Bu sınıfa da&amp;nbsp;&lt;strong&gt;NullCustomer&amp;nbsp;&lt;/strong&gt;adını verelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class NullCustomer : AbstractCustomer
+    {
+        public override string FirstName { get; set; }
+        public override string LastName { get; set; }
+        public override int NumberOfChildren { get; set; }
+        public override int Id { get; set; }
+
+        public override string GetFullName()
+        {
+            return "Customer Not Found !";
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Sonrasında service&amp;nbsp;katmanını aşağıdaki gibi d&amp;uuml;zenleyelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CustomerService
+    {
+        public AbstractCustomer GetCustomerByFirstName(string firstName)
+        {
+            return _customerRepository.Where(c =&amp;gt; c.FirstName == firstName).FirstOrDefault().GetValue();
+        }
+    }
+    public static class CustomerExtensions
+    {
+        public static AbstractCustomer GetValue(this AbstractCustomer customer)
+        {
+            return customer == null ? new NullCustomer() : customer;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki kod bloğunda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre repository null değer d&amp;ouml;nmek yerine yeni bir &lt;strong&gt;NullCustomer&lt;/strong&gt; sınıfı return edecektir.&lt;/p&gt;
+&lt;p&gt;Son adım olarak da cient tarafında yazılacak kod ise yazımızın ilk&amp;nbsp;başında yazdığımız kod bloğu ile aynı.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   var customerService = new CustomerService();
+   var customer = customerService.GetCustomerByFirstName("tosuner");
+   Console.WriteLine("FullName : " + customer.GetFullName() + "\nNumber Of Childreen:" + customer.NumberOfChildren);&lt;/pre&gt;
+&lt;p&gt;Bu pattern ile;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;null reference kontrollerinden kurtulduk,&lt;/li&gt;
+&lt;li&gt;duplicate kod oranını azalttık,&lt;/li&gt;
+&lt;li&gt;memory de değeri olmayan bir alana erişmek yerine null value g&amp;ouml;revi g&amp;ouml;ren bir nesneye eriştik,&lt;/li&gt;
+&lt;li&gt;dahası client tarafı i&amp;ccedil;in daha temiz ve kolay anlaşılır bir kod bıraktık,&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Daha &amp;ouml;ncede belirtiğim gibi bu pattern'i her zaman uygulama gibi bir durum s&amp;ouml;z konusu değil, daha doğrusu&amp;nbsp;s&amp;uuml;rekli null check yapmak yerine bu pattern'i uygulayalım gibi bir d&amp;uuml;ş&amp;uuml;nce doğru değil. Client-side geliştirme yapan developer'a bu kontrolleri yaptırmak istemediğimizde yada "ben server-side'dan hi&amp;ccedil;bir zaman null d&amp;ouml;nmicem.." şeklinde bir garanti vermek istediğinizde kullanabileceğimiz&amp;nbsp;bir pattern dir.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-12-06 21:28:00</pubDate>
+  <lastModified>2020-01-20 08:22:14</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>null-object-pattern-nedir</slug>
+  <tags>
+    <tag>NULL Object Pattern Nedir</tag>
+    <tag>NULL Object</tag>
+    <tag>null check</tag>
+    <tag>nullreferenceexception</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

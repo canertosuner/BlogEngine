@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Integration Test Nedir Nasıl Yazılır</title>
+  <description>https://www.matheus.ro/2018/09/03/integration-tests-in-asp-net-core-controllers/</description>
+  <content>&lt;p&gt;Test yazmak&amp;nbsp;projenizde bulunan business logic'lerin belirtilen input'lar &amp;ccedil;er&amp;ccedil;evesinde ne şekilde &amp;ccedil;alışması gerektiğini garanti ettiğimiz yapılar olup projelerimiz i&amp;ccedil;in olduk&amp;ccedil;a &amp;ouml;nemli bir &lt;strong&gt;Must&lt;/strong&gt; adım olarak kazandırmamız gereken bir &amp;ouml;zelliktir. Daha &amp;ouml;nceki yazılarımızda &lt;a href="/post/asp-net-core-unit-test"&gt;unit test&lt;/a&gt;&amp;nbsp;konusuna değinip &amp;ouml;rnek proje &amp;uuml;zerinde işlemiştik. Bu yazımızın konusu ise asp.net core uygulamarı i&amp;ccedil;in integration test nasıl yazılır.&lt;/p&gt;
+&lt;p&gt;Integration test; projenizde yer alan birden fazla mod&amp;uuml;l&amp;uuml;n belirtilen input'lar ile beklendiği şekilde &amp;ccedil;alışmasını test eden işlemin adıdır. Diğer bir değişle, bir biri ile bağlı şekilde &amp;ccedil;alışan business'ları (database, business methods etc.) toplu bir şekilde ele alıp doğruluğunu veya yanlışlığını test etmemizi sağlayan yapıdır.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/intg_tst_img11.gif" alt="" width="554" height="312" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek olarak verecek olursak; bir CustomerApi projemiz var end-point'ler &amp;uuml;zerinden insert, update ve get işlemleri yaparak database &amp;uuml;zerinde crud işlemleri yapmakta. Bu end-point'lerin testini u&amp;ccedil;tan uca request handle'dan başlayıp business-layer'da yer alan logic'lerin bulunduğu metodları ve repository-layer &amp;uuml;zerinden database'de ki ilgili column'ların doğruluğuna kadar olan bu birbirine bağlı iki sistemin (database &amp;amp; api) u&amp;ccedil;tan uca kontrollerini integration-test&amp;nbsp;yazarak yapabiliriz.&lt;/p&gt;
+&lt;p&gt;Daha &amp;ouml;nceki &lt;a href="/post/asp-net-core-unit-test"&gt;unit test&lt;/a&gt; yazımızda yaptığımız &amp;ouml;rnek &amp;uuml;zerinden ilerleyelim. Bu yazıda asp.net core 2.1 kullanarak CustomerApi adında bir proje oluşturup unit testlerini yazmıştık. Yine aynı &amp;ouml;rnek &amp;uuml;zerinden integration test projeleri oluşurup test metotlarımızı yazalım.&lt;/p&gt;
+&lt;p&gt;Solution a&amp;ccedil;ıldıktan sonra test klas&amp;ouml;r&amp;uuml; i&amp;ccedil;erisine&amp;nbsp;&lt;strong&gt;Customer.Api.IntegrationTest&lt;/strong&gt; adında bir xUnit test projesi oluşturalım&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2018/intg_tstt_img02.PNG" alt="" width="575" height="345" /&gt;&lt;/p&gt;
+&lt;p&gt;CustomerController.cs i&amp;ccedil;erisinde CRUD işlemlerini yapan metotlarımız mevcut ve sırasıyla bu metotlar i&amp;ccedil;in integration test metotlarını yazacağımız CustomerControllerTests.cs sınıfını oluşturalım.&lt;/p&gt;
+&lt;p&gt;Asp..net core ile birlikte TestServer.cs diye bir sınıf hayatımıza girdi ve bu sınıf ile birlikte tıpkı ger&amp;ccedil;ekten iis veya kestrel'de bir web-api uygulaması host edermiş gibi CustomerApi uygulamamızı&amp;nbsp;integration testler i&amp;ccedil;in bir stup projesi ayağa kaldırmamıza olanak sunan bir sınıf.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu sınıfı kullanabilmek i&amp;ccedil;in nuget &amp;uuml;zerinden&amp;nbsp;&lt;strong&gt;Microsoft.AspNetCore.TestHos&lt;/strong&gt;t k&amp;uuml;t&amp;uuml;phanesini projemiz referanslarına ekleyelim. Kurulum tamamladıktan sonra constructor i&amp;ccedil;erisinde aşağıdaki gibi testServer ve rest-call'ları yapmamızı sağlayacak olan httpClient imp. yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class CustomerControllerTests
+{
+    private readonly HttpClient _client;
+
+    public CustomerControllerTests()
+    {
+    var testServer = new TestServer(new WebHostBuilder()
+        .UseStartup&amp;lt;TestStartup&amp;gt;()
+        .UseEnvironment("Development"));
+    _client = testServer.CreateClient();
+    }
+}&lt;/pre&gt;
+&lt;p&gt;TestServer sınıfının initialize olması i&amp;ccedil;in&amp;nbsp;IWebHostBuilder'a ihtiyacı var ve CustomerApi projemizde bulunan Startup.cs sınıfı uygulamayı ayağa kaldırırken bize bir&amp;nbsp;IWebHostBuilder return etmekte. Bizimde amacımız bi CustomerApi projesi run etmek olduğundan IntegrationTest projemizin referanslarına CustomerApi&amp;nbsp;projesinin referanslarını ekleyip Startup.cs'i kullanması gerektiğini belirttik. Ancak mevcut test/qa database'ini kullanmak istemiyoruz, o database'i dirty data ile doldurmak işimize gelmez. Bunun i&amp;ccedil;in TestStartup adında Startup.cs den t&amp;uuml;reyen bir sınıf oluşturarak test i&amp;ccedil;in InMemoryDatabase &amp;ouml;zelliğini kullanabilmesini sağlayalım.&lt;/p&gt;
+&lt;p&gt;TestStartup.cs de&amp;nbsp;sınıfı&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class TestStartup : Startup
+{
+    public TestStartup(IConfiguration configuration) : base(configuration)
+    {
+    }
+
+    public override void ConfigureDatabase(IServiceCollection services)
+    {
+        services.AddDbContext&amp;lt;CustomerDbContext&amp;gt;(options =&amp;gt;
+            options.UseInMemoryDatabase("customerDb_test"));
+    }
+}&lt;/pre&gt;
+&lt;p&gt;İlk olarak httpPost isteği alarak customerInsert işlemi yapan end-point i&amp;ccedil;in test metodu yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Fact]
+public async Task Post_Should_Return_OK_With_Empty_Response_When_Insert_Success()
+{
+    var expectedResult = string.Empty;
+    var expectedStatusCode = HttpStatusCode.OK;
+
+    // Arrange
+    var request = new CustomerDto
+    {
+        FullName = "Caner Tosuner",
+        CityCode = "Ist",
+        BirthDate = new DateTime(1990, 1, 1)
+    };
+    var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+    // Act
+    var response = await _client.PostAsync("/api/customer", content);
+
+    var actualStatusCode = response.StatusCode;
+    var actualResult = await response.Content.ReadAsStringAsync();
+
+    // Assert
+    Assert.Equal(expectedResult, actualResult);
+    Assert.Equal(expectedStatusCode, actualStatusCode);
+}&lt;/pre&gt;
+&lt;p&gt;FullName alanı boş g&amp;ouml;nderildiğinde throw edilen exception i&amp;ccedil;in integrationtest metodunu aşağıdaki gibi yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Fact]
+public async Task Post_Should_Return_FAIL_With_Error_Response_When_Insert_FullName_Is_Empty()
+{
+    var expected = "Fields are not valid to create a new customer.";
+
+    // Arrange
+    var request = new CustomerDto
+    {
+        FullName = string.Empty,
+        CityCode = "Ist",
+        BirthDate = new DateTime(1990, 1, 1)
+    };
+    var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+    // Act
+    var exception = await Assert.ThrowsAsync&amp;lt;Exception&amp;gt;(async () =&amp;gt; await _client.PostAsync("/api/customer", content));
+    
+    // Assert
+    Assert.Equal(expected, exception.Message);
+}&lt;/pre&gt;
+&lt;p&gt;Şimdi ise biraz daha&amp;nbsp;karmaşık&amp;nbsp;bir test metodu yazalım. Insert işlemi success olduktan sonra getAll metoduna call yaparak d&amp;ouml;nen listede bir adım &amp;ouml;nce insert ettiğimiz customer'ın olduğunu test eden metodu aşağıdaki gibi yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Theory]
+[InlineData("/api/customer", "/api/customer")]
+public async Task Get_Should_Return_OK_With_Inserted_Customer_When_Insert_Success(string postUrl,string getUrl)
+{
+    var expectedResult = string.Empty;
+    var expectedStatusCode = HttpStatusCode.OK;
+
+    // Arrange-1
+    var request = new CustomerDto
+    {
+        FullName = "Caner Tosuner",
+        CityCode = "Ist",
+        BirthDate = new DateTime(1990, 1, 1)
+    };
+    var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+    // Act-1
+    var response = await _client.PostAsync(postUrl, content);
+
+    var actualStatusCode = response.StatusCode;
+    var actualResult = await response.Content.ReadAsStringAsync();
+
+    // Assert-1
+    Assert.Equal(expectedResult, actualResult);
+    Assert.Equal(expectedStatusCode, actualStatusCode);
+
+
+            
+    // Act-2
+    var responseGet = await _client.GetAsync(getUrl);
+
+    var actualGetResult = await responseGet.Content.ReadAsStringAsync();
+    var getResultList = JsonConvert.DeserializeObject&amp;lt;List&amp;lt;CustomerDto&amp;gt;&amp;gt;(actualGetResult);
+
+    var insertedCustomer = getResultList.Any(c =&amp;gt; c.FullName == request.FullName);
+
+    // Assert-2
+    Assert.NotEmpty(getResultList);
+    Assert.True(insertedCustomer);
+}&lt;/pre&gt;
+&lt;p&gt;B&amp;uuml;t&amp;uuml;n api end-point'leri i&amp;ccedil;in ise aşağıdaki gibi bir test metodu yazarak sırasıyla insert, getAll, update, getbycityCode metotlarını u&amp;ccedil;tan uca olan integration testimizi yazabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Theory]
+[InlineData("/api/customer", "/api/customer")]
+public async Task Insert_GetAll_Update_GetByCityCode_Should_Return_Expected_Result(string postUrl, string getUrl)
+{
+    #region Insert
+    var expectedResult = string.Empty;
+    var expectedStatusCode = HttpStatusCode.OK;
+
+    // Arrange-1
+    var request = new CustomerDto
+    {
+        FullName = "Caner Tosuner",
+        CityCode = "Ist",
+        BirthDate = new DateTime(1990, 1, 1)
+    };
+    var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+
+    // Act-1
+    var response = await _client.PostAsync(postUrl, content);
+
+    var actualStatusCode = response.StatusCode;
+    var actualResult = await response.Content.ReadAsStringAsync();
+
+    // Assert-1
+    Assert.Equal(expectedResult, actualResult);
+    Assert.Equal(expectedStatusCode, actualStatusCode);
+    #endregion
+
+
+
+    #region GetAll
+    // Act-2
+    var responseGet = await _client.GetAsync(getUrl);
+    responseGet.EnsureSuccessStatusCode();
+
+    var actualGetResult = await responseGet.Content.ReadAsStringAsync();
+    var getResultList = JsonConvert.DeserializeObject&amp;lt;List&amp;lt;CustomerDto&amp;gt;&amp;gt;(actualGetResult);
+
+    var insertedCustomerExist = getResultList.Any(c =&amp;gt; c.CityCode == request.CityCode);
+
+    // Assert-2
+    Assert.NotEmpty(getResultList);
+    Assert.True(insertedCustomerExist);
+    #endregion
+
+
+
+    #region Update
+    // Arrange-3
+    var insertedCustomer = getResultList.Single(c =&amp;gt; c.CityCode == request.CityCode);
+    var requestUpdate = new CustomerDto
+    {
+        FullName = "Ali Tosuner",
+        CityCode = "Ist",
+        BirthDate = new DateTime(1994, 1, 1),
+        Id = insertedCustomer.Id
+    };
+    var contentUpdate = new StringContent(JsonConvert.SerializeObject(requestUpdate), Encoding.UTF8, "application/json");
+
+    // Act-3
+    var responseUpdate = await _client.PutAsync(postUrl, contentUpdate);
+    responseUpdate.EnsureSuccessStatusCode();
+    var updateActualResult = await responseUpdate.Content.ReadAsAsync&amp;lt;CustomerDto&amp;gt;();
+
+    // Assert-3
+    Assert.Equal(updateActualResult.FullName, requestUpdate.FullName);
+    #endregion
+
+
+
+    #region GetByCityCode
+    // Act-2
+    var responseGetByCityCode = await _client.GetAsync("/api/customer/getbycitycode/"+requestUpdate.CityCode);
+    responseGetByCityCode.EnsureSuccessStatusCode();
+
+    var actualGetByCityCodeResult = await responseGetByCityCode.Content.ReadAsStringAsync();
+    var getByCityCodeResultList = JsonConvert.DeserializeObject&amp;lt;List&amp;lt;CustomerDto&amp;gt;&amp;gt;(actualGetByCityCodeResult);
+
+    var updatedCustomerExist = getByCityCodeResultList.Any(c =&amp;gt; c.CityCode == request.CityCode);
+
+    // Assert-2
+    Assert.NotEmpty(getByCityCodeResultList);
+    Assert.True(updatedCustomerExist);
+    #endregion
+
+}&lt;/pre&gt;
+&lt;p&gt;Yazdığımız b&amp;uuml;t&amp;uuml;n testleri run ettiğimizde ise aşağıdaki gibi hepsinin pass stat&amp;uuml;s&amp;uuml;nde olduğunu g&amp;ouml;rebiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/intg_tst_imgg_03.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Yazının başında da belirtiğimiz gibi&amp;nbsp;test yazmak projelerimiz i&amp;ccedil;in olduk&amp;ccedil;a &amp;ouml;nemlidir. Birbirine bağlı yapılar i&amp;ccedil;in integration test yazarak u&amp;ccedil;tan uca olan b&amp;uuml;t&amp;uuml;n process'i test edip less bug, more refactoring i&amp;ccedil;in &amp;ccedil;ok &amp;ouml;nemli bir adım atmış oluruz. Tabi bunu sadece integration test yazarak değil beraberinde unit-test metotlarınıda yazarak yapmamız &amp;ccedil;ok daha keyifli olur.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/Asp.Net-Core-Entity-Framework-Integration-Test-and-Unit-Test-Using-In-Memory-Database"&gt;Source Code:&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-12-19 21:24:00</pubDate>
+  <lastModified>2018-12-19 16:45:07</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-integration-test-nedir-nasil-yazilir</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

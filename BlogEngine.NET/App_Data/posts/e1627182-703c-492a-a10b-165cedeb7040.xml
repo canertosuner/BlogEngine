@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>C# Kodlarının Derlenip Çalıştırılması - CLR,IL,CLS,CTS Kavramları</title>
+  <description>C# yazıyoruz çalışıyor, VB yazıyoruz çalışıyor, C++ yazıyoruz çalışıyor, ne hikmettir pek bilmesek bile bir F# dilimiz var onu yazıyoruz .Net sağolsun onu da çalıştırıyor...</description>
+  <content>&lt;p&gt;C# yazıyoruz &amp;ccedil;alışıyor, VB yazıyoruz &amp;ccedil;alışıyor, C++ yazıyoruz &amp;ccedil;alışıyor, ne hikmettir pek bilmesek bile bir F# dilimiz var onu yazıyoruz .Net sağolsun onu da &amp;ccedil;alıştırıyor...&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Peki ama b&amp;uuml;t&amp;uuml;n bunlar nasıl oluyor ?..&lt;/p&gt;
+&lt;p&gt;.Net framework i&amp;ccedil;erisinde geliştirme yapabilmek i&amp;ccedil;in bir &amp;ccedil;ok dil mevcuttur ancak C# bunlardan en torpillisidir diyebiliriz heralde. Tamamen OOP dayalı bir dil olmasıyla beraber g&amp;uuml;n&amp;uuml;m&amp;uuml;z .Net ailesinde en &amp;ccedil;ok tercih edilen dil haline gelmiştir.&lt;/p&gt;
+&lt;p&gt;Aşağıdaki resimde de g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre v1.0 dan başlayıp v4.5' e kadar gelen s&amp;uuml;re&amp;ccedil;te ne gibi yenilikler geldi, ilk başlarda neler yapabiliyorken son s&amp;uuml;r&amp;uuml;mle birlikte ne gibi yeni &amp;ouml;zellikler geldi bunları g&amp;ouml;rebiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/DotNet.svg/300px-DotNet.svg.png" alt="" width="239" height="319" /&gt;&lt;/p&gt;
+&lt;p&gt;B&amp;uuml;t&amp;uuml;n bunlar g&amp;uuml;zel hoşta arkadaş bunları &amp;uuml;stte bahsettiğimiz .Net ailesi i&amp;ccedil;erisinde bulunan &amp;ccedil;eşitli programlama dilleriyle yapıyoruz ama nasıl oluyor da C# ile yazılan projenin &amp;ccedil;ıktısı ayrı, F# ile yazılanın ki ayrı, VB ile yazılanın ki ayrı iken framework bunları yorumlayıp &amp;ccedil;alıştırıabiliyor ?..&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yazılmış olan kodların direkt olarak derlenip &amp;ccedil;alıştırılması gibi bir cevap d&amp;uuml;ş&amp;uuml;necek olsak o zamanda her bir programlama dili i&amp;ccedil;in ayrı ayrı bu işlemleri yapan logic'ler gerekecektir bu da &amp;ccedil;ok fazla iş y&amp;uuml;k&amp;uuml;,maliyet vs demektir ve aslında m&amp;uuml;mk&amp;uuml;nde değildir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Aşağıda bulunan g&amp;ouml;rsel aslında yazmış olduğumuz projelerin &amp;ccedil;alışmasına kadar olan s&amp;uuml;reci &amp;ouml;zetliyor gibi.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="http://2.bp.blogspot.com/-uvMoRiGSWv4/UH3SUJyfLXI/AAAAAAAAAFE/huJJIHsF-98/s1600/CLR+Architecture.PNG" alt="" width="612" height="390" /&gt;&lt;/p&gt;
+&lt;h2&gt;CLR - Common Language Runtime&lt;/h2&gt;
+&lt;p&gt;.Net framework altında bulunan dillerden herhangi biriyle program yazdığımızda kodlar ilk olarak CIL (common intermadiate language) diğer bir deyişle IL dediğimiz byte kodlara d&amp;ouml;n&amp;uuml;ş&amp;uuml;r. Bu IL kodları aslında &amp;ccedil;alıştırılabilir kodlar değildir ve &amp;ccedil;alıştırılabilmesi i&amp;ccedil;in bir ara programa ihtiya&amp;ccedil; vardır. Bu ara program da CLR'dır. CLR d&amp;ouml;n&amp;uuml;şt&amp;uuml;r&amp;uuml;lm&amp;uuml;ş olan byte IL kodlarını alıp bir JIT (Just-In-Time) derleyicisini etkinleştirerek makine koduna d&amp;ouml;n&amp;uuml;şt&amp;uuml;r&amp;uuml;r ve &amp;ccedil;alıştırır.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;CLS- Common Language&amp;nbsp;Specification&lt;/h2&gt;
+&lt;p&gt;CLS i&amp;ccedil;in .Net framework &amp;ccedil;atısı altında bulunan programlama dillerinin ortak noktalarını barındırır ve programımızın diğer dillerle olan etkileşimini sağlar. Diller arasında ortak kullanılan yapılar ve onların birtakım kuralları bulunmaktadır. Yazdığınız kodların diğer programlama dilleriyle geliştirilen projelerde de kullanabilir olması istiyorsanız, Common Language Specification kurallarına uyumlu kodlar yazmamız gerekmektedir. Bu kurallara uygun geliştirdiğiniz kodlar, CLS desteği olan diller tarafından yorumlanabilir ve b&amp;ouml;ylece diller arasında ki iletişim sağlanmış olur.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="http://www-igm.univ-mlv.fr/~dr/XPOSE2002/Tedeschi/images/dotnet_framework.gif" alt="" width="382" height="298" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;CTS- Common Type System&lt;/h2&gt;
+&lt;p&gt;CTS CLR'ın bir alt k&amp;uuml;mesidir diyebiliriz. Ş&amp;ouml;yle ki;&amp;nbsp;Common Type System sayesinde programlama dillerinde kullanılan veri t&amp;uuml;rlerinin(int,double,byte,string etc.) arasında da uyum sağlanmış olur.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek olarak; .Net framework altında bulunan b&amp;uuml;t&amp;uuml;n dillerde int,double,float vs. gibi tiplerin ram'da kapladıkları yer aynıdır ve bu dillerden biri i&amp;ccedil;in derlenen kodlar referans olarak diğerinde de kullanılabilmektedir. Bu nedenle Framework i&amp;ccedil;erisinde bulunan t&amp;uuml;m dillerde CTS den dolayı ayni kurallara sahip veri tiplerini kullanılır farklı olan şey syntax'dır.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img src="http://image.slidesharecdn.com/csharpjn-090514144345-phpapp02/95/c-sharp-jn-13-728.jpg?cb=1242312262" alt="" width="572" height="429" /&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-08-26 23:14:00</pubDate>
+  <lastModified>2020-01-20 08:22:28</lastModified>
+  <raters>3</raters>
+  <rating>5</rating>
+  <slug>Csharp-Kodlarinin-Derlenip-Calistirilmasi-CLR-CIL-CLS-CTS</slug>
+  <tags>
+    <tag>clr</tag>
+    <tag>msil</tag>
+    <tag>.net</tag>
+    <tag>cts</tag>
+    <tag>cls</tag>
+    <tag>il</tag>
+    <tag>CIL nedir</tag>
+    <tag>CLR nedir</tag>
+    <tag>CLS nedir</tag>
+    <tag>CTS Nedir</tag>
+    <tag>.Net çalışması</tag>
+    <tag>c# kodlarının çalışması</tag>
+  </tags>
+  <comments>
+    <comment id="75af7d6f-0d0a-4def-a7c4-b27a4cb65281" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2018-12-26 09:41:52</date>
+      <author>priya</author>
+      <email>jayapriya.besant@gmail.com</email>
+      <country />
+      <ip>49.204.223.209</ip>
+      <avatar />
+      <content>You actually make it seem so easy with your presentation but I find this matter to be really something that 
+I think I would never understand. It seems too complex and extremely broad for me.
+ I am looking forward for your next post, I&amp;#39;ll try to get the hang of it!|
+
+
+&amp;lt;a href=&amp;quot;https://www.besanttechnologies.com/training-courses/java-training&amp;quot;&gt;java training in chennai&amp;lt;/a&gt;  </content>
+    </comment>
+  </comments>
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications>
+    <email>jayapriya.besant@gmail.com</email>
+  </notifications>
+</post>

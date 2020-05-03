@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Config Custom Section</title>
+  <description>WebConfig Asp.Net tabanlı projelerde istemci tarafında ilk çalıştırılan XML tabanlı bir sayfadır diyebiliriz. İçerisinde bir çok bilgi barındırır ve bir istemci yani kullanıcı websitenize erişmeye çallıştığında ilk webconfig çalışır ve içerisinde set edilen bilgilere göre projenizi çalıştırır &amp; ayağa kaldırır.</description>
+  <content>&lt;p&gt;WebConfig Asp.Net tabanlı projelerde istemci tarafında ilk &amp;ccedil;alıştırılan XML tabanlı bir sayfadır diyebiliriz. İ&amp;ccedil;erisinde bir &amp;ccedil;ok bilgi barındırır ve bir istemci yani kullanıcı websitenize erişmeye &amp;ccedil;allıştığında ilk webconfig &amp;ccedil;alışır ve i&amp;ccedil;erisinde set edilen bilgilere g&amp;ouml;re projenizi &amp;ccedil;alıştırır &amp;amp; ayağa kaldırır.&lt;/p&gt;
+&lt;p&gt;Nedir bu bilgile diye soracak olursa;&amp;nbsp;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Debug, Release mode ayarı,&lt;/li&gt;
+&lt;li&gt;.Net Framework bilgisi,&lt;/li&gt;
+&lt;li&gt;Varsa Database conn string bilgisi,&lt;/li&gt;
+&lt;li&gt;Kullanılan .Net K&amp;uuml;t&amp;uuml;phanelerinin versiyon bilgileri,&lt;/li&gt;
+&lt;li&gt;Uygulama Debug modda nasıl Release modda nasıl &amp;ccedil;alışacak bunun bilgisi,&lt;/li&gt;
+&lt;li&gt;Site i&amp;ccedil;i ve dışı y&amp;ouml;nlendirme ayarları vs.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre uygulama ile ilgili bir &amp;ccedil;ok ayar mevcut kısacası uygulamanın configurasyonu ile ilgili sayısızca &amp;ouml;zellik &amp;amp; ayar set edilebilir.&lt;/p&gt;
+&lt;p&gt;Bunun gibi ayarların dışında web.config i&amp;ccedil;erisinde uygulama i&amp;ccedil;i kullanılan &amp;ccedil;eşitli &amp;ouml;zel bilgiler &amp;amp; ayarlar da saklayabilir. Peki neden bu bilgileri burda saklıyoruz veya turuyoruz ?? Uygulamada Constant diye&amp;nbsp;herhangi bir class oluşturup bunun i&amp;ccedil;erisinde de tutabiliriz. Ama bu sefer ne olur derseniz. Orda tuttuğunuz bilgiyi değiştirmek i&amp;ccedil;in tekrardan projeyi a&amp;ccedil;ıp class i&amp;ccedil;erisinde set edilen değeri değiştirip uygulamayı tekrardan ilgili yere deploy etmemiz gerekmekte. İşte aslında WeConfig bizi bu durumdan kurtarıyor. Webconfig dosyası deploy edildiği yerde projede ki tanımlı olduğu haliyle XML formatında tutuluyor yani uygulama i&amp;ccedil;inde tanımlı olan class gibi dll'e &amp;ccedil;evrilip i&amp;ccedil;ini tekrardan a&amp;ccedil;amayacağımız bir t&amp;uuml;rde durum değil. Bu nedenle değişme olasılığı y&amp;uuml;ksek olan bilgileri WebConfig i&amp;ccedil;erisinde tutup ihtiya&amp;ccedil; duyulduğunda deploy edildiği dosyada ki folder e giderek &amp;ccedil;ok rahat bir şekilde i&amp;ccedil;ini a&amp;ccedil;ıp ilgili ayarı değiştirebiliriz. &amp;Ouml;rnek olarak; uygulama kullanılan iletişim sayfasında ki email adresi veya uygulamaın herhangi bir yerinde kullanılan ve sonradan değiştirmeye a&amp;ccedil;ık olan bir text/metin.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;?xml version="1.0" encoding="utf-8" ?&amp;gt;
+&amp;lt;configuration&amp;gt;   
+     &amp;lt;system.web&amp;gt;
+      &amp;lt;compilation defaultLanguage="c#" debug="true" /&amp;gt;
+    &amp;lt;/system.web&amp;gt;
+    
+    &amp;lt;appSettings&amp;gt;
+      &amp;lt;add key="ContanctEmailAddress" value="info@canertosuner.com" /&amp;gt;
+    &amp;lt;/appSettings&amp;gt;
+ &amp;lt;/configuration&amp;gt;&lt;/pre&gt;
+&lt;p&gt;Yukarıda da g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi uygulama i&amp;ccedil;erisinde y&amp;ouml;netmek istediğimiz değerleri &lt;strong&gt;&amp;lt;appSettings&amp;gt;&amp;nbsp;&lt;/strong&gt;i&amp;ccedil;erisinde&amp;nbsp;unique bir key vererek value alanlarına değerleri set edebiliriz. Bu değeri code tarafından okumak istediğimizde de bilindiği &amp;uuml;zre şu şekilde yapıyoruz;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;string emailAddress= ConfigurationSettings.AppSettings["ContactEmailAddress"];&lt;/pre&gt;
+&lt;p&gt;Peki ya kendimiz aynı&amp;nbsp;&lt;strong&gt;&amp;lt;appSettings&amp;gt;&amp;nbsp;&lt;/strong&gt;section'ı olduğu gibi bir custom secton yapmak istersek..&lt;/p&gt;
+&lt;p&gt;Case şu şekilde olsun. Kredi faizi hesaplayan bir uygulamamız var ve bu uygulamadaki faiz oranlarını webconfig den okuyup hesaplıyor. Aslında bu gibi bilgiler direkt olarak DB den de alınabilir ama bizim rojemizde webConfig den alalım.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1.Adım &lt;/strong&gt;WebConfigde section tanımı yapma&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;configuration&amp;gt;
+  &amp;lt;configSections&amp;gt;
+    &amp;lt;section name="KrediFaizleri" type="MyProject.KrediFaizleriSection" /&amp;gt;
+  &amp;lt;/configSections&amp;gt;
+&amp;lt;/configuration&amp;gt;
+ &lt;/pre&gt;
+&lt;p&gt;Yukarıda da g&amp;ouml;r&amp;uuml;lt&amp;uuml;ğ&amp;uuml; gibi KrediFaizleri adında bir section ımızın olacağı bilgisini verdik.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2.Adım&amp;nbsp;&lt;/strong&gt;Section ve i&amp;ccedil;erisindeki elementleri yazma&lt;/p&gt;
+&lt;p&gt;&amp;lt;/configSections&amp;gt; &amp;nbsp;tag'inin altında aşağıdaki gibi kodumuzu yazalım&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;  &amp;lt;KrediFaizleri&amp;gt; 
+    &amp;lt;Krediler&amp;gt;
+      &amp;lt;add tip="ihtiyac" oran="1.65"/&amp;gt;
+      &amp;lt;add tip="tasit" oran="1.96"/&amp;gt;
+      &amp;lt;add tip="konut" oran="1.20"/&amp;gt;
+    &amp;lt;/Krediler&amp;gt;
+  &amp;lt;/KrediFaizleri&amp;gt;&lt;/pre&gt;
+&lt;p&gt;Burda &lt;strong&gt;Krediler&lt;/strong&gt; diye bir array var ve i&amp;ccedil;erisinde &lt;strong&gt;Kredi&lt;/strong&gt; objesi olduğunu d&amp;uuml;ş&amp;uuml;nelim. Bu obje i&amp;ccedil;erisinde de &lt;strong&gt;tip&lt;/strong&gt; ve &lt;strong&gt;oran&lt;/strong&gt; adında 2 tane string property var. Aslında yukarıda ki xml kodunun tam karşılığı bu. Yukarıda 3 adet kredi i&amp;ccedil;in oran bilgisi girdik şimdi sırada bu değerleri webconfigden okumamızı sağlayacak C# kodlarını yazmaya geldi&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3.Adım&amp;nbsp;&lt;/strong&gt;KrediFaizleri elementini tanımlama&lt;/p&gt;
+&lt;p&gt;Yukarıda Krediler arrayinin i&amp;ccedil;erisinde Kredi objesi olduğunu s&amp;ouml;ylemiştik.Aslında bu bir element. Biz adına &lt;strong&gt;KrediFaizleriElement &lt;/strong&gt;diyelim ve classımız aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; public class KrediFaizleriElement : ConfigurationElement
+    {
+        [ConfigurationProperty("tip", IsKey = true, IsRequired = true)]
+        public string KrediTipi
+        {
+            get { return (string)this["tip"]; }
+            set { this["tip"] = value; }
+        }
+
+        [ConfigurationProperty("oran", IsKey = true, IsRequired = true)]
+        public string Oran
+        {
+            get { return (string)this["oran"]; }
+            set { this["oran"] = value; }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4.Adım&amp;nbsp;&lt;/strong&gt;KrediFaizleri array'ini tanımlama&lt;/p&gt;
+&lt;p&gt;Bu adımda webconfig de ki array'i almamızı sağlayan ConfigurationElementCollection den t&amp;uuml;reyen bir class yazıyoruz. Bu class'ı kullanarak tanımladığımız section i&amp;ccedil;erisinde ki collection'ı i&amp;ccedil;erisindeki Element ler ile birlikte alıyoruz.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;[ConfigurationCollection(typeof(KrediFaizleriElement))]
+    public class KrediFaizleriCollection : ConfigurationElementCollection
+    {
+        protected override ConfigurationElement CreateNewElement()
+        {
+            return new KrediFaizleriElement();
+        }
+
+         protected override object GetElementKey(ConfigurationElement element)
+        {
+            return ((KrediFaizleriElement)element).KrediTipi;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;5.Adım&amp;nbsp;&lt;/strong&gt;KrediFaizleriSection class ını oluşturma&lt;/p&gt;
+&lt;p&gt;Fark ettiyseniz &amp;nbsp;en i&amp;ccedil;ten en dışa doğru ilerliyoruz. İlk olarak Element sonra Collection şimdide sırada Section var. Aşağıda yazılan KrediFaizleriSection webconfigde tanımladığımız KrediFaizleri tag'ini okumamızı sağlayacak olan class. İ&amp;ccedil;erisinde&amp;nbsp;Faizler&amp;nbsp;array i var ve bu array'in i&amp;ccedil;erisindede&amp;nbsp;KrediFaizleriElement objeleri bulunacak.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class KrediFaizleriSection: ConfigurationSection
+    {
+        [ConfigurationProperty("KrediFaizleri", IsDefaultCollection = true)]
+        public KrediFaizleriCollection Faizler
+        {
+            get { return (KrediFaizleriCollection )this["KrediFaizleri"]; }
+            set { this["KrediFaizleri"] = value; }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp; &amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Son Adım &lt;/strong&gt;Webconfig de tanımlı değerleri okuma ve filtreleme işlemi.&lt;/p&gt;
+&lt;p&gt;Bu adıma kadar şu sırayla lerledik;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;WebConfig de Section tanımlama,&lt;/li&gt;
+&lt;li&gt;WebConfig de Section i&amp;ccedil;erisindeki Collection ve Elementleri tanımlama,&lt;/li&gt;
+&lt;li&gt;C# tarafında Element&amp;amp;Model class'ını oluşturma,&lt;/li&gt;
+&lt;li&gt;C# tarafında Collection class'ını oluşturma,&lt;/li&gt;
+&lt;li&gt;C# tarafında Section class'ını oluşturma,&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Şimdi ise sırada bu class ları kullanarak WebConfig de tanımlı değerleri okuma işlemi var. Bunun i&amp;ccedil;in aşağıdaki class ı kullanabiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; public static KrediFaizleriElement KrediOranınıGetir(string krediTipi)
+        {
+            //KrediFaizleri section'nını i&amp;ccedil;erisindeki elementler ile birlikte aldık
+            var element=
+                ConfigurationManager.GetSection("KrediFaizleriSection") as KrediFaizleriSection;
+
+             //Paramaetre olarak verilen kredi tipine g&amp;ouml;re linq sorgusu yaptık
+             var returnValue = element.Faizler.Cast&amp;lt;KrediFaizleriElement&amp;gt;().SingleOrDefault(c =&amp;gt; c.KrediTipi== krediTipi);
+           
+           //İlgili kredi WebConfigde varmı kontrol ettik
+            if (returnValue == null)
+                throw new InvalidOperationException(string.Format("Kredi Tipi {0} bulunamadı !", krediTipi));
+            //Bulunan krediyi geri d&amp;ouml;nd&amp;uuml;rd&amp;uuml;k
+            return returnValue;
+        }&lt;/pre&gt;
+&lt;p&gt;İşlemlerimiz bu kadar. &lt;strong&gt;KrediOranınıGetir&amp;nbsp;&lt;/strong&gt;metodunu gerekli yerde &amp;ccedil;ağrısını yaparak kullanabiliriz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-03-10 17:25:00</pubDate>
+  <lastModified>2020-01-20 08:22:25</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>Web-Config-Custom-Section</slug>
+  <tags>
+    <tag>webconfig</tag>
+    <tag>custom</tag>
+    <tag>section</tag>
+    <tag>appsettings</tag>
+    <tag>webconfig array</tag>
+    <tag>webconfig linq</tag>
+    <tag>ConfigurationElementCollection</tag>
+    <tag>ConfigurationCollection</tag>
+    <tag>ConfigurationElement</tag>
+  </tags>
+  <comments>
+    <comment id="0c446333-8d3a-4d04-b3a4-72fd707f758a" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2018-09-04 09:01:34</date>
+      <author>seymacengiz</author>
+      <email>semacengiz2016@hotmail.com</email>
+      <country />
+      <ip>78.187.201.253</ip>
+      <avatar />
+      <content>bu açıklayıcı yazı için elinize sağlık. aklıma takılan şey şu ki :
+var element=
+               ConfigurationManager.GetSection(&amp;quot;KrediFaizleriSection&amp;quot;) as KrediFaizleriSection;
+
+satırında GetSection methoduna string parametre olarak  section name yani &amp;quot;KrediFaizleri&amp;quot; vermemiz gerekmiyor muydu?</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>27e5276b-0227-42f3-a037-9d3992022f96</category>
+  </categories>
+  <notifications>
+    <email>semacengiz2016@hotmail.com</email>
+  </notifications>
+</post>

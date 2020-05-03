@@ -1,0 +1,43 @@
+﻿.tagcloud {
+    ul {
+        @include clearfix;
+
+        li {
+            display: inline-block;
+            border: none;
+            padding: 0;
+            margin-bottom: 3px !important;
+            margin-right: 3px !important;
+            float: left;
+        }
+
+        a {
+            padding: .25rem 0.5rem;
+            background-color: #f1f1f1;
+            color: #333;
+            display: block;
+            border-radius: .125rem;
+            font-size: .75rem !important;
+            font-weight: 500;
+
+            &:hover {
+                background: $color-theme-primary;
+                color: #fff;
+            }
+        }
+    }
+
+    .blog-footer & {
+        ul {
+            a {
+                background: $color-theme-primary;
+                color: #fff;
+
+                &:hover {
+                    background: #fff;
+                    color: $color-theme-primary;
+                }
+            }
+        }
+    }
+}

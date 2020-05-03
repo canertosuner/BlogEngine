@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Windows Phone SmsComposeTask Kullanımı (Uygulama'dan SMS yollama)</title>
+  <description>Windows Phone'da uygulama i&amp;ccedil;erisinden SMS g&amp;ouml;ndermek istediğinizde&amp;nbsp;SmsComposeTask&amp;nb</description>
+  <content>&lt;p&gt;&lt;span style="font-size: medium;"&gt;Windows Phone'da uygulama i&amp;ccedil;erisinden SMS g&amp;ouml;ndermek istediğinizde&amp;nbsp;SmsComposeTask&amp;nbsp;kontrol&amp;uuml;n&amp;uuml; kullanabilirsiniz. Daha &amp;ouml;ncesinde geliştirmiş olduğum &lt;strong&gt;&lt;a href="http://www.windowsphone.com/tr-tr/store/app/kandil-bayram-sms/555f4902-7aad-4b63-a614-30bba788ae11"&gt;Kandil,Bayram SMS&lt;/a&gt;&lt;/strong&gt; uygulamasında da kullandığım kodlar aşağıda mevcuttur.&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; SmsComposeTask myTask= new SmsComposeTask();
+&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; myTask.To = " "; &amp;nbsp;//Sms'in g&amp;ouml;nderileceği numara
+&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;myTask.Body &amp;nbsp;="Message"; &amp;nbsp;//Sms'in i&amp;ccedil;eriği
+&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;myTask.Show();&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;//Task'i &amp;ccedil;alıştırdığımız yer&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://cdn.marketplaceimages.windowsphone.com/v8/images/7eea5c9d-006f-4a68-a177-df5314c9a193?imageType=ws_screenshot_large&amp;amp;rotation=0" alt="" width="246" height="410" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-06-01 17:11:00</pubDate>
+  <lastModified>2020-01-20 08:22:34</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Windows-Phone-SmsComposeTask-Kullanımı-(Uygulamadan-SMS-yollama)</slug>
+  <tags>
+    <tag>sms</tag>
+    <tag>SmsComposeTask</tag>
+    <tag>mesaj</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

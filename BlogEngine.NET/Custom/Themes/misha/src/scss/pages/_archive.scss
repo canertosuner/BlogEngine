@@ -1,0 +1,100 @@
+﻿.archive-page {
+    font-size: 1rem;
+
+    .archive-page-content {
+        h2 {
+            font-size: 1rem;
+            height: 2rem;
+            margin-top: 1.5rem;
+            margin-bottom: .25rem;
+            line-height: 2rem;
+
+            a {
+                &:before {
+                    width: .75rem;
+                    height: .75rem;
+                    color: #ff9e07;
+                    margin-right: .5rem;
+                    @include icon("\f09e");
+                }
+            }
+        }
+
+        img {
+            display: none;
+        }
+    }
+
+    ul {
+        @include unstyled;
+        @include clearfix;
+
+        li {
+            float: left;
+            width: 33%;
+            list-style: disc inside;
+        }
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 0 !important;
+
+        th {
+            display: none;
+            border: 0 !important;
+        }
+
+        td {
+            vertical-align: top;
+            border: 0 !important;
+            font-size: 1rem;
+            padding: 0 !important;
+            color: #444;
+        }
+
+        a {
+            display: block;
+            color: #000;
+
+            &:hover {
+                color: $color-theme-primary
+            }
+        }
+    }
+
+    .date {
+        width: 6rem;
+        min-width: 6rem;
+    }
+
+    .comments, .rating {
+        display: none !important;
+    }
+
+    @media screen and (max-width:64rem - .0625rem) {
+        ul {
+            li{
+                float:none;
+                width:100%;
+            }
+        }
+        .date {
+            display: none;
+        }
+
+        table {
+
+            tr {
+                margin-bottom: .5rem;
+                padding-bottom: .5rem;
+                display: block;
+                border-bottom: 1px solid #ddd;
+            }
+
+            td {
+            }
+        }
+    }
+}

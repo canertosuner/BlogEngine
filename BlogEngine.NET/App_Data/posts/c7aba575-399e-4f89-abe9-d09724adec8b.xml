@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core ElasticSearch Logging ve Kibana Kurulumu &amp; Kullanımı</title>
+  <description>Daha önceki yazılarda asp.net core, elasticsearch, logging konularına ayrı ayrı farklı örneklerle değinmiştik. Bu yazımızda ise asp.net core projelerinde default logging storage olarak elasticsearch konfigure edip bu elasticsearch'de ki index'lerde bulunan log kayıtlarını Kibana kullanarak nasıl görüntüleyebiliriz örnek proje ile anlatacağız.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki yazılarda&amp;nbsp;&lt;a href="/category/AspNet-Core"&gt;asp.net core&lt;/a&gt;,&amp;nbsp;&lt;a href="/category/Elasticsearch"&gt;elasticsearch&lt;/a&gt;,&amp;nbsp;&lt;a href="/search?q=Logging"&gt;logging&lt;/a&gt;&amp;nbsp;konularına ayrı ayrı farklı &amp;ouml;rneklerle değinmiştik. Bu yazımızda ise asp.net core projelerinde default logging storage olarak elasticsearch&amp;nbsp;konfigure edip bu elasticsearch'de ki index'lerde bulunan log kayıtlarını Kibana kullanarak nasıl g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebiliriz &amp;ouml;rnek proje ile anlatacağız.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Logging bir uygulama i&amp;ccedil;in olmazsa olmazların başında gelmektedir. Uygulama&amp;nbsp;cycle'ın da loglama işlemi doğru zamanda doğru yerde ve en &amp;ouml;nemlisi bir birine bağlı olacak şekilde yaptığınızda log sonucunda oluşan veri aslında sizin i&amp;ccedil;in paha bi&amp;ccedil;ilmez bir monitoring aracı olabilir. Analiz yapabilir, alert oluşturabilir, &amp;ccedil;eşitli raporlar sağlayabiliriz. B&amp;uuml;t&amp;uuml;n bu saydıklarımız ve daha fazlası i&amp;ccedil;in &amp;ccedil;eşitli &amp;ccedil;&amp;ouml;z&amp;uuml;mler sunulabilir ancak şuan ki g&amp;uuml;n&amp;uuml;m&amp;uuml;z yazılım d&amp;uuml;nyasında&amp;nbsp;ElasticSearch, Kibana with Logstach &amp;uuml;&amp;ccedil;l&amp;uuml;s&amp;uuml; en performanslı ve open-source olduğundan community'si en sağlam &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak karşımıza &amp;ccedil;ıkmakta.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/es_kibna_netcore.png" alt="" width="670" height="186" /&gt;&lt;/p&gt;
+&lt;p&gt;Uygulama ge&amp;ccedil;meden &amp;ouml;nce bilgisayarınızda .Net Core SDK, ElasticSearch ve Kibana&amp;nbsp;y&amp;uuml;kl&amp;uuml; olmalı. Kurulumlarla ilgili detaylara&amp;nbsp;.Net Core SDK ve ElasticSearch i&amp;ccedil;in aşağıdaki başlık altında bulunan yazılarımızdan ulaşabilirsiniz. Kibana kurulumunu ise bu yazımızda anlatacağız.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;1) .Net Core Sdk 2.1 Kurulumu&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;.Net Core SDK 2.1 kurulumunu&amp;nbsp;&lt;a href="/post/net-core-2-0-to-2-1-migration"&gt;NET Core 2.0 to 2.1 Migration&lt;/a&gt;&amp;nbsp;yazımızda anlatmıştık ve bu yazıda belirtilen instraction'ları takip ederek sdk kurulunu sağlayabilirsiniz.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;2) ElasticSearch Kurulumu&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;ElastciSearch kullanabilmek i&amp;ccedil;in&amp;nbsp;&lt;a href="/post/elasticsearch-client-using-nest-elasticsearch-net-genericrepository-nancy"&gt;bu yazıda&lt;/a&gt;&amp;nbsp;anlatıldığı gibi kurulum işlemlerini yapıp&amp;nbsp;kurulumun doğru olup olmadığını test etmek adına browser &amp;uuml;zerinden&amp;nbsp;&amp;nbsp;&lt;a href="http://localhost:9200/"&gt;http://localhost:9200/&lt;/a&gt;&amp;nbsp;adresine httpget isteği yaptığınızda kurulu olan es'&amp;uuml;n bilgilerini g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebilirsiniz.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;3) Kibana&amp;nbsp;Kurulumu&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Kibana kurulumu i&amp;ccedil;in&lt;a href="https://www.elastic.co/downloads/kibana"&gt;&amp;nbsp;elastic.co&lt;/a&gt;&amp;nbsp;adresinde yer alan download sayfasından Kibana i&amp;ccedil;in ilgili işletim sisteminize ait dosyaları download edelim. Ben local'de windows kullandığım i&amp;ccedil;in Windows uyumlu versiyonu indirdim.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/aspcore_elsech_kbna_kbna_dwnld.png" alt="" width="453" height="321" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Download işlemi bittikten sonra rar'lı dosyaları ben C s&amp;uuml;r&amp;uuml;c&amp;uuml;s&amp;uuml;n&amp;uuml; se&amp;ccedil;tim extract edelim. Extract ettikten sonra&amp;nbsp;&lt;strong&gt;C:\kibana-6.3.2\bin&lt;/strong&gt;&amp;nbsp;klas&amp;ouml;r&amp;uuml;nde bulunan&amp;nbsp;&lt;strong&gt;kibana.bat&lt;/strong&gt;&amp;nbsp;dosyasını run edip kibanayı start etmesini bekleyelim. Dilerseniz Kibanayı işletim sistemine service olarak register'da edebilirsiniz.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Kibananın &amp;ccedil;alışıp &amp;ccedil;alışmadığından emin olmak i&amp;ccedil;in browser &amp;uuml;zerinden&amp;nbsp;&lt;a href="http://localhost:5601"&gt;http://localhost:5601&lt;/a&gt;&amp;nbsp;adresine giderek ulaşabilirsiniz. Elasticsearch'te index oluşturduktan sonra kibana'ya tekrar d&amp;ouml;neceğiz.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;4) Asp.Net Core Api Proje Oluşturulması&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Artık &amp;ouml;rnek projemizi geliştirmeye başlayalım. İlk olarak vs'da&amp;nbsp;&lt;strong&gt;ProductApi&lt;/strong&gt;&amp;nbsp;adında bir Asp.net core 2.1 Web&amp;nbsp;Api projesi oluşturalım.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2018/aspcore_elsech_kbna_create.png" alt="" width="485" height="353" /&gt;Projeyi oluşturduktan sonra nuget'ten indirip kullanacağımız k&amp;uuml;t&amp;uuml;phaneleri projemiz i&amp;ccedil;in kuralım. Uygulama loglarını atarken Serilog k&amp;uuml;t&amp;uuml;phanesini ve onun ElasticSearch ve .net Core i&amp;ccedil;in olan extension dll'lerini projemize nuget &amp;uuml;zerinden bulup ekleyelim.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.nuget.org/packages/serilog/"&gt;Serilog&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.nuget.org/packages/Serilog.Sinks.ElasticSearch/"&gt;Serilog.Sinks.ElasticSearch&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.nuget.org/packages/Serilog.Extensions.Logging/"&gt;Serilog.Extensions.Logging&amp;nbsp;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Yukarıdaki paketlerin nuget &amp;uuml;zerinden kurulum işlemleri tamamlandıktan sonra projede yer alan Startup.cs sınıfı i&amp;ccedil;erisinde serilog ve elasticsearch i&amp;ccedil;in gerekli olan logging konfigurasyonlarını aşağıdaki gibi yapalım. İlk olarak&amp;nbsp;ConfigureServices metodunda serilog ve serilog'un storage olarak elasticsearch'&amp;uuml; kullanacağını&amp;nbsp;belirten kod bloğunu aşağıdaki gibi yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    Log.Logger = new LoggerConfiguration()
+        .Enrich.FromLogContext()
+        .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200/"))
+        {
+            AutoRegisterTemplate = true,
+        })
+        .CreateLogger();
+
+    services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+}&lt;/pre&gt;
+&lt;p&gt;Sonrasında ise Configure metodunda yukarıda&amp;nbsp;ilgili tanımlamalarını yaptığımız serilog'u LoggerFactory'e ekleyip uygulamanın serilog &amp;uuml;zerinden logging yapacağını belirttiğimiz kısmı yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+{
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    else
+    {
+        app.UseHsts();
+    }
+
+    loggerFactory.AddSerilog();//serilog servisini eklediğimiz yer
+
+    app.UseMvc();
+}&lt;/pre&gt;
+&lt;p&gt;Kurulumlarımızı ve proje geliştirme&amp;nbsp;adımlarını tamamladık artık projemizi run ederek&amp;nbsp;&amp;ouml;rnek olarak bir ProductController a&amp;ccedil;ıp i&amp;ccedil;erisinde bulunan Get metoduna &amp;uuml;r&amp;uuml;n isimleri girmiştim&amp;nbsp;browser &amp;uuml;zerinden&amp;nbsp;&lt;a href="http://localhost:60506/api/product"&gt;http://localhost:60506/api/product&lt;/a&gt;&amp;nbsp;adresine httpGet isteği attığımızda aşağıdaki gibi &amp;uuml;r&amp;uuml;n isimlerini listelediğini g&amp;ouml;receğiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Route("api/[controller]")]
+[ApiController]
+public class ProductController : ControllerBase
+{
+    // GET api/product
+    [HttpGet]
+    public ActionResult&amp;lt;IEnumerable&amp;lt;string&amp;gt;&amp;gt; Get()
+    {
+        return new List&amp;lt;string&amp;gt; { "Mobile Phone", "Laptop", "Books", "Shoes" };
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/aspcore_elsech_kbna_kbna_prdct_img_lst.png" alt="" width="365" height="109" /&gt;&lt;/p&gt;
+&lt;p&gt;Uygulamada minimum log level Information olduğundan hem uygulama&amp;nbsp;start event'leri hemde end-point'e yaptığımız request-response'a ait log mesajlarını şuan elasticsearch'de&amp;nbsp;&lt;strong&gt;logstash-yyy.MM.dd&lt;/strong&gt; (logstash-2018.07.26 gibi.) formatında bir index oluşturup bu index'e g&amp;uuml;nl&amp;uuml;k olarak insert etmiş bulunuyor. Bu index'in yaratılıp yaratılmadığını anlamak i&amp;ccedil;inse yine browser &amp;uuml;zerinden elasticsearch'&amp;uuml;n api'sine istekte bulunarak &amp;ouml;ğrenebiliriz. Browser'dan&amp;nbsp;&lt;a href="http://localhost:9200/_cat/indices?v"&gt;http://localhost:9200/_cat/indices?v&lt;/a&gt;&amp;nbsp;adesine httpGet isteği yolladığınızda yukarıda bahsettiğimiz formatta index'in oluştuğunu g&amp;ouml;receksinizdir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/aspcore_elsech_kbna_kbn_indx_list.png" alt="" width="672" height="142" /&gt;&lt;/p&gt;
+&lt;p&gt;Şimdi ise son adım olarak index'lemiş olduğumuz bu logları Kibana &amp;uuml;zerinde g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyelim.&amp;nbsp;&lt;a href="http://localhost:5601"&gt;http://localhost:5601&lt;/a&gt;&amp;nbsp;adresine gittiğimizde şuan i&amp;ccedil;in herhangi bir index tanımlaması yapmadığımızdan&amp;nbsp;hi&amp;ccedil;bir şey&amp;nbsp;g&amp;ouml;r&amp;uuml;nt&amp;uuml;lenmemekte. Bunun i&amp;ccedil;in Kibana'da sol men&amp;uuml;de yer alan&amp;nbsp;&lt;strong&gt;Management&lt;/strong&gt;&amp;nbsp;sayfasına giderek&amp;nbsp;&lt;strong&gt;Index Patterns&lt;/strong&gt;&amp;nbsp;ekranında&amp;nbsp;Index pattern textbox'ına "&lt;strong&gt;logstash-*&lt;/strong&gt;" yazarak&amp;nbsp;Next dedikten sonra &amp;ccedil;ıkan ekranda Time Filter'ı log hangi property'ye g&amp;ouml;re yapacağını belirttiğimiz dropdown'dan&amp;nbsp;&lt;strong&gt;@timestamp&lt;/strong&gt;&amp;nbsp;field'ını se&amp;ccedil;ip&amp;nbsp;&lt;strong&gt;Create Index Pattern&lt;/strong&gt;&amp;nbsp;butonuna tıkladıktan sonra&amp;nbsp;&lt;strong&gt;logstash-&lt;/strong&gt;&amp;nbsp;formatına uygun b&amp;uuml;t&amp;uuml;n indexleri Kibana'ya tanımlamış olduk.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2018/aspcore_elsech_creat_indx_kbn_on.png" alt="" width="766" height="519" /&gt;&lt;/p&gt;
+&lt;p&gt;Indexlemiş olduğumuz logları g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebilmek i&amp;ccedil;in yine sol men&amp;uuml;den&amp;nbsp;&lt;strong&gt;Discover&lt;/strong&gt;&amp;nbsp;sayfasına giderek zaman filtresine g&amp;ouml;re aşağıdaki gibi uygulamamıza ait logları g&amp;ouml;rebiliriz. Dilersek search box'ı kullanarak log i&amp;ccedil;ersiinde aramak istediğimiz bir metni kolayca arayabilir yada uygulamanın throw ettiği exception'lar i&amp;ccedil;in dashboard'lar tanımlayıp daha metric'ler kullanarak kolayca g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/aspcore_elsech_creat_indx_final_pge.png" alt="" width="696" height="374" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Geleneksel logging tekniklerinde genelde erişilmesi ve anlaşılması zor i&amp;ccedil;inde kaybolunabilen yapılar s&amp;ouml;z konusuydu.&amp;nbsp;&amp;Ouml;yle ki log dosyaları arasında aradığımız bir text'i bulmak bazen saatlerimizi bile alabilmekteydi. Ancak elasticsearch ve kibana bunu tamamiyle değiştirdi desek yanlış olmaz. Bu ikili ile birlikte&amp;nbsp;uygulamanızın &amp;uuml;rettiği g&amp;uuml;nl&amp;uuml;k y&amp;uuml;zlerce megabyte'lık log text'ini elasticsearch'e index'leyip &amp;ccedil;ok rahat ve hızlı bir şekilde kibana &amp;uuml;zerinden erişebilirsiniz.&amp;nbsp;&lt;a href="https://www.elastic.co/guide/en/x-pack/current/xpack-introduction.html"&gt;X pack&lt;/a&gt;&amp;nbsp;kullanarak &amp;ccedil;eşitli alert yapıları tasarlayabilir uygulamanızla ilgili herhangi olağan dışı bir durumda en hızlı şekilde kolayca haberdar olabilirsiniz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/Asp.Net-Core-ElasticSearch-Logging-and-Kibana"&gt;Source Code&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-08-05 00:18:00</pubDate>
+  <lastModified>2019-11-20 08:40:24</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>asp-net-core-elasticsearch-logging-ve-kibana-kullanimi1</slug>
+  <tags>
+    <tag>asp.net core 2.0</tag>
+    <tag>elasticsearch</tag>
+    <tag>kibana</tag>
+    <tag>kibana kurulum</tag>
+    <tag>serilog</tag>
+    <tag>logging with elasticsearch and kibana</tag>
+    <tag>elsaticsearch loglama</tag>
+    <tag>asp.net core elasticsearch</tag>
+  </tags>
+  <comments>
+    <comment id="60cc3986-e46c-41d9-ad5a-ed9565b1cc5f" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-03-11 06:01:14</date>
+      <author>Oğuz</author>
+      <email>berkayyerdelen@gmail.com</email>
+      <country />
+      <ip>10.230.100.85</ip>
+      <avatar />
+      <content>Anlatım için teşekkür ederim giriş seviyesinde tam ihtiyacım olan makaleydi.</content>
+    </comment>
+    <comment id="ed297632-be24-454a-8211-c187d25857c6" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-11-20 08:40:24</date>
+      <author>abdulkadir</author>
+      <email>us.senkadir@gmail.com</email>
+      <country />
+      <ip>81.8.60.26</ip>
+      <avatar />
+      <content>Merhaba,
+Yazı için teşekkürler oldukça faydalı oldu.
+Ben denemdim fakat şöyle bir problemim var;
+Microservis bir yapıda bütün mikroservislerin loglarını elastichsearche aktarmak istiyorum.
+
+Bir servis için loglamayı yazdım o servis kendi loglarını gönderiyor başarılı bir şekilde yazıyorum fakat aynı konfigürasyonlarla diğer servisleri elastichsearche baktırdığımda onlar loglarını basmıyor.
+
+Sizce neden kaynaklanıyor olabilir?</content>
+    </comment>
+    <comment id="d12bc13e-a395-4f41-ad77-579297e720c4" parentid="ed297632-be24-454a-8211-c187d25857c6" approved="True" spam="False" deleted="True">
+      <date>2019-12-10 14:31:11</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba,
+Konfigurasyon eksikligi gibi geldi. Dieğr projelerin log&amp;#39;u atan projeden farkı nedir ? Bir yerde bir nokta gözden kaçmış olabilir mi ?</content>
+    </comment>
+    <comment id="573c54a2-9449-4a07-8b7e-6d3473fc5b36" parentid="ed297632-be24-454a-8211-c187d25857c6" approved="True" spam="False" deleted="False">
+      <date>2020-01-20 08:26:52</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumun için teşekkürler. Bir conf. eksiği var gibi geldi, detay paylaşman mümkün mü ? Email de atabilirsin canertosuner@gmail.com</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>a0313877-509c-481a-954b-6e000b44433d</category>
+  </categories>
+  <notifications />
+</post>

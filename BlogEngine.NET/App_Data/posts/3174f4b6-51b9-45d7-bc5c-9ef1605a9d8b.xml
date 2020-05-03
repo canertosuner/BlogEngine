@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Caching With Postsharp</title>
+  <description>Cache bir proje için olmazsa olmazlardan biridir diyebiliriz ve ihtiyaç duyulduğunda çok can kurtarır. Öyleki çok fazla değişmesini düşünmediğiniz verileri cache de saklayarak reqeust response time konusunda projenize oldukça fazla performans kazandırabilirsiniz.</description>
+  <content>&lt;p&gt;Cache bir proje i&amp;ccedil;in olmazsa olmazlardan biridir diyebiliriz ve ihtiya&amp;ccedil; duyulduğunda &amp;ccedil;ok can kurtarır. &amp;Ouml;yleki &amp;ccedil;ok fazla değişmesini d&amp;uuml;ş&amp;uuml;nmediğiniz verileri cache de saklayarak reqeust response time konusunda projenize olduk&amp;ccedil;a fazla performans kazandırabilirsiniz. Daha &amp;ouml;nceki &lt;a href="/category/WebApi"&gt;web api i&amp;ccedil;in cache&lt;/a&gt; ve &lt;a href="/category/Aspect-Oriented-Programming"&gt;aspect oriented &lt;/a&gt;- &lt;a href="/?tag=postsharp"&gt;postsharp &lt;/a&gt;konularından bahsetmiştik. WCF Service projenize Postsharp ile basit bir server-side cache yapısı kurabilirsin.&lt;/p&gt;
+&lt;p&gt;İlk adım olarak cache de tutacağımız &lt;strong&gt;CacheModel&lt;/strong&gt; adlı model'i tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class CacheModel
+{
+    public DateTime CacheTimeOutInfo { get; set; }//cache'in ne zaman timeout olacağını belirten time bilgisi
+    public object CacheData { get; set; }//cache'de tutulacak object
+}&lt;/pre&gt;
+&lt;p&gt;Şimdi ise CacheManager'a implement edeceğimiz &lt;strong&gt;ICache&amp;nbsp;&lt;/strong&gt;interface'i tanımlayalım ve i&amp;ccedil;erisine cache metotlarımızı yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface ICache
+{
+   bool Contains(string key);//key varmı yokmu diye control ettiğimiz metot
+   void Add(string key, CacheModel cacheData);//cache key'i ile birlikte cache model'i alıp cache'e ekleyen metot
+   object Get(string key);//key parametresi alarak cache'de ki data yı return eden metot
+   void Remove(string key);//key parametresine g&amp;ouml;re mevcut cache'i silen metot
+   void RemoveAll();//b&amp;uuml;t&amp;uuml;n cache'i silen metot
+}&lt;/pre&gt;
+&lt;p&gt;Aşağıda yazacağımız class'ta ise &amp;uuml;stte yazdığımız ICache'i implement eden cache y&amp;ouml;netimini yapacağımız &lt;strong&gt;CacheManager&lt;/strong&gt; class'ını oluşturacağızz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CacheManager : ICache
+    {
+        public bool Contains(string key)
+        {
+            var isExist = HttpRuntime.Cache[key];
+            if (isExist != null)
+            {
+                var obj = GetCacheModel(key);
+                if (obj.CacheTimeOutInfo &amp;gt; DateTime.Now)
+                    return true;
+                Remove(key);
+            }
+            return false;
+        }
+
+        public void Add(string key, CacheModel cacheData)
+        {
+            if (Contains(key))
+                Remove(key);
+            HttpRuntime.Cache[key] = cacheData;
+        }
+
+        public object Get(string key)
+        {
+            var obj = GetCacheModel(key);
+            return obj.CacheData;
+        }
+
+        private CacheModel GetCacheModel(string key)
+        {
+            return (CacheModel)HttpRuntime.Cache[key];
+        }
+
+        public void Remove(string key)
+        {
+            HttpRuntime.Cache.Remove(key);
+        }
+
+        public void RemoveAll()
+        {
+            var enumerator = HttpRuntime.Cache.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                HttpContext.Current.Cache.Remove((string)enumerator.Key);
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Sırada Postsharp kullanarak oluşturacağmız CacheAspect adında&amp;nbsp;interceptor'ı yazama var. Bunun i&amp;ccedil;in nuget'ten postsharp'ı indiriyoruz ve aşağıdaki gibi CacheAspect adındaki&amp;nbsp;interceptor'ımızı oluşturuyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    [Serializable]
+    public class CacheAspect : OnMethodBoundaryAspect
+    {
+        //Metottan alacağımız cache s&amp;uuml;resi
+        public int MethodCacheDurationInMinute = 0;
+
+        public override void OnEntry(MethodExecutionArgs args)
+        {
+                 //cache key oluşturma
+                var cacheKey = CreateMD5(GenerateCacheKey(args));
+
+                var cacheManager = new CacheManager();
+
+                var isCacheKeyExist = cacheManager.Contains(cacheKey);
+
+                if (isCacheKeyExist)
+                { 
+                    //eğer request geldiğinde cache key cache de varsa client'a cahe de bulunan veriyi d&amp;ouml;n
+                    args.ReturnValue = cacheManager.Get(cacheKey);
+                    args.FlowBehavior = FlowBehavior.Return;
+                }
+                else
+                {
+                    //cache de yoksa normal akışta ilerlemesine devam eder
+                    args.MethodExecutionTag = cacheKey;
+                }
+        }
+
+        public override void OnSuccess(MethodExecutionArgs args)
+        {
+                //başarılı bir şekilde metottan &amp;ccedil;ıktıysa cache'e at
+
+                    var cacheKey = (string)args.MethodExecutionTag;
+
+                    var cacheManager = new CacheManager();
+                    var cacheModel = new CacheModel
+                    {
+                        CacheData = args.ReturnValue,
+                        CacheTimeOutInfo = DateTime.Now.AddMinutes(MethodCacheDurationInMinute)
+                    };
+                    cacheManager.Add(cacheKey, cacheModel);
+        }
+
+        private static string GenerateCacheKey(MethodExecutionArgs args)
+        {
+            var generatedKey = string.Empty;
+
+            if (args.Method.DeclaringType != null)
+                generatedKey = args.Method.DeclaringType.Name + "-" + args.Method.Name + (args.Arguments.Any() ? "-" + args.Arguments.Aggregate((first, second) =&amp;gt; first + "-" + second) : "");
+            generatedKey += SerializeObjectToJson(args.Arguments);
+
+            return generatedKey;
+        }
+
+        public static string CreateMD5(string input)
+        {
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                var inputBytes = Encoding.ASCII.GetBytes(input);
+                var hashBytes = md5.ComputeHash(inputBytes);
+
+                var sb = new StringBuilder();
+                foreach (var t in hashBytes)
+                {
+                    sb.Append(t.ToString("X2"));
+                }
+                return sb.ToString();
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Artık sıra cache'i projemizde kullanmaya geldi.&amp;nbsp;yazdığımız&amp;nbsp;interceptor'ı projede hangi metodu cache'e atmak istiyorsak metodun başına attribute olarak ekleyip ka&amp;ccedil; dakikalık cache'de tutacağını belirteceğiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [CacheAspect(MethodCacheDurationInMinute = 120)] //120 dakikalığına cachelemesini s&amp;ouml;yl&amp;uuml;yoruz
+        public List&amp;lt;FooModel&amp;gt; Foo(FooRequest reqModel)
+        {
+            var fooManager=new FooManager();
+            return fooManager.GetFooList();
+        }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Kullanım olarak olduk&amp;ccedil; basit ve projede hangi metotta istersek aynı yukarıda olduğu gibi attribute olarak projemize ekleyebiliriz. Yazının başında da belirttiğim gibi cache bir &amp;ccedil;ok zaman hayat kurtarır ve yabana atılmaması gereken bir konudur.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-10-20 21:06:00</pubDate>
+  <lastModified>2020-01-20 08:22:21</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>wcf-caching-with-postsharp</slug>
+  <tags>
+    <tag>postsharp</tag>
+    <tag>Aspect-Oriented Programming</tag>
+    <tag>wcf</tag>
+    <tag>wcf cache</tag>
+    <tag>wcf postsharp</tag>
+    <tag>postsharp nedir</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

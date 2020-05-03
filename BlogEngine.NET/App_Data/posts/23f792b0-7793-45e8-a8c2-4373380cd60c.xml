@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Dependency Injection</title>
+  <description>Asp.Net Core basitçe nedir ne değildir bahsetmiştik daha önceki yazılarımızda. Bugünkü yazıda ise Asp.Net Core için Dependency Injection konusuna değinip framework içerisinde default gelen built-in DI Container'ını inceleyeceğiz.</description>
+  <content>&lt;p&gt;&lt;a href="/post/asp-net-core-a-giris"&gt;Asp.Net Core&lt;/a&gt;&amp;nbsp;basit&amp;ccedil;e nedir ne değildir bahsetmiştik daha &amp;ouml;nceki yazılarımızda. Bug&amp;uuml;nk&amp;uuml; yazıda ise Asp.Net Core i&amp;ccedil;in Dependency Injection konusuna değinip framework i&amp;ccedil;erisinde default gelen built-in DI Container'ını inceleyeceğiz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/aspcore_di_img.png" alt="" width="863" height="312" /&gt;&lt;/p&gt;
+&lt;p&gt;.Net core i&amp;ccedil;in 3rd party&amp;nbsp;DI container'lar kullanılabildiği gibi&amp;nbsp;k&amp;uuml;&amp;ccedil;&amp;uuml;k basit uygulamalar yada microservice'ler i&amp;ccedil;in kullanılabilen microsoft'un geliştirmiş olduğu basit kullanıma sahip bir&amp;nbsp;built-in default DI tool'u da framework ile sunulmuştur. Castle, Autofac yada Unity framework'leri kadar &amp;ccedil;eşitli &amp;ouml;zelliklere sahip olmasa da olduk&amp;ccedil;a kullanması basit ve performanslı bir framework olarak karşımıza &amp;ccedil;ıkmakta. &amp;Ouml;rnek bir proje &amp;uuml;zerinden nedir, ne değildir, nasıl kullanılır anlatmaya başlayalım.&lt;/p&gt;
+&lt;h3&gt;Creating a Sample&amp;nbsp;Project&lt;/h3&gt;
+&lt;p&gt;Aşağıdaki gibi Asp.Net Core'da Web Api olarak yazılmış bir projemiz olsun ve proje i&amp;ccedil;erisinde Repository ve Service katmanları i&amp;ccedil;in kullandığımız interface'leri container'a register edelim ve kullanalım. İlk olarak domain objemizi aşağıdaki gibi yaratalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;namespace AspCoreDIContainerSample.Domain
+{
+    public class City
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Sonrasında yukarıda oluşturduğumuz domain model i&amp;ccedil;in repsoitory inteface ve sınıfını oluşturalım.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;namespace AspCoreDIContainerSample.Repository
+{
+    public interface ICityRepository
+    {
+        IEnumerable&amp;lt;City&amp;gt; GetAll();
+    }
+}&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;namespace AspCoreDIContainerSample.Repository
+{
+    public class CityRepository : ICityRepository
+    {
+        public IEnumerable&amp;lt;City&amp;gt; GetAll()
+        {
+            // send back some hard-coded data
+            return new List&amp;lt;City&amp;gt;
+            {
+                new City { Id = "3938ca15-cba2-44a5-bd53-b5d6a5e306f5", Name = "Ankara" },
+                new City { Id = "cfd61cbf-a161-440f-9d1d-fdef32379b71", Name = "Samsun" }
+            };
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda oluşturduğumuz ICityRepository interface'i aşağıda tanımlayacağımız CityService sınıfına constructer-injected&amp;nbsp;parameter olarak vereceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;namespace AspCoreDIContainerSample.Service
+{
+    public interface ICityService
+    {
+        List&amp;lt;City&amp;gt; GetAllCities();
+    }
+}&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;namespace AspCoreDIContainerSample.Application
+{
+    public class CityService : ICityService
+    {
+        private readonly ICityRepository cityRepository;
+ 
+        public CityService(ICityRepository cityRepository)
+        {
+            this.cityRepository = cityRepository;
+        }
+ 
+        public List&amp;lt;City&amp;gt; GetAllCities()
+        {
+            return this.cityRepository.GetAll().ToList();
+        }
+    }
+}&lt;/pre&gt;
+&lt;h3&gt;Register All Used Components&lt;/h3&gt;
+&lt;p&gt;Yukarıda kullandığımız repository ve service objelerini container'a implementasyonlarını belirterek register etmemiz gerekiyor. Bunu i&amp;ccedil;in aşağıdaki gibi proje solution'ında bulunan Startup.cs sınıfından faydalanacağız. Startup.cs proje ilk run edildiğinde &amp;ccedil;alışan kod satırlarının bulunduğu sınıftır. Bizde proje ilk run edildiğinde ilgili kullanılan bağımlılıkları register edeceğiz. Startup.cs de bulunan&amp;nbsp;&lt;strong&gt;ConfigureServices&lt;/strong&gt;&amp;nbsp;adlı&amp;nbsp;metot register işlemlerini yapmak i&amp;ccedil;in default gelen bir metottur. Aşağıdaki gibi&amp;nbsp;tanımlamalarımızı yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddScoped&amp;lt;ICityRepository, CityRepository&amp;gt;();
+            services.AddScoped&amp;lt;ICityService, CityService&amp;gt;();
+        }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre&amp;nbsp;ICityRepository ve ICityService interface'lerini implementasyonlarını belirterek AddScoped metodunu kullanarak register ettik. Peki ne bu AddScoped ?&lt;/p&gt;
+&lt;h3&gt;&amp;nbsp;&lt;/h3&gt;
+&lt;h3&gt;Dependency Injection Lifetimes - Scoped, Singleton, Transient&lt;/h3&gt;
+&lt;p&gt;Dependency injection lifetime container'dan istenen objenin ne zaman instance create edileceğini yada ne zaman yeniden create edilmesi gerektiğini sağlar. Container'da lifetime tanımı yapabilmemizi sağlayan 3 state vardır. Sırasıyla bu &amp;uuml;&amp;ccedil;l&amp;uuml;ye bakacak olursak;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Scoped&lt;/strong&gt;&lt;/span&gt;&amp;nbsp;: Her scope i&amp;ccedil;in tek bir instance yaratılmasını sağlayan lifetime adı dır. &amp;Ouml;rneğin web projesi i&amp;ccedil;in projenize gelen her bir HttpRequest i&amp;ccedil;in ilgili instance'ı yaratıp container'da tutar ve o http lifecycle'ı boyunca hep aynı instance'ı kullanır.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Singleton&lt;/strong&gt;&lt;/span&gt;&amp;nbsp;: İsminden de anlaşılacağı &amp;uuml;zre singleton yani uygulama ilk &amp;ccedil;alıştığında tek bir instance yaratır ve sonrasından uygulama stop olana kadar bu instance'ı kullanır.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Transient&lt;/strong&gt;&lt;/span&gt;&amp;nbsp;: Bu lifetime ise ilgili&amp;nbsp;obje her istendiğinde yeni bir instance yaratır ve &amp;ouml;zellikle stateless servisler i&amp;ccedil;in best-practice olarak kullanılır.&lt;/p&gt;
+&lt;p&gt;Biz yukarıda kullandığımız interface'lerin lifetime'larını Scoped olarak tanımladık ancak ihtiyaca g&amp;ouml;re Singleton yada Transient olarak da tanımlayabilirdik.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;  services.AddSingleton&amp;lt;ICityRepository, CityRepository&amp;gt;();
+  services.AddSingleton&amp;lt;ICityService, CityService&amp;gt;();&lt;/pre&gt;
+&lt;h3&gt;&amp;nbsp;&lt;/h3&gt;
+&lt;h3&gt;Using Registered Components&lt;/h3&gt;
+&lt;p&gt;Son adım olarak register ettiğimiz bu service'leri kullanmak kaldı. Aşağıdaki gibi CityController i&amp;ccedil;erisinde&amp;nbsp;container'da register edilen instance'ları kullanarak geriye cityList return edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;namespace AspCoreDIContainerSample.Api
+{
+    public class CityController : Controller
+    {
+        private readonly ICityService _cityService;
+ 
+        public CityController(ICityService cityService)
+        {
+            this._cityService= cityService;
+        }
+
+        [HttpGet]
+        public List&amp;lt;City&amp;gt; GetCityList()
+        {
+            return this.cityService.GetAllCities();
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Asp.Net Core i&amp;ccedil;in Dependency Injection kullanım &amp;ouml;rneğimiz bu kadardı. Yukarıdaki end-point'e call yaparak geriye Samsun ve Ankara illerinin bulunduğu array'i return ettiğini g&amp;ouml;receğiz.&lt;/p&gt;
+&lt;p&gt;Built-in dependency injection castle, ninject veya autofac kadar zenginliğe sahip bir IoC container değildir ancak olduk&amp;ccedil;a basit kullanıma sahip hızlı ve implementasyonu kolay bir container dır. Eğer isterseniz bu container'ın asp.net core i&amp;ccedil;in bir k&amp;uuml;t&amp;uuml;phanesi geliştirildiyse&amp;nbsp;default built-in container ile replace de edebilirsiniz. Sonraki Asp.Net Core DI yazımızda 3rd party asp.net core&amp;nbsp;DI container'larından birini&amp;nbsp;nasıl built-in container yerine kullanabiliriz inceleyeceğiz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-01-09 21:11:00</pubDate>
+  <lastModified>2020-01-20 08:22:14</lastModified>
+  <raters>5</raters>
+  <rating>5</rating>
+  <slug>asp-net-core-dependency-injection</slug>
+  <tags>
+    <tag>Asp.Net Core Dependency Injection</tag>
+    <tag>.net core IoC</tag>
+    <tag>Asp.Net Core IoC</tag>
+    <tag>built-in container</tag>
+    <tag>.net core container</tag>
+    <tag>asp.net core container</tag>
+    <tag>Scoped</tag>
+    <tag>Singleton</tag>
+    <tag>Transient</tag>
+    <tag>AddSingleton</tag>
+    <tag>AddScoped</tag>
+    <tag>AddTransient</tag>
+    <tag>asp.net core</tag>
+  </tags>
+  <comments>
+    <comment id="2c652289-571b-4caf-b99d-c3ebeba0cf34" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2018-01-10 07:35:40</date>
+      <author>testsd a</author>
+      <email>aacaca@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <avatar />
+      <content>4234234 23424 2 4234 </content>
+    </comment>
+    <comment id="76c00ab9-8b88-43d1-9643-3bb234c2b9e9" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-08-05 19:46:36</date>
+      <author>Koç Akademi</author>
+      <email>koc.academi@yopmail.com</email>
+      <country />
+      <ip>31.223.0.86</ip>
+      <avatar />
+      <content>Eline sağlık, Nacizane son bölümdeki kod bloğunda bir sorun var.
+public CityService(ICityService cityService)
+yerine
+public CityController(ICityService cityService)
+olması gerekir.</content>
+    </comment>
+    <comment id="382c8095-a064-4802-9cb4-c0465280ce65" parentid="76c00ab9-8b88-43d1-9643-3bb234c2b9e9" approved="True" spam="False" deleted="True">
+      <date>2018-08-05 20:02:46</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>31.223.39.98</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumun için teşekkürler. Haklısın bir karışıklık olmuş, güncelledim :)</content>
+    </comment>
+    <comment id="5aceb682-faa0-4204-b53e-3aea569dd33d" parentid="76c00ab9-8b88-43d1-9643-3bb234c2b9e9" approved="True" spam="False" deleted="False">
+      <date>2018-08-05 20:04:31</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>31.223.39.98</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumun için teşekkürler. Haklısın küçük bir karışıklık olmuş, güncelledim :)</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+  </categories>
+  <notifications>
+    <email>aacaca@gmail.com</email>
+    <email>koc.academi@yopmail.com</email>
+  </notifications>
+</post>

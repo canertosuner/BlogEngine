@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<InstalledPackageFiles>
+  <item id="FacebookLike" fileorder="1" filepath="App_Code\Extensions\FacebookLike.cs" isdirectory="False" />
+  <item id="FacebookLike" fileorder="2" filepath="Styles" isdirectory="True" />
+  <item id="FacebookLike" fileorder="3" filepath="Styles\FacebookLikeStyle.css" isdirectory="False" />
+  <item id="SocialBuzz" fileorder="1" filepath="App_Code\Extensions\SocialBuzz.cs" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="1" filepath="admin\Extensions\BlogParser" isdirectory="True" />
+  <item id="ImageZoomExtension" fileorder="2" filepath="admin\Extensions\BlogParser\BlogParserAdmin.aspx" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="3" filepath="admin\Extensions\BlogParser\BlogParserAdmin.aspx.cs" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="4" filepath="admin\Extensions\BlogParser\Settings.ascx" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="5" filepath="admin\Extensions\BlogParser\Settings.ascx.cs" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="6" filepath="admin\Extensions\ImageZoom" isdirectory="True" />
+  <item id="ImageZoomExtension" fileorder="7" filepath="admin\Extensions\ImageZoom\ChangeCaptionTemplate.htm" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="8" filepath="admin\Extensions\ImageZoom\ChangeImageStyleTemplate.htm" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="9" filepath="admin\Extensions\ImageZoom\ImageZoomAdmin.aspx" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="10" filepath="admin\Extensions\ImageZoom\ImageZoomAdmin.aspx.cs" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="11" filepath="App_Code\Extensions\BlogParser.cs" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="12" filepath="App_Code\Extensions\ImageZoom.cs" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="13" filepath="pics\ImageZoomMagnifier.png" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="14" filepath="Scripts\ImageZoom" isdirectory="True" />
+  <item id="ImageZoomExtension" fileorder="15" filepath="Scripts\ImageZoom\imagezoom.js" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="16" filepath="Scripts\ImageZoom\imagezoomadmin.js" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="17" filepath="Styles\ImageZoom" isdirectory="True" />
+  <item id="ImageZoomExtension" fileorder="18" filepath="Styles\ImageZoom\imagezoom.css" isdirectory="False" />
+  <item id="ImageZoomExtension" fileorder="19" filepath="Styles\ImageZoom\imagezoommob.css" isdirectory="False" />
+  <item id="TopPosts" fileorder="1" filepath="App_code\Extensions\TopPosts.cs" isdirectory="False" />
+  <item id="TopPosts" fileorder="2" filepath="Widgets\Top Posts" isdirectory="True" />
+  <item id="TopPosts" fileorder="3" filepath="Widgets\Top Posts\edit.ascx" isdirectory="False" />
+  <item id="TopPosts" fileorder="4" filepath="Widgets\Top Posts\edit.ascx.cs" isdirectory="False" />
+  <item id="TopPosts" fileorder="5" filepath="Widgets\Top Posts\widget.ascx" isdirectory="False" />
+  <item id="TopPosts" fileorder="6" filepath="Widgets\Top Posts\widget.ascx.cs" isdirectory="False" />
+  <item id="TagCanvas" fileorder="1" filepath="widgets\TagCanvas" isdirectory="True" />
+  <item id="TagCanvas" fileorder="2" filepath="widgets\TagCanvas\edit.ascx" isdirectory="False" />
+  <item id="TagCanvas" fileorder="3" filepath="widgets\TagCanvas\edit.ascx.cs" isdirectory="False" />
+  <item id="TagCanvas" fileorder="4" filepath="widgets\TagCanvas\excanvas.js" isdirectory="False" />
+  <item id="TagCanvas" fileorder="5" filepath="widgets\TagCanvas\jquery.tagcanvas.min.js" isdirectory="False" />
+  <item id="TagCanvas" fileorder="6" filepath="widgets\TagCanvas\widget.ascx" isdirectory="False" />
+  <item id="TagCanvas" fileorder="7" filepath="widgets\TagCanvas\widget.ascx.cs" isdirectory="False" />
+  <item id="RecentTweets" fileorder="1" filepath="widgets\Recent Tweets" isdirectory="True" />
+  <item id="RecentTweets" fileorder="2" filepath="widgets\Recent Tweets\edit.ascx" isdirectory="False" />
+  <item id="RecentTweets" fileorder="3" filepath="widgets\Recent Tweets\edit.ascx.cs" isdirectory="False" />
+  <item id="RecentTweets" fileorder="4" filepath="widgets\Recent Tweets\screenshot.png" isdirectory="False" />
+  <item id="RecentTweets" fileorder="5" filepath="widgets\Recent Tweets\twitter.png" isdirectory="False" />
+  <item id="RecentTweets" fileorder="6" filepath="widgets\Recent Tweets\widget.ascx" isdirectory="False" />
+  <item id="RecentTweets" fileorder="7" filepath="widgets\Recent Tweets\widget.ascx.cs" isdirectory="False" />
+  <item id="RecentTweets" fileorder="8" filepath="widgets\Recent Tweets\widget.xml" isdirectory="False" />
+  <item id="Instagram-Widget" fileorder="1" filepath="widgets\Instagram\edit.ascx" isdirectory="False" />
+  <item id="Instagram-Widget" fileorder="2" filepath="widgets\Instagram\edit.ascx.cs" isdirectory="False" />
+  <item id="Instagram-Widget" fileorder="3" filepath="widgets\Instagram\widget.ascx" isdirectory="False" />
+  <item id="Instagram-Widget" fileorder="4" filepath="widgets\Instagram\widget.ascx.cs" isdirectory="False" />
+  <item id="MostRead" fileorder="1" filepath="App_Code\Extensions\GEBEEMostRead.cs" isdirectory="False" />
+  <item id="MostRead" fileorder="2" filepath="bin\GEBEE.dll" isdirectory="False" />
+  <item id="MostRead" fileorder="3" filepath="bin\GEBEE.pdb" isdirectory="False" />
+  <item id="MostRead" fileorder="4" filepath="MostRead.aspx" isdirectory="False" />
+  <item id="MostRead" fileorder="5" filepath="MostRead.aspx.cs" isdirectory="False" />
+  <item id="PopularPosts" fileorder="1" filepath="widgets\PopularPosts" isdirectory="True" />
+  <item id="PopularPosts" fileorder="2" filepath="widgets\PopularPosts\edit.ascx" isdirectory="False" />
+  <item id="PopularPosts" fileorder="3" filepath="widgets\PopularPosts\edit.ascx.cs" isdirectory="False" />
+  <item id="PopularPosts" fileorder="4" filepath="widgets\PopularPosts\Readme.txt" isdirectory="False" />
+  <item id="PopularPosts" fileorder="5" filepath="widgets\PopularPosts\widget.ascx" isdirectory="False" />
+  <item id="PopularPosts" fileorder="6" filepath="widgets\PopularPosts\widget.ascx.cs" isdirectory="False" />
+  <item id="Quotations" fileorder="1" filepath="widgets\Quotations" isdirectory="True" />
+  <item id="Quotations" fileorder="2" filepath="widgets\Quotations\edit.ascx" isdirectory="False" />
+  <item id="Quotations" fileorder="3" filepath="widgets\Quotations\edit.ascx.cs" isdirectory="False" />
+  <item id="Quotations" fileorder="4" filepath="widgets\Quotations\widget.ascx" isdirectory="False" />
+  <item id="Quotations" fileorder="5" filepath="widgets\Quotations\widget.ascx.cs" isdirectory="False" />
+  <item id="AllTuts" fileorder="1" filepath="Custom\Themes\AllTuts" isdirectory="True" />
+  <item id="AllTuts" fileorder="2" filepath="Custom\Themes\AllTuts\css" isdirectory="True" />
+  <item id="AllTuts" fileorder="3" filepath="Custom\Themes\AllTuts\css\ddsmoothmenu-v.css" isdirectory="False" />
+  <item id="AllTuts" fileorder="4" filepath="Custom\Themes\AllTuts\css\ddsmoothmenu.css" isdirectory="False" />
+  <item id="AllTuts" fileorder="5" filepath="Custom\Themes\AllTuts\images" isdirectory="True" />
+  <item id="AllTuts" fileorder="6" filepath="Custom\Themes\AllTuts\images\bk_blockquote.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="7" filepath="Custom\Themes\AllTuts\images\bk_body.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="8" filepath="Custom\Themes\AllTuts\images\bk_box_bottom.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="9" filepath="Custom\Themes\AllTuts\images\bk_box_bottom_right.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="10" filepath="Custom\Themes\AllTuts\images\bk_box_mid.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="11" filepath="Custom\Themes\AllTuts\images\bk_box_mid_inner.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="12" filepath="Custom\Themes\AllTuts\images\bk_box_mid_right.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="13" filepath="Custom\Themes\AllTuts\images\bk_box_top.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="14" filepath="Custom\Themes\AllTuts\images\bk_box_top_right.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="15" filepath="Custom\Themes\AllTuts\images\bk_box_top_right.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="16" filepath="Custom\Themes\AllTuts\images\bk_but_search.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="17" filepath="Custom\Themes\AllTuts\images\bk_date.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="18" filepath="Custom\Themes\AllTuts\images\bk_footer.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="19" filepath="Custom\Themes\AllTuts\images\bk_h2_right.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="20" filepath="Custom\Themes\AllTuts\images\bk_header.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="21" filepath="Custom\Themes\AllTuts\images\bk_link_reply.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="22" filepath="Custom\Themes\AllTuts\images\bk_pagenavi.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="23" filepath="Custom\Themes\AllTuts\images\bk_pagenavi_ov.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="24" filepath="Custom\Themes\AllTuts\images\bk_slider.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="25" filepath="Custom\Themes\AllTuts\images\bk_slider_caption.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="26" filepath="Custom\Themes\AllTuts\images\bk_social_links.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="27" filepath="Custom\Themes\AllTuts\images\bk_top_hover.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="28" filepath="Custom\Themes\AllTuts\images\bk_twitter_box_bottom.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="29" filepath="Custom\Themes\AllTuts\images\bk_twitter_box_top.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="30" filepath="Custom\Themes\AllTuts\images\bullet_list.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="31" filepath="Custom\Themes\AllTuts\images\but_addcomment.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="32" filepath="Custom\Themes\AllTuts\images\but_next.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="33" filepath="Custom\Themes\AllTuts\images\but_previous.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="34" filepath="Custom\Themes\AllTuts\images\delicious.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="35" filepath="Custom\Themes\AllTuts\images\digg.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="36" filepath="Custom\Themes\AllTuts\images\down.gif" isdirectory="False" />
+  <item id="AllTuts" fileorder="37" filepath="Custom\Themes\AllTuts\images\facebook.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="38" filepath="Custom\Themes\AllTuts\images\ico_author.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="39" filepath="Custom\Themes\AllTuts\images\ico_becomeauthor.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="40" filepath="Custom\Themes\AllTuts\images\ico_comments.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="41" filepath="Custom\Themes\AllTuts\images\ico_facebook.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="42" filepath="Custom\Themes\AllTuts\images\ico_linkedin.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="43" filepath="Custom\Themes\AllTuts\images\ico_readmore.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="44" filepath="Custom\Themes\AllTuts\images\ico_rss.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="45" filepath="Custom\Themes\AllTuts\images\ico_tag.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="46" filepath="Custom\Themes\AllTuts\images\ico_twitter.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="47" filepath="Custom\Themes\AllTuts\images\list_red_bullet.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="48" filepath="Custom\Themes\AllTuts\images\logo.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="49" filepath="Custom\Themes\AllTuts\images\reddit.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="50" filepath="Custom\Themes\AllTuts\images\right.gif" isdirectory="False" />
+  <item id="AllTuts" fileorder="51" filepath="Custom\Themes\AllTuts\images\site5.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="52" filepath="Custom\Themes\AllTuts\images\site5bottom.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="53" filepath="Custom\Themes\AllTuts\images\site5_125x125.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="54" filepath="Custom\Themes\AllTuts\images\star.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="55" filepath="Custom\Themes\AllTuts\images\stumbleupon.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="56" filepath="Custom\Themes\AllTuts\images\twitter.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="57" filepath="Custom\Themes\AllTuts\images\youradhere.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="58" filepath="Custom\Themes\AllTuts\js" isdirectory="True" />
+  <item id="AllTuts" fileorder="59" filepath="Custom\Themes\AllTuts\js\ddsmoothmenu.js" isdirectory="False" />
+  <item id="AllTuts" fileorder="60" filepath="Custom\Themes\AllTuts\js\jquery-1.7.2.min.js" isdirectory="False" />
+  <item id="AllTuts" fileorder="61" filepath="Custom\Themes\AllTuts\js\jquery.form.js" isdirectory="False" />
+  <item id="AllTuts" fileorder="62" filepath="Custom\Themes\AllTuts\CommentView.cshtml" isdirectory="False" />
+  <item id="AllTuts" fileorder="63" filepath="Custom\Themes\AllTuts\noavatar.jpg" isdirectory="False" />
+  <item id="AllTuts" fileorder="64" filepath="Custom\Themes\AllTuts\PostView.cshtml" isdirectory="False" />
+  <item id="AllTuts" fileorder="65" filepath="Custom\Themes\AllTuts\ReleaseNotes.txt" isdirectory="False" />
+  <item id="AllTuts" fileorder="66" filepath="Custom\Themes\AllTuts\site.cshtml" isdirectory="False" />
+  <item id="AllTuts" fileorder="67" filepath="Custom\Themes\AllTuts\style.css" isdirectory="False" />
+  <item id="AllTuts" fileorder="68" filepath="Custom\Themes\AllTuts\theme.png" isdirectory="False" />
+  <item id="AllTuts" fileorder="69" filepath="Custom\Themes\AllTuts\theme.xml" isdirectory="False" />
+  <item id="AllTuts" fileorder="70" filepath="Custom\Themes\AllTuts\WidgetContainer.cshtml" isdirectory="False" />
+  <item id="MoveToTop" fileorder="1" filepath="Custom\Extensions" isdirectory="True" />
+  <item id="MoveToTop" fileorder="2" filepath="Custom\Extensions\MoveToTop" isdirectory="True" />
+  <item id="MoveToTop" fileorder="3" filepath="Custom\Extensions\MoveToTop\MovetoTop.png" isdirectory="False" />
+  <item id="MoveToTop" fileorder="1" filepath="bin\MoveToTop.dll" isdirectory="False" />
+  <item id="GoogleAsyncAnalytics" fileorder="1" filepath="bin\GoogleAsyncAnalytics.dll" isdirectory="False" />
+  <item id="GoogleTranslator" fileorder="1" filepath="Custom\Widgets\GoogleTranslator" isdirectory="True" />
+  <item id="GoogleTranslator" fileorder="2" filepath="Custom\Widgets\GoogleTranslator\edit.cshtml" isdirectory="False" />
+  <item id="GoogleTranslator" fileorder="3" filepath="Custom\Widgets\GoogleTranslator\widget.cshtml" isdirectory="False" />
+  <item id="GoogleTranslator" fileorder="4" filepath="Custom\Widgets\GoogleTranslator\widget.xml" isdirectory="False" />
+</InstalledPackageFiles>

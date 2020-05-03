@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Sharepoint Rest Get User By</title>
+  <description />
+  <content>&lt;h2&gt;Get All Users List&amp;nbsp;&lt;/h2&gt;
+&lt;p&gt;http://your-site-name/_vti_bin/ListData.svc/UserInformationList&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Get A User By Account or Any Other Property&lt;/h2&gt;
+&lt;p&gt;http://your-site-name/_vti_bin/ListData.svc/UserInformationList?$filter=Account eq &amp;lsquo;contoso\administrator&amp;rsquo;&amp;amp;$select=Id,Name&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Get Users by Content Type&lt;/h2&gt;
+&lt;p&gt;http://your-site-name/_vti_bin/ListData.svc/UserInformationList? $filter=ContentType eq &amp;lsquo;Person&amp;rsquo;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-06-02 09:12:00</pubDate>
+  <lastModified>2020-01-20 08:22:28</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Sharepoint-Rest-Get-User-By</slug>
+  <tags>
+    <tag>sharepoint</tag>
+    <tag>UserInformationList</tag>
+    <tag>userprofile</tag>
+    <tag>getuserby</tag>
+    <tag>getgroup</tag>
+    <tag>accountname</tag>
+    <tag>username</tag>
+    <tag>loginname</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>0b1e407c-eda9-4959-8552-c6da2babf29d</category>
+  </categories>
+  <notifications />
+</post>

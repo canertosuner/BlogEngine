@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>C# "params" Kullanımı</title>
+  <description>C# dilinde yazmış olduğumuz bir metoda params keyword'ü ile parametre tanımlaması yaptığımızda bu o metodun çok sayıda parametresi olduğuna işaret eder ve bu parametreleri teker teker metodu çağırdığımız yerde ayrı ayrı "," ile ayırıp set etmek yerine bir sefer de parametre olarak verebiliriz.</description>
+  <content>&lt;p&gt;&lt;span style="font-size: small;"&gt;C# dilinde yazmış olduğumuz bir metoda &lt;strong&gt;params&lt;/strong&gt; keyword'&amp;uuml; ile parametre tanımlaması yaptığımızda bu o&amp;nbsp;metodun &amp;ccedil;ok sayıda parametresi olduğuna işaret eder ve bu parametreleri teker teker metodu &amp;ccedil;ağırdığımız yerde ayrı ayrı "," ile ayırıp set etmek yerine bir sefer de parametre olarak verebiliriz. Parametre olarak bir array alan metod olmalı ve tanımlarken tip belirtecinden &amp;ouml;nce "params" keyword'&amp;uuml; eklenmelidir.&amp;nbsp;G&amp;ouml;ndereceğimiz array tek boyutlu olmalı ve bir metodda tek bir params anahtar s&amp;ouml;zc&amp;uuml;ğ&amp;uuml; kullanmalıyız. Params keyword'&amp;uuml; alan ilgili metoda yanında başka parametrelerde g&amp;ouml;nderebiliriz. ancak dikkat etmemiz gereken şey params tanımlamasını t&amp;uuml;m parametrelerden sonra yazmamız gerektiği.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;&amp;Ouml;rnek olarak bir tane int array alan bir metod olsun ve metod bu aldığı array de bulunan sayıların toplamını geriye return etsin.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;&lt;strong&gt;Params &lt;span style="font-size: small;"&gt;kullanmadan&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;int SayilariTopla(int a, int b, int c, int d, int e)
+{
+    return a+b+c+d+e;
+}
+
+static void Main(string[] args)
+{
+     int result = SayilarTopla(2,1,4,5,7);
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;Yukarıda ki &amp;ouml;rnekte g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi 5 tane int parametre alan bir metod ve geriye bu sayıların toplamını d&amp;ouml;n&amp;uuml;yor. Peki bu metod 6-7 veya 1-2 parametre alarakta &amp;ccedil;alışmasını istersek ne yapacağız ? Ayrı ayrı birka&amp;ccedil; metod daha yazacak değilizdir. İşte burda params'ın g&amp;uuml;c&amp;uuml; devreye giriyor&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;&lt;strong&gt;Params &lt;span style="font-size: small;"&gt;kullanarak&amp;nbsp;&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:c-sharp;toolbar:false" contenteditable="false"&gt;int SayilariTopla(params int[] sayilar)
+{
+  int toplam= 0;
+  foreach (int i in sayilar) 
+  {
+     toplam+= i; 
+  }
+  return toplam;
+}
+
+static void Main(string[] args)
+{
+    int result1= SayilariTopla(5);
+    int result2= SayilariTopla(1, 2,-3);
+    int result3= SayilariTopla(-4,4,3,7,-7,1,8,0);
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;Params ile birlikte yukarıda ki gibi SayilariTopla metoduna artık istediğimiz kadar parametre ge&amp;ccedil;ip kullanabiliriz.&amp;nbsp;&lt;/span&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-09-25 16:25:00</pubDate>
+  <lastModified>2020-01-20 08:22:27</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>params-kullanimi</slug>
+  <tags>
+    <tag>params</tag>
+    <tag>c#</tag>
+    <tag>array</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>sealed class nedir</title>
+  <description>Kalıtım nesneye dayalı programlamada ki en büyük etkendir. Projede tanımladığımız bir class başka bir class veya interface'den ihtiyaca göre inheret olabilir ve böylelikle bir nevi oop'nin faydalarından</description>
+  <content>&lt;p style="text-align: left;"&gt;Kalıtım nesneye dayalı programlamada ki en b&amp;uuml;y&amp;uuml;k etkendir. Projede tanımladığımız bir class başka bir class veya interface'den ihtiyaca g&amp;ouml;re inheret olabilir ve b&amp;ouml;ylelikle bir nevi oop'nin faydalarından yararlanmış oluruz. Ancak bazen yazmış olduğumuz bir class'ın başka class'lara kalıtım vermesini istemeyebiliriz. Neden b&amp;ouml;yle bir şeye ihtiya&amp;ccedil; duyalım ki dersek genellikle security konularından dolayı b&amp;ouml;yle bir durum s&amp;ouml;z konusu olabilir. C# tarafında bu ihtiyacımızı karşılayacak olan &lt;strong&gt;sealed&amp;nbsp;&lt;/strong&gt;&amp;nbsp;keyword'&amp;uuml; bulunmaktadır. Eğer bir class &lt;strong&gt;sealed&lt;/strong&gt; tanımlanırsa bu class alt class'lara kalıtım veremez.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&amp;Ouml;rnek olarak ; sealed tanımlı A class'ımız olsun ve 2 tanede sealed olmayan B,C adında class'larımız olsun&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;// Sealed class
+sealed class A
+{
+
+} &lt;/pre&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class B
+{
+
+} 
+
+//Sorunsuz &amp;ccedil;alışır
+public class C : B
+{
+
+} 
+
+
+//Hata verir !!!  cannot derive from sealed type 'A'
+public class C : A
+{
+
+} 
+&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;C class'ı B class'ından kalıtım alabilirken A class'ından kalıtım alamayacaktır. &amp;Ccedil;&amp;uuml;nk&amp;uuml; A class'ı sealed'dır ve başka hi&amp;ccedil;bir class'a kalıtım veremez.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;.Net Framework i&amp;ccedil;erisinde bir &amp;ccedil;ok sealed class bulunmaktadır. Bunlardan en tanınmış olanı &lt;strong&gt;String&lt;/strong&gt; class'ı dır. Bu nedenledir ki herhangi bir class String class'ından kalıtım almaya &amp;ccedil;alıştığında "&lt;strong&gt;cannot derive from sealed type 'string'&lt;/strong&gt;" hatasını verir.&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2014-11-05 22:00:00</pubDate>
+  <lastModified>2020-01-20 08:22:29</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>sealed-class-nedir</slug>
+  <tags>
+    <tag>sealed</tag>
+    <tag>class</tag>
+    <tag>inheritence</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

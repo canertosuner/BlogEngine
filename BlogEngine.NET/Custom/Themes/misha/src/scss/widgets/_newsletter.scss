@@ -1,0 +1,44 @@
+﻿.newsletter {
+
+    .widget-content {
+        padding: 0 !important;
+    }
+
+    .form-control {
+        margin-bottom: 1rem;
+        background: none;
+        // this is becuase the input has an inline style width 98% :|
+        width: 100% !important;
+    }
+
+    #newsletteraction {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    [for=txtNewsletterEmail] {
+        // We added the placeholder by jQuery, so we don't need this bold label.
+        display: none;
+    }
+
+    #newsletterthanks {
+        background: #28a745;
+        color: #fff;
+        padding: 1rem !important;
+        text-align: center;
+        border-radius: .25rem;
+    }
+
+    .btn {
+        display: block;
+        width: 100%;
+    }
+
+    .blog-footer & {
+        .form-control {
+            color: #fff;
+            border-color: $color-theme-primary;
+            box-shadow: none !important;
+        }
+    }
+}

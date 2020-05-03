@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Nhibernate Listener Kullanarak Entity Değerini Değiştirme (CreatedDate, ModifiedDate)</title>
+  <description>https://tpodolak.com/blog/2013/08/24/nhibarnate-using-event-listeners-to-set-entity-modification-dat</description>
+  <content>&lt;p&gt;Server-side bir projede geliştirme yapıyorsanız&amp;nbsp;ve db de bolca CRUD işlemleri i&amp;ccedil;in query'ler &amp;ccedil;alıştırmanız gerekiyorsa sizden db de kaydedilen o row i&amp;ccedil;in CreatedDate veya update edilen değer i&amp;ccedil;in ModifiedDate gibi alanlar tutmanız&amp;nbsp;muhakkak isteni. İstenmese dahi bu bilgileri ilgili colonlarda tutmak muhakkak bir g&amp;uuml;n işinize yarayacaktır.&lt;/p&gt;
+&lt;p&gt;Eğer CRUD işlemlerini&amp;nbsp;Ado.Net kullanarak yapıyorsanız query'nin sonuna bu değerleri ekleyebilir yada stored-procedure kullanıyorsanız da bu bilgileri sp i&amp;ccedil;erisinde de yapabiliriz.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda bu ve benzeri işlemleri Fluent-Nhibernate kullanarak nasıl yapabiliriz konusuna değineceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Her defasında yeni kayıt geldi modeli initialize ederken &lt;strong&gt;CreatedDate&lt;/strong&gt; alanına&lt;strong&gt; DateTime.Now&lt;/strong&gt; set et, yada her update işlemi geldiğinde &lt;strong&gt;ModifiedDate&lt;/strong&gt; alanına&lt;strong&gt; DateTime.Now&lt;/strong&gt; alanını set et. Pek de hoş durmuyor sanki. 50'ye yakın db de tablonuz olduğunu d&amp;uuml;ş&amp;uuml;n&amp;uuml;n her bir entity i&amp;ccedil;in gidip bu işlemleri yapmak istemeyiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;NHibernate'i geliştiren &amp;uuml;statlar bu durum i&amp;ccedil;in şahane bir &amp;ccedil;&amp;ouml;z&amp;uuml;m getirmişler.&amp;nbsp;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;IPreInsertEventListener&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;IPreUpdateEventListener&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;IPreInsertEventListener&lt;/strong&gt;; adında da anlaşılacağı &amp;uuml;zre entity'niz insert edilirken bir interceptor gibi araya girmemizi sağlayan&amp;nbsp;ve insert query execution'dan &lt;strong&gt;OnPreInsert &lt;/strong&gt;adındaki metoduna invoke edilerek entity'niz &amp;uuml;zerinde işlemler yapmanızı sağlar.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;IPreUpdateEventListener&lt;/strong&gt;; ise bir update listener'ı dır ve i&amp;ccedil;erisinde implement edebildiğimiz&amp;nbsp;&lt;strong&gt;OnPreUpdate&lt;/strong&gt;&amp;nbsp;metodu &amp;ccedil;ağrılır update query'sinin execution'dan &amp;ouml;nce&amp;nbsp;call edilerek yine entity &amp;uuml;zerinde değişiklikler yapabilmemizi sağlar.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek olarak bir BaseEntity'miz olsun ve projemizde bulunan her bir entity i&amp;ccedil;in tablolarda ortak bulunan alanları bu class i&amp;ccedil;erisinde tanımlayabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public abstract class BaseEntity
+    {
+        public virtual Guid Id { get; set; }
+        public virtual DateTime? CreatedDate { get; set; }
+        public virtual DateTime? ModifiedDate { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Db de bulunan tablolarımıza karşılık gelen&amp;nbsp;entity'lerimiz ise yukarıda tanımladığımız BaseEntity class'ından inherit olacaklar. &amp;Ouml;rnek olarak Customer adında aşağıdaki gibi bir entity tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class Customer : BaseEntity
+    {
+        public virtual string FirstName { get; set; }
+        public virtual string LastName { get; set; }
+        public virtual string Email { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi ise CustomerMap class'ını oluşturacaz ancak &amp;ouml;ncesinde BaseEntity i&amp;ccedil;erisinde bulunan proeprty'ler i&amp;ccedil;in BaseMapping adında bir class tanımlayacağız. Customer ve diğer db modellerimizde bu BaseMapping'i kullanarak map işlemlerini yapacağız. Bunu yapmamızdaki ama&amp;ccedil; her bir entity i&amp;ccedil;in ayrı ayrı gidip BaseEntity i&amp;ccedil;erisinde bulunan alanların map'ini yapmamak.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class BaseMapping&amp;lt;T&amp;gt; : ClassMap&amp;lt;T&amp;gt; where T : BaseEntity
+    {
+        public MappingBase()
+        {
+            Id(x =&amp;gt; x.Id);
+            Map(x =&amp;gt; x.CreatedDate);
+            Map(x =&amp;gt; x.ModifiedDate);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Artık BaseMapping 'i kullanarak CustomerMap class'ını oluşturabiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CustomerMap : BaseMapping&amp;lt;Customer&amp;gt;
+    {
+        public CustomerMap()
+        {
+            Map(x =&amp;gt; x.FirstName);
+            Map(x =&amp;gt; x.LastName);
+            Map(x =&amp;gt; x.Email);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Sırada Listener class'ını oluşturmak var. Aşağıda&amp;nbsp;&lt;strong&gt;NHInsertUpdateListener &lt;/strong&gt;adında bir class tanımlayalım. Yazının başında bahsettiğimiz her tablomuzda bulunan CreatedDate ve ModifiedDate tarih alanlarını&amp;nbsp;&lt;strong&gt;NHInsertUpdateListener &lt;/strong&gt;i&amp;ccedil;erisinde set edeceğiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class NHInsertUpdateListener : IPreInsertEventListener, IPreUpdateEventListener
+    {
+        public bool OnPreUpdate(PreUpdateEvent @event)
+        {
+            var audit = @event.Entity as BaseEntity;
+            if (audit == null)
+                return false;
+
+            var time = DateTime.Now;
+            var name = WindowsIdentity.GetCurrent().Name;
+
+            Set(@event.Persister, @event.State, "CreatedDate", time);
+
+            audit.CreatedDate = time;
+
+            return false;
+        }
+
+        public bool OnPreInsert(PreInsertEvent @event)
+        {
+            var audit = @event.Entity as BaseEntity;
+            if (audit == null)
+                return false;
+
+
+            var time = DateTime.Now;
+            var name = WindowsIdentity.GetCurrent().Name;
+
+            Set(@event.Persister, @event.State, "ModifiedDate", time);
+
+            audit.ModifiedDate = time;
+
+            return false;
+        }
+
+        private void Set(IEntityPersister persister, object[] state, string propertyName, object value)
+        {
+            var index = Array.IndexOf(persister.PropertyNames, propertyName);
+            if (index == -1)
+                return;
+            state[index] = value;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Artık son adım olarak FluentNHibernate'i ayağa kaldırmak var. Nh configuration'ı aşağıdaki gibi tanımlayabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;Fluently.Configure()
+               .Database(MsSqlConfiguration.MsSql2012.ConnectionString(c =&amp;gt; c.FromAppSetting("dbConnectionString")).ShowSql())
+               .Mappings(m =&amp;gt; m.FluentMappings.AddFromAssemblyOf&amp;lt;CustomerMap&amp;gt;())
+               .ExposeConfiguration(cfg =&amp;gt; new SchemaUpdate(cfg).Execute(false, true))
+               .ExposeConfiguration(cfg =&amp;gt;
+               {
+                   cfg.SetProperty(
+                       NHibernate.Cfg.Environment.CurrentSessionContextClass,
+                       "web");
+
+                   cfg.AppendListeners(ListenerType.PreUpdate, new IPreUpdateEventListener[] { new NHInsertUpdateListener() });
+               })
+               .BuildSessionFactory();&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Sırasıyla yazmak gerekirse neler yaptık;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Vs da bir tane proje oluşturduk. (Console veya Api),&lt;/li&gt;
+&lt;li&gt;FluentNHibernate paketini nuget'ten indirip kurduk,&lt;/li&gt;
+&lt;li&gt;Bir db miz olduğunu ve connection string bilgisinin web config'de tanımlı olduğunu varsaydık,&lt;/li&gt;
+&lt;li&gt;Tablolarda ortak kullanılan propert'leri BaseEntity adında ki class da topladık,&lt;/li&gt;
+&lt;li&gt;Daha sonra&amp;nbsp;BaseMapping adında bir mapping tanımlaması yaparak entity i&amp;ccedil;erisindeki property'leri map ettik,&lt;/li&gt;
+&lt;li&gt;CustomerMap class'ını oluşturarak&amp;nbsp;mapping işlemini tanımladık,&lt;/li&gt;
+&lt;li&gt;NHInsertUpdateListener'ı oluşturduk ve CreatedDate - ModifiedDate alanları i&amp;ccedil;in değerleri&amp;nbsp;set ettik.&lt;/li&gt;
+&lt;li&gt;Fluent Nhibernate konfigurasyonunu oluşturduk.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Listener'lar&amp;nbsp;biraz geride kalan bir &amp;ouml;zellik gibi g&amp;ouml;r&amp;uuml;nse de olduk&amp;ccedil;a faydalıdırlar. &amp;Ouml;rnekte olduğu gibi benzer case'lerde&amp;nbsp;kullanarak bizleri satırlarca tekrar eden kodlardan uzaklaştırır.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-07-15 21:52:00</pubDate>
+  <lastModified>2017-06-24 15:54:48</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>nhibernate-listener-kullanarak-entity-degerini-degistirme</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

@@ -1,0 +1,18 @@
+﻿.categorylist {
+    a {
+
+        &[rel=nofollow] {
+            &:before {
+                width: .75rem;
+                height: .75rem;
+                color: #ff9e07;
+                margin-right: .5rem;
+                @include icon("\f09e");
+            }
+        }
+
+        img {
+            display: none;
+        }
+    }
+}

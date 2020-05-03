@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>NInject Kullanarak Web Api İçi Dependency İnjection</title>
+  <description>Ninject oldukça popüler IoC container'lar dan biri olup bağımlılıkları enjekte etmede kullanılan open source bir kütüphanedir. Dependency injection bizlere loosely coupled dediğimiz birbirlerine gevşek bağlı ve daha kolay test edilebilir geliştirmeler yapmamızı sağlayan bir design pattern dir. </description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki &lt;a href="/search?q=ioc"&gt;IoC &lt;/a&gt;yazılarımızda Castle Windsor dan bahsedip &amp;ouml;rnekler &amp;uuml;zerinden k&amp;uuml;t&amp;uuml;phaneyi incelemiştik. Bu yazımızda ise &amp;ccedil;ok&amp;ccedil;a yaygın olarak kullanılan IoC container'lar dan biri olan NInject'i Web APi &amp;uuml;zerinde inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;Ninject olduk&amp;ccedil;a pop&amp;uuml;ler IoC container'lar dan biri olup bağımlılıkları&amp;nbsp;enjekte etmede kullanılan open source bir k&amp;uuml;t&amp;uuml;phanedir.&amp;nbsp;Dependency injection bizlere&amp;nbsp;loosely coupled dediğimiz birbirlerine gevşek bağlı ve daha kolay test edilebilir&amp;nbsp;geliştirmeler yapmamızı sağlayan bir design pattern dir. IoC ise belli &amp;ouml;zelliklere sahip ve birbirlerine bağımlı nesnelerin işlevlerini ger&amp;ccedil;ekleştirmek i&amp;ccedil;in ihtiyacı olan instance'ları kendilerinin değilde bir IoC container tarafından y&amp;ouml;netilmesini s&amp;ouml;yler.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda ise Web Api &amp;uuml;zerinde Ninject implementasyonu&amp;nbsp;nasıl yapılır bunu inceliyor olacağız.&lt;/p&gt;
+&lt;p&gt;İlk olarak&amp;nbsp;VS'da bir tane Web Api projesi oluşturalım ve proje referanslarına nuget &amp;uuml;zerinden &lt;strong&gt;Ninject.Web.WebApi.WebHost&lt;/strong&gt;'u aşağıdaki gibi bulup install edelim.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/ninjeect_vs_kurulum.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Kurulum bittikten sonra projede bulunan &lt;strong&gt;App_Start&lt;/strong&gt;&amp;nbsp;klas&amp;ouml;r&amp;uuml; i&amp;ccedil;erisinde&amp;nbsp;&lt;strong&gt;NinjectWebCommon&lt;/strong&gt; adında otomatik olarak bir class oluşturulduğunu g&amp;ouml;receksiniz. Bu class i&amp;ccedil;erisinde ilgili install ve register işlemlerini yapacağız. Class i&amp;ccedil;erisinde baktığınızda oto-generated olan bir &amp;ccedil;ok kod bloğu var ancak biz şimdilik sadece&amp;nbsp;&amp;nbsp; &lt;strong&gt;RegisterServices()&amp;nbsp;&lt;/strong&gt;metodu ile haşır neşir olacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        /// &amp;lt;summary&amp;gt;
+        /// Load your modules or register your services here!
+        /// &amp;lt;/summary&amp;gt;
+        /// &amp;lt;param name="kernel"&amp;gt;The kernel.&amp;lt;/param&amp;gt;
+        private static void RegisterServices(IKernel kernel)
+        {
+
+        }  &lt;/pre&gt;
+&lt;p&gt;Register etmek istediğimiz bağımlılıkları bu metot i&amp;ccedil;erisine tanımlayacağız.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;ncelikle &lt;strong&gt;UserController&lt;/strong&gt; adında &amp;ouml;rnek bir controller oluşturalım ve bu controller i&amp;ccedil;erisinde tanımlı IUserService intercase'ini contructor injection y&amp;ouml;ntemi ile inject edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class UserController : ApiController
+    {
+        private readonly IUserService _userService;
+        public UserController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
+        [HttpGet]
+        public HttpResponseMessage GetUserFullNames()
+        {
+            var response = _userService.GetUserFullNames();
+
+            return Request.CreateResponse(response);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Controller i&amp;ccedil;erisinde kullandığımız IUserService interface'i ve onun&amp;nbsp;implemantasyonunu aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IUserService
+    {
+        List&amp;lt;string&amp;gt; GetUserFullNames();
+    }
+
+    public class UserService : IUserService
+    {
+        public List&amp;lt;string&amp;gt; GetUserFullNames()
+        {
+            return new List&amp;lt;string&amp;gt;
+                                  { "Olcay Şahan",
+                                    "Anderson Talisca",
+                                    "Oğuzhan &amp;Ouml;zyakup",
+                                    "Ricardo Quaresma",
+                                    "Cenk Tosun" };
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;UserController i&amp;ccedil;erisindeki&amp;nbsp;GetUserFullNames metodu HttpGet isteği alarak geriye UserService i&amp;ccedil;erisinde bulunan&amp;nbsp;GetUserFullNames metodunun return ettiği List of string'i d&amp;ouml;necektir.&lt;/p&gt;
+&lt;p&gt;Şimdi sırada bağımlılıkları inject etmek var. Yukarıda&amp;nbsp;NinjectWebCommon class'ı i&amp;ccedil;erisinde bulunan&amp;nbsp;RegisterServices metodunda IUserService'i&amp;nbsp;register edeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        private static void RegisterServices(IKernel kernel)
+        {
+            kernel.Bind&amp;lt;IUserService&amp;gt;().To&amp;lt;UserService&amp;gt;();
+        }&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre implementasyon olduk&amp;ccedil;a basit ve projemiz hazır durumda. UserController i&amp;ccedil;erisindeki metoda Postman kullanarak aşağıdaki gibi request atıp&amp;nbsp;sonucu g&amp;ouml;relim.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/ninjeect_vs_postman_sample.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre Ninject controller'ın&amp;nbsp;constructor'ında IUserService'i i&amp;ccedil;in bize UserService'ini resolve etti ve herhangi bir yeni instance&amp;nbsp;oluşturmadan kolayca controller'ı kullanabildik.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-04-27 05:15:00</pubDate>
+  <lastModified>2017-04-29 06:30:58</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>ninject-kullanarak-web-api-ici-dependency-injection</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core In-Memory Cache</title>
+  <description>Daha önceki Asp.Net Core yazılarında as.net core'a giriş yapıp sonrasında asp.net core framework ile birlikte gelen built-in container'ını incelemiştik.Asp.Net Core Windows, Linux, MacOS üzerinde çalışan moden web uygulamaları geliştirmemizi sağlayan modüler bir framework'dür.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki&amp;nbsp;&lt;a href="/?tag=asp.net+core"&gt;Asp.Net Core yazılarında&lt;/a&gt;&amp;nbsp;as.net core'a giriş yapıp sonrasında asp.net core framework ile birlikte gelen built-in container'ını incelemiştik.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/memory_Cache_imgdfasdf.png" alt="" width="685" height="292" /&gt;&lt;/p&gt;
+&lt;p&gt;Asp.Net Core Windows, Linux, MacOS &amp;uuml;zerinde &amp;ccedil;alışan moden web uygulamaları geliştirmemizi sağlayan mod&amp;uuml;ler bir framework'd&amp;uuml;r. Mod&amp;uuml;ler olmasının dezavantajı olarak da klasik Asp.net k&amp;uuml;t&amp;uuml;phanesine kıyasla i&amp;ccedil;erisinde default olarak gelen bir &amp;ccedil;ok &amp;ouml;zellik bulunmamaktadır. Bunlardan biride default olarak i&amp;ccedil;erisinde bir Cache object bulunmamaktadır. Ancak bir ka&amp;ccedil; k&amp;uuml;&amp;ccedil;&amp;uuml;k geliştirmeyle uygulamanıza hem in-memory hemde&amp;nbsp;distributed caching &amp;ouml;zelliklerini kazandırabiliyoruz..&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu yazımızda da asp.net core uygulamamıza in-memory cache &amp;ouml;zelliğini nasıl kazandırabiliriz basit bir &amp;ouml;rnek ile&amp;nbsp; inceleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Enable In-Memory Cache&lt;/h3&gt;
+&lt;p&gt;In-memory cache &amp;ouml;zelliği asp.net core i&amp;ccedil;erisinde bir service olarak bulunmaktadır. Bu servis default kapalı gelir yapmamız gereken startup.cs i&amp;ccedil;erisinde bulunan ConfigureServices metodunda aşağıdaki gibi cache servisini a&amp;ccedil;mak.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddMvc();
+    services.AddMemoryCache();
+}&lt;/pre&gt;
+&lt;p&gt;Core projelerinde in-memory cache kullanmamızı sağlayan aray&amp;uuml;z&amp;uuml;n adı IMemoryCache. Bu interface'e ait metotları vs. kullanarak cache set,get,remove gibi işlemleri yapabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface IMemoryCache : IDisposable
+{
+    bool TryGetValue(object key, out object value);
+    ICacheEntry CreateEntry(object key);
+    void Remove(object key);
+}&lt;/pre&gt;
+&lt;h3&gt;Using IMemoryCache to Cache&lt;/h3&gt;
+&lt;p&gt;ConfigureServices metodu i&amp;ccedil;erisinde servisi aktifleştirdikten sonra IMemoryCache interface'ini kullanmak istediğimiz katmana ait constructor'da inject etmemiz gerekmekte.&lt;br /&gt;Bizde geriye product list return ettiğimiz bir controller tanımlayarak IMemoryCache interface'ini aşağıdaki gibi const. inj. parameter olarak verelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Route("api/[controller]")]
+public class ProductController : Controller
+{
+    private readonly IMemoryCache _memoryCache;
+    public ProductController(IMemoryCache memoryCache)
+    {
+        _memoryCache = memoryCache;
+    }
+
+        // GET api/values
+    [HttpGet]
+    public IEnumerable&amp;lt;Product&amp;gt; Get()
+    {
+
+    }
+}
+
+
+public class Product
+{
+    public int Quantity { get; set; }
+    public string Name { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;Şimdi ise get metodunun i&amp;ccedil;erisini dolduralım.&amp;nbsp;Set metodu parametre olarak 1:key, 2:value, 3:cacheOptions . Cache options olarak AbsoluteExpiration;cache expire s&amp;uuml;resi ve Priority; memory şiştiğinde cache objelerini hangi priority'de silecek bunun bilgisinin bulunduğu ayarları set edeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[HttpGet]
+public IEnumerable&amp;lt;Product&amp;gt; Get()
+{
+    const string cacheKey = "productListKey";
+
+    if (!_memoryCache.TryGetValue(cacheKey, out List&amp;lt;Product&amp;gt; response))
+    {
+        response = new List&amp;lt;Product&amp;gt; { new Product { Name = "test 1 ", Quantity = 20 }, new Product { Name = "test 2", Quantity = 45 } };
+
+        var cacheExpirationOptions =
+            new MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTime.Now.AddMinutes(30),
+                Priority = CacheItemPriority.Normal
+            };
+        _memoryCache.Set(cacheKey, response, cacheExpirationOptions);
+    }
+
+    return response;
+}&lt;/pre&gt;
+&lt;p&gt;Gelen ilk request i&amp;ccedil;in cache'de o key'e ait bir obje olmadığından ilk response source'a gidip(bir repository yada service layer olabilir) d&amp;ouml;nen değer alınıp 30 dkka expire s&amp;uuml;resi set edilerek oluşturacaktır. Artık ondan sonraki b&amp;uuml;t&amp;uuml;n request'ler 30 dkka s&amp;uuml;resince source'a gitmeden response'u cache'de bulup Get işlemi yapıp return edecektir. Expire s&amp;uuml;resi dolduğunda ise ilgili key ve obje cache'den silinecektir.&lt;/p&gt;
+&lt;p&gt;Set, Get yapabildiğimiz gibi Remove işlemide&amp;nbsp;yapabiliriz. Bunun i&amp;ccedil;in cacheKey değerini parametre olarak Remove metoduna verip call yapmak yeterli.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; _memoryCache.Remove(cacheKey);&lt;/pre&gt;
+&lt;p&gt;CacheItemPriority enum'ı i&amp;ccedil;erisinde Low, Normal, High, NeverRemove değerleri mevcut. CachedObject Priority değerine g&amp;ouml;re memory de yer a&amp;ccedil;mak i&amp;ccedil;in sırayla silinir. Memory'den otomatik silme işlemi yapıldığında bunun bilgisini bize iletmesini sağlayan bir callback handler metodunu aşağıdaki gibi options'a register edebiliriz ve silme işlemi yapılırken bu metot tetiklenerek bize haber verir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; cacheExpirationOptions.RegisterPostEvictionCallback
+     (ProductGetALLCacheItemChangedHandler, this);
+ _memoryCache.Set(cacheKey, response, cacheExpirationOptions);&lt;/pre&gt;
+&lt;p&gt;Cache nerede ve nasıl uygulanması gerektiğine karar verildiğinde server-side bir uygulama i&amp;ccedil;in olmazsa &amp;ouml;zelliklerden biri haline gelmiştir. Asp.net core'da da yazının başında bahsettiğimiz gibi memory ve distributed cache işlemleri yapmamızı sağlayan service'ler bulunmaktadır. Bu yazımızda basit&amp;ccedil;e memory cache &amp;ouml;zelliğini projemize nasıl kazandırabiliriz konusuna değindik. Sonraki yazılarda redis kullanarak distributed cache yapısını uygulamamıza nasıl entegre edebiliriz inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-12-29 11:14:00</pubDate>
+  <lastModified>2018-01-03 13:09:56</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-in-memory-cache</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

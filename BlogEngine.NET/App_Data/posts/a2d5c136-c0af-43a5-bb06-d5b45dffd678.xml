@@ -1,0 +1,181 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Debezium Kullanarak PostgreSql Db Change Data Capture (CDC)Nasıl Yapılır ?</title>
+  <description>&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+https://medium.com/@tilakpatid</description>
+  <content>&lt;p&gt;G&amp;uuml;n&amp;uuml;m&amp;uuml;z yazılım d&amp;uuml;nyasında her t&amp;uuml;rl&amp;uuml; verinin ne kadar &amp;ouml;nemli olduğunu hepimiz biliyoruzdur. &amp;Ouml;zellikle doğrudan end-user oriented &amp;ccedil;alışan sistemlerde s&amp;uuml;rekli olarak farklı noktalara veri akışı sağlandığını g&amp;ouml;r&amp;uuml;r&amp;uuml;z. &amp;Ouml;rneğin bir e-ticaret sitesinde bir payment işlemi yapıldığında aynı anda 3-4 farklı noktaya bu işlem ile ilgili verileri aktarmanız gerekiyor (fraud-erp-dataScience-customer etc.)&amp;nbsp;ve bunu klasik &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak gece &amp;ccedil;alışan bir job ile vs değilde anlık 1-2 sn i&amp;ccedil;erisinde&amp;nbsp;iletmeniz gerekmekte. Biraz daha teknik olarak a&amp;ccedil;ıklamak gerekirse; payment db'nizde bulunan transaction tablonuzdaki b&amp;uuml;t&amp;uuml;n crud(create,read,update,delete) işlemlerinden haberdar olması gereken farklı ekipler var ve bunu bir şekilde &amp;ccedil;&amp;ouml;zmeniz beklenmekte. Eğer event-driven bir&amp;nbsp;mimariniz&amp;nbsp;var ise ilgili ekiplerin rmq'larına rederation kurarak event'ler fırlatabilirsiniz ancak kod tarafında geliştirme yapmanız gereken bir &amp;ccedil;&amp;ouml;z&amp;uuml;m ve biz bunu pek istemiyoruz.&lt;/p&gt;
+&lt;p&gt;Bu t&amp;uuml;r problemlere&amp;nbsp;&amp;ccedil;&amp;ouml;z&amp;uuml;m olarak &amp;ouml;nerilen y&amp;ouml;ntem&amp;nbsp;&lt;a href="https://en.wikipedia.org/wiki/Change_data_capture"&gt;Change Data Capture&lt;/a&gt;(CDC)&amp;nbsp;yaklaşımı. CDC db seviyesinde data-tracking&amp;nbsp;yaparak &amp;ccedil;&amp;ouml;z&amp;uuml;mler &amp;uuml;reten bir dizi design pattern modelidir.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda PostgreSql veritabınında bulunan bir tabloyu &lt;a href="https://github.com/debezium/debezium"&gt;Debizium&lt;/a&gt; ile track ederek b&amp;uuml;t&amp;uuml;n crud işlemlerini Kafka'ya birer message olarak publish&amp;nbsp;edip sonrasında bir consumer ile bu message'ları consume&amp;nbsp;eden bir yapı tasarlayacağız.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1&lt;/strong&gt;.&amp;nbsp;&lt;a href="https://kafka.apache.org/"&gt;Apache Kafka&lt;/a&gt; - Messaging topic&amp;nbsp;oluşturarak database'de&amp;nbsp;track edilecek kayıtları store etmek i&amp;ccedil;in kullanacağız.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2&lt;/strong&gt;. &lt;a href="https://www.confluent.io/hub/"&gt;Kafka Connect&lt;/a&gt;&amp;nbsp;-&amp;nbsp;Apache Kafka ve diğer sistemler arasında &amp;ouml;l&amp;ccedil;eklenebilir ve g&amp;uuml;venilir veri akışını sağlamak i&amp;ccedil;in kullanılan bir tool'dur. Veritabanlarındaki&amp;nbsp;kayıtları Kafka'ya ve&amp;nbsp;kafka dışındaki başka bir source'a&amp;nbsp;taşıyabilen conenctor'leri tanımlamak i&amp;ccedil;in kullanılır.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3&lt;/strong&gt;. &lt;a href="https://debezium.io/"&gt;Debizium&lt;/a&gt;&amp;nbsp;- Debizium open source olarak geliştirilen distributed bir change data capture (CDC) platformudur. Database'de track edilen&amp;nbsp;verilerin Kafka Connect Apı kullanılarak Kafka'da tanımlı topic'e aktarılmasını sağlar.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/dbzm_img11_kfk.PNG" alt="" width="789" height="206" /&gt;&lt;/p&gt;
+&lt;p&gt;Uygulamamızı geliştirmeye başlayalım. &amp;Ouml;ncelikle hazırlamış olduğumuz &lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;docker-compose.yml&lt;/span&gt;&lt;/strong&gt; dosyamız ile zookeeper, kafka, postgresql ve connector i&amp;ccedil;in gerekli image'leri &amp;ccedil;ekip docker'da &amp;ccedil;alışır hale getirelim.&lt;/p&gt;
+&lt;pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"&gt;version: '3.1'
+services:
+    postgres:
+        image: debezium/postgres
+        environment:
+          POSTGRES_PASSWORD: qwerty
+          POSTGRES_USER: appuser
+        volumes:
+           - ./postgres:/data/postgres
+        ports:
+          - 6532:6532 
+    zookeeper:
+        image: confluentinc/cp-zookeeper
+        ports:
+          - "2181:2181"
+        environment:
+          ZOOKEEPER_CLIENT_PORT: 2181
+    kafka:
+        image: confluentinc/cp-kafka
+        depends_on:
+          - zookeeper
+          - postgres
+        ports:
+          - "9092:9092"
+        environment:
+          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_LOG_CLEANER_DELETE_RETENTION_MS: 5000
+          KAFKA_BROKER_ID: 1
+          KAFKA_MIN_INSYNC_REPLICAS: 1
+    connector:
+        image: debezium/connect:latest
+        ports:
+          - "8083:8083"
+        environment:
+          GROUP_ID: 1
+          CONFIG_STORAGE_TOPIC: my_connect_configs
+          OFFSET_STORAGE_TOPIC: my_connect_offsets
+          BOOTSTRAP_SERVERS: kafka:9092
+        depends_on:
+          - zookeeper
+          - postgres
+          - kafka&lt;/pre&gt;
+&lt;p&gt;Dosyayı oluşturduktan sonra ilgili dizinde;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;docker-compose up&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;komutunu &amp;ccedil;alıştırarak kurulumlara başlayalım.&amp;nbsp;&lt;img src="/image.axd?picture=/2020/dcks_dbzm_img2.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;B&amp;uuml;t&amp;uuml;n kurulumlar bittikten sonra farklı bir terminalde docker ps komutu ile aşağıdaki gibi container'larımızın ayağa kalktığını g&amp;ouml;rebilmemiz gerekmekte.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2020/dcks_dbzm_img3.png" alt="" /&gt;&lt;/p&gt;
+&lt;h3&gt;PostgreSql&amp;nbsp;&amp;nbsp;&lt;/h3&gt;
+&lt;p&gt;İlk olarak postgres container'a girip appuser adında bir user tanımlayıp sonrasında Payment database'ini oluşturup Tranasction tablomuzu yaratalım.&amp;nbsp;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;docker exec -it 95b24f0c47b7 bash&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;psql -h localhost -p 5432 -U appuser&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;CREATE DATABASE payment;&lt;br /&gt;\c payment&lt;br /&gt;CREATE TABLE transaction(id SERIAL PRIMARY KEY, amount decimal(18,2), customerId varchar(36));&lt;/p&gt;
+&lt;p&gt;insert into transactions(id, amount,customerId) values(51, 12.40,'37b920fd-ecdd-7172-693a-d7be6db9792c');&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;B&amp;uuml;t&amp;uuml;n komutlarımızı başarılı bir şekilde &amp;ccedil;alıştırdığımızda appuser kullanıcısı ile login olup payment adında bir database ve transaction adında bir tablo yaratmış olduk. &amp;Ouml;rnek olarak bir tanede transaction insert ettik.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/dcks_dbzm_img4.png" alt="" /&gt;&lt;/p&gt;
+&lt;h3&gt;Debizium&amp;nbsp;&lt;/h3&gt;
+&lt;p&gt;Şimdi transaction tablosunda ger&amp;ccedil;ekleşen her değişikliği Kafka'ya taşımak istiyoruz. Bunun i&amp;ccedil;in bir connector oluşturmalıyız. Conenctor, verileri veritabanından (veya başka bir depolama sisteminden) Kafka cluster'a (yada tam tersi) taşımaktan sorumlu olan bir uygulamadır. Kafka konekt&amp;ouml;r&amp;uuml;ne aşina değilseniz &lt;a href="https://www.confluent.io/connectors/"&gt;buradan &lt;/a&gt;daha fazla bilgiye ulaşabilirsiniz. Burada PostgreSql CRUD&amp;nbsp;işlemlerini&amp;nbsp;Apache Kafka cluster'ına taşımak istiyoruz. Debezium, PostgreSql'den gelen t&amp;uuml;m change-event'lerini&amp;nbsp;okuyabilen ve bunları Kafka'da yayınlayabilen bir Kafka connector'&amp;uuml;d&amp;uuml;r.&lt;/p&gt;
+&lt;p&gt;Debizium'un restApi'si bulunmakta ve bu api'yi kullanarak&amp;nbsp;gerekli tanımlamalarımızı aşağıdaki gibi yapalım.&lt;/p&gt;
+&lt;pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"&gt;curl -X POST -H "Accept:application/json" -H "Content-Type:application/json" localhost:8083/connectors/ -d '
+{
+ "name": "payment-connector",
+ "config": {
+ "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+ "tasks.max": "1",
+ "database.hostname": "postgres",
+ "database.port": "5432",
+ "database.user": "appuser",
+ "database.password": "qwerty",
+ "database.dbname" : "payment",
+ "database.server.name": "dbserver1",
+ "database.whitelist": "payment",
+ "database.history.kafka.bootstrap.servers": "kafka:9092",
+ "database.history.kafka.topic": "schema-changes.payment"
+ }
+}'&lt;/pre&gt;
+&lt;p&gt;Connector'&amp;uuml;m&amp;uuml;z&amp;uuml; tanımladık. Db bilgilerini vererek hangi tabloya ait event'leri track edeceğini belirttik. Eğer ki&amp;nbsp;&lt;strong&gt;curl localhost:8083/connectors/payment-connector/status &lt;/strong&gt;komutunu &amp;ccedil;alıştırırsanız connecto'&amp;uuml;n RUNNING state'de olduğunu g&amp;ouml;rebilirsiniz.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2020/dcks_dbzm_img5.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Şimdi ise kafka container'ın i&amp;ccedil;erisine gidip topiclerimizi listeleyelim.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;docker exec -it a140f7b3c983 bash&lt;/p&gt;
+&lt;p&gt;kafka-topics --zookeeper zookeeper:2181 --list&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"&gt;__confluent.support.metrics
+__consumer_offsets
+connect-status
+dbserver1.public.transaction
+my_connect_configs
+my_connect_offsets&lt;/pre&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre&amp;nbsp;&lt;strong&gt;dbserver1.public.transaction&lt;/strong&gt;&amp;nbsp;topic'i oluşmuş. Transaction tablosunda oluşan b&amp;uuml;t&amp;uuml;n eventler connector aracılığı ile bu topic'te store edilecek.&lt;/p&gt;
+&lt;p&gt;Şimdi aşağıdaki komutu kullanarak bir consumer ayağa&amp;nbsp;kaldırıp dinlemeye başlayalım.&lt;/p&gt;
+&lt;pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"&gt;kafka-console-consumer --bootstrap-server kafka:9092 --from-beginning --topic dbserver1.public.transaction --property print.key=true --property key.separator="-"&lt;/pre&gt;
+&lt;p&gt;Sonrasında farklı bir terminalde tekrardan payment db'ye connect olup bir insert ve update işlemi yapalım ve bu işlemlerin kafka-consumer tarafından consume edildiğini g&amp;ouml;relim.&lt;br /&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://towardsdatascience.com/beat-cache-invalidation-in-asp-net-core-using-kafka-and-debezium-65cd1d80554d"&gt;https://towardsdatascience.com/beat-cache-invalidation-in-asp-net-core-using-kafka-and-debezium-65cd1d80554d&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://medium.com/@tilakpatidar/streaming-data-from-postgresql-to-kafka-using-debezium-a14a2644906d"&gt;https://medium.com/@tilakpatidar/streaming-data-from-postgresql-to-kafka-using-debezium-a14a2644906d&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://info.crunchydata.com/blog/postgresql-change-data-capture-with-debezium"&gt;https://info.crunchydata.com/blog/postgresql-change-data-capture-with-debezium&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:xml;auto-links:false;toolbar:false" contenteditable="false"&gt;docker-compose exec kafka bash
+
+kafka-topics --zookeeper zookeeper:2181 --list
+
+
+kafka-console-consumer --bootstrap-server kafka:9092 --from-beginning --topic dbserver1.public.transaction --property print.key=true --property key.separator="-"
+
+
+
+curl -X GET -H &amp;ldquo;Accept:application/json&amp;rdquo; http://localhost:8083/connectors/payment-connector/status
+
+Invoke-WebRequest http://localhost:8083/connectors/payment-connector
+Invoke-WebRequest DELETE http://localhost:8083/connectors/payment-connector  --delete
+
+
+
+
+
+
+
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2020-02-10 18:40:00</pubDate>
+  <lastModified>2020-03-10 08:49:50</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>debezium-ile-kafka-uzerinden-postgresql-db-changes-stream-nasil-yapilir</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

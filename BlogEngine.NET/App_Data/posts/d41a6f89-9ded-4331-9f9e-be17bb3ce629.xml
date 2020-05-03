@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Api MemoryCache Kullanımı</title>
+  <description>Daha önce Web Api ile ilgili yazdığımız yazılarda çeşitli konulara değinmiştik ve bunlardan bir tanesi de yazısıydı. Bu yazımızda yine web api için cache'den bahsediyor olacağız anack bu sefer output cache değilde uygumala içerisinde kendimiz manuel olarak memory'e atıp daha sonra kullanmak istediğimiz de alıp modify</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nce &lt;strong&gt;&lt;a href="/category/WebApi"&gt;Web Api&lt;/a&gt;&lt;/strong&gt;&amp;nbsp;ile ilgili yazdığımız yazılarda &amp;ccedil;eşitli konulara değinmiştik ve bunlardan bir tanesi de yazısıydı. Bu yazımızda yine web api i&amp;ccedil;in cache'den bahsediyor olacağız anack bu sefer output cache değilde uygumala i&amp;ccedil;erisinde kendimiz manuel olarak memory'e atıp daha sonra kullanmak istediğimiz de alıp modify edebilmemizi sağlayan veya direkt olarak output cache de olduğu gibi alıp client'a d&amp;ouml;nmemizi sağlayan yapı &lt;strong&gt;MemoryCache&amp;nbsp;&lt;/strong&gt;den bahsediyor olacağız. MemoryCache .Net 4.0 ile birlikte&amp;nbsp;&lt;strong&gt;System.Runtime.Caching.dll&lt;/strong&gt; i&amp;ccedil;erisinde sunulmuş bir yapı olarak karşımıza &amp;ccedil;ıkıyor. Projemize bu dll'i referans olarak eklemek i&amp;ccedil;in solution'da bulunan references'a sağ tıklayıp add reference deyip Assemblies =&amp;gt; Framework&amp;nbsp;kategorisine tıkalyıp gelen listeden&amp;nbsp;&lt;strong&gt;System.Runtime.Caching.dll&lt;/strong&gt;'ini se&amp;ccedil;ip ekliyoruz.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/08/webapi_memorycache.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Referansımızı ekeldikten sonra projemize &lt;strong&gt;MemoryCacheManager&lt;/strong&gt; adında adında bir class ekleyelim. Case ş&amp;ouml;yle olsun, ProductController.cs adında bir controller ve i&amp;ccedil;erisinde &lt;strong&gt;GetAllProducts&lt;/strong&gt; ve &lt;strong&gt;GetProductById&lt;/strong&gt; adında iki metot tanımlayalım. İlk metotda geriye d&amp;ouml;nd&amp;uuml;ğ&amp;uuml;m&amp;uuml;z product listesini &lt;strong&gt;ICache&lt;/strong&gt; den implement olan&amp;nbsp;&lt;strong&gt;MemoryCacheManager&lt;/strong&gt;&amp;nbsp;class'ını kullanarak MemoryCache'e atalım ve GetProductById metoduna Id parametresi ile request'te bulunulduğunda cache'den okuyup geriye product objesini d&amp;ouml;nelim.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ICache.cs&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface ICache
+    {
+        bool Contains(string key);//key varmı yokmu diye control ettiğimiz metot
+        void Add&amp;lt;T&amp;gt;(string key, T source);//cache key'i ile birlikte cache model'i alıp cache'e ekleyen metot
+        T Get&amp;lt;T&amp;gt;(string key);//key parametresi alarak cache'de ki data yı return eden metot
+        void Remove(string key);//key parametresine g&amp;ouml;re mevcut cache'i silen metot
+    }&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;&amp;nbsp;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;MemoryCacheManager.cs&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class MemoryCacheManager : ICache
+    {
+        ObjectCache cache;
+
+        public MemoryCacheManager()
+        {
+            cache = MemoryCache.Default;
+        }
+
+        public void Add&amp;lt;T&amp;gt;(string key, T source)
+        {
+            //60 dakika boyunca cache'de tutacak
+            var policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(60) };
+            cache.Add(key, source, policy);
+        }
+
+        public bool Contains(string key)
+        {
+            return cache.Contains(key);
+        }
+
+        public T Get&amp;lt;T&amp;gt;(string key)
+        {
+            return (T)cache.Get(key);
+        }
+
+        public void Remove(string key)
+        {
+            cache.Remove(key);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Product.cs&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public decimal Price { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ProductController.cs&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ProductController : ApiController
+    {
+        [HttpGet]
+        public Product[] GetAllProducts()
+        {
+            Product[] products = new Product[]
+            {
+                new Product { Id = 1, Name = "Tomato Soup", Category = "Groceries", Price = 1 },
+                new Product { Id = 2, Name = "Yo-yo", Category = "Toys", Price = 3.75M },
+                new Product { Id = 3, Name = "Hammer", Category = "Hardware", Price = 16.99M }
+            };
+
+            //&amp;uuml;r&amp;uuml;nleri cache'e atıyoruz
+            var cm = new MemoryCacheManager();
+
+            string cacheKey = "products";
+            if (cm.Contains(cacheKey))//varmı diye kontrol ediyoruz, eğer varsa mevcutu sil yeni listeyi ekle
+                cm.Remove(cacheKey);
+            cm.Add(cacheKey, products);
+
+            return products;
+        }
+
+        [HttpGet]
+        public Product GetProductById(int Id)
+        {
+            var cm = new MemoryCacheManager();
+            string cacheKey = "products";
+            if (cm.Contains(cacheKey))//varmı diye kontrol ediyoruz
+                return cm.Get&amp;lt;Product[]&amp;gt;(cacheKey).FirstOrDefault(p =&amp;gt; p.Id == Id);
+            return null;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Projemizi run edip browser aracılığıyla &amp;ouml;nce &lt;strong&gt;GetAllProducts&lt;/strong&gt; metoduna request'te bulunuyoruz ve product listesini return etmeden &amp;ouml;nce &lt;strong&gt;MemoryCacheManager&lt;/strong&gt;'ın &lt;strong&gt;Add&lt;/strong&gt; metodunu kullanarak geriye product listesini return etmeden&amp;nbsp;&amp;ouml;nce listeyi alıp "&lt;strong&gt;products&lt;/strong&gt;" key'i ile&amp;nbsp;cache'e atıyor ve sonrasında return ediyor.&amp;nbsp;Product listesini&amp;nbsp;aldıktan sonra Id=2 olan &amp;uuml;r&amp;uuml;n i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;GetProductById &lt;/strong&gt;metoduna request'te bulunuyoruz ve ilk olarak &lt;strong&gt;MemoryCacheManager&amp;nbsp;&lt;/strong&gt;i&amp;ccedil;erisine gidip "&lt;strong&gt;products&lt;/strong&gt;" key'i ile mcache atılmış olan product listesini bulup alıyor ve sonrasında Id=2 olan product'ı bulup geriye d&amp;ouml;nd&amp;uuml;r&amp;uuml;yor.&lt;/p&gt;
+&lt;p&gt;Manuel olarak MemoryCache entegrasyonu bu şekilde yapabilirsiniz veya ihtiyaca g&amp;ouml;re farklı kullanımlarda uygulayabilirsiniz. Cache &amp;ouml;nemlidir arkadaşlar, doğru yerde kullanıldığında &amp;ccedil;ok can kurtarır :)&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-09-15 21:54:00</pubDate>
+  <lastModified>2020-01-20 08:22:22</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>web-api-memorycache-kullanimi</slug>
+  <tags>
+    <tag>memory cache</tag>
+    <tag>web api</tag>
+    <tag>objectcache</tag>
+    <tag>manuel cache</tag>
+    <tag>CacheItemPolicy </tag>
+    <tag>MemoryCache</tag>
+    <tag>MemoryCache  nedir</tag>
+    <tag>cache nedir</tag>
+  </tags>
+  <comments>
+    <comment id="88a207c2-9a76-4671-9ba5-9afb4bbab369" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-09-12 12:47:35</date>
+      <author>koraytoma</author>
+      <email>koraytoma@gmail.com</email>
+      <country />
+      <ip>213.74.218.2</ip>
+      <avatar />
+      <content>Güzel yazınız için öncelikle teşekkürler. 
+Bir sorum olacaktı. MemoryCache işlemi için araştırma yapıyorum da projenizi kendi projeme uyarladım. Fakat  
+public MemoryCacheManager()
+{
+      cache = MemoryCache.Default;     ---&gt; The type or namespace name &amp;#39;Default&amp;#39; does not exist in the namespace &amp;#39;MemoryCache&amp;#39; .... 
+ }
+
+
+kısmında hata alıyorum. Bunun çözümü ne olabilir ?</content>
+    </comment>
+    <comment id="b2b3b398-1f5f-4ecc-86f5-49f706f70106" parentid="88a207c2-9a76-4671-9ba5-9afb4bbab369" approved="True" spam="False" deleted="True">
+      <date>2018-09-13 05:51:54</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumun için teşekkürler, kullandığın .net framework versiyonu ile ilgili olabilir mi? Hangi versiyonu kullanıyorsun ?</content>
+    </comment>
+    <comment id="738ae46c-6999-4be3-91ca-62b6038dcc27" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-12-19 12:07:19</date>
+      <author>Ali Can</author>
+      <email>ao83@hotmail.com</email>
+      <country />
+      <ip>5.47.49.213</ip>
+      <avatar />
+      <content>Asp.Nette bir resmi değiştirdikten sonra görüntülemek istediğimde eski resim çıkıyor. Tarayıcının geçmişini silince yeni resim çıkıyor. Bu işi C# kodla nasıl yapabilirim? Teşekkürler.</content>
+    </comment>
+    <comment id="ae2e2ab1-51ff-468c-9b04-f92c2e9172a8" parentid="88a207c2-9a76-4671-9ba5-9afb4bbab369" approved="True" spam="False" deleted="False">
+      <date>2019-04-16 07:21:33</date>
+      <author>malik masis</author>
+      <email>malik.masis@gmail.com</email>
+      <country />
+      <ip>88.230.231.226</ip>
+      <avatar />
+      <content>Merhabalar,
+Versiyon ile ilgili bir hata değil, sınıf ismini MemoryCache vermiş olabilirsiniz. Çünkü bu ismi verdiğinizde derleyici kendi sınıfı içinde aramaktadır. Sınıf ismini değiştirdiğinizde çalışacaktır.</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications>
+    <email>koraytoma@gmail.com</email>
+    <email>malik.masis@gmail.com</email>
+  </notifications>
+</post>

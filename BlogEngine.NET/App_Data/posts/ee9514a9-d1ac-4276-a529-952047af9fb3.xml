@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>RabbitMQ Nedir ? Windows Üzerinde Kurulumu</title>
+  <description>RabbitMQ, Erlang dili open-source olarak geliştirilen ve Open Telecom Platform k&amp;uuml;t&amp;uuml;phanesi</description>
+  <content>&lt;p&gt;Messaging Queue (MQ), &lt;strong&gt;fire-and-forget&lt;/strong&gt; communication dediğimiz asynchronous &amp;ccedil;alışma yapısı &amp;uuml;zerine kurulmuş yapılar i&amp;ccedil;in g&amp;uuml;n&amp;uuml;m&amp;uuml;z yazılım d&amp;uuml;nyasının en pop&amp;uuml;ler yapısıdır. Bu yapılara &amp;ouml;rnek olarak; JMS, MSMQ, RabbitMQ, Kafka etc. verebiliriz.&amp;nbsp;Bu yapılar genel &amp;ccedil;er&amp;ccedil;eveden baktığımızda bir sender - queue ve receiver olan yapılardır&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/messaging_queue_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;h3&gt;RabbitMQ Nedir&lt;/h3&gt;
+&lt;p&gt;&lt;a href="http://www.rabbitmq.com/"&gt;RabbitMQ&lt;/a&gt;, Erlang dili ile open-source olarak geliştirilen ve &lt;a href="https://en.wikipedia.org/wiki/Open_Telecom_Platform"&gt;Open Telecom Platform&lt;/a&gt; k&amp;uuml;t&amp;uuml;phanesi &amp;uuml;zerinde build edilebilen g&amp;uuml;n&amp;uuml;m&amp;uuml;z server-to-server/app-to-app communication ihtiya&amp;ccedil;ları konusunda giderek pop&amp;uuml;ler olan hızlı bir messaging queue yapısıdır. &lt;a href="https://www.amqp.org/"&gt;Advanced Message Queuing Protocol (AMQP)&lt;/a&gt;&amp;nbsp;implement ederek uygulamalar ve server'lar arası&amp;nbsp;veri alışverişini sağlar.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/rabbitmq_structure_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Rabbitmq Publisher ve Consumer mantığıyla &amp;ccedil;alışır. &amp;Ouml;rneğin data-exchange yapmanız gereken bir iş var bunu rabbitmq &amp;uuml;zerinden publisher'ile ilgili queue'ya publish edip sonrasında bu queue'yu consume edecek bir consumer projesi oluşturup yapmak istediğimiz bu işlemi consumer'a yaptırabiliriz. Bu işlemler genelde ana uygulama &amp;uuml;zerinde yapmak istemeyeceğimiz y&amp;uuml;k&amp;uuml; fazla olan işlemler olabilir.&lt;/p&gt;
+&lt;p&gt;Daha basit anlatacak olursak; sunucu RabbitMQ sunucusuna bir message g&amp;ouml;nderir ve sunucu bu mesajı ilgili queue'ya y&amp;ouml;nlendirir. Sonrasında başka bir uygulama bu queue'yu dinler ve &lt;strong&gt;FIFO&lt;/strong&gt; mantığıyla &amp;ccedil;alışan kuyruktaki bu mesajları consume ederek s&amp;uuml;reci sonlandırır. Sahip olduğu&amp;nbsp;Web Management Interface ile de bulunan queue'ları g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebilme, requeue etme, delete, purge gibi daha bir &amp;ccedil;ok işlemi yapabilmemizi sağlar.&lt;/p&gt;
+&lt;p&gt;Queue yapıları aslında projelerimiz i&amp;ccedil;in birer middleware g&amp;ouml;revi g&amp;ouml;rmektedir. Ana uygulamanızdan queue ya push ettiğiniz message Consumer down olsa dahi o message'ı queue'da bekletir ve consumer tekrardan start olduğunda o message'ı tekrar tekrar push etmeye &amp;ccedil;alışır ve b&amp;ouml;ylelikle veri kaybının da &amp;ouml;n&amp;uuml;ne ge&amp;ccedil;memizi sağlar.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bazı term'lere bakacak olursak;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Producer/Publisher&lt;/strong&gt; : Queue'ya message'ı g&amp;ouml;nderen yapıya verilen isimdir.&lt;br /&gt;&lt;strong&gt;Consumer&lt;/strong&gt; : Queue'yu dinleyerek ilgili message'ları receive eden yapıdır. &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &lt;strong&gt;Queue&lt;/strong&gt; : First-in-first-out mantığıyla &amp;ccedil;alışan kuyruk yapımız.&lt;br /&gt;&lt;strong&gt;Exchange&lt;/strong&gt; : Routing yani kuyruğa iletilen message'ı route eden yapıdır ve routing işlemini yapan &amp;ccedil;eşitli yapılar bulunmaktadır.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Kurulum&lt;/h3&gt;
+&lt;p&gt;İlk olarak rabbitmq &lt;strong&gt;erlang&lt;/strong&gt; dili ile geliştirildiğinden makinamızda sahip olduğumuz işletim sistemine g&amp;ouml;re uygun versiyona ait erlang dosyalarını&amp;nbsp;&lt;a href="http://www.erlang.org/downloads"&gt;erlang.org&lt;/a&gt;&amp;nbsp;sitesinden indirip kuralım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/erlang_install_windows.png" alt="" width="582" height="239" /&gt;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Sonrasında ise &lt;a href="http://www.rabbitmq.com/download.html"&gt;rabbitmq.com&lt;/a&gt; sitesinden Windows i&amp;ccedil;in g&amp;uuml;ncel rabbitmq server versiyonunu indirip kuralım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/rabbitmq_install_windows.png" alt="" width="574" height="269" /&gt;&lt;/p&gt;
+&lt;p&gt;Kurulumlar sorunsuz bir şekilde tamamlandıktan sonra yukarıda da bahsettiğimiz web aray&amp;uuml;z&amp;uuml;n&amp;uuml; aktifleştirelim. Bunun i&amp;ccedil;in rabbimq sbin dosyası i&amp;ccedil;erisinde olan RabbitMQ Command Prompt'ı &amp;ccedil;alıştıralım ve aşağıdaki komut satırını yazalım.&lt;/p&gt;
+&lt;pre class="brush:ps;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;gt; rabbitmq-plugins enable rabbitmq_management&lt;/pre&gt;
+&lt;p&gt;RabbitMQ windows makinada Windows Service olarak &amp;ccedil;alışır ve yukarıda yazdığımız web aray&amp;uuml;z&amp;uuml;n&amp;uuml; enable etme komutunun hemen &amp;ccedil;alışabilmesi i&amp;ccedil;in rabbitmq'yu aşağıdaki gibi stop/start edelim.&lt;/p&gt;
+&lt;pre class="brush:ps;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;gt; net service stop RabbitMQ
+.....
+&amp;gt; net service start RabbitMQ&lt;/pre&gt;
+&lt;p&gt;Şimdi ise browser &amp;uuml;zerinden &lt;a href="http://localhost:15672/"&gt;http://localhost:15672/&lt;/a&gt; adresine giderek login i&amp;ccedil;in default credential'lar username/password guest/guest olarak girdikten sonra aşağıdaki gibi aray&amp;uuml;z&amp;uuml; g&amp;ouml;receğiz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/rabbitmq_managemeent_console_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Şuan mevcutta herhangi bir queue oluşturmadığımızdan &amp;uuml;stte bulunan exchange&amp;nbsp;tab'ına tıkladığımızda aşağıdaki gibi default exchange listesini g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/rabbitmq_default_queue_list.png" alt="" /&gt;&lt;/p&gt;
+&lt;table style="height: 384px;" width="1221"&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p&gt;RabbitMQ Windows &amp;Uuml;zerinden kurulumu bu kadardı.&lt;/p&gt;
+&lt;p&gt;Sonraki yazılarda Exchange tool'larındanbirini kullanarak basit bir publisher consumer &amp;ouml;rneği ile devam edeceğiz. &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;/p&gt;
+&lt;/td&gt;
+&lt;td&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;img src="/image.axd?picture=/2017/rabbit_mqq.jpg" alt="" /&gt;&amp;nbsp; &amp;nbsp;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p style="text-align: right;"&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-09-24 21:40:00</pubDate>
+  <lastModified>2017-08-23 16:53:13</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>rabbitmq-nedir-kurulumu</slug>
+  <tags>
+    <tag>rabbitmq nedir</tag>
+    <tag>rabbitmq</tag>
+    <tag>rabbitmq kurulum</tag>
+    <tag>publisher consumer</tag>
+    <tag>Messaging Queue</tag>
+    <tag>rabbitmq windows</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

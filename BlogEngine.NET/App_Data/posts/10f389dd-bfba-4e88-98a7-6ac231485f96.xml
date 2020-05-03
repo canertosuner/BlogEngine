@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Servisten Gelmeli || Client Yapmalı</title>
+  <description>Servisten mi gelmeli yoksa client mı yapmalı ?.. 
+Hem server tarafta hem de client tarafta geliştirme yapan biri olarak kolayca söyleyebilirim ki bu iki soru yazılımla uğraşan kişilerin sıkça dile getirdiği sorulardan dır. Özellikle 10-12 kişilik development ekiplerinin bulunduğu projelerde client ve server tarafını geliştiren kişilerin genelde scrum'larda birbirlerine</description>
+  <content>&lt;h3&gt;Servisten mi gelmeli yoksa client mı yapmalı ?..&amp;nbsp;&lt;/h3&gt;
+&lt;p&gt;Hem server tarafta hem de client tarafta geliştirme yapan biri olarak kolayca s&amp;ouml;yleyebilirim ki bu iki soru yazılımla uğraşan kişilerin sık&amp;ccedil;a dile getirdiği sorulardan&amp;nbsp;dır. &amp;Ouml;zellikle 10-12 kişilik development ekiplerinin bulunduğu projelerde client ve server tarafını geliştiren kişilerin genelde scrum'larda birbirlerine karşı dile getirirler bu c&amp;uuml;mleleri. Jira'da yeni bir bug a&amp;ccedil;ılır analist arkadaş genelde platform belirtilmişse direkt olarak bug'ı o platformu geliştiren kişiye assign eder. Sonrasında o arkadaş ilgili bug'ın altına server-side geliştirmesini yapan arkadaşlardan birini mention'layarak şu sihirli yorumu yazar "servisten gelmeli veya servis yapmalı" veya bunun tam tersi bug server-side geliştirme yapan kişiye a&amp;ccedil;ılır o yorum yazarak "client yapmalı" vs şeklinde bir c&amp;uuml;mle yazar. İşte taht kavgaları tamda o anda başlar.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/11/you-know-nothing-jon-snow_651612.jpg" alt="" width="314" height="274" /&gt;&lt;/p&gt;
+&lt;p&gt;Aslında bu gereksiz kavganın yaşanmasındaki sebeplerin başında gerekli geliştirme hem client hem de server tarafta da yapılabiliyordur ancak developer geliştirmeyi &amp;uuml;zerine almak istemediğinden diğer tarafa atmak ister. Bir ka&amp;ccedil; &amp;ouml;rdenk case den yola &amp;ccedil;ıkarak bu soruna &amp;ccedil;&amp;ouml;z&amp;uuml;m bulabiliriz aslında.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;SOA ger&amp;ccedil;eklerinden yola &amp;ccedil;ıkacak olursak y&amp;ouml;netimin service tarafından yapılabiliyor olması bir projede olduk&amp;ccedil;a &amp;ouml;nemlidir. &amp;Ouml;rneğin bir mobil proje geliştiriyorsunuz ve username password yanlış olduğunda kullanıcıya g&amp;ouml;sterdiğiniz bir uyarı metni var "Girmiş olduğunuz bilgiler hatalıdır." şeklinde. Bu geliştirmeyi client tarafta yaptığınızı d&amp;uuml;ş&amp;uuml;nelim ve uygulama marketteyken m&amp;uuml;şteri dedi ki "ya biz şu metni Girmiş olduğunuz bilgiler hatalıdır.&amp;nbsp;L&amp;uuml;tfen tekrar deneyiniz." olarak değiştirelim ve bunu hemen 1-2 saat i&amp;ccedil;erisinde yapalım. Proje m&amp;uuml;d&amp;uuml;r OK verdi ve geliştirmeyi yapmak i&amp;ccedil;in hem ios hem android projelerinde metni değiştirdiniz tekrardan markete submit ettiniz. Uygulamanın market onay s&amp;uuml;recinden ge&amp;ccedil;mesi &amp;ouml;zellikle ios tarafında bazen 1 hafta dahi s&amp;uuml;rebiliyor. Ne oldu peki m&amp;uuml;şteri 1-2 saatte halledelim dedi ancak siz 1 haftada halledebildiniz. Eğer client'cı arkadaşların dediği gibi "geliştirmeyi servis yapsın" c&amp;uuml;mlesini dinleyerek yola &amp;ccedil;ıksaydık ve geliştme service tarafında yapılmış olsaydı hemen ilgili metin değişikliğini db'de bulunan tablodan g&amp;uuml;ncelleyip dakikalar i&amp;ccedil;erisinde isteği yerine getirmiş olacaktık.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Tabi client'ın her dediği yapıldığında da bir s&amp;uuml;re sonra servisci arkadaşlarda şu c&amp;uuml;mleyi ister sitemez duyabiliyoruz&amp;nbsp;"e uygulamayı biz yazıyoz zaten client napıyo ki.." Bu gibi durumlar i&amp;ccedil;inde aslında &amp;ccedil;ok arada kalınan bir case ise ve client'ın yapması daha kolay bir durum ise client'ta yapmak daha doğru olacaktır. &amp;Ouml;rnek olarak karşılaştığım bir case olmuştu. Uygulamada &amp;uuml;r&amp;uuml;n detay sayfasının bir b&amp;ouml;l&amp;uuml;m&amp;uuml;n&amp;uuml;n arka planında blur şekilde &amp;uuml;r&amp;uuml;n g&amp;ouml;rselinni g&amp;ouml;sterilmesi isteniyordu ve &amp;uuml;r&amp;uuml;n resmi dış servis sağlayıcıdan dikd&amp;ouml;rtgen şeklinde geliyordu. Bunun i&amp;ccedil;in client tarafı bu geliştirmeyi servis yapacak demiş ve servis tarafını geliştiren ekibe yani bize ş&amp;ouml;yle bir geliştirme ticket'ı a&amp;ccedil;ıldı "Gelen dikd&amp;ouml;rtgen resim alınacak resmin en ortada bulunan kısmından 200x200 boyutlarında bulunan kısmı alnıp client'a o şekilde g&amp;ouml;nderilecek..." ve 2 g&amp;uuml;n sonra s&amp;uuml;r&amp;uuml;m &amp;ccedil;ıkmayı planlıyoruz..&amp;nbsp;WTF oluyosun ilk okuduğunda ama geliştirmede bu.&amp;nbsp;Muhakak yapılır ancak ne gerek var o kadar uğraşmaya diyor insan. Daha &amp;ouml;nceleri client geliştirmesi yapıtığımdan biliyorum ki o resmi client tarafta alıp arka plana yerleştirip ortalamak max 15 dkkalık bir iş olsa gerek.&amp;nbsp;Hemen takım liderine durumu anlattım ve hakiketen client tarafı 15-20 dkka i&amp;ccedil;erisinde istenilen geliştirmeyi yaptı. Burda şunu sorabilirsiniz, e yarın 300x300 olacak şekilde isterlerse ne olacak ? Olabilir tabikide ancak 15 dkka nere 1-2 g&amp;uuml;n nere. Bu gibi durumlarda ekip olarak &amp;ccedil;oğunluğa g&amp;ouml;re karar alınıp en hızlı &amp;ccedil;&amp;ouml;z&amp;uuml;m&amp;nbsp;hangisi ise o uygulanmaya &amp;ccedil;alışılır.&lt;/p&gt;
+&lt;p&gt;Sonu&amp;ccedil; olarak; serviste mi gelmeli yoksa client mı yapmalı diye tekrar soracak olursak "&lt;strong&gt;it depends on the business&lt;/strong&gt;" diyorum ben yani işe g&amp;ouml;re değişir ve her ne kadar herşeyi servisten y&amp;ouml;netmemiz gereksede ger&amp;ccedil;ek olan o ana g&amp;ouml;re mantıklı olan &amp;ccedil;&amp;ouml;z&amp;uuml;m ney ise o taraf yapıyor olmalıdır. Ger&amp;ccedil;ekten iki tarafıda en iyi şekilde bilen bir kişiye danışarak veya iki taraf bir araya gelip istişare yaptıktan sonra en efektif &amp;ccedil;&amp;ouml;z&amp;uuml;m bulunacaktır.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-12-08 22:43:00</pubDate>
+  <lastModified>2020-01-20 08:22:20</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>servisten-gelmeli-client-yapmali1</slug>
+  <tags>
+    <tag>server or client</tag>
+    <tag>server side</tag>
+    <tag>client side</tag>
+    <tag>software development</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web API İçin 5 Altın Kural</title>
+  <description>Çoğu zaman yazılım geliştirirken ortaya çıkan ürün yazılımcılar için değilde son kullanıcılar içindir ve bu kişiler teknik olmayan ve sadece UI tarafıyla haşır neşir olan kişilerdir. Ortaya çıkan ürünün iyi bir arayüzü vardır ve son kullanıcı arkada çalışan hangi teknolojiymiş, nasıl çalışıyormuş gibi bilgilerle hiç ilgilenmezler.</description>
+  <content>&lt;p&gt;&amp;Ccedil;oğu zaman yazılım geliştirirken ortaya &amp;ccedil;ıkan &amp;uuml;r&amp;uuml;n yazılımcılar i&amp;ccedil;in değilde son kullanıcılar i&amp;ccedil;indir ve bu kişiler teknik olmayan ve sadece UI tarafıyla haşır neşir olan kişilerdir. Ortaya &amp;ccedil;ıkan &amp;uuml;r&amp;uuml;n&amp;uuml;n iyi bir aray&amp;uuml;z&amp;uuml; vardır ve son kullanıcı arkada &amp;ccedil;alışan hangi teknolojiymiş, nasıl &amp;ccedil;alışıyormuş gibi bilgilerle hi&amp;ccedil; ilgilenmezler.&lt;/p&gt;
+&lt;p&gt;Ancak WebApi i&amp;ccedil;in bunu s&amp;ouml;yleyemeyiz. Yazılımcı olarak geliştirmiş olduğunu WebApi projesi end-user i&amp;ccedil;in değil bazen kim olduğunu bilmediğimiz başka yazılımcılar i&amp;ccedil;indir. Bu kişiler teknik bilgisi en azından junior developer seviyesinde olan kişilerdir ve ortaya &amp;ccedil;ıkan &amp;uuml;r&amp;uuml;n&amp;uuml;n interface'i değilde yazılım tarafında ki her bir ince detayı inceleyip kullanacak olan kişilerdir ve sizi eleştirme hakkına da sahiptirler.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Api'ı kullanacak olan kişiler yazılımcılar olduğundan geliştirmeyi yaparken bir WebApi client'ıymış bakış a&amp;ccedil;ısıyla yaklaşıp &amp;ouml;yle geliştirme yapmak gerekir ve aslında bir nevi bu bakış a&amp;ccedil;ısını da Api'ı kullanan kişilerle de paylaşmış oluyoruz.&lt;/p&gt;
+&lt;p&gt;Api geliştiriciler genelde geliştirme sırasında şu sorulara odaklanırken ;"Bu servisin ne yapması gerekiyor ?", "Bu servis metodu ne sağlamalı ?", "Content-type json mı, xml mi ?" etc. , Api'ı kullanan kişiler "En az efor sarf ederek bu Api'ı nasıl kullanırım ? etc".&lt;/p&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre Api'ı yazan ve Api'ı kullanan kişiler tamamiyle farklı şeylere odaklanıyorlar &amp;ccedil;&amp;uuml;nk&amp;uuml; farklı bakış a&amp;ccedil;ılarıyla Api'ı kullanıyorlar. &amp;nbsp;Sonu&amp;ccedil; olarak Api'ı yazan kişiler olarak uygulamayı geliştirirken consume edecek kişilerin yani Api kullanıcılarının bakış a&amp;ccedil;ısından bakıp onlar bu APi'ı kullanırken ne gibi sorular sorabilir veya hangi sorunun cevabına en kolay şekilde ulaşabilirler bunu d&amp;uuml;ş&amp;uuml;nerek hareket etmemiz gerekir.&lt;/p&gt;
+&lt;p&gt;Peki iyi g&amp;uuml;zel ama b&amp;ouml;yle bir Api geliştirmek i&amp;ccedil;in neler yapmak gerekir ? Bunun i&amp;ccedil;in bir&amp;ccedil;ok geliştirici tarafından standart kabul edilen 5 altın kural vardır;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Documentation&lt;/strong&gt; (D&amp;ouml;k&amp;uuml;mantasyon)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Stability and Consistency&lt;/strong&gt; (Kararlılık ve Tutarlılık)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Flexibility&lt;/strong&gt; (Esneklik)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Security&lt;/strong&gt; (G&amp;uuml;venlik)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;User Acceptance&lt;/strong&gt;&amp;nbsp;(Kullanıcılar tarafından kabul g&amp;ouml;rmesi)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=%2f2016%2f05%2f2318.WithAPIArchitecture.PNG" alt="" width="595" height="261" /&gt;&lt;/p&gt;
+&lt;h2&gt;Rule 1: Documentation&amp;nbsp;&lt;/h2&gt;
+&lt;p&gt;Yazılım geliştiren kişilerin ortak pek sevmediği şeylerden biri sayfalarca analistler tarafından yazılmış d&amp;ouml;k&amp;uuml;manları okumaktır. Sizde sevmiyorsunuz dimi ?.. :) &amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İyi bir d&amp;ouml;k&amp;uuml;mantasyon Api i&amp;ccedil;in olmazsa olmazlardandır ve &amp;ccedil;oğu zaman Api'ları geliştirren kişiler olarak bu iş biz developer'lara bırakılmıştır. Kullanıcı tarafından d&amp;uuml;ş&amp;uuml;nelim bir bankada &amp;ccedil;alışıyorsunuz ve banka radikal bir karar alarak bazı servislerini dışarıya a&amp;ccedil;ma kararı aldı ve başladınız Api metodlarını yazmaya. Api'lar prod'a alınıp kullanıma sunulduktan sonra kullanmak isteyen kişilerin ilk başlayacakları yer Api ile ilgili yazılan d&amp;ouml;k&amp;uuml;manları okumaktır. &amp;nbsp;Yani birinin sizin Api'ınızı kullanmasını istiyorsanız ilk yapmanız geren şey d&amp;ouml;k&amp;uuml;mantasyon yazmaktır &amp;ccedil;&amp;uuml;nk&amp;uuml; kullanıcıların ilk bakacakları şey budur.&lt;/p&gt;
+&lt;p&gt;Peki iyi bir d&amp;ouml;k&amp;uuml;mantasyonu nasıl yazarız ?&lt;/p&gt;
+&lt;p&gt;Yazılımla projeleri ile ilgili d&amp;ouml;k&amp;uuml;manlarda genelde; hangi sırasıyla metodların &amp;ccedil;ağrılacağı, metod parametreleri, değişken tipleri, request, response class'ları etc. ve d&amp;ouml;k&amp;uuml;mantasyon oluşturmak i&amp;ccedil;inde bir &amp;ccedil;ok tool'da bulunmaktadır aynı zamanda kendimizde bunları basit bir template belirleyerek yazabiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Ancak harika yazılmış bir d&amp;ouml;k&amp;uuml;manı &amp;uuml;stte bahsettiğimiz yaygın olarak kullanılan d&amp;ouml;k&amp;uuml;man yazma tekniklerinden ne ayırır diye soracak olursa Api'ın kullanım &amp;ouml;rnekleri ve iyi bir eğitim i&amp;ccedil;eriği. Bu ikisi Api'ı kullanan kişiler i&amp;ccedil;in en &amp;ouml;nemli iki şeydir diyebiliriz &amp;ccedil;&amp;uuml;nk&amp;uuml; son kullanıcı i&amp;ccedil;in ger&amp;ccedil;ek bir &amp;ouml;rnek &amp;uuml;zerinden ve takıldığı noktaları eğitim i&amp;ccedil;eriğine bakarak en hızlı ve kolay şekilde &amp;ouml;ğrenecektir. Ancak yazdığımız d&amp;ouml;k&amp;uuml;manın şeması ve yazdığımız &amp;ouml;rnek kodların karmaşık olmamasına da dikkat etmeliyiz. D&amp;ouml;k&amp;uuml;man yazıyoruz diye kullanıcıya 300 sayfalık bir roman veya 15 class'lık bir &amp;ouml;rnek projede yazmamalıyız :)&lt;/p&gt;
+&lt;p&gt;D&amp;ouml;k&amp;uuml;mantasyon işiniz bittikten sonra yapabiliyorsanız yapmış olduğunuz &amp;ouml;rnek Api kullanım projelerini ve d&amp;ouml;k&amp;uuml;manları &amp;ccedil;evrenizdeki developer'lara g&amp;ouml;nderin ve feedback'ler almaya &amp;ccedil;alışın. Gelen feedback'ler doğrultusunda da yazmış olduğunuz d&amp;ouml;k&amp;uuml;manıdaha user-friend hale getirebilirsiniz. &amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yaptıkları d&amp;ouml;k&amp;uuml;manları harika bulduğum birka&amp;ccedil; firma var ki bunlar kendi sekt&amp;ouml;rlerinde en iyiler bile değiller ancak ger&amp;ccedil;ek bir Api d&amp;ouml;k&amp;uuml;manı nasıl olmalı sorusuna verilecek en iyi cevabı vermiş firmalar;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.twilio.com/api"&gt;Twilio&lt;/a&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.djangoproject.com/en/1.9/"&gt;Django&lt;/a&gt;,&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://apidocs.mailchimp.com/"&gt;MailChimp&amp;nbsp;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Rule 2: Stability and Consistency&lt;/h2&gt;
+&lt;p&gt;Daha &amp;ouml;nce Facebook&amp;ucirc;n Api'larını kullandıysanız ne sıklıkla Api'ları değiştirdiklerini bilirsiniz. S&amp;uuml;rekli olarak bir g&amp;uuml;ncelleme yayınlıyorlar ve &amp;ccedil;alışan bir&amp;ccedil;ok uygulama da patlıyor &amp;ccedil;atlıyor. Facebook'un ne kadar başarılı bir &amp;uuml;r&amp;uuml;n olduğuna herkes hemfikirdir ancak başarılı olmalarının sebebi son derece iyi bir Api'a sahip oldukları değil milyarları ge&amp;ccedil;en kullanıcı sayısı sahip olmaları ancak iş Api konusuna gelince developer'lar i&amp;ccedil;in bazen hayatı zindan ettikleri oluyor. Muhtemelen sizlerin geliştirdiği Api'lar milyarlarca kullanıcı tarafından kullanılmicak ancak o bakış a&amp;ccedil;ısıyla geliştiriyor olmakta fayda var. Yeni s&amp;uuml;r&amp;uuml;m yayınladığınızda eski versiyonlara desteği en azından birka&amp;ccedil; yıl daha s&amp;uuml;rd&amp;uuml;r&amp;uuml;yor olmak gerekir en azından mevcut kullanıcıları en iyi şekilde yeni versiyondan haberdar ederek onların yeni versiyona ge&amp;ccedil;melerini sağlamak gerekir.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek &amp;uuml;zerinden gitmek gerekirse ; farz edelim ki &lt;strong&gt;http://www.canertosuner.com/api/getUsers/&lt;/strong&gt;&amp;nbsp; şeklinde tanımlı &lt;strong&gt;JSON&lt;/strong&gt; formatında response d&amp;ouml;nen ve yaklaşık 10 bin kişi &amp;nbsp;tarafından kullanılan bir Api'ımız var diyelim. Api'ı production'a aldıktan aylar sonra d&amp;ouml;nen responsları değiştirdiniz ve bu Api'ı kullanan kişileri de etkileyen bir değişiklik olsun. Bu şu demek; 10 bin kişinin geliştirdiği 10 bin uygulamaların patlaması demek. Bunun &amp;ccedil;&amp;ouml;z&amp;uuml;m&amp;uuml; tabii ki de uygulamaya yeni versiyon &amp;ccedil;ıkmamak değil bir &amp;uuml;r&amp;uuml;n aldığı update'ler ile daha iyi olur. Bunun &amp;ccedil;&amp;ouml;z&amp;uuml;m&amp;uuml; i&amp;ccedil;in Api'ınıza basit bir versiyon kontrol&amp;uuml; koymak ve eski versiyonlara desteği s&amp;uuml;rd&amp;uuml;rmek.&lt;strong&gt;(&lt;/strong&gt;&amp;nbsp;&lt;strong&gt;http://www.canertosuner.com/api/getUsers?version=2&lt;/strong&gt; yada &lt;strong&gt;http://www.canertosuner.com/api/&lt;/strong&gt;&lt;strong&gt;v2/&lt;/strong&gt;&lt;strong&gt;getUsers )&amp;nbsp;&lt;/strong&gt;.B&amp;ouml;ylelikle hem eski versiyonu kullananlar yeni versiyona ge&amp;ccedil;ene kadar uygulamalarının &amp;ccedil;alışmalarını sağlayabilirler hemde Api'ı yeni kullanmaya başlayacak olanlar direkt olarak son versiyondan başlarlar.&lt;/p&gt;
+&lt;p&gt;Api'ınızın Consistent yani tutarlı olması da son derece &amp;ouml;nemlidir. Api'ınızın geriye d&amp;ouml;nd&amp;uuml;ğ&amp;uuml; response class'larının ortak bir base class i&amp;ccedil;erisinde olmasına &amp;ouml;zen g&amp;ouml;sterin. &amp;Ccedil;&amp;uuml;nk&amp;uuml; bu class sayesinde metodun d&amp;ouml;nd&amp;uuml;ğ&amp;uuml; response dışında Api kullanıcısına farklı verilerde d&amp;ouml;nd&amp;uuml;rebilirsiniz. Daha &amp;ouml;nce kullanmış olduğum bazı Api'larda tutarlılık neredeyse hi&amp;ccedil; yoktu. S&amp;uuml;rekli olarak yeni gelen versiyonlarda parametre isimleri değişiyor, metod isimleri değişebiliyor, bir &amp;ouml;nceki metodda UserID'yi int g&amp;ouml;nderirken bir sonraki metodda string olarak istiyorlardı, hata mesajları s&amp;uuml;rekli olarak farklı formatta geliyordu vs. gibi &amp;ouml;rneklerle karşılaşmak m&amp;uuml;mk&amp;uuml;n. Bu gibi durumlara dikkat etmek gerekiyor. Ortak kullanılan parametreler tek bir yerden y&amp;ouml;netilebiliyor olmalı ve major değişiklikler kolay kolay uygulanmamalı veya uygulandığında Api'ı kullanan kişiyi etkilenmesinden ka&amp;ccedil;ınılmalı.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=%2f2016%2f05%2fbrand_personality.jpg" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Son olarak yayınlamış olduğunuz yeni versiyonlarda iyi bir changelog yayınlayıp mevcut kullanıcılarınızı bilgilendirmeniz gerekir. B&amp;ouml;ylece kullanıcılar nasıl upgrade edeceklerini &amp;ouml;ğrenmiş olurlar ve Api uygulamanızda &amp;ccedil;ok b&amp;uuml;y&amp;uuml;k major değişikliklere gitmemeye &amp;ouml;zen g&amp;ouml;sterin veya bunu kullanıcıları en az seviyede etkileyecek şekilde yapın ve tutarlılığı korumaya &amp;ccedil;alışın.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Rule 3: Flexibility&lt;/h2&gt;
+&lt;p&gt;Yazmış olduğumuz Api'ların flexible yani esnek olması olduk&amp;ccedil;a &amp;ouml;&amp;ccedil;nemli bir konudur.Peki ama esnek derken neyi kastediyorum ?&lt;/p&gt;
+&lt;p&gt;Garbage in, garbage out (GIGO) programcılar tarafından iyi bilinen bir technical-term d&amp;uuml;r. Kısaca "&lt;strong&gt;input olarak ne verirsen output'un ona g&amp;ouml;re değişiklik g&amp;ouml;sterir"&lt;/strong&gt; veya&amp;nbsp;&lt;strong&gt;ne ekersen onu bi&amp;ccedil;ersin&lt;/strong&gt;". Hadi biraz daha basit s&amp;ouml;yleyelim&amp;nbsp;programa yanlış bir request'te bulunursanız response'unuzda yanlış olacaktır. GIGO yu &amp;ouml;rnek olarak vermemin sebebi aslında Web Api tarafında request response ilişkisine dikkat &amp;ccedil;ekmek istemem.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;G&amp;uuml;n&amp;uuml;m&amp;uuml;zde bir &amp;ccedil;ok Api doğru d&amp;uuml;zg&amp;uuml;n bir JSON desteği bile bulunmamakta ancak iyi bir Api'ın sadece JSON değil bunu yanında YAML, XML vs. gibi formatlar i&amp;ccedil;inde desteği bulunmalıdır ve bunlardan hangisini return edeceği bilgisini de aslında Api kullanıcılardan yani client'lardan parametre olarak almalıdır. &amp;Ouml;rnek olarak&amp;nbsp;&lt;strong&gt;http://www.canertosuner.com/api/getUsers?Format=JSON &lt;/strong&gt;yada bu bilgiyi header'a parametre olarak eklemek aslında en doğru kullanımdır diyebiliriz&amp;nbsp;&lt;strong&gt;Accept: application/json .&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=%2f2016%2f05%2fflexible-man-laptop97-crop-600x338.jpg" alt="" width="438" height="247" /&gt;&lt;/p&gt;
+&lt;p&gt;Bu kullanım sadece kullanıcıya d&amp;ouml;necek olan response i&amp;ccedil;in değil aynı zamanda kullanıcının size g&amp;ouml;ndereceği Post metodlarında body de bulunan request parametreleri i&amp;ccedil;inde ge&amp;ccedil;erlidir. Bir kulalnıcı JSON olarak g&amp;ouml;nderirken diğer bir kullanıcı XML olarak g&amp;ouml;ndermek isteyebilir ve b&amp;ouml;yle bir esnekliğe sahip olabilmek olduk&amp;ccedil;a &amp;ouml;nemli bir ayrıcalıktır.&lt;/p&gt;
+&lt;p&gt;Api'ınızın OData &amp;ouml;zelliğine sahip olması da bir o kadar &amp;ouml;nemlidir. OData ile Api'nızın d&amp;ouml;neceği respons'lara kullanıcılar tarafından filtreleme yapma şansı sunarsınız ve b&amp;ouml;ylece kullanıcının istemediği bir veriyi d&amp;ouml;nmemiş olursunuz. &amp;Ouml;rneğin A kullanıcısı GetProducts metodundan sadece ProductID'lerini almak isterken B kullanıcısı ProductName ve ProductID alanlarını almak isteyebilir. OData bu gibi durumlar i&amp;ccedil;in son derece filexible(esnek) bir kullanım sunar.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Rule 4: Security&lt;/h2&gt;
+&lt;p&gt;G&amp;uuml;venlik bir WebService &amp;amp; WebApi projesindeki en &amp;ouml;nemli noktalardan biri ancak &amp;ouml;yle Api'lar var ki&amp;nbsp;otantike olmak nerdeyse bazen imkansız oluyor. Tamam g&amp;uuml;venlik &amp;ouml;nemli ama &amp;ouml;yle katı ve karmaşık kurallar koyarak Api yazan firmalar var ki bazen birbiri ile ilişkili Api' metodları i&amp;ccedil;in 2-3 &amp;ccedil;eşit g&amp;uuml;venlik algoritması kullandığımız olabiliyor ve ortada d&amp;ouml;k&amp;uuml;manda yoksa nasıl requestte bulunacaksın, nasıl response alacaksın hepsi belirsiz. Bir Api developer olarak Api'ı kullanan kişiler i&amp;ccedil;in nasıl&amp;nbsp;authenticate ve authorize olunur bilgilerini i&amp;ccedil;eren kolay ve a&amp;ccedil;ıklayıcı &amp;ouml;rneklerle anlatıyor olmamız gerekir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;G&amp;uuml;n&amp;uuml;m&amp;uuml;z Web Api'larının &amp;ccedil;oğunda ortak olarak &lt;strong&gt;token-based authentication&lt;/strong&gt; kullanılmakta. Kısaca; kullanıcı yapmış olduğu ilk requestte Api'a bazı g&amp;uuml;venlik parametreleri ge&amp;ccedil;er ve Api'da ona random generate edilmiş olan token bilgisini d&amp;ouml;ner ve client b&amp;uuml;t&amp;uuml;n session'ı boyunca aynı token &amp;uuml;zerinden request atıp response almaya devam eder.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Token dışında OAuth 2 + SSL de Api'ınızı g&amp;uuml;venli hale getirmek i&amp;ccedil;in yapılabilecek diğer se&amp;ccedil;enekler arasındadır. SSL her hal&amp;uuml;karda kullanıyor olmamız gerekir bunun yanında OAuth 2'yi de server-side'da uygulamakta olduk&amp;ccedil;a basittir ve &amp;nbsp;OAuth 2'nin hemen hemen b&amp;uuml;t&amp;uuml;n yaygın kullanılan programlama dilleri i&amp;ccedil;in k&amp;uuml;t&amp;uuml;phaneleri de bulunmaktadır.&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=%2f2016%2f05%2fwhat_is_API_security_01.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Bunlarla birlikte g&amp;uuml;venlik i&amp;ccedil;in dikkat edilmesi gereken birka&amp;ccedil; konu dha bulunmaktadır;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Api'larda genellikle &lt;strong&gt;update, insert, delete&lt;/strong&gt; gibi işlemler yapılabilmektedir. Bu işlemleri yapan metodları public hale getirip b&amp;uuml;t&amp;uuml;n kullanıcıların kullanımına sunarken dikkat edilmesi gerekmektedir. Her kullanıcının ş&amp;ouml;yle bir Api &amp;ccedil;ağrısı yapamıyor olması gerekir "&lt;strong&gt;/user/delete/&amp;lt;id&amp;gt;&lt;/strong&gt;" . Bununla ilgili her bir kullanıcı i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;Whitelisting Functionality&amp;nbsp;&lt;/strong&gt;bilgisi oluşturup bu listede belirtilen kurallara g&amp;ouml;re request validation işlemleri yapılabilir.&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;OData&lt;/strong&gt; kullanırken de &lt;strong&gt;select&lt;/strong&gt;&amp;nbsp;işlemleri yapılırken kullanıcının sahip olmasını istemediğimiz bilgiler i&amp;ccedil;in request'te bulunduğunda&amp;nbsp;&lt;strong&gt;406 Not Acceptable Response&amp;nbsp;&lt;/strong&gt;şeklinde status kodlar d&amp;ouml;nebiliriz.&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cross-Site Request Forgery (CSRF)&amp;nbsp;&lt;/strong&gt;isteklerine akrşı Api'ı korumalıyız. Session veya cookie&amp;nbsp;bazlı bir&amp;nbsp;authentication yapımız var ise Api'ımızı&amp;nbsp;&lt;strong&gt;CSRF&amp;nbsp;&lt;/strong&gt;ataklarına karşı koruduğumuzdan emin olmalıyız. Bununla ilgili faydalı d&amp;ouml;k&amp;uuml;manları&amp;nbsp;&lt;a href="https://www.owasp.org/index.php/Main_Page"&gt;&lt;strong&gt;The Open Web Application Security Project (OWASP)&lt;/strong&gt;&lt;/a&gt;&amp;nbsp;da bulabilirsiniz.&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Resource&lt;/strong&gt; dosyalarına olan erişimi y&amp;ouml;netiyor olmamız gerekir. &amp;Ouml;rnek olarak bir banka kredi kartlarını tutan Api yazdınız ve Api i&amp;ccedil;erisindeki bir dosyada kredi kartı g&amp;ouml;rselleri bulunmakta. Herhangi bir kullanıcı gidipte &lt;strong&gt;&amp;nbsp;/account/card/view/152423 &lt;/strong&gt;şeklinde bir istekte bulunup erişmemesi gereken bir resource dosyasına erişmemelidir.&lt;/li&gt;
+&lt;li&gt;B&amp;uuml;t&amp;uuml;n request'leri validate ediyor olmamız gerekir. Her bir request'in kendine &amp;ouml;zg&amp;uuml; parametreleri bulunur ve kullanıcı s&amp;uuml;rekli olarak sa&amp;ccedil;ma sapan request'lerde bulunduğunda &amp;ouml;rnek olarak; userId miz 4608 olsun ve user bilglsini getiren metoda 4608 den başlayıp random sayılar &amp;uuml;reterek (&amp;nbsp;&lt;strong&gt;/account/getUserInfo/4609&lt;/strong&gt;) başka kullanıcıların bilgileri i&amp;ccedil;in request'te bulunduklarında Api'ımızın bir şekilde bir g&amp;uuml;venlik kontrol&amp;uuml; olup bu kullanıcıyı tespit edip engellemelidir.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Rule 5: User Acceptance&lt;/h2&gt;
+&lt;p&gt;Beşinci ve son kural aslında bu beşli arasındaki en &amp;ouml;nemli kural diyebiliriz. Bu kural ilk 4 kural boyunca bahsettiğim b&amp;uuml;t&amp;uuml;n şeylerin aslında bir &amp;uuml;r&amp;uuml;n olarak hazırlanıp kullanıcıya sunulması ve kabul g&amp;ouml;rmesini i&amp;ccedil;ermekte. &amp;Ouml;rneğin iyi bir d&amp;ouml;k&amp;uuml;mantasyon, kolay entegre edilebilir g&amp;uuml;venlik adımları, yazdığımız Api'metodlarını tutorial'larla s&amp;uuml;sleyip max 15 dakikada kullanıcılar tarafından entegre edebilmelerini sağlama gibi durumlar diyebiliriz.&lt;/p&gt;
+&lt;p&gt;Api'ın kullanıcılar tarafından daha kolay kabul g&amp;ouml;rmesini sağlayacak bazı spesific tavsiyeler saymak gerekirse; &amp;nbsp;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Kullanıcıların d&amp;ouml;k&amp;uuml;mantasyonda belirtilenlere g&amp;ouml;re Api'ınızı ilk denemeden sonra entegre edebildiğinden emin olun.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;KISS -&amp;nbsp;&lt;/strong&gt;&lt;strong&gt;Keep it Simple Stupid&amp;nbsp;&lt;/strong&gt;anlayışına g&amp;ouml;re hareket etmeye &amp;ccedil;alışın. Fantastik&amp;nbsp;authentication y&amp;ouml;ntemlerinden ka&amp;ccedil;ının, SOAP, JSON, REST'i yeniden yaratmaya &amp;ccedil;alışmayın veya b&amp;uuml;t&amp;uuml;n platformlar tarafından kabul g&amp;ouml;rmemiş herhangi bir y&amp;ouml;ntem kullanmayın.&lt;/li&gt;
+&lt;li&gt;Service aray&amp;uuml;z&amp;uuml; i&amp;ccedil;in dil spesifik library'i desteği vermeye &amp;ccedil;alışın. Otomatik olarak bu işlemi yapan g&amp;uuml;zel tool'lar da mevcut (Alpaca veya Apache Thrift gibi).&lt;/li&gt;
+&lt;li&gt;Gereken sign-up işlemlerini en basit şekilde yapın. Api'ınız bir open-source proje değilse ve sign-up &amp;amp; register gibi işlemler varsa bunları olabildiğince basite indirgeyip biran &amp;ouml;nce kullanıcıları yormadan api'ınınzın bulunduğu yere y&amp;ouml;nlendirin. Eğer sizin i&amp;ccedil;in extra bir maliyeti yoksa sign-up with social media account (facebook, google, twitter etc) &amp;ouml;zelliği sunabilirsiniz.&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;"Satış sonrası destek" sağlayın. Bug'sız uygulama olmaz ve Api'ı kullanan kişiler bug veya herhangi bir sorun ile karşılaştıklarında en kısa ve kolay şekilde bunları size iletmesini sağlayın. Bu bir forum sitesi veya e-mail sistemi olabilir size kolayca raporlayabilsinler. Sorunu giderip yeni versiyon &amp;ccedil;ıktıktan sonrada ilgili kişileri tekrardan bilgilendirmeyi ihmal etmeyin.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;&amp;Ouml;zetle..&lt;/h2&gt;
+&lt;p&gt;Iot (Internet of Things) ile birlikte hayatımızda kullanacağımız IP alıp internete &amp;ccedil;ıkabilen b&amp;uuml;t&amp;uuml;n teknolojik &amp;uuml;r&amp;uuml;nler WebService &amp;amp; Api ile haberleşiyor olacaklar ve beraberinde bir&amp;ccedil;ok yeni Api'lar yazılmasına ihtiya&amp;ccedil; duyulacak. Bug&amp;uuml;n&amp;uuml;n verilerine g&amp;ouml;re d&amp;uuml;ş&amp;uuml;n&amp;uuml;rsek; binlerce api &amp;amp; web service var ancak sıkıntılı olan şey kullanımları ger&amp;ccedil;ekten kolay değil. Sebep olarak &lt;a href="/post/solid-prensipleri"&gt;SOLID &lt;/a&gt;prensiplerine pek uymayan yazılım anlamında zayıf tasarımlı projeler olması, d&amp;ouml;k&amp;uuml;mantasyon tarafının yeterli d&amp;uuml;zeyde veya yeteri kadar kolay anlaşılabilir olmaması, &amp;ouml;rnek kod par&amp;ccedil;acıkları i&amp;ccedil;ermemesi, raporlanmasına rağmen &amp;ccedil;&amp;ouml;z&amp;uuml;lmeyen bug'lar etc.. bir s&amp;uuml;r&amp;uuml; sıralayabiliriz.&lt;/p&gt;
+&lt;p&gt;Yukarıda belirtilen 5 altın kural bir &amp;ccedil;ok kişi tarafından aslında ortak dile getirilen başlıklar ve Api projesi geliştirirken uyulması gereken kurallar olarak belirtilmekte. Eğer bizlerde bundan sonra yazacağımız Api'larda birazcıkta olsa bu kurallara uygulayarak hareket edersek her şey hem Api geliştiriciler hemde Api kullanan kişiler i&amp;ccedil;in daha kolay olacaktır.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-05-11 21:35:00</pubDate>
+  <lastModified>2020-03-22 13:47:06</lastModified>
+  <raters>4</raters>
+  <rating>5</rating>
+  <slug>Web-API-Icin-5-Altin-Kural</slug>
+  <tags>
+    <tag>API</tag>
+    <tag>SoftwareDesign</tag>
+    <tag>SystemArchitecture</tag>
+    <tag>Web</tag>
+    <tag>WebApi</tag>
+    <tag>Rules</tag>
+  </tags>
+  <comments>
+    <comment id="2fe596ae-2b70-4bad-93c3-fdcb9ac7c1bf" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2016-05-16 00:29:22</date>
+      <author>Kenan</author>
+      <email>kenantasd@gmailc.om</email>
+      <country>tr</country>
+      <ip>78.181.12.137</ip>
+      <moderatedby>caner</moderatedby>
+      <avatar />
+      <content>Hocam yazı ger&amp;#231;ekten &amp;#231;ok faydalı olmuş</content>
+    </comment>
+    <comment id="cc0a222d-350b-4047-8568-b2293a41a71d" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2016-06-03 15:52:10</date>
+      <author>Caner Tosuner</author>
+      <email>trackback</email>
+      <country />
+      <ip>94.102.8.48</ip>
+      <website>http://canertosuner.com/post/Web-Api-Nedir</website>
+      <moderatedby>Rule:white list</moderatedby>
+      <content>Asp .Net Web Api Nedir 
+
+Asp .Net Web Api Nedir </content>
+    </comment>
+    <comment id="9ff6fbcd-8bdf-4c76-a654-61e538440184" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-01-21 07:19:36</date>
+      <author>Caner Tosuner</author>
+      <email>trackback</email>
+      <country />
+      <ip>191.235.220.16:5256</ip>
+      <website>http://www.canertosuner.com/post/Web-Api-Nedir</website>
+      <content>Asp .Net Web Api Nedir 
+
+Asp .Net Web Api Nedir </content>
+    </comment>
+    <comment id="b9d7e430-0358-47a6-87f0-790cba9fd53e" parentid="2fe596ae-2b70-4bad-93c3-fdcb9ac7c1bf" approved="False" spam="False" deleted="True">
+      <date>2020-03-20 00:01:57</date>
+      <author>sds</author>
+      <email>sds</email>
+      <country />
+      <ip>78.171.124.186</ip>
+      <avatar />
+      <content>sdsd</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

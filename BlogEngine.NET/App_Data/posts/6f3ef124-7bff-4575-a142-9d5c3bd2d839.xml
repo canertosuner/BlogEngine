@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>gRPC nedir ? .Net Core gRPC Service Oluşturma</title>
+  <description>gRPC open source olarak google tarafından geliştirlen ve ilk olarak 2015 yılında tanıtılan bir remote-procedure-call(RPC) kütüphanesidir. Transport için HTTP/2 prokolünü kullanır ve yine google tarafından ilk olarak şirket içi projelerde kullanılmak üzere geliştirilen bir binary serialization protocol'ü olan Protocol Buffers(protobuf) kullanarak serialize/deserialize edilmiş binary-message exchange yapabilen bir altyapı sunmaktadır.</description>
+  <content>&lt;p&gt;Bu yazımızda ana hatlarıyla gRPC nedir, nerden gelmiştir, microservice mimarileri i&amp;ccedil;in nasıl kullanılır gibi konulara değinerek &amp;ouml;rnek bir uygulama &amp;uuml;zerinde inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://grpc.io/"&gt;gRPC&lt;/a&gt; open source olarak google tarafından geliştirlen ve ilk olarak 2015 yılında tanıtılan bir remote-procedure-call(RPC) k&amp;uuml;t&amp;uuml;phanesidir. Transport i&amp;ccedil;in HTTP/2&amp;nbsp;prokol&amp;uuml;n&amp;uuml; kullanır ve yine google tarafından ilk olarak şirket i&amp;ccedil;i projelerde&amp;nbsp;kullanılmak &amp;uuml;zere geliştirilen bir binary serialization protocol'&amp;uuml; olan &lt;a href="https://en.wikipedia.org/wiki/GRPC"&gt;Protocol Buffers&lt;/a&gt;(protobuf) kullanarak serialize/deserialize edilmiş binary-message exchange yapabilen bir altyapı sunmaktadır. Protobuf temelde bir&amp;nbsp;binary serialization protocol'&amp;uuml;d&amp;uuml;r ve d&amp;uuml;ş&amp;uuml;k CPU kullanımı ile y&amp;uuml;ksek performans g&amp;ouml;sterebilmesiyle &amp;ouml;ne &amp;ccedil;ıkmaktadır. &amp;Ouml;zellikle son yıllarda IoT uygulamalarının kullanımının yaygınlaşmasıyla birlikte &amp;ccedil;ok daha k&amp;uuml;&amp;ccedil;&amp;uuml;k avu&amp;ccedil; i&amp;ccedil;i kadar teknolojik cihazlar arası iletişim s&amp;ouml;z konusu olduğundan&amp;nbsp;gRPC IoT cihazlar arası iletişim i&amp;ccedil;in kullanılabilecek ilk se&amp;ccedil;eneklerden biri olarak g&amp;ouml;r&amp;uuml;lmekte.&lt;/p&gt;
+&lt;p&gt;gRPC artık g&amp;uuml;n&amp;uuml;m&amp;uuml;zde Microservice&amp;nbsp;mimarilerindede kullanılmakta. Microservice mimarisi &amp;uuml;zerine bir yapı tasarladığınızda ve&amp;nbsp;olduk&amp;ccedil;a fazla sayıda service'iniz olduğunu d&amp;uuml;ş&amp;uuml;n&amp;uuml;rsek, s&amp;uuml;rekli olarak bu microservice'ler arası veya service-to-3rd party uygulamalar arası bir iletişim s&amp;ouml;zkonusu olacaktır.&amp;nbsp;&amp;Ouml;zellikle Restful service'ler yani &amp;ccedil;oğunlukla external bir client tarafından consume edilen yapılar i&amp;ccedil;in daha uygundur ve&amp;nbsp;RESTful servisler daha &amp;ccedil;ok human-optimized edilmiş text-based&amp;nbsp;mesajlaşmaya dayandığından&amp;nbsp;aslında internal service-to-service iletişim i&amp;ccedil;in en ideal se&amp;ccedil;enek değildir. Bunun yerine service-to-service internal communication i&amp;ccedil;in&amp;nbsp;gRPC&amp;nbsp;kullanmak son zamanlarda olduk&amp;ccedil;a tercih edilir&amp;nbsp;bir se&amp;ccedil;enek haline gelmekte ve nerdeyse b&amp;uuml;t&amp;uuml;n yazılım dillerini desteklediğinden Cloud Native Computing Foundation (CNCF) tarafından da benimsenerek gRPC'nin yeni evi olarak kabul edilmekte.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir case &amp;uuml;zerinden &amp;ccedil;alışma şekline bakacak olursak; bir e-ticaret sitesi geliştirdiğimizi&amp;nbsp;d&amp;uuml;ş&amp;uuml;nelim ve satmış olduğumuz bir &amp;uuml;r&amp;uuml;n i&amp;ccedil;in m&amp;uuml;şteri iade isteğine bulunmak istiyor. gRPC Interface Definition Contract'lar tanımlayarak client-server arasındaki iletişimi http2 protocol&amp;rsquo;&amp;uuml; kullanılarak&amp;nbsp;s&amp;uuml;re&amp;ccedil; tamamlanıyor. Sonrasında&amp;nbsp;refund işleminin yapıldığına dair bilgilendirme NotifyCustomerClient'a&amp;nbsp;iletilerek m&amp;uuml;şteri bilgilendiriliyor.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2020/ntcr_grp_c_img1.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre, client'tan bir iade isteği geliyor ve bu istek proto formatında olan contract RefundService'e iletiliyor ve sonrasında kendi business'larını&amp;nbsp;process ettikten sonra response'u client'a iletiyor.&amp;nbsp;Bu contract dosyalarında herhangi bir değişiklik s&amp;ouml;z konusu olduğunda hem client hemde service tarafı&amp;nbsp;bu değişiklikleri almak&amp;nbsp;zorundadır.&lt;/p&gt;
+&lt;p&gt;gRPC'nin konseptlerine ve desteklediği&amp;nbsp;&lt;a href="https://grpc.io/docs/guides/concepts"&gt;client-server iletişim tiplerine&lt;/a&gt; bakacak olursak;&lt;/p&gt;
+&lt;h4&gt;Unary RPC&lt;/h4&gt;
+&lt;p&gt;Yukarıdaki refund &amp;ouml;rneğimize karşılık gelen, client'ın tek bir request atıp karşılığında bir response aldığı iletişim tipi.&lt;/p&gt;
+&lt;h4&gt;Server streaming RPC&lt;/h4&gt;
+&lt;p&gt;Server'ın client'tan request alıp geriye&amp;nbsp;response stream d&amp;ouml;nmeye başladığı iletişim tipi.&lt;/p&gt;
+&lt;h4&gt;Client streaming RPC&lt;/h4&gt;
+&lt;p&gt;Server streaming'in tam tersi olarak client&amp;nbsp;birden &amp;ccedil;ok message g&amp;ouml;nderir ve server bu message'ları process ettikten sonra client'a tek bir response&amp;nbsp;d&amp;ouml;ner.&lt;/p&gt;
+&lt;h4&gt;Bidirectional streaming RPC&lt;/h4&gt;
+&lt;p&gt;Hem client'ın hemde server'ın karşılıklı message streaming yapabildiği iletişim tipi.&lt;/p&gt;
+&lt;h4&gt;Cancelling an RPC&lt;/h4&gt;
+&lt;p&gt;Client yada server istedikleri bir anda RPC'yi cancel edebilirler ve&amp;nbsp;bu hemen anlık&amp;nbsp;olur.&lt;/p&gt;
+&lt;h4&gt;Deadlines/Timeouts&lt;/h4&gt;
+&lt;p&gt;gRPC client'lara bir timeout s&amp;uuml;resi set edebilmelerini ve server'larında herhangi bir RPC'nin timeout olup olmadığını sorgulayabilmelerine olanak sağlar.&lt;/p&gt;
+&lt;h2&gt;Creating gRPC Service&lt;/h2&gt;
+&lt;p&gt;Bu kadar terminolojiden sonra biraz practice yapalım ve yukarıda g&amp;ouml;rselde bahsettiğimiz refund &amp;ouml;rneği &amp;uuml;zerinden asp.net core 3.1 kullanarak bu&amp;nbsp;yazımızı &amp;ouml;rneklendirelim. İlk olarak vs'da create new project deyip bir RefundService adında bir gRPC Service projesi oluşturalım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/ntcr_grp_c_img2.PNG" alt="" width="699" height="235" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Projemizi oluşturduktan sonra solution'a bakacak&amp;nbsp;olursak; Yeni bir gRPC projesi oluşturduğunuzda default olarak vs'da GreeterService adında &amp;ouml;rnek bir gRPC implementation'ı ile birlikte&amp;nbsp;gelmekte.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&lt;img src="/image.axd?picture=/2020/ntcr_grp_c_img3.PNG" alt="" width="327" height="325" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre proje aslında bir GreeterService sınıfı ve bu sınıf i&amp;ccedil;in tanımlı olan greet.proto contract dosyasından oluşmakta. Daha doğrusu greet.proto dosyasında bulunan tanımlamalara g&amp;ouml;re generate edilen sınıflar GreeterBase ve GreeterService sınıfları projede yer almakta.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Startup.cs i&amp;ccedil;erisine bakacak olursak projenizde gRPC kullanabilmek i&amp;ccedil;in&amp;nbsp;uygulama service'lerine gRPC'yi eklemeniz gerekmekte ve sonrasında Configure metodu i&amp;ccedil;erisinde oluşturmuş olduğumuz service-endpoint mapping'i endpointRouting'e tanımlamalıyız.&lt;/p&gt;
+&lt;h4 style="text-align: left;"&gt;Add&amp;nbsp;gRPC&lt;/h4&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddGrpc();
+}&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    app.UseRouting();
+
+    app.UseEndpoints(endpoints =&amp;gt;
+    {
+        endpoints.MapGrpcService&amp;lt;GreeterService&amp;gt;();
+    });
+}&lt;/pre&gt;
+&lt;h4 style="text-align: left;"&gt;Create refund.proto&lt;/h4&gt;
+&lt;p style="text-align: left;"&gt;refund.proto dosyasının i&amp;ccedil;erisine metotlarımızı tanımlamaya başlayalım. RefundService'inde 2 metod bulunuyor, Refund() ve NotifyCustomer() metodları. Bunlardan Refund metodu&amp;nbsp;Unary RPC tipinde işlem g&amp;ouml;r&amp;uuml;rken, NotifyCustomer metodu&amp;nbsp;Server Streaming RPC t&amp;uuml;r&amp;uuml;nde hizmet verecektir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;syntax = "proto3";
+
+option csharp_namespace = "RefundService";
+
+package Refund;
+
+service RefundService {
+rpc Refund (RefundRequest) returns (RefundReply){}
+rpc NotifyCustomer (NotifyRequest) returns (stream NotifyReply){}
+}
+
+message RefundRequest {
+  string orderId = 1;
+  double amount = 2;
+  string customerid = 3;
+}
+
+message RefundReply {
+  string message = 1;
+}
+
+message NotifyRequest {
+}
+
+message NotifyReply {
+	string orderId = 1;
+	string customerid = 2;
+	string message = 3;
+}
+&lt;/pre&gt;
+&lt;h4 style="text-align: left;"&gt;Implement RefundService&lt;/h4&gt;
+&lt;p style="text-align: left;"&gt;RefundService sınıfına bakacak olursak; yukarıda tanımladığımız 2 metodun implementasyonunun bulunduğu kod bloklarından&amp;nbsp;oluşan bi servis sınıfı olacaktır. Refund metodu m&amp;uuml;şterinin istekte bulunduğu iade işlemini tamamlarken NotifyCustomer metodu m&amp;uuml;şteriye iade işlemi ile ilgili bildirim g&amp;ouml;ndermeden sorumlu metot g&amp;ouml;revi g&amp;ouml;recektir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class RefundService : global::RefundService.RefundService.RefundServiceBase
+{
+    private readonly IRefundManager _refundManager;
+    public RefundService(IRefundManager refundManager)
+    {
+        _refundManager = refundManager;
+    }
+
+    public override Task&amp;lt;RefundReply&amp;gt; Refund(RefundRequest request, ServerCallContext context)
+    {
+        Console.WriteLine("CustomerId: " + request.Customerid + "\tOrderId: " + request.OrderId + "\tAmount:" + request.Amount + " refunded");
+        return Task.FromResult(new RefundReply
+        {
+            Message = "Reply from RefundService " + request.OrderId + " Refunded",
+        });
+    }
+
+    public override async Task NotifyCustomer(NotifyRequest request, IServerStreamWriter&amp;lt;NotifyReply&amp;gt; responseStream, ServerCallContext context)
+    {
+        while (!context.CancellationToken.IsCancellationRequested)
+        {
+            var refunds = _refundManager.GetRefundList();
+
+            foreach (var item in refunds)
+            {
+                var reply = new NotifyReply { OrderId = item };
+                await responseStream.WriteAsync(reply);
+            }
+        }
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;gRPC Service uygulamamız artık hazır tek yapmamız gereken uygulamayı &amp;ccedil;alıştırmak. Run ettikten sonra console'da aşağıdaki gibi service ile ilgili info-log'lar g&amp;ouml;receksinizdir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/ntcr_grp_c_img4.PNG" alt="" width="569" height="206" /&gt;&lt;/p&gt;
+&lt;p&gt;Sunucu, varsayılan ayarlara g&amp;ouml;re HTTPS (ve HTTP kullanarak 5000) kullanarak 5001 numaralı port'u dinlemeye başlayacaktır. RefundService uygulamamız artık hazır ve bir sonraki yazımızda yeni client'lar tanımlayarak Refund ve NotifyCustomer metotlarını consume edebiliriz.&lt;/p&gt;
+&lt;p&gt;Bu yazımızın sonuna gelmiş olduk. &amp;Ouml;zetleyecek olursak; gRPC nedir ne gibi ama&amp;ccedil;lar i&amp;ccedil;in kullanılır, en basit haliyle Asp.Net Core kullanılarak bir gRPC Service nasıl oluşturulur &amp;ouml;ğrenmiş olduk. Bir sonraki yazımızda bu servis metotları i&amp;ccedil;in client uygulamaları yazacağız. gRPC ile ilgili &amp;ccedil;ok daha fazla &amp;ouml;rnek dotnet uygulamalarını bu &lt;a href="https://github.com/grpc/grpc-dotnet"&gt;sayfada &lt;/a&gt;bulabilirsiniz.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/gRPC-service-and-client-net-core"&gt;Source&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2020-05-02 16:00:00</pubDate>
+  <lastModified>2020-05-02 20:48:05</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>grpc-nedir-net-core-grpc-service-olusturma</slug>
+  <tags>
+    <tag>gRPC nedir</tag>
+    <tag>net core gRPC kullanımı</tag>
+    <tag>asp.net core</tag>
+    <tag>Unary RPC</tag>
+    <tag>Server Streaming RPC</tag>
+    <tag>gRPC Implementation</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>cbc2ab0e-9b45-49ec-a014-6278eb7cfdc5</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

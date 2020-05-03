@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>C# Compare Two Objects and Get Differences</title>
+  <description>namespace ConsoleApp1
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+  </description>
+  <content>&lt;p&gt;Db de kayıtlı bulunan bir nesne&amp;nbsp;i&amp;ccedil;in Update işlemi yaparken ka&amp;ccedil;ınılmazdır ki sizden sadece ilgili objede değişen alanların g&amp;ouml;nderilmesi veya değişen alan var mı yok mu diye bir takım can sıkıcı&amp;nbsp;validasyonlar yapmanız istenir ki hele bir de işin i&amp;ccedil;ine javascript girerse yemede yanında yat. İşte bu gibi durumlar i&amp;ccedil;in gidip s&amp;uuml;rekli olarak mevcut objedeki alanla yeni değer compare edilip&amp;nbsp;değişmiş mi değişmemiş mi diye bir s&amp;uuml;r&amp;uuml; logic yazmayı tabii ki de pek istemeyiz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir case &amp;uuml;zerinden&amp;nbsp;anlatmak gerekirse; aşağıdaki gibi &lt;strong&gt;User&lt;/strong&gt; diye bir modeliniz&amp;nbsp;ve sizden &lt;strong&gt;UpdateUser&lt;/strong&gt; adından bir end-point yazmanız isteniyor ve analizde validasyon olarak objede bulunan hangi alan kullanıcı tarafından değiştirilmiş bunlarla ilgili log tutmanız veya bilgilendirme emaili atmanız gerektiği yazılmış.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class User
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string EMail { get; set; }
+        public DateTime BirthDate { get; set; }
+        public int ZipCode { get; set; }
+        public bool IsPublic { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Gidip db de kayıtlı bulunan objedeki property ile kullanıcıdan aldığınız değeri teker teker compare etmek istemeyiz elbette &lt;strong&gt;&amp;nbsp;if(dbUserModel.FirstName == newUserModel.FirstName) . &lt;/strong&gt;Bu gibi bir durum i&amp;ccedil;in Reflection'dan faydalanabiliriz. Aşağıdaki gibi bir &lt;strong&gt;MemberComparisonResult&lt;/strong&gt;&amp;nbsp;adında bir model tanımlayalım ve&amp;nbsp;generic tanımlayacağımız &lt;strong&gt;CompareObjectsAndGetDifferences&lt;/strong&gt;&amp;nbsp;&amp;nbsp;adından ki metottan bu modeli d&amp;ouml;nd&amp;uuml;relim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class MemberComparisonResult
+    {
+        public string Name { get; }
+        public object FirstValue { get; }
+        public object SecondValue { get; }
+
+        public MemberComparisonResult(string name, object firstValue, object secondValue)
+        {
+            Name = name;
+            FirstValue = firstValue;
+            SecondValue = secondValue;
+        }
+
+        public override string ToString()
+        {
+            return Name + " : " + FirstValue.ToString() + (FirstValue.Equals(SecondValue) ? " == " : " != ") + SecondValue.ToString();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi ise&amp;nbsp;&lt;strong&gt;CompareObjectsAndGetDifferences&lt;/strong&gt; adındaki metodumuzu aşağıdaki&amp;nbsp;yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public static List&amp;lt;MemberComparisonResult&amp;gt; CompareObjectsAndGetDifferences&amp;lt;T&amp;gt;(T firstObj, T secondObj)
+        {
+            var differenceInfoList = new List&amp;lt;MemberComparisonResult&amp;gt;();
+
+            foreach (var member in typeof(T).GetMembers())
+            {
+                if (member.MemberType == MemberTypes.Property)
+                {
+                    var property = (PropertyInfo)member;
+                    if (property.CanRead &amp;amp;&amp;amp; property.GetGetMethod().GetParameters().Length == 0)
+                    {
+                        var xValue = property.GetValue(firstObj, null);
+                        var yValue = property.GetValue(secondObj, null);
+                        if (!object.Equals(xValue, yValue))
+                            differenceInfoList.Add(new MemberComparisonResult(property.Name, xValue, yValue));
+                    }
+                    else
+                        continue;
+                }
+            }
+            return differenceInfoList;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Son olarak da yazdığımız metodu aşağıdaki gibi bir ConsoleApplication'da test edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        static void Main(string[] args)
+        {
+            var existingUser = new User
+            {
+                FirstName = "Mestan",
+                LastName = "Tosuner",
+                BirthDate = DateTime.Today.AddYears(23),
+                EMail = "mestan@mestanali.com",
+                ZipCode = 34000,
+                IsPublic = false
+            };
+
+            var existingUserWithNewValue = new User
+            {
+                FirstName = "Mestan Ali",
+                LastName = "Tosuner",
+                BirthDate = DateTime.Today.AddYears(23),
+                EMail = "mestan@mestanali.com",
+                ZipCode = 55400,
+                IsPublic = true
+            };
+
+            var changes = CompareObjectsAndGetDifferences(existingUser, existingUserWithNewValue);
+            foreach (var item in changes)
+            {
+                Console.WriteLine(item.ToString());
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Projenizi &amp;ccedil;alıştırdıktan sonra ekran g&amp;ouml;r&amp;uuml;nt&amp;uuml;s&amp;uuml; aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2017/compare_two_obj_find_difference_img.png" alt="" width="450" height="291" /&gt;&lt;/p&gt;
+&lt;p&gt;G&amp;ouml;rd&amp;uuml;ğ&amp;uuml;n&amp;uuml;z gibi existingUserWithNewValue ismindeki modeldeki değerler kullanıcıdan yeni alınan değerlere sahip. Yukarıdaki ekran g&amp;ouml;r&amp;uuml;nt&amp;uuml;s&amp;uuml;nde de&amp;nbsp;bize FirstName, ZipCode ve IsPublic alanlarının g&amp;uuml;ncellendiğini s&amp;ouml;ylemekte ve ilk değerleri ile ikinci değerlerini ekrana display etmekte.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-05-07 21:25:00</pubDate>
+  <lastModified>2017-03-28 13:22:04</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>c-compare-two-objects-and-get-differences</slug>
+  <tags />
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>PostSharp İle Request Response Loglama</title>
+  <description>&amp;Ccedil;ok k&amp;uuml;&amp;ccedil;&amp;uuml;k bazlı projeleri saymazsak Log tutmak bir projede olmazsa olmazlard</description>
+  <content>&lt;p&gt;&amp;Ccedil;ok k&amp;uuml;&amp;ccedil;&amp;uuml;k projeleri saymazsak Log tutmak bir projede olmazsa olmazlardandır. Hele ki o proeje bir enterprise proje ise m&amp;uuml;şteri size burdan kuş bile ge&amp;ccedil;se onun log'unu g&amp;ouml;rmek istiyorum gibi bir c&amp;uuml;mle dahi kurabilir.Bu t&amp;uuml;r bir projede m&amp;uuml;şterinin loglamanızı isteyeceği şeylerin başında yapılan request ve response'lar gelir. Metota gelen request ve response'u loglamak i&amp;ccedil;in &lt;a href="/post/Aspect-Oriented-Programming"&gt;Aspect Oriented&lt;/a&gt; yazımızda da bahsettiğim &amp;uuml;zre AOP paradigmasından yararlanarak request response log'larını tutabiliriz. Bunun i&amp;ccedil;in Postsharp kullanıcaz.&lt;/p&gt;
+&lt;p&gt;Postsharp ile Excetion Handling yazısında da bahsettiğimiz gibi OnMethodBoundaryAspect class ile sahip olduğumuz bazı metotlar vardı. &lt;a href="/post/PostSharp-Exception-Handling"&gt;Exception Handling&lt;/a&gt; i&amp;ccedil;in OnException metodunu kullanmıştık. Request Response log i&amp;ccedil;in OnEntry ve OnExit diye 2 metot mevcut. İsimlerinden de anlaşıldığı &amp;uuml;zre bu metotlar ilgili metota giriş ve metottan &amp;ccedil;ıkış anında bir takım işlemler yapmamızı sağlar.&lt;/p&gt;
+&lt;p&gt;*PostSharp kurulumu vs bilgileri i&amp;ccedil;in &lt;a href="/post/PostSharp-Exception-Handling"&gt;şu &lt;/a&gt;yazıyı inceleyebilirsiniz.&lt;/p&gt;
+&lt;p&gt;Case'imiz ş&amp;ouml;yle olsun TracingAspect adında OnMethodBoundaryAspect den inherit olan bir class tanımlayalım ve OnEntry &amp;amp; OnExit metotlarını override edelim ve bu metotlar i&amp;ccedil;erisinde gelen request response'u JSON formatında loglayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    [Serializable]
+    public class TracingAspect : OnMethodBoundaryAspect
+    {
+        JavaScriptSerializer serializer = new JavaScriptSerializer();
+        public override void OnEntry(MethodExecutionArgs args)
+        {
+            var jsonRequest = serializer.Serialize(args.Arguments);
+            LogMessage(jsonRequest);
+        }
+
+        public override void OnExit(MethodExecutionArgs args)
+        {
+            var jsonResponse = serializer.Serialize(args.ReturnValue);
+            LogMessage(jsonResponse);
+        }
+
+        private void LogMessage(string message)
+        {
+            Console.Write(message);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi ise EFT işlemi yapan bir metot yazalım ve bu metot parametre oalrak TransferRequest objesi alsın ve response olarak TransferResponse adında bir model d&amp;ouml;ns&amp;uuml;n.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; class Program
+    {
+        static void Main(string[] args)
+        {
+            var request = new TransferRequest
+            {
+                Amount = 540,
+                ReceiverIBAN = "TR33 0006 1005 1978 6457 8413 26",
+                SenderIBAN = "TR33 0006 1005 1978 6457 8413 26"
+            };
+
+            var resp = MoneyTransfer(request);
+        }
+
+        [TracingAspect] //Aspect'i ekliyoruz
+        public static TransferResponse MoneyTransfer(TransferRequest request)
+        {
+            var resp = new TransferResponse
+            {
+                IsSuccess = true,
+                Message = "Transfer İşleminiz Ger&amp;ccedil;ekleşti."
+            };
+            return resp;
+        }
+
+        public class TransferRequest
+        {
+            public decimal Amount { get; set; }
+            public string SenderIBAN { get; set; }
+            public string ReceiverIBAN { get; set; }
+        }
+
+        public class TransferResponse
+        {
+            public bool IsSuccess { get; set; }
+            public string Message { get; set; }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Main fonksiyon i&amp;ccedil;erisinde MoneyTransfer metoduna istekte bulunduğumuzda Metota girerken OnEntry'ye, metotdan &amp;ccedil;ıkarken de OnExit'e d&amp;uuml;şecektir ve LogMessage fonsiyonuna aşağıdaki gibi message parametlerini g&amp;ouml;nderecektir.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;OnEntry =&amp;gt;&amp;nbsp;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[{"Amount":540,"SenderIBAN":"TR33 0006 1005 1978 6457 8413 26","ReceiverIBAN":"TR33 0006 1005 1978 6457 8413 26"}]&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;OnExit =&amp;gt;&amp;nbsp;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;{"IsSuccess":true,"Message":"Transfer İşleminiz Ger&amp;ccedil;ekleşti."}&lt;br /&gt;&amp;nbsp;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre Postsharp sayesinde request ve response log tutma işlemini &amp;ccedil;ok kolay bir şekilde halledebiliyoruz ve aynı zamanda AOP bizlere reusable aspect'ler yazın diyor bizde TracingAspect'i uyulamada istediğimiz her hangi bir yerde kullanıp log tutma işlemini tek bir yerden y&amp;ouml;netebiliriz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-07-23 18:50:00</pubDate>
+  <lastModified>2016-06-28 07:42:41</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>PostSharp-Trace-Requests-and-Responses</slug>
+  <tags>
+    <tag>postsharp</tag>
+    <tag>AOP</tag>
+    <tag>Aspect-Oriented Programming</tag>
+    <tag>request response</tag>
+    <tag>tracing</tag>
+    <tag>OnEntry</tag>
+    <tag>OnExit</tag>
+    <tag>OnMethodBoundaryAspect</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

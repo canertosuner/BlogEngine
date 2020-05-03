@@ -1,0 +1,214 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core In-Memory Cache</title>
+  <description>Daha önceki Asp.Net Core yazılarında as.net core'a giriş yapıp sonrasında asp.net core framework ile birlikte gelen built-in container'ını incelemiştik.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki&amp;nbsp;&lt;a href="/?tag=asp.net+core"&gt;Asp.Net Core yazılarında&lt;/a&gt;&amp;nbsp;as.net core'a giriş yapıp sonrasında asp.net core framework ile birlikte gelen built-in container'ını incelemiştik.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/memory_Cache_imgdfasdf.png" alt="" width="685" height="292" /&gt;&lt;/p&gt;
+&lt;p&gt;Asp.Net Core Windows, Linux, MacOS &amp;uuml;zerinde &amp;ccedil;alışan moden web uygulamaları geliştirmemizi sağlayan mod&amp;uuml;ler bir framework'd&amp;uuml;r. Mod&amp;uuml;ler olmasının dezavantajı olarak da klasik Asp.net k&amp;uuml;t&amp;uuml;phanesine kıyasla i&amp;ccedil;erisinde default olarak gelen bir &amp;ccedil;ok &amp;ouml;zellik bulunmamaktadır. Bunlardan biride default olarak i&amp;ccedil;erisinde bir Cache object bulunmuyor ancak bir ka&amp;ccedil; k&amp;uuml;&amp;ccedil;&amp;uuml;k geliştirmeyle uygulamanıza hem in-memory hemde&amp;nbsp;distributed caching &amp;ouml;zelliklerini kazandırabiliyoruz..&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu yazımızda da asp.net core uygulamamıza in-memory cache &amp;ouml;zelliğini nasıl kazandırabiliriz basit bir &amp;ouml;rnek ile&amp;nbsp; inceleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Enable In-Memory Cache&lt;/h3&gt;
+&lt;p&gt;In-memory cache &amp;ouml;zelliği asp.net core i&amp;ccedil;erisinde bir service olarak bulunmaktadır. Bu servis default kapalı gelir yapmamız gereken startup.cs i&amp;ccedil;erisinde bulunan ConfigureServices metodunda aşağıdaki gibi cache servisini a&amp;ccedil;mak.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddMvc();
+    services.AddMemoryCache();
+}&lt;/pre&gt;
+&lt;p&gt;Core projelerinde in-memory cache kullanmamızı sağlayan aray&amp;uuml;z&amp;uuml;n adı IMemoryCache. Bu interface'e ait metotları vs. kullanarak cache set,get,remove gibi işlemleri yapabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface IMemoryCache : IDisposable
+{
+    bool TryGetValue(object key, out object value);
+    ICacheEntry CreateEntry(object key);
+    void Remove(object key);
+}&lt;/pre&gt;
+&lt;h3&gt;Using IMemoryCache to Cache&lt;/h3&gt;
+&lt;p&gt;ConfigureServices metodu i&amp;ccedil;erisinde servisi aktifleştirdikten sonra IMemoryCache interface'ini kullanmak istediğimiz katmana ait constructor'da inject etmemiz gerekmekte.&lt;br /&gt;Bizde geriye product list return ettiğimiz bir controller tanımlayarak IMemoryCache interface'ini aşağıdaki gibi const. inj. parameter olarak verelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Route("api/[controller]")]
+public class ProductController : Controller
+{
+    private readonly IMemoryCache _memoryCache;
+    public ProductController(IMemoryCache memoryCache)
+    {
+        _memoryCache = memoryCache;
+    }
+
+    // GET api/values
+    [HttpGet]
+    public IEnumerable&amp;lt;Product&amp;gt; Get()
+    {
+
+    }
+}
+
+
+public class Product
+{
+    public int Quantity { get; set; }
+    public string Name { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;Şimdi ise get metodunun i&amp;ccedil;erisini dolduralım.&amp;nbsp;Set metodu parametre olarak 1:key, 2:value, 3:cacheOptions . Cache options olarak AbsoluteExpiration;cache expire s&amp;uuml;resi ve Priority; memory şiştiğinde cache objelerini hangi priority'de silecek bunun bilgisinin bulunduğu ayarları set edeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[HttpGet]
+public IEnumerable&amp;lt;Product&amp;gt; Get()
+{
+    const string cacheKey = "productListKey";
+
+    if (!_memoryCache.TryGetValue(cacheKey, out List&amp;lt;Product&amp;gt; response))
+    {
+        response = new List&amp;lt;Product&amp;gt; { new Product { Name = "test 1 ", Quantity = 20 }, new Product { Name = "test 2", Quantity = 45 } };
+
+        var cacheExpirationOptions =
+            new MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTime.Now.AddMinutes(30),
+                Priority = CacheItemPriority.Normal
+            };
+        _memoryCache.Set(cacheKey, response, cacheExpirationOptions);
+    }
+    return response;
+}&lt;/pre&gt;
+&lt;p&gt;Gelen ilk request i&amp;ccedil;in cache'de o key'e ait bir obje olmadığından ilk response source'a gidip(bir repository yada service layer olabilir) d&amp;ouml;nen değer alınıp 30 dkka expire s&amp;uuml;resi set edilerek oluşturacaktır. Artık ondan sonraki b&amp;uuml;t&amp;uuml;n request'ler 30 dkka s&amp;uuml;resince source'a gitmeden response'u cache'de bulup Get işlemi yapıp return edecektir. Expire s&amp;uuml;resi dolduğunda ise ilgili key ve obje cache'den silinecektir.&lt;/p&gt;
+&lt;p&gt;Set, Get yapabildiğimiz gibi Remove işlemide&amp;nbsp;yapabiliriz. Bunun i&amp;ccedil;in cacheKey değerini parametre olarak Remove metoduna verip call yapmak yeterli.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; _memoryCache.Remove(cacheKey);&lt;/pre&gt;
+&lt;p&gt;CacheItemPriority enum'ı i&amp;ccedil;erisinde Low, Normal, High, NeverRemove değerleri mevcut. CachedObject Priority değerine g&amp;ouml;re memory de yer a&amp;ccedil;mak i&amp;ccedil;in sırayla silinir. Memory'den otomatik silme işlemi yapıldığında bunun bilgisini bize iletmesini sağlayan bir callback handler metodunu aşağıdaki gibi options'a register edebiliriz ve silme işlemi yapılırken bu metot tetiklenerek bize haber verir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; cacheExpirationOptions.RegisterPostEvictionCallback
+     (ProductGetALLCacheItemChangedHandler, this);
+ _memoryCache.Set(cacheKey, response, cacheExpirationOptions);&lt;/pre&gt;
+&lt;p&gt;Cache nerede ve nasıl uygulanması gerektiğine karar verildiğinde server-side bir uygulama i&amp;ccedil;in olmazsa &amp;ouml;zelliklerden biri haline gelmiştir. Asp.net core'da da yazının başında bahsettiğimiz gibi memory ve distributed cache işlemleri yapmamızı sağlayan service'ler bulunmaktadır. Bu yazımızda basit&amp;ccedil;e memory cache &amp;ouml;zelliğini projemize nasıl kazandırabiliriz konusuna değindik. Sonraki yazılarda redis kullanarak distributed cache yapısını uygulamamıza nasıl entegre edebiliriz inceleyeceğiz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-01-19 21:10:00</pubDate>
+  <lastModified>2020-01-20 08:22:13</lastModified>
+  <raters>6</raters>
+  <rating>5</rating>
+  <slug>asp-net-core-in-memory-cache</slug>
+  <tags>
+    <tag>In-Memory Cache</tag>
+    <tag>cache</tag>
+    <tag>.net core cache</tag>
+    <tag>asp.net core cache</tag>
+    <tag>asp.net core memory cache</tag>
+    <tag>IMemoryCache</tag>
+    <tag>asp.net core</tag>
+  </tags>
+  <comments>
+    <comment id="e90a2366-6062-42b2-8eec-85428e02d766" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-02-08 11:46:00</date>
+      <author>inan</author>
+      <email>inanyalcin75@gmail.com</email>
+      <country />
+      <ip>188.3.52.2</ip>
+      <avatar />
+      <content>Merhabalar, yazınız çok güzel öncelikle 
+
+Bir sorum olucak &amp;quot;memorycache&amp;quot; controller seviyesinde çalışıyor ama .net core web projesine referans ettiğim library project içinde çalışmıyor  kodlar ben mi birşeyi yanlış yapıyorum yoksa normal mi ?
+
+.net core 2.0</content>
+    </comment>
+    <comment id="8deb2d82-bfc8-4aa2-b872-8a887b89d02d" parentid="e90a2366-6062-42b2-8eec-85428e02d766" approved="True" spam="False" deleted="False">
+      <date>2018-02-08 18:43:49</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.162.38</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba, değerli yorumun için teşekkürler.
+Eğer web projesinde yazıda belirtilen cache module&amp;#39;ünü enable ettiysen bu projeye referans verilen bütün .net core library&amp;#39;lerin de IMemoryCache interface&amp;#39;ini kullanarak cache yönetimini rahatlıkla yapabiliyor olmalısın. İlgili kod bloğunu mail olarak iletebirsen detaylıca bakabiliriz.</content>
+    </comment>
+    <comment id="7e03feff-3db7-4589-b0d0-4d3d9d8f6a1e" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-02-10 15:14:29</date>
+      <author>Naci Yetkin</author>
+      <email>naciyetkin@hotmail.com</email>
+      <country />
+      <ip>78.178.36.150</ip>
+      <avatar />
+      <content>Teşekkürler :)</content>
+    </comment>
+    <comment id="d99e4b47-419f-4fdd-aa4a-6d1d8cad0ece" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-12-24 11:11:47</date>
+      <author>Çağrı</author>
+      <email>Ak&amp;#231;ay</email>
+      <country />
+      <ip>213.74.149.234</ip>
+      <avatar />
+      <content>Merhaba,
+redis-server.exe açıkken  kodlar çalışıyor ama kaplıyken çalışmıyor. Redisi otomatik olarak çalıştıramıyor muyuz ?</content>
+    </comment>
+    <comment id="432da859-1353-48f8-aa73-5f10b5b7088d" parentid="d99e4b47-419f-4fdd-aa4a-6d1d8cad0ece" approved="True" spam="False" deleted="True">
+      <date>2018-12-25 14:32:50</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.161.6</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba
+Redis&amp;#39;i windows makinanda service olarak tanımlayabilirsin yada bir docker-container üzerinde host edip üzerinde çalıştığı işletim sistemi ayakta olduğu sürece redis-server da çalışacaktır.</content>
+    </comment>
+    <comment id="6e5b4c68-81f9-4cde-83b9-e555fcecb1ca" parentid="d99e4b47-419f-4fdd-aa4a-6d1d8cad0ece" approved="True" spam="False" deleted="True">
+      <date>2018-12-25 14:33:46</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.161.6</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba
+Redis&amp;#39;i windows makinanda service olarak tanımlayabilirsin yada bir docker-container üzerinde host edip container ayakta olduğu sürece redis-server da çalışacaktır.</content>
+    </comment>
+    <comment id="3bdf690a-8806-4068-adc2-3b6c03b4ebd5" parentid="d99e4b47-419f-4fdd-aa4a-6d1d8cad0ece" approved="True" spam="False" deleted="False">
+      <date>2018-12-25 14:34:42</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.161.6</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba
+Redis&amp;#39;i windows makinanda service olarak tanımlayabilirsin yada bir docker-container üzerinde host edip container ayakta olduğu sürece redis-server da çalışacaktır.</content>
+    </comment>
+    <comment id="718f050f-2d71-4b06-8da3-e576ed596d51" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-02-17 10:19:27</date>
+      <author>Gökhan</author>
+      <email>gokhan_bilisim@hotmail.com</email>
+      <country />
+      <ip>195.174.95.167</ip>
+      <avatar />
+      <content>Request&amp;#39;e göre yapabiliyor muyuz? Yani kullanıcı bazlı değişken verilerde kullanılabiliyor mu? Daha net anlatmak gerekirse, ürün listesi çektiğimizi varsayalım, ancak bir ürünü beli bir kullanıcı için kırmızı kazaklarda %20, mavi kazaklarda %40 indirim yapmak istiyorum diyelim. Bunu cache te tutup nasıl döndürebilirim?</content>
+    </comment>
+    <comment id="c8fc0875-eea3-4af8-ab55-e43e28539457" parentid="718f050f-2d71-4b06-8da3-e576ed596d51" approved="True" spam="False" deleted="False">
+      <date>2019-02-24 09:20:01</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.162.23</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Yapabilirsin tabiki. İlgili kullanıcının indirimleri hesaplanmış ürün listesini ilk defa Cache atarken CustomerId yada tam olarak karşılığı neyse bu bilgiyi de cacheKey hesaplarken kullanabilir yada Cache&amp;#39;de bulunan bilgileri retriew ederken customer bazlı filtreleyebileceğin bir yapı tasarlayarak kullanabilirsin diye düşünüyorum.</content>
+    </comment>
+    <comment id="03310a7d-fb4c-4acc-a4ad-475710bb3ae2" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-03-12 10:37:49</date>
+      <author>Ümit ATEŞ</author>
+      <email>umitatestr@gmail.com</email>
+      <country />
+      <ip>78.181.53.138</ip>
+      <avatar />
+      <content>Emeğin için teşekkür ederim. Klavyene sağlık.
+Bu sistem memory üzerinde çalıştığı için dikkat etmemiz gereken noktalar nedir? </content>
+    </comment>
+    <comment id="0b704878-53c0-431d-9b60-1bc51b83d83e" parentid="03310a7d-fb4c-4acc-a4ad-475710bb3ae2" approved="True" spam="False" deleted="False">
+      <date>2019-03-23 16:40:25</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.162.56</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumun için teşekkürler, huge-amount-of-data dediğimiz oldukça büyük mb&amp;#39;daki verileri in-memory cache&amp;#39;de saklamaman uygulamanın çalıştığı makina için iyi olur. Birde bu distributed sistemler için önerilen bir yöntem değil diyebiliriz çünkü cache datasıno o anki uygulamanın host edildiği makinanın ram&amp;#39;inde saklıyorsun. Distributed sistemler için Redis vs düşünebilirsin.</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+  </categories>
+  <notifications>
+    <email>inanyalcin75@gmail.com</email>
+    <email>Akçay</email>
+    <email>gokhan_bilisim@hotmail.com</email>
+    <email>umitatestr@gmail.com</email>
+  </notifications>
+</post>

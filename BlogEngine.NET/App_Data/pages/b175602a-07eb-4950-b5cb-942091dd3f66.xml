@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<page>
+  <title>Hakkımda</title>
+  <description>&amp;nbsp;
+
+&amp;nbsp;
+&amp;nbsp;&amp;nbsp;
+
+Lisedeyken tek hedefi&amp;nbsp;İnşaat M&amp;uuml;h.&amp;nbsp;b&amp;ouml;l&amp;uuml;m&amp;uuml; </description>
+  <content>&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:cpp;auto-links:false;toolbar:false" contenteditable="false"&gt;#include &amp;lt;iostream&amp;gt;
+
+int main()
+{
+  std::cout &amp;lt;&amp;lt; "Hello World!";
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <keywords />
+  <slug>about</slug>
+  <parent>00000000-0000-0000-0000-000000000000</parent>
+  <isfrontpage>False</isfrontpage>
+  <showinlist>True</showinlist>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <sortorder>0</sortorder>
+  <datecreated>2013-05-28 11:01:00</datecreated>
+  <datemodified>2017-01-02 18:55:52</datemodified>
+</page>

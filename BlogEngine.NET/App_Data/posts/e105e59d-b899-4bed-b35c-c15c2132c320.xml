@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Optimistic Lock  Nedir ? Pessimistic Lock Nedir ? Data concurrency</title>
+  <description>Db'si olan ve son kullanıcı tarafından CRUD işlemlerinin bolca yapılabildiği bir proje geliştiriyorsanız veri tutarlılığı sizin için oldukça önemli bir hal almak durumundadır. Kayıtlı olan veriyi son kullanıcıya ulaştırabilip en güncel veri üzerinden transaction'ları işleyebilmek</description>
+  <content>&lt;p&gt;Db'si olan ve son kullanıcı tarafından&amp;nbsp;CRUD işlemlerinin bolca yapılabildiği&amp;nbsp;bir proje geliştiriyorsanız&amp;nbsp;veri tutarlılığı sizin i&amp;ccedil;in olduk&amp;ccedil;a &amp;ouml;nemli bir hal almak durumundadır. Kayıtlı olan veriyi&amp;nbsp;son kullanıcıya ulaştırabilip en g&amp;uuml;ncel veri &amp;uuml;zerinden transaction'ları işleyebilmek ve stale&amp;nbsp;yada dirty data olarak da adlandırılan bayat veriyi handle edip kullanıcının erişmesini engellemek olduk&amp;ccedil;a &amp;ouml;nemlidir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Transactional operasyonlar &lt;strong&gt;Concurrency&lt;/strong&gt;'yi sağlayabilmek adına&amp;nbsp;genelde &amp;uuml;zerinde işlem yapılan veriye lock işlemi uygulanarak ger&amp;ccedil;ekleştirilirler.&amp;nbsp;Bu lock işlemi i&amp;ccedil;in 2 farklı yaklaşım vardır. &lt;strong&gt;Pessimistik Lock&lt;/strong&gt; ve &lt;strong&gt;Optimistic Lock.&lt;/strong&gt;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;strong&gt;&lt;img src="/image.axd?picture=/2017/optimistic_pessimistic_lock_imgg.JPG" alt="" /&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Pessimistic Lock&lt;/strong&gt;&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;O an işlem ger&amp;ccedil;ekleşirken &amp;uuml;zerinde &amp;ccedil;alışılan kayıt lock'lanır ki o anda başka birisi o kayıt &amp;uuml;zerinde değişiklik yapmasın. Bu işlem session bazlı olur ve transaction başlarken a&amp;ccedil;ılan session sonlandırılıncaya veya rollback yapılıncaya kadar işlem yapılan row db de lock'lanır. &amp;Ouml;rnek olarak bir bankacılık uygulaması d&amp;uuml;ş&amp;uuml;n&amp;uuml;n ve bir hesaba aynı anda hem para &amp;ccedil;ekme hemde para yatırma işlemi geldi.&amp;nbsp;İlk para yatırma işlemini yapan thread &amp;ouml;ncelikli d&amp;uuml;ş&amp;uuml;nd&amp;uuml;ğ&amp;uuml;m&amp;uuml;zde bu&amp;nbsp;transaction'ı ger&amp;ccedil;ekleştiren session o account'u işlem sonlanıncaya kadar lock'lar ve para &amp;ccedil;ekme işlemini bekletir. Transaction&amp;nbsp;sonlandıktan sonra diğer thread'in ger&amp;ccedil;ekleştireceği para &amp;ccedil;ekme işleminin session'nını a&amp;ccedil;arak g&amp;uuml;ncel veri &amp;uuml;zerinden işlemlerin ger&amp;ccedil;ekleşmesine olanak sağlar. Bunu yapmasındaki ama&amp;ccedil; g&amp;uuml;ncel veri &amp;uuml;zerinden transaction'ı ge&amp;ccedil;irip oluşabilecek kayıpları engellemektir. Ancak pessimistic lock'ın&amp;nbsp;deadlock'lara sebep&amp;nbsp;olabileceğini de&amp;nbsp;unutmayalım.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Optimistic Lock&lt;/strong&gt;&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Optimistic Lock ise, adından da anlaşılacağı &amp;uuml;zre "iyimser" birden fazla işlemin birbirini etkilemeden ger&amp;ccedil;ekleşeceğini ve kimsenin kimse &amp;uuml;zerinde bir lock koymayacağını s&amp;ouml;yler. Diğer bir deyişle farklı thread'ler de aynı row &amp;uuml;zerinde işlem yapılırken herhangi bir lock işlemi olmadan update edilmek&amp;nbsp;istenen verinin bayat olup olmadığını o verinin kayıtlı olduğu&amp;nbsp;tabloda yer alan versiyon numarası olarak da adlandırılan bir column'da bulunan değeri kontrol eder ve eğer versiyon eşleşmiyorsa yani veri bayat ise işlem geri &amp;ccedil;ekilir.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Peki bayat(stale) data ne demek ?&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek &amp;uuml;zerinden anlatacak olursak; bir internet sitesinde kayıtlı bulunan adres bilginizi g&amp;uuml;ncellemek istiyorsunuz.&amp;nbsp;Aynı anda 2 farklı bilgisayardan bilgileri g&amp;uuml;ncelle sayfasını a&amp;ccedil;tınız ve&amp;nbsp;adresiniz o an "Samsun" olarak kayıtlı yani 2 ekranda da "Samsun" yazıyor. İlk bilgisayarda bulunan kişi adres bilgisini "Ankara" olarak değiştirdi ve g&amp;uuml;ncelle butonuna basıp bilgiyi g&amp;uuml;ncelledi.&lt;/p&gt;
+&lt;p&gt;İkinci ekranda bulunan kişi ise ekranda halen "Samsun" yazılı iken adres bilgisini "İstanbul" olarak değiştirdi ve g&amp;uuml;ncelle butonuna basıp bilgiyi g&amp;uuml;ncelledi. Ekranda yazan "Samsun"&amp;nbsp;kaydı artık bizim i&amp;ccedil;in bayat bir kayıttır ve&amp;nbsp;birinci kullanıcı değişikliği "Samsun" =&amp;gt; "Ankara" yaptığını d&amp;uuml;ş&amp;uuml;n&amp;uuml;rken ikinci kişi bu değişikliği "Samsun" =&amp;gt; "İstanbul" yaptığını d&amp;uuml;ş&amp;uuml;n&amp;uuml;yor. Halbuki ger&amp;ccedil;ekte olan ikinci kişi adres bilgisi ekranda "Ankara" iken =&amp;gt; "İstanbul" olarak değiştirmiş oldu.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/optimistic_pessimistic_sample_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Ne oldu ? Pek de istemediğimiz bir case oluştu. İkinci kullanıcı Samsun olan kaydı İstanbul yaptığını d&amp;uuml;ş&amp;uuml;n&amp;uuml;rken aslında Ankara olan kaydı İstanbul yaptı. Yani&amp;nbsp;stale olan kaydı g&amp;uuml;ncellemiş oldu.&lt;/p&gt;
+&lt;p&gt;Optimistic Lock ile ikinci kullanıcının stale olan veriyi update etmesine şu şekilde engel olabiliriz; Eğer Ado.Net kullanıyorsanız ve db de bulunan her bir row icin birer versiyon&amp;nbsp;numarasi vb gibi kaydiniz var ise query nizde where koşuluna o row i&amp;ccedil;in g&amp;uuml;ncel olarak bulunan&amp;nbsp;version bilgisini ekleyerek kontrol sağlayabiliriz veya &lt;strong&gt;Entity Framework&lt;/strong&gt; yada &lt;strong&gt;NHibernate&lt;/strong&gt; gibi ORM tool'larından birini&amp;nbsp;kullanıyorsanız bu işlemi size bırakmadan g&amp;uuml;ncellenmek istenen row'a ait versiyon numarasını select işleminde memory de tutuyor ve o veri i&amp;ccedil;in update transaction'ı execute edilirken bu versiyon numarası db de karşılaştırıyor. Eğer o versiyon numarası db de bulunan ile aynı ise versiyon numarasını 1 artırıp execution'a izin veriyor değilse hata fırlatıyor. Hata mesajı olarak kullanılan ORM t&amp;uuml;r&amp;uuml;ne g&amp;ouml;re "&lt;strong&gt;The record you attempted to edit was modified by another user after you got the original value&lt;/strong&gt;" gibi bir message return ediyor.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Hem optimistic hemde pessimistic lock konuları&amp;nbsp;&amp;ccedil;ok fazla &amp;ouml;nemsemediğimiz anlar olsa da olduk&amp;ccedil;a &amp;ouml;nemli konulardır ve g&amp;ouml;zden ka&amp;ccedil;irdgimiz noktada kullanicilari yanlis yonlendirebilme gibi bir cok soruna sebep olabilir.&amp;nbsp;Sonraki yazılarımızda&amp;nbsp;Nhibernate veya Entity Framework kullanarak nasıl bir Optimistic Lock yapısı implement edebiliriz&amp;nbsp;inceleyeceğiz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-07-07 21:12:00</pubDate>
+  <lastModified>2020-04-08 16:05:46</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>optimistic-lock-nedir-pessimistic-lock-nedir-data-concurrency</slug>
+  <tags>
+    <tag>optimistic lock</tag>
+    <tag>pessimistic lock</tag>
+    <tag>data concurrency</tag>
+    <tag>optimistic lock nedir</tag>
+    <tag>pessimistic lock nedir</tag>
+    <tag>stale data</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>33191729-e344-4de6-8ecf-6400c88b07e7</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,51 @@
+﻿.search {
+    position: relative;
+    padding: 0;
+    overflow: hidden;
+    height: 2.5rem;
+    background-color: #f1f1f1;
+    border-radius: .125rem;
+
+    .widget-content, #searchbox {
+        padding: 0;
+        height: 100%;
+    }
+
+    input {
+        height: 100%;
+        background: none;
+
+        &[type=text] {
+            display: block;
+            color: #495057;
+            font-size: 1rem;
+            width: 100%;
+            padding: 0 .75rem;
+            border: 0;
+            background: none;
+
+            &:focus {
+                outline: none;
+            }
+        }
+
+        &[type=button] {
+            position: absolute;
+            right: 0;
+            top: 0;
+            border: none;
+            padding: 0 1rem;
+            border-left: 1px solid #ddd;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            font-weight: 500;
+            font-size: .875rem;
+            text-transform: uppercase;
+
+            &:hover {
+                background: $color-theme-primary;
+                color: #fff;
+            }
+        }
+    }
+}

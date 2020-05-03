@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<InstalledPackages>
+  <item id="FacebookLike" version="2.0.0.1" />
+  <item id="SocialBuzz" version="1.5" />
+  <item id="ImageZoomExtension" version="2.1" />
+  <item id="TopPosts" version="2.2" />
+  <item id="TagCanvas" version="1.0" />
+  <item id="RecentTweets" version="1.2" />
+  <item id="Instagram-Widget" version="2.0.0.0" />
+  <item id="MostRead" version="2.5" />
+  <item id="PopularPosts" version="1.1.0.0" />
+  <item id="Quotations" version="1.0.0.1" />
+  <item id="FlatBlog" version="3.0.0.1" />
+  <item id="AllTuts" version="3.0.0.1" />
+  <item id="MoveToTop" version="3.0.0.1" />
+  <item id="GoogleAsyncAnalytics" version="3.0.0.1" />
+  <item id="GoogleTranslator" version="3.3.0.1" />
+</InstalledPackages>

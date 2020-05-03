@@ -1,0 +1,74 @@
+.content-stlye {
+    font-size: 1.0625rem;
+
+    h1, h2, h3, h4, h5 {
+        font-weight: 700;
+    }
+
+    h1, h2 {
+        font-size: 1.75rem;
+    }
+
+    h3, h4 {
+        font-size: 1.5rem;
+    }
+
+    .syntaxhighlighter {
+        font-size: .875rem !important;
+        margin-bottom: 2rem !important;
+        padding: 2rem 2rem 2rem 1rem !important;
+        background:#fafafa !important;
+        .line.alt2 ,.line.alt1{
+            background:#fafafa !important;
+        }
+    }
+
+    p, figure, ul, ol, table, blockquote {
+        margin-bottom: 1.75rem;
+    }
+
+    img {
+        height: auto;
+    }
+
+    blockquote {
+        background-color: #fafafa;
+        padding: 2rem;
+
+        p {
+            &:last-child {
+                margin: 0;
+            }
+        }
+    }
+
+    table {
+        font-size: 1rem;
+        width: 100%;
+        max-width: 100%;
+        border: 1px solid #ccc;
+
+        td, th {
+            padding: .75rem;
+            vertical-align: top;
+            border: 1px solid #ccc;
+        }
+
+        thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #ccc;
+        }
+    }
+
+    @media screen and (max-width:64rem - .0625rem) {
+        font-size: 1rem;
+
+        h1, h2 {
+            font-size: 1.5rem;
+        }
+
+        h3, h4 {
+            font-size: 1.25rem;
+        }
+    }
+}

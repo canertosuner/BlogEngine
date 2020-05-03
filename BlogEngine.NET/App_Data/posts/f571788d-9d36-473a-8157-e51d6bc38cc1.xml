@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>PostSharp Kullanarak Exception Handling ve Log İşlemi</title>
+  <description>Daha önce Aspect-Oriented Programming yazımızda AOP'den bahsetmiştik ve AOP'nin .Net tarafında uyarlanabilmesini sağlayan tool'lar ve bu tool'ların en yaygın olanı Postsharp olduğunu söylemiştik. Bu yazıda Postsharp kullanarak uygulamamızda meydana gelecek olan exception'ları yakalamayı sağlayan bir geliştirme yapacağız.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nce &lt;a href="/post/Aspect-Oriented-Programming"&gt;Aspect-Oriented Programming&lt;/a&gt;&amp;nbsp;yazımızda AOP'den bahsetmiştik ve AOP'nin .Net tarafında uyarlanabilmesini sağlayan tool'lar ve bu tool'ların en yaygın olanı Postsharp olduğunu s&amp;ouml;ylemiştik. Bu yazıda Postsharp kullanarak uygulamamızda meydana gelecek olan exception'ları yakalamayı sağlayan bir geliştirme yapacağız.&lt;/p&gt;
+&lt;h3&gt;Başlarken&lt;/h3&gt;
+&lt;p&gt;&amp;Ouml;ncelikle VS'yu a&amp;ccedil;ıp yeni bir proje oluşturuyoruz.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;File &amp;gt; New &amp;gt; Project &amp;gt; Console Application&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;İsim olarak ben&amp;nbsp;"PostSharpExcHand" dedim siz istediğiniz bir ismi&amp;nbsp;verebilrisiniz, sonrasında Ok'e tıklayıp projeyi oluşturuyoruz.&lt;/p&gt;
+&lt;p&gt;Daha sonra Postsharp'ı projemize ekleme işlemi var. Bunun i&amp;ccedil;in;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Tools &amp;gt; NuGet Package Manager &amp;gt; Manage NuGet Packages for Solution&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Search kısmına "&lt;strong&gt;PostSharp&lt;/strong&gt;" yazıp &amp;ccedil;ıkan sonu&amp;ccedil;lar arasından postsharp'ı bulup indiriyoruz sornasında&amp;nbsp;solution'da bulunan hangi projeye eklemek istiyorsak onu se&amp;ccedil;ip y&amp;uuml;klemi işlemini bitiriyoruz.&lt;/p&gt;
+&lt;h3&gt;Aspect Tanımlama&lt;/h3&gt;
+&lt;p&gt;AOP yazımızda aspect'lerden bahsetmiştik. Projemizde kullanacağımız reusable mod&amp;uuml;lleri aspectler halinde tanımlayıp kullanmak istediğimiz yerlerde aynı metot &amp;uuml;st&amp;uuml;nde attribute tanımlarmış gibi eklediğimizden bahsetmiştik. Bu yazıda Exception anında &amp;ccedil;alışacak olan aspect'i tanımlicaz. Bunun i&amp;ccedil;in projeye&amp;nbsp;&lt;strong&gt;ExceptionHandlerAspect&lt;/strong&gt; adında bir class ekleyelim. Postsharp ile birlikte gelen &lt;strong&gt;OnMethodBoundaryAspect&lt;/strong&gt; adında bir class var ve bu class'tan inherit olan class'lar aşağıda da g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi&amp;nbsp;override edebileceği bazı metodlara sahip oluyorlar.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/06/postsharp_method_list.gif" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Bu metotları kullanarak log,exception handling gibi bir &amp;ccedil;ok ihtiyaca &amp;ccedil;&amp;ouml;z&amp;uuml;m &amp;uuml;retebilirsiniz. Biz bu yazıda exceptionHandling işlemi yapacağımız i&amp;ccedil;in oluşturduğumuz&amp;nbsp;ExceptionHandlerAspect class'ını&amp;nbsp;&lt;strong&gt;OnExceptionAspect&lt;/strong&gt; class'ından t&amp;uuml;retiyoruz ve bu metotla birlikte gelen&amp;nbsp;&lt;strong&gt;OnException &lt;/strong&gt;metodunu override ediyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   [Serializable]
+    public class ExceptionHandlerAspect  : OnExceptionAspect
+    {
+        public override void OnException(MethodExecutionArgs args)
+        {
+            string msg =  string.Format("{0}: Error running {1}. {2}{3}",DateTime.Now, args.Method.Name, args.Exception.Message, args.Exception.StackTrace);
+            Debug.WriteLine(msg);
+            args.FlowBehavior = FlowBehavior.Continue;
+        }&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi uygulamada exception meydana geldiğinde &lt;strong&gt;OnException&lt;/strong&gt; metoduna d&amp;uuml;şecektir ve burda ihtiyaca g&amp;ouml;re log atma vs. gibi işlemleri yapabliriz.&lt;/p&gt;
+&lt;h3&gt;Tanımladığımız Aspect'i Kullanma&lt;/h3&gt;
+&lt;p&gt;Şimdi ise sırada tanımladığımız&amp;nbsp;Aspect'i projede kullanma var. Bunun i&amp;ccedil;in uygulamada Exception olabilieceğini d&amp;uuml;ş&amp;uuml;nd&amp;uuml;ğ&amp;uuml;m&amp;uuml;z metotların başına attribute olarak&amp;nbsp;&lt;strong&gt;ExceptionHandlerAspect&lt;/strong&gt;'i ekleyebilriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    class Program
+    {
+        static void Main(string[] args)
+        {
+            ThrowSampleException();
+        }
+ 
+        [ExceptionHandlerAspect]//Attribute olarak Aspect'i ekledik
+        private static void ThrowSampleException()
+        {
+            throw new NotImplementedException ();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre yukarıda bulunan&lt;strong&gt; ThrowSampleException()&lt;/strong&gt;&amp;nbsp; i&amp;ccedil;erisinde exception alındığında &amp;uuml;zerinde tanımlı bulunan &lt;strong&gt;ExceptionHandlerAspect&lt;/strong&gt;'inden dolayı bu class i&amp;ccedil;erisine gidip&amp;nbsp;&lt;strong&gt;OnException &lt;/strong&gt;metoduna d&amp;uuml;şecektir ve ilgili exception a&amp;ccedil;ıklamasını alıp artık canınız ne isterse onu yapabilirsiniz :) Log atabilirsiniz, &amp;ccedil;alışmasını istediğiniz ayrı bir process olabilir onu &amp;ccedil;alıştırabilirsiniz vs. vs.&lt;/p&gt;
+&lt;h3&gt;ThrowSampleException&amp;nbsp;IL Kodları&lt;/h3&gt;
+&lt;p&gt;ExceptionHandlerAspect&amp;nbsp;ThrowSampleException&amp;nbsp;metoduna ne kazandırdı diye IL kodlarına bakacak olursak aslında &lt;strong&gt;try/catch&lt;/strong&gt;&amp;nbsp;kullandı ve&amp;nbsp;metot i&amp;ccedil;erisinde bulunan kodları try bloğunun i&amp;ccedil;erisine alarak meydana gelecek olan exception'lar i&amp;ccedil;in catch bloğunda bunları handle eden kodları yazdı.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;private static void ThrowSampleException()
+{
+    try
+    {
+        throw new NotImplementedException();
+    }
+    catch (NotImplementedException exception)
+    {
+        MethodExecutionArgs methodExecutionArgs = new MethodExecutionArgs(null, null);
+        MethodExecutionArgs arg_1F_0 = methodExecutionArgs;
+        MethodBase m = Program.&amp;lt;&amp;gt;z__Aspects.m2;
+        arg_1F_0.Method = m;
+        methodExecutionArgs.Exception = exception;
+        Program.&amp;lt;&amp;gt;z__Aspects.a0.OnException(methodExecutionArgs);
+        switch (methodExecutionArgs.FlowBehavior)
+        {
+        case FlowBehavior.Default:
+        case FlowBehavior.RethrowException:
+            IL_55:
+            throw;
+        case FlowBehavior.Continue:
+            methodExecutionArgs.Exception = null;
+            return;
+        case FlowBehavior.Return:
+            methodExecutionArgs.Exception = null;
+            return;
+        case FlowBehavior.ThrowException:
+            throw methodExecutionArgs.Exception;
+        }
+        goto IL_55;
+    }
+}&lt;/pre&gt;
+&lt;h3&gt;Reusability&lt;/h3&gt;
+&lt;p&gt;Evet arkadaşlar aslında AOP kullanarak exception handling yapmamızda ki en b&amp;uuml;y&amp;uuml;k ama&amp;ccedil; bu&amp;nbsp;&lt;strong&gt;Reusability. &lt;/strong&gt;Tanımlamış olduğumuz aspect'i artık projenin her yerinde kullanabiliriz ve bu durum bizi &amp;ccedil;ookk ama &amp;ccedil;ok b&amp;uuml;y&amp;uuml;k bir iş y&amp;uuml;k&amp;uuml;nden kurtarmış olup spaghetti code'lar yazmamıza engel olmuştur.&lt;/p&gt;
+&lt;p&gt;Son olarak; &lt;strong&gt;AOP&amp;nbsp;&lt;/strong&gt;candır.. :)&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-07-08 22:00:00</pubDate>
+  <lastModified>2020-01-20 08:22:23</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>PostSharp-Exception-Handling</slug>
+  <tags>
+    <tag>postsharp</tag>
+    <tag>AOP</tag>
+    <tag>ExceptionHandler</tag>
+    <tag>Aspect</tag>
+    <tag>OnExceptionAspect</tag>
+    <tag>OnException</tag>
+    <tag>postsharp nedir</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

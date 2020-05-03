@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Sharepoint Add People Picker Control</title>
+  <description />
+  <content>&lt;p&gt;To add people picker on your upload.aspx or any other sharepoint aspx pages;&lt;/p&gt;
+&lt;h2&gt;First create a div for picker&amp;nbsp;&lt;/h2&gt;
+&lt;pre class="brush: js; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;div id="PeoplePickerDiv"&amp;gt;&amp;lt;/div&amp;gt;&lt;/pre&gt;
+&lt;h2 style="white-space: normal;"&gt;Write your rest api functon to get people&lt;/h2&gt;
+&lt;pre class="brush: js; first-line: 1; tab-size: 4; toolbar: false; "&gt;function initializePeoplePicker(peoplePickerElementId) {
+
+    var schema = {};
+    schema['PrincipalAccountType'] = 'User,DL,SecGroup,SPGroup';
+    schema['SearchPrincipalSource'] = 15;
+    schema['ResolvePrincipalSource'] = 15;
+    schema['AllowMultipleValues'] = true;
+    schema['MaximumEntitySuggestions'] = 50;
+    schema['Width'] = '280px';
+
+    this.SPClientPeoplePicker_InitStandaloneControlWrapper(peoplePickerElementId, null, schema);
+}&lt;/pre&gt;
+&lt;h2&gt;Initialize Your People Picker&lt;/h2&gt;
+&lt;pre class="brush: js; first-line: 1; tab-size: 4; toolbar: false; "&gt;initializePeoplePicker('PeoplePickerDiv');&lt;/pre&gt;
+&lt;h2 style="white-space: normal;"&gt;Get Selected Users&lt;/h2&gt;
+&lt;pre class="brush: js; first-line: 1; tab-size: 4; toolbar: false; "&gt;var peoplePickerUserIDArray = [];
+function peoplePickerGetSelectedUsersArray() {
+	
+    // Get the people picker object from the page.
+    var peoplePicker = this.SPClientPeoplePicker.SPClientPeoplePickerDict.PeoplePickerDiv_TopSpan;
+
+
+    // Get information about all users.
+    var users = peoplePicker.GetAllUserInfo();
+
+    var userInfo = '';
+    for (var i = 0; i &amp;lt; users.length; i++) {
+        var user = users[i];
+        peoplePickerSetUserIdArray(user.Key);
+    }
+}
+
+function peoplePickerSetUserIdArray(loginName) {
+
+    var context = new SP.ClientContext.get_current();
+    var user = context.get_web().ensureUser(loginName);
+    context.load(user);
+    context.executeQueryAsync(
+        Function.createDelegate(null, function() {
+            peoplePickerUserIDArray.push(user.get_id());
+        }),
+        Function.createDelegate(null, function(se, ea) {
+            alert('Error:' + ea.get_message());
+        })
+    );
+}
+&lt;/pre&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-05-02 10:05:00</pubDate>
+  <lastModified>2020-01-20 08:22:25</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Sharepoint-Add-People-Picker-Control</slug>
+  <tags>
+    <tag>sharepoint</tag>
+    <tag>peoplepicker</tag>
+    <tag>people</tag>
+    <tag>group</tag>
+    <tag>search</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>0b1e407c-eda9-4959-8552-c6da2babf29d</category>
+  </categories>
+  <notifications />
+</post>

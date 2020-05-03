@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Repository Pattern CRUD İşlemleri Dışında Bulunan Specific Metotlar İçin Mocking</title>
+  <description>Bir önceki yazımızda Repository Pattern için Mocking Infrastructure Oluşturma konusuna değinmiştik ve CRUD işlemleri için ortak bir setup yapısı oluşturmuştuk. Peki ya aşağıdaki sorulduğu gibi bir case ile karşılaşırsak;</description>
+  <content>&lt;p&gt;Bir &amp;ouml;nceki yazımızda &lt;a href="/post/repository-pattern-icin-reusable-mocking-yapisi"&gt;Repository Pattern i&amp;ccedil;in Mocking Infrastructure &lt;/a&gt;&lt;a href="/post/repository-pattern-icin-reusable-mocking-yapisi"&gt;O&lt;/a&gt;&lt;a href="/post/repository-pattern-icin-reusable-mocking-yapisi"&gt;luşturma&lt;/a&gt;&amp;nbsp;konusuna değinmiştik ve CRUD işlemleri i&amp;ccedil;in ortak bir setup yapısı oluşturmuştuk. Peki ya aşağıdaki sorulduğu gibi bir case ile karşılaşırsak;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Soru :&lt;/strong&gt;&lt;/span&gt; Crud metotları dışında sadece o repository'e &amp;ouml;zel bir metot tanımlamak istersek setup işlemi i&amp;ccedil;in nasıl bir yol izlemeliyiz ?&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rneğin UserRepository i&amp;ccedil;in bir &amp;ouml;nceki &lt;a href="/post/repository-pattern-icin-reusable-mocking-yapisi"&gt;&amp;ouml;rnekte &lt;/a&gt;tanımladığımız tanımladığımız All, Get, Insert, Update, Delete metotlarının dışında bir de GetByEmail() adında bir metot gerekli. Bu metot i&amp;ccedil;in gidip IRepository i&amp;ccedil;erisine yeni bir metot eklemek ve sonrasında RepositoryBaseTest i&amp;ccedil;erisine setup tanımlaması yapmak doğru olmaz &amp;ccedil;&amp;uuml;nk&amp;uuml; orası adından da anlaşıldığı &amp;uuml;zre &lt;strong&gt;Base&lt;/strong&gt;&amp;nbsp;anlayışına uyan işlemler i&amp;ccedil;in sınırlandırılmış bir yer.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu gibi durumlarda IUseRepository adında bir interface tanımlayıp ve UserRepository'yi aşağıdaki gibi&amp;nbsp;modify etmemiz yeterli olacaktır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IUserRepository
+    {
+        User GetByEmail(string email);
+    }
+
+public class UserRepository : BaseRepository&amp;lt;int, User&amp;gt;, IUserRepository
+    {
+        public User GetByEmail(string email)
+        {
+            throw new NotImplementedException();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Test tarafındaki mocking işlemi i&amp;ccedil;in ise IUserRepository interface'ini mock yaparak setup işlemini tamamlayabiliriz.&lt;/p&gt;
+&lt;p&gt;UserRepositoryTest class'ının son hali aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    [TestClass]
+    public class UserRepositoryTest : RepositoryBaseTest
+    {
+        private List&amp;lt;User&amp;gt; _userList;
+        private Mock&amp;lt;IRepository&amp;lt;int, User&amp;gt;&amp;gt; _mockRepo;
+        private Mock&amp;lt;IUserRepository&amp;gt; _mockUserRepo;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _userList = new List&amp;lt;User&amp;gt;();
+            var user1 = new User
+            {
+                Id = 1,
+                Email = "canertosuner@gmail.com",
+                FirstName = "Caner",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user1);
+
+            var user2 = new User
+            {
+                Id = 2,
+                Email = "tanertosuner@gmail.com",
+                FirstName = "Taner",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user2);
+
+            var user3 = new User
+            {
+                Id = 3,
+                Email = "janertosuner@gmail.com",
+                FirstName = "Janer",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user3);
+
+            var user4 = new User
+            {
+                Id = 4,
+                Email = "yenertosuner@gmail.com",
+                FirstName = "Yeneer",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user4);
+
+            _mockRepo = new Mock&amp;lt;IRepository&amp;lt;int, User&amp;gt;&amp;gt;();
+
+            // mock common methods
+            SetupRepositoryMock&amp;lt;int, User&amp;gt;(_mockRepo, _userList);
+
+            _mockUserRepo = new Mock&amp;lt;IUserRepository&amp;gt;();
+
+            // mock specific method
+            _mockUserRepo.Setup(x =&amp;gt; x.GetByEmail(It.IsAny&amp;lt;string&amp;gt;()))
+                .Returns(new Func&amp;lt;string, User&amp;gt;(
+                    email =&amp;gt; _userList.Single(x =&amp;gt; x.Email == email))
+                );
+        }
+
+        [TestMethod]
+        public void Get_By_Email_Then_Result_OK()
+        {
+            var userFirst = _mockRepo.Object.All().FirstOrDefault();
+
+            var userByEmail = _mockUserRepo.Object.GetByEmail(userFirst.Email);
+
+            Assert.IsNotNull(userByEmail);
+            Assert.AreEqual(userFirst.Email, userByEmail.Email);
+            Assert.AreEqual(userFirst.Id, userByEmail.Id);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda olduğu gibi ihtiyacımız olan metodu interface aracılığıyla soyutlaştırarak&amp;nbsp;common olan ortak metotlar dışında&amp;nbsp;ayrı olarak mocking işlemi yapabiliriz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-03-13 22:17:00</pubDate>
+  <lastModified>2020-01-20 08:22:18</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>repository-pattern-crud-islemeri-disinda-bulunan-metotlar-icin-mocking</slug>
+  <tags>
+    <tag>unit test</tag>
+    <tag>mocking</tag>
+    <tag>moq library</tag>
+    <tag>Repository</tag>
+    <tag>repository mocking</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>018aedb2-84ba-46ad-89f2-2d551bf7c063</category>
+  </categories>
+  <notifications />
+</post>

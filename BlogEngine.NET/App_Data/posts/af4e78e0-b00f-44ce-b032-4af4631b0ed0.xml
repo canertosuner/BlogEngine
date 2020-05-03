@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>C# Extension Method Kullanımı</title>
+  <description>Kelime anlamı genişletilebilir metod olan Extension Method'lar C#3.0 ile hayatımıza girmiştir ve yaptığı iş itibatiyle kullanım açısından son derece faydalı metodlardır.</description>
+  <content>&lt;p&gt;Kelime anlamı genişletilebilir metod olan Extension Method'lar C#3.0 ile hayatımıza girmiştir ve yaptığı iş itibatiyle kullanım a&amp;ccedil;ısından son derece faydalı metodlardır. Tek c&amp;uuml;mleyle &amp;ouml;zetlemek gerekirse class ve struct yapılarını modify etmeden ilgili struct yada class'i&amp;ccedil;in extension metodlar eklememizi sağlar.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;Extesion metod yazarken uymamız gereken bir ka&amp;ccedil; kural vardır. Bunlar;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Extension metodlar static bir class i&amp;ccedil;erisinde static olarak tanımlanmalıdır.&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;Extend edilecek class ilgili extension metoda metodun ilk parametresi olarak verilip &amp;ouml;n&amp;uuml;nde &lt;strong&gt;this&lt;/strong&gt; keyword'&amp;uuml; ile tanımlanmalıdır&lt;/li&gt;
+&lt;li&gt;Extension metod da tanımlı parametrelerden sadece 1 tanesi &lt;strong&gt;this&lt;/strong&gt; keyword'&amp;uuml; ile tanımlanır&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Hemen bir &amp;ouml;rnek &amp;uuml;zerinde inceleyelim. Case'imiz şu olsun; Bir tane extension metodumuz var ve bu metod &lt;strong&gt;integer&amp;nbsp;&lt;/strong&gt;bir değer alıp asal mı değil mi diye kontrol etsin.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public static class MyExtensions
+   {
+       public static bool IsPrime(this int integer)
+       {
+           //tembellik edip implementation'ı yazmakla uğraşmadım :)
+           return true;
+       }
+   }&lt;/pre&gt;
+&lt;p&gt;Yazdığımız metodu aşağıdaki g&amp;ouml;rselde olduğu gibi kullanmak istediğimizde int tanımlı değişkenin adı"." nokta dediğimizde extensionMetod'u intellisense de g&amp;ouml;rebileceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://canertosuner.com/MyImage_Folder/extensionmethoddemo.jpg" alt="" width="444" height="280" /&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;class Program
+{
+    static void Main(string[] args)
+	{
+		int anyNumber = 123456;
+		if(anyNumber.IsPrime())
+		{
+			//asal sayı
+		}
+		else
+		{
+			//asal sayı değil
+		}
+	}
+}&lt;/pre&gt;
+&lt;p&gt;Heralde en g&amp;uuml;zel yanı da bu olsa gerek metodu extension tanımladığımız i&amp;ccedil;in sanki o metod int struct'ına i&amp;ccedil;erisinde tanımlı bir metodmuş gibi direkt olarak "." nokta deyip kullanabiliyoruz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yukarıda ki &amp;ouml;rnekte &lt;strong&gt;int &lt;/strong&gt;tipini&lt;strong&gt;&amp;nbsp;&lt;/strong&gt;baz alarak ilerledim ancak ihtiya&amp;ccedil; dahilinde b&amp;uuml;t&amp;uuml;n tipler ve kendi tanımladığımız objeler i&amp;ccedil;inde extension metodlar yazabiliriz.&lt;/p&gt;
+&lt;p&gt;Yine &amp;ouml;rnek olarak ; bir Person class'ımız ver ve i&amp;ccedil;erisinde DateTime tipinde ismi BirthDate olan bir property olsun. Bir tane GetBirthDate adında extension metod tanımlayalım ve bu metod bize parametre olarak aldığı Person objesinde bulunan BirthDate alanını return ettirsin.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class Person
+{
+	public string FullName {get;set;}
+	public DateTime BirthDate {get;set;}
+}
+
+public static class MyExtensions
+{
+	public static DateTime GetBirthDate(this Person prs)
+	{
+			return prs.BirthDate;
+	}
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi bu metodu kullanan kısmı yazalım&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+					
+class Program
+{
+    static void Main(string[] args)
+	{
+		Person prs=new Person();
+		DateTime bDAte = prs.GetBirthDate();
+	}
+}&lt;/pre&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi Extension metod kullanım alanımızı ihtiyaca g&amp;ouml;re genişletip metodlarımızı istediğimiz yerde "." nokta diyerek fıtı fıtı &amp;ccedil;ağırıyoruz :)&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-07-20 17:40:00</pubDate>
+  <lastModified>2020-01-20 08:22:28</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>C-Extension-Method-Kullanımı</slug>
+  <tags>
+    <tag>this</tag>
+    <tag>extension</tag>
+    <tag>method</tag>
+    <tag>c#</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

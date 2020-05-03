@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<categories>
+    <category id="91467d82-b6b4-4b4d-ab9a-f3a25c7c7447" description="" parent="">.Net</category>
+    <category id="af2ae59a-5e53-4ebf-b52e-cbba606354f4" description="" parent="">AOP</category>
+    <category id="b48e5b38-b409-47bf-83e9-c969aff0ddb7" description="" parent="">Asp.Net Core</category>
+    <category id="8b1fab7b-05eb-4666-b030-503ffa84eea9" description="" parent="">C#</category>
+    <category id="893b792b-cf43-45bb-af68-eecfaf416ddf" description="" parent="">Design Patterns</category>
+    <category id="45609306-8fde-4db1-8d81-7fe1bf2b9738" description="" parent="">Design Principles</category>
+    <category id="8ba67740-30c1-4afe-b3ac-a1ed7655ae81" description="" parent="">Docker</category>
+    <category id="a0313877-509c-481a-954b-6e000b44433d" description="" parent="">Elasticsearch</category>
+    <category id="12fb8d4e-b852-4059-a0cb-9565196e4f88" description="" parent="">Entity Framework Core</category>
+    <category id="5660c93a-7f12-4fdb-9aba-b7a2b128029f" description="" parent="">Etkinlik</category>
+    <category id="cbc2ab0e-9b45-49ec-a014-6278eb7cfdc5" description="" parent="">gRPC</category>
+    <category id="01a365a0-dea4-4805-8375-c19bfa24f287" description="" parent="">IoC</category>
+    <category id="2c45703a-5f98-4b5f-a533-23a91d41eb16" description="" parent="">Messaging Queue</category>
+    <category id="593b3c0c-d7f0-4bcf-8ff7-b856bc5d22c9" description="" parent="">NFC</category>
+    <category id="0b1e407c-eda9-4959-8552-c6da2babf29d" description="" parent="">Sharepoint</category>
+    <category id="ebe6cacc-3d21-4b1a-87de-e73b59b91a82" description="" parent="">Software Development</category>
+    <category id="33191729-e344-4de6-8ecf-6400c88b07e7" description="" parent="">SQL</category>
+    <category id="018aedb2-84ba-46ad-89f2-2d551bf7c063" description="" parent="">Test</category>
+    <category id="27e5276b-0227-42f3-a037-9d3992022f96" description="" parent="">Web</category>
+    <category id="59c799ee-35b7-40dc-911f-1d8613b862f2" description="" parent="">Web Service</category>
+    <category id="4f7b9b49-03e3-42bc-ba3b-203e3ca707ec" description="" parent="">WebApi</category>
+    <category id="e8efc70d-b037-4f0c-9301-07808692337b" description="" parent="">Windows</category>
+</categories>

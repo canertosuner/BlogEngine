@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Token Authentication JSON Web Token Nedir Nasıl Kullanılır</title>
+  <description>Bu yazımızda asp.net core uygulamalarında token based&amp;nbsp;authentication nedir, nasıl sağlanır bir </description>
+  <content>&lt;p&gt;Bu yazımızda asp.net core uygulamalarında token based&amp;nbsp;authentication nedir, nasıl sağlanır bir &amp;ouml;rnek &amp;uuml;zerinden inceleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;ProductApi adında bir service projenizin olduğunu d&amp;uuml;ş&amp;uuml;n&amp;uuml;n ve bu service &amp;uuml;zerinde product tablonuz i&amp;ccedil;in CRUD işlemlerini yapan belli endpoint'ler sağladığınızı varsayalım. Herhangi bir g&amp;uuml;venlik kontrol&amp;uuml;&amp;nbsp;bulunmayan&amp;nbsp;ProductApi'nize call yapmak isteyen bir kişi geliştirme yaparken doğrudan erişebiliyor. Peki ama &amp;ccedil;ok basit bir şekilde d&amp;uuml;ş&amp;uuml;necek olursak&amp;nbsp;service url'lerini bulan herhangi bir kişi servisinizi manip&amp;uuml;le etmek adına CRUD metotlarınıza doğrudan call yapabilir yada bazı metotları call edebilir bazılarını edemez vs. gibi riskler barındırmaktadır.&lt;/p&gt;
+&lt;p&gt;Bu gibi durumlara &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak token-based&amp;nbsp;authentication y&amp;ouml;ntemleri geliştirilmiştir.&lt;/p&gt;
+&lt;p&gt;Token based&amp;nbsp;authentication'ın genel konsepti olduk&amp;ccedil;a basit;&amp;nbsp;kullanıcıdan bir username ve password vs. gibi bir bilgi alıp bu bilgiyi server'a g&amp;ouml;ndermek ve eğer valid bir username ve password ise karşılığında bir token d&amp;ouml;n&amp;uuml;p o kullanıcının artık token expire oluncaya dek b&amp;uuml;t&amp;uuml;n api işlemlerini o token &amp;uuml;zerinden yapması beklenir.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/jwt-img_1.png" alt="" width="709" height="368" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;JSON Web Token Nedir Nasıl Kullanılır;&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Base64 olarak oluşturulmuş 3 ayrı b&amp;ouml;l&amp;uuml;mden oluşur;&lt;/p&gt;
+&lt;p&gt;HEADER.PAYLOAD.SIGNATURE&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Header&lt;/strong&gt;&lt;/span&gt;&amp;nbsp;b&amp;ouml;l&amp;uuml;m&amp;uuml;nde; hangi token t&amp;uuml;r&amp;uuml;n&amp;uuml;n ve şifreleme algoritmasının kullanıldığı bilgisi yer alır.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Payload&lt;/strong&gt;&lt;/span&gt;; uygulama bazlı bilgilerin&amp;nbsp;yer aldığı(claim,userId vs.) yani uygulamaya &amp;ouml;zel b&amp;ouml;l&amp;uuml;md&amp;uuml;r.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Signature&lt;/strong&gt;&lt;/span&gt;&amp;nbsp;ise adından da anlaşıldığı gibi server tarafından &amp;uuml;retilen signature'ın bulunduğu b&amp;ouml;l&amp;uuml;md&amp;uuml;r.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2018/jwt_headerpayloadsignature.jpeg" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Şimdi ise bir asp.net core projesinde JWT nasıl entegre edilir ve kullanılır bunu inceleyelim.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İlk olarak aşağıdaki gibi&amp;nbsp;&lt;strong&gt;Startup.cs&lt;/strong&gt;&amp;nbsp;bulunan &lt;strong&gt;ConfigureServices&lt;/strong&gt;&amp;nbsp;metodu i&amp;ccedil;erisinde uygulama boyunca ge&amp;ccedil;erli olan JWT Authentication middleware konfigurasyonlarını yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(jwtBearerOptions =&amp;gt;
+    {
+        jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateActor = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = Configuration["Issuer"],
+            ValidAudience = Configuration["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["SigningKey"]))
+        };
+    });
+    services.AddMvc();
+}&lt;/pre&gt;
+&lt;p&gt;Middleware tanımlamasını yukarıdaki gibi yaptıktan sonra bunu builder'a eklememiz gerekmekte. Bunun i&amp;ccedil;inde yine&amp;nbsp;&lt;strong&gt;Startup.cs&lt;/strong&gt;&amp;nbsp;de&amp;nbsp;&lt;strong&gt;Configure&lt;/strong&gt;&amp;nbsp;metodu i&amp;ccedil;erisinde aşağıdaki tanımlamayı yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    app.UseAuthentication();
+    app.UseMvc();
+}&lt;/pre&gt;
+&lt;p&gt;Sırada JWT generate edecek olan endpoint'i oluşturma var. Bunun i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;TokenController&lt;/strong&gt;&amp;nbsp;adında bir controller oluşturalım ve i&amp;ccedil;erisine&amp;nbsp;kullanıcıyı validate ederken kullanılacak olan bilgilerin bulunduğu request modeli alıp geriye tokenResponse d&amp;ouml;nen bir endpoint oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[AllowAnonymous]
+[HttpPost]
+[Route("token")]
+public IActionResult Post([FromBody]LoginRequest request)
+{
+    if (ModelState.IsValid)
+    {
+        var user = _userService.Get(request.UserName, request.Password); 
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, request.Username),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var token = new JwtSecurityToken
+        (
+            issuer: _configuration["Issuer"], //appsettings.json i&amp;ccedil;erisinde bulunan issuer değeri
+            audience: _configuration["Audience"],//appsettings.json i&amp;ccedil;erisinde bulunan audince değeri
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(30), // 30 g&amp;uuml;n ge&amp;ccedil;erli olacak
+            notBefore: DateTime.UtcNow,
+            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SigningKey"])),//appsettings.json i&amp;ccedil;erisinde bulunan signingkey değeri
+                    SecurityAlgorithms.HmacSha256)
+        );
+        return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+    }
+    return BadRequest();
+}
+
+public class LoginRequest
+{
+	public string UserName {get;set;}
+	public string Password {get;set;}
+}&lt;/pre&gt;
+&lt;p&gt;JWT based&amp;nbsp;authentication yapısı projemiz i&amp;ccedil;in hazır. Sırada bunu test etmek var. Bunun i&amp;ccedil;in asp.net core projesi oluşturulurken default gelen ValuesController.cs i&amp;ccedil;erisindeki Get metodunu kullanarak testimizi yapalım. Controller seviyesinde &lt;strong&gt;[Authorize]&lt;/strong&gt; atrtribute'&amp;uuml; kullanarak&amp;nbsp;authentication zorunlu olduğunu belirtebiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Authorize]
+[Route("api/[controller]")] 
+public class ValuesController : Controller
+{
+    [HttpGet]
+    public IEnumerable&amp;lt;string&amp;gt; Get()
+    {
+        return new string[] { "value1", "value2" };
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Postman kullanarak projemizi test edelim.&lt;/p&gt;
+&lt;p&gt;İlk olarak token almadan&amp;nbsp;&lt;strong&gt;ValuesController&lt;/strong&gt;'a HttpGet request'inde bulunalım&amp;nbsp;ancak token bilgisi set etmediğimizden&amp;nbsp;bize geriye successful bir response (http200) d&amp;ouml;nmemesi gerekir. Aşağıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre response olarak 401 yani Unauthorized cevabı aldık.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/jwt_api_img_pstmn_1.png" alt="" width="705" height="277" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Şimdi ise&amp;nbsp;&lt;strong&gt;TokenController&lt;/strong&gt;&amp;nbsp;da bulunan metoda request atarak token&amp;nbsp;response'unu aşağıdaki gibi alalım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/jwt_api_img_pstmn_3.png" alt="" width="705" height="391" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Almış olduğumuz tokenResponse'u g&amp;ouml;ndereceğimiz request'in Authorization header'ına set ederek tekrardan ValuesController'a istekte bulunduğumuzda bu sefer http200 ile geriye value array'ini d&amp;ouml;nen cevabı almış olacağız.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/jwt_api_img_pstmn_5.png" alt="" width="705" /&gt;&lt;/p&gt;
+&lt;p&gt;JWT'nin kullanımı &amp;ouml;zetle bu şekilde. Sizlerde geliştirdiğiniz bir api projenizi dış d&amp;uuml;nyaya a&amp;ccedil;arken token-based&amp;nbsp;authentication yapmak istediğinizde&amp;nbsp;implementasyonu&amp;nbsp;olduk&amp;ccedil;a basit olan basit&amp;nbsp;jwt den faydalanabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-05-03 21:07:00</pubDate>
+  <lastModified>2018-05-04 05:33:04</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-token-authentication-jwt-nedir-nasil-kullanilir</slug>
+  <tags>
+    <tag>asp.net core token</tag>
+    <tag>jwt asp.net core</tag>
+    <tag>.net core token based authentication</tag>
+    <tag>json web token nedir</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+  </categories>
+  <notifications />
+</post>

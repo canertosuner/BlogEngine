@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widgets>
+  <widget id="e53c0e19-c61b-4f6e-aa90-09da817488bc" title="Administration" showTitle="True">Administration</widget>
+  <widget id="a305a372-ba9f-49b3-ac49-1453faa3efc0" title="Arama" showTitle="True">Search</widget>
+  <widget id="21108331-e283-4807-a4f6-f1db31163608" title="Kategoriler" showTitle="True">CategoryList</widget>
+  <widget id="6487834e-c6dc-4fd2-8ff0-334a5a4cf7a4" title="MonthList" showTitle="True">MonthList</widget>
+</widgets>

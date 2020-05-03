@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>.Net Core Windows Service Çalışabilen Uygulama Geliştirme Topshelf</title>
+  <description>Windows servisler herhangi bir arayüzü olmadan işletim sisteminde background'da uzun süreli hiç durmaksızın çalışması gereken uygulamalar yaratmak için faydalanabileceğimiz yöntemlerden biridir. Windows servisler herhangi bir manuel start stop işlemi gerektirmeksizin üzerinde..</description>
+  <content>&lt;p&gt;Windows servisler herhangi bir aray&amp;uuml;z&amp;uuml; olmadan işletim sisteminde background'da uzun s&amp;uuml;reli hi&amp;ccedil; durmaksızın &amp;ccedil;alışması gereken uygulamalar&amp;nbsp;yaratmak i&amp;ccedil;in faydalanabileceğimiz y&amp;ouml;ntemlerden biridir. Windows servisler herhangi bir manuel start stop işlemi gerektirmeksizin &amp;uuml;zerinde &amp;ccedil;alıştıkları işletim sistemi ile birlikte start-stop olabilecek şekilde konfig&amp;uuml;re edilirler.&lt;/p&gt;
+&lt;p&gt;Windows service şeklinde &amp;ccedil;alışan projeler oluşturmak i&amp;ccedil;in birden fazla&amp;nbsp;y&amp;ouml;ntem bulunmaktadır ancak open-source geliştirilen &lt;a href="http://topshelf-project.com/"&gt;Topshelf&lt;/a&gt;&amp;nbsp;k&amp;uuml;t&amp;uuml;phanesi kalitesi ve .Net Core uyumluluğuyla olduk&amp;ccedil;a &amp;ouml;n plana &amp;ccedil;ıkmakta.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu yazıda bir .net core console uygulamasını topshelf kullanarak Windows Service olarak nasıl&amp;nbsp;host edebiliriz bunu inceleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://docs.topshelf-project.com/en/latest/overview/faq.html"&gt;Topshelf&amp;nbsp;&lt;/a&gt;.net framework/.net core kullanılarak geliştirilen console uygulamalarını&amp;nbsp;windows service olarak install ve host etmeye yarayan bir open-source k&amp;uuml;t&amp;uuml;phanedir. K&amp;uuml;t&amp;uuml;phane&amp;nbsp; service class mimarisi karmaşasından&amp;nbsp;uzak sadece bir ka&amp;ccedil; class implementasyonu ile console uygulamalarını windows service olarak host&amp;nbsp;etmemize olanak sağlar.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir uygulama &amp;uuml;zerinden anlatacak olursak;&lt;/p&gt;
+&lt;p&gt;İlk olarak vs'da&lt;strong&gt;&amp;nbsp;NetCoreTopshelf.Sampl&lt;/strong&gt;e adında bir .net core console app. oluşturalım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/tpshlf_img_vs_Crt.PNG" alt="" width="738" height="440" /&gt;&lt;/p&gt;
+&lt;p&gt;Sonrasında&amp;nbsp;nuget &amp;uuml;zerinden hali hazırda develope branch'i de olsa Topshelf'i proje referanslarına ekleyelim.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/tpshlf_img_vs_ngt_1.PNG" alt="" width="722" height="175" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Sırada Windows Service Logic bilgisini i&amp;ccedil;eren HelloWorldServiceHost.cs sınıfını aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class HelloWorldServiceHost
+{
+    public void Start()
+    {
+        Console.WriteLine("Hello World Service Started !!");
+    }
+
+    public void Stop()
+    {
+        Console.WriteLine("Hello World Service Stopped !!");
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Uygulama kod kısmı ile ilgili son kısım ise Windows Service configure etmek kaldı. Program.cs i&amp;ccedil;erisindeki Main metodunda aşağıdaki gibi uygulamamızı windows service registration yaparken gerekli olan konfigurasyonları belirtelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;static void Main(string[] args)
+{
+    HostFactory.Run(hostConfig =&amp;gt;
+    {
+        hostConfig.Service&amp;lt;HelloWorldServiceHost&amp;gt;(serviceConfig =&amp;gt;
+        {
+            serviceConfig.ConstructUsing(() =&amp;gt; new HelloWorldServiceHost());
+            serviceConfig.WhenStarted(s =&amp;gt; s.Start());
+            serviceConfig.WhenStopped(s =&amp;gt; s.Stop());
+        });
+        hostConfig.RunAsLocalSystem();
+        hostConfig.SetServiceName("Hello World Service");
+        hostConfig.SetDisplayName("Hello World Service Host");
+        hostConfig.SetDescription("Hello World Service Host using .Net Core and Topshelf.");
+    &lt;/pre&gt;
+&lt;p&gt;Windows service olarak exe install etmemiz gerekmekte ancak .net core uygulamaları default'da executable bir output &amp;uuml;retmemekte. Bunu yapabilmemiz i&amp;ccedil;in extradan proje csproj dosyasına gidip aşağıdaki gibi .exe &amp;ccedil;ıktısı &amp;uuml;retmesini sağlatacak olan &lt;strong&gt;RuntimeIdentifier&lt;/strong&gt; kod satırını ekleyelim.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;lt;RuntimeIdentifier&amp;gt;win7-x64&amp;lt;/RuntimeIdentifier&amp;gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre class="brush:xml;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;nbsp;&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/tpshlf_ntcr_csprjj_1.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Uygulama geliştirmemiz bitti. Tek yapmamız gereken exe'yi service olarak install etmek. Bunun i&amp;ccedil;in NetCoreTopshelf.Sample.exe dosyasının bulunduğu path'e gidip aşağıdaki gibi administrator olarak &amp;ccedil;alıştırdığımız Command Prompt'ta ilgili install komutunu &amp;ccedil;alıştıralım.&amp;nbsp;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;nbsp;NetCoreTopshelf.Sample.exe install&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/tpshlf_ntcr_srvcc_instll.PNG" alt="" width="741" height="415" /&gt;&lt;/p&gt;
+&lt;p&gt;Uygulamamız windows service olarak &amp;ccedil;alışmaya başladı. Emin olmak i&amp;ccedil;in bilgisayarınızdan Task Manager'a gidip Services tab'ının altında aşağıdaki gibi HelloWorld ismini g&amp;ouml;receksinizdir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2018/tpshlf_ntcr_srvcc_im1.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Service'i uninstall etmek i&amp;ccedil;inse&amp;nbsp;NetCoreTopshelf.Sample.exe uninstall komutunu &amp;ccedil;alıştırmanız yeterli.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;NetCoreTopshelf.Sample.exe uninstall&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Yazının başında da belirtiğimiz gibi windows-service &amp;ccedil;alışan uygulamalar geliştirmenin &amp;ccedil;eşitli yolları vardır ancak Topshelf k&amp;uuml;t&amp;uuml;phanesi kullanarak bu uygulamaları geliştirmek olduk&amp;ccedil;a hızlı ve basit bir se&amp;ccedil;enek olarak karşımıza &amp;ccedil;ıkmakta. &amp;Ouml;zellikle .Net Core i&amp;ccedil;in konuşmak gerekirse bug&amp;uuml;n itibariyle windows-service olarak &amp;ccedil;alışabilen self-hosted uygulamalar oluşturmak pek kolay gibi g&amp;ouml;r&amp;uuml;nmesede Topshelf ile bunu yapabilmek m&amp;uuml;mk&amp;uuml;n m&amp;uuml;mk&amp;uuml;n.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/.net-core-windows-service-using-topshelf"&gt;Source Code&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-11-17 21:07:00</pubDate>
+  <lastModified>2020-01-20 08:22:10</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>net-core-windows-service-topshelf</slug>
+  <tags>
+    <tag>topshelf</tag>
+    <tag>.net core windows service</tag>
+    <tag>creating windows service</tag>
+    <tag>asp.net core windows service</tag>
+  </tags>
+  <comments>
+    <comment id="bdce5682-b5db-4a5c-8fa2-8c649e46629a" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-12-17 16:29:36</date>
+      <author>Ali </author>
+      <email>ali_softdev88@gmail.com</email>
+      <country />
+      <ip>31.223.39.93</ip>
+      <avatar />
+      <content>Tam ihtiyacim olan yazi, elinize saglik</content>
+    </comment>
+    <comment id="d6172fff-7ee4-49fb-b4af-47a28c0f2ebe" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-03-26 08:15:45</date>
+      <author>Celalettin</author>
+      <email>celalettinayvaci@gmail.com</email>
+      <country />
+      <ip>82.222.6.10</ip>
+      <avatar />
+      <content>Merhaba,
+Paylaşım için teşekkürler. Linux servis için(Fedora) serviz yazacağım. Nasıl bir yol izleyebilirim. 
+İyi Çalışmalar. </content>
+    </comment>
+    <comment id="7e6c9430-2607-4950-a89a-ac11be0e3483" parentid="d6172fff-7ee4-49fb-b4af-47a28c0f2ebe" approved="True" spam="False" deleted="False">
+      <date>2019-03-26 11:42:30</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba, linux için işler daha basit aslında, dotnet komutuyla uygulamayı çalıştırman yeterli. İşletim sistemi çalıştığı sürece uygulama çalışmaya devam edecektir.</content>
+    </comment>
+    <comment id="ac74a5b0-95ae-40de-99dd-86a0c5a9c9fd" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-08-25 14:38:49</date>
+      <author>bora</author>
+      <email>braylmz270@gmail.com</email>
+      <country />
+      <ip>88.230.19.77</ip>
+      <avatar />
+      <content>Verdiğiniz değerli bilgiler için teşekkür ederim</content>
+    </comment>
+    <comment id="a21f0cf7-031e-430b-8999-2893514758fe" parentid="ac74a5b0-95ae-40de-99dd-86a0c5a9c9fd" approved="True" spam="False" deleted="False">
+      <date>2019-09-16 17:31:02</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.161.192</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Rica ederim.</content>
+    </comment>
+    <comment id="a4953c82-612b-4e1f-a5e1-b97880713732" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="True" deleted="False">
+      <date>2019-09-17 11:40:29</date>
+      <author>Banu</author>
+      <email>banubeydag@yahoo.com</email>
+      <country />
+      <ip>212.252.63.100</ip>
+      <moderatedby>App_Code.Extensions.StopForumSpam</moderatedby>
+      <avatar />
+      <content>Merhaba,
+.net Framework 4.6.1 ile geliştirilmiş windows servis projesini .net core&amp;#39;a çevirebilir miyim?
+Teşekkürler</content>
+    </comment>
+    <comment id="f42831e8-5795-42fc-8294-e8035d567ed8" parentid="a4953c82-612b-4e1f-a5e1-b97880713732" approved="True" spam="False" deleted="False">
+      <date>2020-01-06 14:54:51</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Evet çevirmen mümkün, bununla ilgili google&amp;#39;da migrate .net framework to .net core gibi bir arama yapabilirsin.</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications>
+    <email>celalettinayvaci@gmail.com</email>
+    <email>braylmz270@gmail.com</email>
+    <email>banubeydag@yahoo.com</email>
+  </notifications>
+</post>

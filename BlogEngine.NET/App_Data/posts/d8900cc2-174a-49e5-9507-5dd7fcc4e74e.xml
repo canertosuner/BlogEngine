@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Single Responsibility Principle</title>
+  <description>Daha önceki SOLID nedir yazısında bahsettiğim üzre sırasıyla SOLID prensiplerini örneklerle anlatmaya başlıyoruz. Bu yazıda SOLID'in S'si olan ilk prensip Single Responsibility 'den bahsedeceğim ve daha önce çalıştığım bir şirkette karşılaştığım Single Responsibility ile ilgili bir olaydan da bahsetmek istiyorum.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki &lt;strong&gt;&lt;a href="http://canertosuner.com/post/solid-prensipleri"&gt;SOLID nedir&lt;/a&gt;&lt;/strong&gt; yazısında bahsettiğim &amp;uuml;zre sırasıyla SOLID prensiplerini &amp;ouml;rneklerle anlatmaya başlıyoruz. Bu yazıda&amp;nbsp;SOLID'in &lt;strong&gt;S&lt;/strong&gt;'si olan ilk prensip &lt;strong&gt;Single Responsibility&lt;/strong&gt; 'den bahsedeceğim ve daha &amp;ouml;nce &amp;ccedil;alıştığım bir şirkette karşılaştığım Single Responsibility ile ilgili bir olaydan da bahsetmek istiyorum.&lt;/p&gt;
+&lt;p&gt;Bir g&amp;uuml;n şirkette bir bankacılık projesinde &amp;ccedil;alışırken Mobil tarafta geliştirme yapıyordum ve projedeki mod&amp;uuml;llerden birinin bitirilmesine 4-5 g&amp;uuml;n kalmıştı ancak WebService tarafı yetişemiyordu. WebService tarafı .Net ile geliştiriliyordu ve full-stack .Net'liğin vermiş olduğu sorumlulukla project manager'ımız benden 2-3 g&amp;uuml;n service tarafına destekte bulunmamı rica etti bende ok deyip tfs'ten projeyi &amp;ccedil;ektim ve projeyi ayağa kaldırdıktan sonra ufaktan incelemeye başladım ve solution'da bulunan katmanlardan biri olan &amp;nbsp;"....Common" isimli projeyi a&amp;ccedil;tım. Her projede olmazsa olmaz "&lt;strong&gt;CommonFunctions.cs&lt;/strong&gt;" isimli class'ı a&amp;ccedil;mamla kapatmam bir oldu. Class'ın tek su&amp;ccedil;u isminin başında "&lt;strong&gt;Common" &lt;/strong&gt;olması ama o class'ı yazanlar sağ olsunlar aşağıya doğru scroll ederken VS resmen dondu. Class'ın i&amp;ccedil;erisinde yanılmıyorsam 5 bin satıra yakın kod vardı.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="https://camo.githubusercontent.com/b424f2e4fa53c950a20f31123417edd3e55d7ff8/687474703a2f2f692e696d6775722e636f6d2f63464a6b6638692e6a7067" alt="" width="282" height="282" /&gt;&lt;/p&gt;
+&lt;p&gt;Aslında b&amp;ouml;yle olmasının bence temel sebebi proje yaklaşık 3 yıllık bir projeydi ve her gelen tam anlamıyla projeye hakim olmadan geliştirmeye başlamış olsa gerek her şeyi bu class'a yazmışlar ve ortaya&amp;nbsp;&lt;strong&gt;OCOP - One Class Oriented Programming &lt;/strong&gt;(benim uydurmam)&lt;strong&gt;&amp;nbsp;&lt;/strong&gt;&amp;ccedil;ıkmış. Bazı hesaplama metodları var, Resource manager metodları var, string format metodları var, obejct mapping metodları var... var oğlu var. İsminin başında "&lt;strong&gt;Common&lt;/strong&gt;" olmasından kaynaklanan yetkiyle her şey bu class'ta.&lt;/p&gt;
+&lt;p&gt;Single Responsibility prensibi bu ve benzeri durumlar i&amp;ccedil;in var diyebiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Tek bir soru ve cevap ile ;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Single Responsibility (tek sorumluluk)&lt;/strong&gt; nedir ?&lt;/li&gt;
+&lt;li&gt;Her class'ın tek bir sorumluluk alanı olup &amp;nbsp;tek bir amaca hizmet etmesidir.&amp;nbsp;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;şeklinde tanımlayabiliriz. Peki ne demek bu "&lt;strong&gt;Her class'ın tek bir sorumluluk alanı olup tek bir amaca hizmet etmesidir.&lt;/strong&gt;" c&amp;uuml;mlesi.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yazılmış olan her bir class kendi işinden sorumlu olup başka class'ların yapması gereken işlere karışmaması veya kendi sorumluluk alanına &amp;ccedil;ıkmaması istenir. &amp;Ccedil;ok k&amp;uuml;&amp;ccedil;&amp;uuml;k bir &amp;ouml;rnekle, toplama işlemlerini yapması beklenen class gidip de &amp;ccedil;ıkartma işlemlerine yapmasın, &amp;ccedil;ıkartma işlemlerini yapan başka bir class yazılır ve orda yapılması beklenir.&lt;/p&gt;
+&lt;p&gt;Daha g&amp;uuml;zel ve oop odaklı olan bir &amp;ouml;rnek &amp;uuml;zerinden gidelim. Bir tane banka i&amp;ccedil;in proje geliştiriyor olalım (&amp;uuml;stte bahsettiğim gibi değil tabi :) ) ve BankAccount adında bir class ve bu class i&amp;ccedil;erisinde belli hesaplamalar sonucu tutulan field'lar bulunsun.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class BankAccount
+{
+    public int AccountNumber { get; set; }
+    public int AccountBalance { get; set; }
+ 
+    public void SaveData()
+    {
+        //kayıt işlemlerini yapan metod
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda ki class'a ilk baktığımızda sorunsuz g&amp;uuml;zel bir class gibi duruyor ancak &lt;strong&gt;SRP(&lt;/strong&gt;&lt;strong&gt;Single Responsibility Principle&lt;/strong&gt;&lt;strong&gt;) &lt;/strong&gt;a&amp;ccedil;ısından baktığımızda SRP'yi ihlal ediyor. BankAccount class'ı i&amp;ccedil;erisinde bulundurduğu methodlardan dolayı data management-calculations işlerinede karışmış durumda. Yani bu class i&amp;ccedil;erisinde field'ları olan birbir obje g&amp;ouml;revimi g&amp;ouml;recek yoksa barındırdığı metodlar itibariyle bir nevi helper class'ımı olacak. Bu gibi sebeplerden dolayı class'ın aldığı sorumluluklar değişkenlik g&amp;ouml;stermektedir ve bu sorumlulukların bir arada karışıklıklara sebebiyet verebilir.&lt;/p&gt;
+&lt;p&gt;Peki ne yapacağız bu durum i&amp;ccedil;in ? Eğer BankAccount objemiz diğer bankalardaki hesaplar i&amp;ccedil;in de kullanılacağını varsayalım ve b&amp;ouml;yle bir durumda bir interface veya abstrack class oluşturmak en g&amp;uuml;zel &amp;ccedil;&amp;ouml;z&amp;uuml;m olacaktır.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public interface IBankAccount
+{
+    int AccountNumber { get; set; }
+    int AccountBalance { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi &lt;strong&gt;IBankAccount&lt;/strong&gt; interface'inden implement olan BankAccount class'ını oluşturabiliriz.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class CTBank : IBankAccount
+{
+    int _accountNumber;
+    int _accountBalance;
+ 
+    // IBankAccount Members
+     public int AccountNumber
+    {
+        get
+        {
+            return _accountNumber;
+        }
+        set
+        {
+            _accountNumber = value;
+        }
+    }
+ 
+    public int AccountBalance
+    {
+        get
+        {
+            return _accountBalance;
+        }
+        set
+        {
+            _accountBalance = value;
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Kolay ve daha oop olacak şekilde class'ımızı oluşturduk. Şimdi sırada en başta BankAccount class'ında yazdğımız &lt;strong&gt;SaveData&lt;/strong&gt;&amp;nbsp;metodu i&amp;ccedil;in bir&amp;nbsp;&lt;strong&gt;DataAccessLayer&lt;/strong&gt; yazmak var. Bunun i&amp;ccedil;in ilk olarak yine bir interface yazalım ismi &lt;strong&gt;IDataService&amp;nbsp;&lt;/strong&gt;olsun.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public interface IDataService
+{
+    bool Save(IBankAccount account);
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu noktaya kadar ne yaptık ?&amp;nbsp;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;BankAccount objesinde bulunan field'ları barındıran bir &lt;strong&gt;IBankAccount&lt;/strong&gt; interface'i yazdık&lt;/li&gt;
+&lt;li&gt;Bu interface'den implement olan&amp;nbsp;&lt;strong&gt;BankAccount&amp;nbsp;&lt;/strong&gt;objesini tanımladık,&lt;/li&gt;
+&lt;li&gt;DataAccess class'ı i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;IDataService&lt;/strong&gt; adında bir interface tanımaldık,&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Bu noktadan sonra geriye sadece&lt;strong&gt; DataService&lt;/strong&gt; class'ını yazmak kalıyor. Bu class tahmin ettiğiniz gibi&amp;nbsp;&lt;strong&gt;IDataService&amp;nbsp;&lt;/strong&gt;interfce'ini implemente edecek.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class DataService : IDataService
+{
+    //IDataService Members
+    public bool Save(IBankAccount account)
+    {
+        bool isSaved = false;
+        try
+        {
+            //save data here 
+            isSaved = true;
+        }
+        catch (Exception)
+        {
+            // error
+            // log exception data
+            isSaved = false;
+        }
+        return isSaved;
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre projemiz ilk başta yazdığımız BankAccount class'ına kıyasla artık daha object-oriented ve daha y&amp;ouml;netilip genişletilebilir hale gelmiş oldu. Tabi ki istenilen feature'a g&amp;ouml;re değişiklik g&amp;ouml;sterebilir ancak proje release olduktan sonra ki değişiklik isteklerine daha kolay ve bu değişiklerin daha hızlı entegre edilebilmesini sağlar hale geldi diyebiliriz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-05-05 23:42:00</pubDate>
+  <lastModified>2020-01-20 08:22:25</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>SOLID-prensipleri-Single-Responsibility</slug>
+  <tags>
+    <tag>srp</tag>
+    <tag>single responsibility</tag>
+    <tag>solid</tag>
+    <tag>SoftwareDesign</tag>
+    <tag>SystemArchitecture</tag>
+  </tags>
+  <comments>
+    <comment id="373ddc12-ab18-45a3-a3ef-8afa363908d8" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2016-05-21 09:12:00</date>
+      <author>Caner Tosuner</author>
+      <email>trackback</email>
+      <country />
+      <ip>94.102.8.48</ip>
+      <website>http://canertosuner.com/post/SOLID-Prensipleri-Open-Closed</website>
+      <moderatedby>Rule:white list</moderatedby>
+      <content>SOLID Prensipleri - Open Closed Principle
+
+SOLID Prensipleri - Open Closed Principle</content>
+    </comment>
+    <comment id="1d322d98-7d10-4a4f-82d6-4d6eb8674909" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2016-10-29 21:05:38</date>
+      <author>Koray</author>
+      <email>koray.durudogan@outlook.com</email>
+      <country />
+      <ip>212.252.163.125</ip>
+      <avatar />
+      <content>Öncelikle bu bilgilendirici yazı için teşekkürler hocam. Solid prensiplerini kavramaya çalışan biri olarak bir soru sormak istiyorum. Örnek için IDataService interfaceinde tek bir method koymuşsunuz. Gerçek bir projedede tek bir method için interface açmak doğrumu yoksa örnek anlaşılır olsun diye tek bir methodmu koydunuz ? İnterface kullanımı hakkında bilgim var ama ne zaman kullanmam gerektiği konusunda kararsızlık yaşadığım çok oluyor. Tek bir method için interface kullanmak doğrumudur ? Teşekkürler.</content>
+    </comment>
+    <comment id="a2205daf-b3c9-4eab-be63-94383b33292a" parentid="1d322d98-7d10-4a4f-82d6-4d6eb8674909" approved="True" spam="False" deleted="False">
+      <date>2016-10-30 15:47:51</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>88.233.24.52</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba, interface içerisinde tanımlı tek bir metot olması tamamiyle örnek anlaşılır olsun diye. Seninde belirttiğin gibi tek bir metot için interface tanımlamak doğru değildir ama hani öyle bir an gelir ki mecbur kalırsın ve tek bir metodu bulunan bir interface tanımlamak zorunda da kalabilirsin :) Ne zaman interface kullanılmalı sorusuna gelecek olursak; belirli kurallara uymasını istediğin nesnelerin var ve sadece tanımladığın işlemleri yapabilsin istiyorsan interface kullanabilirsin. Örneğin; bir futbol oyunu geliştiriyorsun ve hakemler oyun sırasında hangi işlemleri yapabilir ? &amp;quot;MaciBaslat&amp;quot;, &amp;quot;MaciBitir&amp;quot;, &amp;quot;DudukCal&amp;quot;, vs... gibi işlemleri yapabilir.Peki hakem penaltı kurtarabilir mi ? penaltı atabilir mi ? Şut çekebilir mi ? Hayır, ve oyun sırasında yapmamasını bekleriz çünkü bunlar oyuncuların yapmasını istediğimiz işlemler. Bir şekilde hakem nesnesini tanımlarken yapabileceği işlemleri belirten bir contract &amp;amp; interface tanımlanmalı ve hareketleri sınırlanmalı. Bunu IHakem diye bir interface tanımayıp yukarıda belirttiğimiz metotları bu interface içerisine tanımlayıp Hakem.cs class&amp;#39;ının bu interface&amp;#39;den inherit olup metotları implement edildiğinde edildiğinde içleri doldurulup oyun içinde nasıl hareket edecekleri söylenebilir. Oyunculardan yapmasını beklediğimiz hareketler içinde yine IOyuncu adında bir interface tanımlayıp hareketlerini belirtebiliriz ve böylelikle uygulama içerisindeki nesnelerin kurallarını interface metotları ile belirtebiliriz.  
+Umarım bir kaç satırla da olsa anlatabilmişimdir, tekrar sorun olursa da her zaman yazabilirsin :)</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+  </categories>
+  <notifications>
+    <email>koray.durudogan@outlook.com</email>
+  </notifications>
+</post>

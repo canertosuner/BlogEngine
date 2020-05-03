@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>test</title>
+  <description />
+  <content>&lt;p&gt;test&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-08-17 14:06:00</pubDate>
+  <lastModified>2013-08-17 14:07:12</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>test</slug>
+  <tags />
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

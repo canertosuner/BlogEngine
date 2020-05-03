@@ -1,0 +1,379 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Open Closed Principle</title>
+  <description>SOLID prensipleri yazı serisinde daha öncesnde SOLID nedir ve Single Responsibility konularından bahsetmiştik. Şimdi ise sırada SOLID'in  "O" su olan Open-Closed Principle. Bu prensip 1988 yılında fransız akademist Bertrand Meyer tarafından ortaya atılıp şu şekilde tanımlandı;</description>
+  <content>&lt;p&gt;SOLID prensipleri yazı serisinde daha &amp;ouml;ncesnde &lt;a href="/post/solid-prensipleri"&gt;SOLID nedir&lt;/a&gt; ve &lt;a href="/post/SOLID-prensipleri-Single-Responsibility"&gt;Single Responsibility&lt;/a&gt;&amp;nbsp;konularından bahsetmiştik. Şimdi ise sırada SOLID'in &amp;nbsp;"O" su olan Open-Closed Principle. Bu prensip 1988 yılında fransız akademist&amp;nbsp;Bertrand Meyer tarafından ortaya atılıp şu şekilde tanımlandı;&lt;/p&gt;
+&lt;p&gt;"Software entities (classes, modules, functions, etc.) should be open for extension, but closed for modification."&lt;/p&gt;
+&lt;p&gt;&lt;img style="float: right;" src="/image.axd?picture=%2f2016%2f05%2focp_solid.jpeg" alt="" width="320" height="240" /&gt;&lt;/p&gt;
+&lt;p&gt;Peki ne demek bu "&lt;strong&gt;gelişime a&amp;ccedil;ık değişime kapalı&lt;/strong&gt;" s&amp;ouml;z&amp;uuml; ? Şu bir ger&amp;ccedil;ek ki bir kod yazacaksınız ve ilelebet hep aynı kalacak.. tamamen palavra. Hi&amp;ccedil; bir kod yıllar i&amp;ccedil;inde değişime uğramadan kalamaz, s&amp;uuml;rekli olarak yeni bir feature ekleme durumu s&amp;ouml;z konusudur ve m&amp;uuml;şteri s&amp;uuml;rekli olarak "şunu da ekleyelim, bunu da ekleyelim, şu da olsun.." vs. vs. istekler hi&amp;ccedil;bir zaman bitmeyecektir. Bu tarz durumlar i&amp;ccedil;in Open-Closed bize yeni gelen değişiklik isteklerini projenize eklerken yazmış olduğunuz sınıfların genel davranışlarını değiştirmeden sadece birka&amp;ccedil; ufak dokunuşla bu geliştirmeleri ekleyebileceğiniz class lar yazmamızı s&amp;ouml;yl&amp;uuml;yor. Yani Core koda gerekirse hi&amp;ccedil; m&amp;uuml;dahale etmeden yeni feature'ları ekleyin diyor. Sebebi ise mevcut koda yapılacak olan her m&amp;uuml;dahale yeni bug'ların &amp;ccedil;ıkmasına neden olabilir ve buda yeniden test-analiz s&amp;uuml;reci demektir ki bunu hi&amp;ccedil;bir firma veya &amp;ccedil;alışan istemez.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir proje &amp;uuml;zerinden ilerleyelim. &lt;strong&gt;Bad Example&lt;/strong&gt; ve &lt;strong&gt;Better Example&lt;/strong&gt; diye Open-Closed'u iki şekilde ele alalım.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;&lt;strong&gt;Bad Example&amp;nbsp;&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;&amp;Ouml;rneğimiz şu şekilde olacak; Araba ve Otob&amp;uuml;s &amp;uuml;retimi yapan bir fabrikamız var diyelim. Bunun i&amp;ccedil;in bir tane aşağıdaki gibi &lt;strong&gt;Vehicle&lt;/strong&gt; adında bir class'ımız olsun. Bu class i&amp;ccedil;erisinde &lt;strong&gt;VehicleType&lt;/strong&gt; isminde bir enum ve bu enum'ında &lt;strong&gt;Car-Bus&lt;/strong&gt; diye 2 değeri olsun. Daha sonra Vehicle class'ından inherit olmuş Car ve Bus isminde 2 class oluşturalım ve constructor'larında gerekli enum değerlerini verelim.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Vehicle.cs&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;namespace BadExample
+{
+    public class Vehicle
+    {
+        public VehicleType VType { get; set; }
+    }
+
+    public enum VehicleType
+    {
+        Car,
+        Bus
+    }
+
+    public class Car : Vehicle
+    {
+        public Car()
+        {
+            this.VType = VehicleType.Car;
+        }
+    }
+
+    public class Bus : Vehicle
+    {
+        public Bus()
+        {
+            this.VType = VehicleType.Bus;
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi ise bu ara&amp;ccedil;ları &amp;uuml;retme kısmına geldi.&amp;nbsp;&lt;strong&gt;VehicleFactory&amp;nbsp;&lt;/strong&gt;adında bir class oluşturalım ve bu class i&amp;ccedil;erisinde &lt;strong&gt;ProduceVehicle&lt;/strong&gt;&amp;nbsp;isminde&amp;nbsp;&lt;strong&gt;Vehicle &lt;/strong&gt;&amp;nbsp;objesini parametre olarak alan bir metod olsun ve bu metoda verilen objedeki vehicleType enum değerine g&amp;ouml;re ilgili aracı &amp;uuml;reten fonksiyonları &amp;ccedil;ağırsın.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;VehicleFactory.cs&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;namespace BadExample
+{
+    public class VehicleFactory
+    {
+        public void ProduceVehicle(Vehicle vehicle)
+        {
+            switch (vehicle.VType)
+            {
+                case VehicleType.Car:
+                    ProduceCar((Car)vehicle);
+                    break;
+                case VehicleType.Bus:
+                    ProduceBus((Bus)vehicle);
+                    break;
+            }
+        }
+
+        private void ProduceCar(Car car)
+        {
+            Console.WriteLine("Car Produced\n");
+        }
+
+        private void ProduceBus(Bus car)
+        {
+            Console.WriteLine("Bus Produced\n");
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi sırada yazmış olduğumuz class'ları kullanarak ara&amp;ccedil;ları &amp;uuml;retme işlemi var. Bunun i&amp;ccedil;in &lt;strong&gt;Program.cs&lt;/strong&gt; class'ı aşağıdaki gibi olacak&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Program.cs&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;namespace BadExample
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            VehicleFactory vf1 = new VehicleFactory();
+            vf1.ProduceVehicle(new Car());
+ 
+            VehicleFactory vf2 = new VehicleFactory();
+            vf2.ProduceVehicle(new Bus());
+
+            Console.ReadLine();
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;strong&gt;Uygulamamızın Ekran &amp;ccedil;ıktısı&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img src="/image.axd?picture=%2f2016%2f05%2fbuscar_produced.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Ne g&amp;uuml;zel ara&amp;ccedil;larımız &amp;uuml;rettik kodumuz tıkır tıkır &amp;ccedil;alışıyor ve fabrika haftada 300 car-bus &amp;uuml;retiyor. Peki patron &amp;ccedil;ıldırdı dedi ki "Arkadaşlar 2 ay sonra kamyon &amp;uuml;retmeye başlıyoruz, b&amp;uuml;t&amp;uuml;n altyapıyı hazır edin..". Hi&amp;ccedil; sorun değil nasıl olsa kodumuzu yazdık arabayı otob&amp;uuml;s&amp;uuml; nasıl &amp;uuml;rettiysek kamyonu da &amp;ouml;yle &amp;uuml;retiriz deyip kamyon i&amp;ccedil;in aşağıdaki gibi kodlarımızı modify edip değişiklikleri yapalım.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1-&lt;/strong&gt; İlk olarak =&amp;gt;&amp;nbsp;&lt;strong&gt;VehicleType&lt;/strong&gt; enum'ına Truck diye yeni bir alan eklemeliyiz&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; public enum VehicleType
+    {
+        Car,
+        Bus,
+        Truck//Truck enum değerini ekledik
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2-&lt;/strong&gt; İkinci olarak =&amp;gt; &lt;strong&gt;Vehicle&lt;/strong&gt; class'ına Truck objesini oluşturma. Nasıl Car ve Bus i&amp;ccedil;in Vehicle'dan inherit olan class lar yazdık aynı şekilde Truck i&amp;ccedil;inde bunu yapıyoruz&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;namespace BadExample
+{
+    public class Vehicle
+    {
+        public VehicleType VType { get; set; }
+    }
+
+    public enum VehicleType
+    {
+        Car,
+        Bus,
+        Truck
+    }
+
+    public class Car : Vehicle
+    {
+        public Car()
+        {
+            this.VType = VehicleType.Car;
+        }
+    }
+    public class Bus : Vehicle
+    {
+        public Bus()
+        {
+            this.VType = VehicleType.Bus;
+        }
+    }
+
+    public class Truck : Vehicle//Truck objesini tanımladık 
+    {
+        public Truck()
+        {
+            this.VType = VehicleType.Truck;
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3-&lt;/strong&gt;&amp;nbsp;&amp;Uuml;&amp;ccedil;&amp;uuml;nc&amp;uuml; olarak =&amp;gt;&amp;nbsp; &lt;strong&gt;VehicleFactory&amp;nbsp;&lt;/strong&gt;class'ına &amp;nbsp;&lt;strong&gt;ProduceTruck&lt;/strong&gt;&amp;nbsp;class'ını ekleyip ProduceVehicle metoduna Truck i&amp;ccedil;in gerekli kontrolleri ekleyeceğiz&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace BadExample
+{
+    public class VehicleFactory
+    {
+        public void ProduceVehicle(Vehicle vehicle)
+        {
+            switch (vehicle.VType)
+            {
+                case VehicleType.Car:
+                    ProduceCar((Car)vehicle);
+                    break;
+                case VehicleType.Bus:
+                    ProduceBus((Bus)vehicle);
+                    break;
+                case VehicleType.Truck://truck &amp;uuml;retimi i&amp;ccedil;in logic kısmını yazdık
+                    ProduceTruck((Truck)vehicle);
+                    break;
+            }
+        }
+
+        private void ProduceCar(Car car)
+        {
+            Console.WriteLine("Car Produced\n");
+        }
+
+        private void ProduceBus(Bus car)
+        {
+            Console.WriteLine("Bus Produced\n");
+        }
+
+        private void ProduceTruck(Truck truck) //truck &amp;uuml;retimi yapan metodu ekledik
+        {
+            Console.WriteLine("Truck Produced\n");
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;4-&lt;/strong&gt;&amp;nbsp;D&amp;ouml;rd&amp;uuml;nc&amp;uuml; olarak =&amp;gt;&amp;nbsp;&amp;nbsp;Yazmış olduğumuz kodları kullanma vakti, Main fonksiyonda da Truck &amp;uuml;retimi i&amp;ccedil;in gerekli metod &amp;ccedil;ağrılarını yapacağız.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;namespace BadExample
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            VehicleFactory vf1 = new VehicleFactory();
+            vf1.ProduceVehicle(new Car());
+            
+            VehicleFactory vf2 = new VehicleFactory();
+            vf2.ProduceVehicle(new Bus());
+            
+            VehicleFactory vf3 = new VehicleFactory();
+            vf3.ProduceVehicle(new Truck());
+            
+            Console.ReadLine();
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Uygulamamızın Ekran &amp;ccedil;ıktısı&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img src="/image.axd?picture=%2f2016%2f05%2ftruck_produced.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Kamyonumuzu &amp;uuml;rettikkk. Patron mutlu alan mutlu satan mutlu.. Peki ama yeni bir ara&amp;ccedil; yani Kamyon t&amp;uuml;r&amp;uuml;nde bir Vehicle &amp;uuml;retmek i&amp;ccedil;in neler yaptık &amp;ouml;yle... Elimizi atmadığımız class kalmadı. Bu işlemi tam 4 farklı adımda halledebildik. Bu peki istediğimiz bir şey mi ?.. Ne diyordu&amp;nbsp;Open-Closed prensibi "gelişime a&amp;ccedil;ık değişime kapalı"&amp;nbsp;Peki biz ne yaptık; projede ki logic kısmı dahil her yere m&amp;uuml;dahale edip bir takım değişiklikler yaptık yani prensibe uygun hareket etmedik.&lt;/p&gt;
+&lt;p&gt;Peki nasıl olması gerekirdi ? Sadece Main fonksiyonunda bir par&amp;ccedil;a kod ekleyip sorunu &amp;ccedil;&amp;ouml;zecek halimiz yok tabiki de ancak patron yarın tekrardan gelip "Motorsiklet &amp;uuml;retmeye başlıyoruz, Bisiklet &amp;uuml;retmeye başlıyoruz.." diye devam etme ihtimaline karşı daha generic ve core koda yani logic'in bulunduğu kod kısımlarına &amp;ccedil;ok fazla dokunmadan bir ka&amp;ccedil; extended class yazarak yeni &amp;uuml;retim işlemine başlıyor olmamız gerekirdi.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;&lt;strong&gt;Better Example&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;Şimdi gelin Truck &amp;uuml;retim işlemimizi biraz daha "&lt;strong&gt;Better&amp;nbsp;than the previous example&lt;/strong&gt;" sloganıyla yazalım&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İlk olarak &lt;strong&gt;Vehicle.cs&lt;/strong&gt; ile başlayalım. Bu sefer Vehicle class'ımız &lt;strong&gt;abstract &lt;/strong&gt;i&amp;ccedil;erisinde bir adet abstract olarak tanımlı &lt;strong&gt;Produce()&lt;/strong&gt; metodu var ve Car, Bus ve Truck objeleri de yine Vehicle class'ını implemente edip ve Produce metodunu kullanacaklar.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace GoodExample.MyFolder
+{
+    public abstract class Vehicle
+    {
+        public abstract void Produce();
+    }
+
+    public class Car : Vehicle
+    {
+        public override void Produce()
+        {
+            Console.WriteLine("Car Produced\n");
+        }
+    }
+    
+    public class Bus : Vehicle
+    {
+        public override void Produce()
+        {
+            Console.WriteLine("Bus Produced\n");
+        }
+    }
+
+    public class Truck : Vehicle
+    {
+        public override void Produce()
+        {
+            Console.WriteLine("Truck Produced\n");
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;VehicleFactory.cs&lt;/strong&gt; class'ımızda artık hi&amp;ccedil;bir if/else yada switch/case condition'ı bulunmicak. Bu class ta yine Vehicle tipinde parametre alan &lt;strong&gt;ProduceVehicle()&lt;/strong&gt; adında bir metod olacak ve tek g&amp;ouml;revi parametre olarak aldığı&amp;nbsp;&lt;strong&gt;abstract&amp;nbsp;&lt;/strong&gt;Vehicle'dan t&amp;uuml;reyen objeyi alıp &lt;strong&gt;Produce()&lt;/strong&gt; metodunu &amp;ccedil;ağırmak.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;namespace GoodExample.MyFolder
+{
+    public class VehicleFactory
+    {
+        public void ProduceVehicle(Vehicle vehicle)
+        {
+            vehicle.Produce();
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Program.cs&lt;/strong&gt;'ın diğer &amp;ouml;rnekte olduğu gibi aynısını kullanıcaz yani &amp;uuml;retmek istediğimiz objenin instance'ını alıp &amp;uuml;retime başlicaz.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace GoodExample
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            VehicleFactory vf1 = new VehicleFactory();
+            vf1.ProduceVehicle(new Car());
+
+            VehicleFactory vf2 = new VehicleFactory();
+            vf2.ProduceVehicle(new Bus());
+
+            VehicleFactory vf3 = new VehicleFactory();
+            vf3.ProduceVehicle(new Truck());
+            
+            Console.ReadLine();
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Uygulamamızın Ekran &amp;ccedil;ıktısı&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=%2f2016%2f05%2ftruck_produced.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi i&amp;ccedil;imizden şu soruyu sorabiliriz.. "Eeee noldu şimdi aynı işi yaptık, hedefimiz Truck &amp;uuml;retimi yapmaktı Bad Example'da da yaptık Better Example'da da..". Cevabı a&amp;ccedil;ık ve net arkadaşlar&amp;nbsp;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Projemizi daha generic hale getirdip hi&amp;ccedil;bir condition'a bağımlı tutmadık,&lt;/li&gt;
+&lt;li&gt;Abstraction kullanarak projedeki bazı yerleri daha kolay geliştirebilir hale getirdik,&lt;/li&gt;
+&lt;li&gt;Core taraftaki kodu gelişime a&amp;ccedil;ık &amp;ccedil;ok b&amp;uuml;y&amp;uuml;k k&amp;ouml;kl&amp;uuml; değişimlere kapalı hale getirdik,&lt;/li&gt;
+&lt;li&gt;Yeni bir &amp;uuml;retim işlemi &amp;nbsp;başlasın Vehicle objesinden inherit olan class'ımızı olluşturup Produce metodunun i&amp;ccedil;erisini doldurduktan sonra kolayca &amp;uuml;retime başlayabilecek hale geldik,&lt;/li&gt;
+&lt;li&gt;Yani kısaca projemizi &lt;strong&gt;Open-Closed&lt;/strong&gt; prensibine uygun hale getirdik&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;BadExample'da&lt;/strong&gt; yaptığımız gibi yeni bir ara&amp;ccedil; &amp;uuml;retimine başlamak i&amp;ccedil;in yapmış olduğumuz o 4-5 farklı değişiklikten kurtulup &lt;strong&gt;BetterExample'da&lt;/strong&gt; olduğu gibi sadece &amp;uuml;retilecek olan nesneyi Vehicle objesinden inherit edilmiş şekilde tanımlayıp&amp;nbsp;&lt;strong&gt;Main&lt;/strong&gt; fonksiyonunda &amp;Uuml;retim işlemini başlatmak yeterli olacaktır.&lt;/p&gt;
+&lt;p&gt;Hadi son olarak &lt;strong&gt;Motorcycle&lt;/strong&gt; &amp;uuml;retelim. &amp;nbsp;İlk olarak nesnemizi tanımlıyoruz&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;    public class Motorcycle : Vehicle
+    {
+        public override void Produce()
+        {
+            Console.WriteLine("Motorcycle Produced\n");
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Sonrasında Main fonksiyonunda &amp;uuml;retime başla diyoruz&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace GoodExample
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            VehicleFactory vf1 = new VehicleFactory();
+            vf1.ProduceVehicle(new Motorcycle());
+
+
+            Console.ReadLine();
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;That's it :)&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-05-21 01:00:00</pubDate>
+  <lastModified>2020-01-20 08:22:24</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>SOLID-Prensipleri-Open-Closed</slug>
+  <tags>
+    <tag>solid</tag>
+    <tag>open-closed principle</tag>
+    <tag>ocp</tag>
+    <tag>example</tag>
+    <tag>principles</tag>
+    <tag>oop</tag>
+    <tag>s.o.l.i.d</tag>
+    <tag>SoftwareDesign</tag>
+    <tag>SystemArchitecture</tag>
+    <tag>object oriented</tag>
+  </tags>
+  <comments>
+    <comment id="5aa8c6b9-fa44-435d-97a8-d70a21bd673a" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-11-14 00:24:16</date>
+      <author>salih</author>
+      <email>salihkasimbenli@gmail.com</email>
+      <country />
+      <ip>37.154.132.16</ip>
+      <avatar />
+      <content>cok tatli guzel bi anlatim olmus, iyi calismalar</content>
+    </comment>
+    <comment id="f7966541-6b2d-474e-922f-eaae4cca2ecf" parentid="5aa8c6b9-fa44-435d-97a8-d70a21bd673a" approved="True" spam="False" deleted="False">
+      <date>2018-11-19 05:33:07</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>31.223.36.208</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Çok teşekkürler :)</content>
+    </comment>
+    <comment id="d71e2543-a696-4d3c-b139-2f1fe58f9acb" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-06-17 13:19:20</date>
+      <author>Orhan Albayrak </author>
+      <email>osmn.kra53@gmail.com</email>
+      <country />
+      <ip>193.189.142.11</ip>
+      <avatar />
+      <content>Hocam gerçekten emeğiniz için teşekkürler :)</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+  </categories>
+  <notifications />
+</post>

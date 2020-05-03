@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Dependency Injection</title>
+  <description>Yazılımla ilgilenen kişiler bilirler ki proje geliştirmede süreçler çok önemlidir. Müşteriye gidilir, ihtiyaç olan şey dinlenir, analiz edilir ve analiz yazılıp müşteriye sunulur. Müşteri analizi kabul eder ve development süreci başlar. Analiz developera gelir ve</description>
+  <content>&lt;p&gt;Yazılımla ilgilenen kişiler bilirler ki proje geliştirmede s&amp;uuml;re&amp;ccedil;ler &amp;ccedil;ok &amp;ouml;nemlidir. M&amp;uuml;şteriye gidilir, ihtiya&amp;ccedil; olan şey dinlenir, analiz edilir ve analiz yazılıp m&amp;uuml;şteriye sunulur. M&amp;uuml;şteri analizi kabul eder ve development s&amp;uuml;reci başlar. Analiz developera gelir ve 3 ay sonra işini bitirdikten sonra m&amp;uuml;şteriye projenin sunumu yapılır ve m&amp;uuml;şterinin &amp;ccedil;enesi o anda a&amp;ccedil;ılır. Bunu da ekleyelim, şunu da yapalım, bu da olsa daha iyi olur.. s&amp;uuml;reli olarak bu gibi c&amp;uuml;mleler duymamak hi&amp;ccedil;ten bile değildir.&amp;nbsp;Bu gibi durumları g&amp;ouml;z &amp;ouml;n&amp;uuml;ne alarak projeyi olabildiğince esnek hazırlamak yararımıza olacaktır.&lt;/p&gt;
+&lt;p&gt;Proje i&amp;ccedil;erisindeki mod&amp;uuml;llerin bir birlerine gevşek bağlı(loosely coupled) olması, &amp;uuml;stte bahsettiğimiz gibi sonradan oluşabilecek talepler i&amp;ccedil;in minimum efor sarf change request leri yani sonradan istenilen değişiklikleri hayata ge&amp;ccedil;irmemize katkıda bulunabilir. Bir senaryo ele alalım;&lt;/p&gt;
+&lt;p&gt;Person ve Car adında classrımız olsun ve bu classların i&amp;ccedil;erisinde Drive adında bir metodumuz olsun ve kullanıcı classının instance alınıp Drive metodu &amp;ccedil;ağrıldığında kullanıcı Car classının Drive metodu &amp;ccedil;ağrılarak araba kullanıyor olsun.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class Person {
+  private Car myCar = new Car();
+ 
+  public void Drive()
+  {
+     this.myCar.drive();
+  }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;M&amp;uuml;şterinin isteğine g&amp;ouml;re araba s&amp;uuml;rebilen bir Person objesi yaratmış olduk. Peki ya m&amp;uuml;şteri 2 ay sonra "&lt;strong&gt;bu person kamyonda s&amp;uuml;rs&amp;uuml;n, motorsiklette s&amp;uuml;rs&amp;uuml;n.."&lt;/strong&gt; derse ? İşte bu gibi durumlar i&amp;ccedil;in &amp;uuml;stte yazdığımız class işimizi g&amp;ouml;rmicektir ve m&amp;uuml;şterinin istediğini geliştirmemiz belkide bu g&amp;uuml;ne kadar ki development s&amp;uuml;resi kadar zaman alabilir de (projenin b&amp;uuml;y&amp;uuml;kl&amp;uuml;ğ&amp;uuml; gibi vs. konulara bağlı). &amp;Uuml;stteki sorunumuz Person objesi Car objesine bağlı ve bu nedenle Bus ve Motorcycle classlarını Person objesine entegre etmemize engel oluyor. İşte Dependency Injection burda devreye giriyor. Amacımız Person objesinin bağımlılığını en aza indirgemek. Bunun i&amp;ccedil;in ilk olarak&amp;nbsp;IVehicle adında i&amp;ccedil;erisinde Drive metodu bulunan bir interface yazıyoruz.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public interface IVehicle {
+  void Drive();
+}&lt;/pre&gt;
+&lt;p&gt;Sonrasında ise bizim Car, Bus ve Motorcycle class larımız&amp;nbsp;IVehicle implemente etsinler&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class Car : IVehicle 
+{
+  public void Drive()
+  {
+    Console.WriteLn("Araba s&amp;uuml;r&amp;uuml;l&amp;uuml;yor");
+  }
+}
+
+public class Bus : IVehicle 
+{
+  public void Drive()
+  {
+    Console.WriteLn("Otob&amp;uuml;s s&amp;uuml;r&amp;uuml;l&amp;uuml;yor");
+  }
+}
+
+public class Motorcycle: IVehicle 
+{
+  public void Drive()
+  {
+    Console.WriteLn("Motorsiklet s&amp;uuml;r&amp;uuml;l&amp;uuml;yor");
+  }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda ki geliştirmeler ile birlikte artık Person class'ımızın Car Bus gibi objelere olan bağlılığını ortadan kaldırmış olduk yani birbirlerine&amp;nbsp;gevşek bağlı(loosely coupled) halede getirdik diyebiliriz.&lt;/p&gt;
+&lt;p&gt;Person classımızın yeni hali aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class Person {
+  private IVehicle vehicle {get; set;}
+
+  public Person(IVehicle Vehicle)
+  {
+    this.vehicle = Vehicle
+  }
+ 
+  public void Drive()
+  {
+     this.vehicle.Drive();
+  }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Person classımızı kullanacağımız yerde artık şu şekilde yazabiliriz;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;//Araba s&amp;uuml;rmesini istediğimizde
+var person=new Person(new Car());
+person.Drive();
+
+//Otob&amp;uuml;s s&amp;uuml;rmesini istediğimizde
+var person=new Person(new Bus());
+person.Drive();
+&lt;/pre&gt;
+&lt;p&gt;Burada IVehicle&amp;nbsp;interface&amp;icirc;ni implemente eden sayısız nesne ekleyebiliriz veya bu nesneler &amp;uuml;zerinde değişiklik yapabiliriz ancak bu durum Person classını hi&amp;ccedil; ilgilendirmiyor &amp;ccedil;&amp;uuml;nk&amp;uuml; herhangi bir nesneye bağlı değildir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-11-11 16:44:00</pubDate>
+  <lastModified>2020-01-20 08:22:27</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>Dependency-Injection</slug>
+  <tags>
+    <tag>dependency injection</tag>
+    <tag>loosely coupled</tag>
+    <tag>injection</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

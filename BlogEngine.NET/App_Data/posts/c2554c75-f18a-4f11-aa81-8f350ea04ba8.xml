@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Api FluentValidation Kullanımı</title>
+  <description>Özellikle server-side geliştirme yapan kişiler için validation olmazsa olmazlardan biridir. Yazmış olduğunuz api'a client'lar belli başlı parametreler göndererek request'te bulunurlar ve sürekli bir veri alış verişi söz konusudur ve server-side geliştirici olarak asla gönderilen input'a güvenmememiz gerekir.</description>
+  <content>&lt;p&gt;&amp;Ouml;zellikle server-side geliştirme yapan kişiler i&amp;ccedil;in validation&amp;nbsp;olmazsa olmazlardan biridir. Yazmış olduğunuz api'a client'lar belli başlı parametreler g&amp;ouml;ndererek request'te bulunurlar ve s&amp;uuml;rekli bir veri alış verişi s&amp;ouml;z konusudur ve server-side geliştirici olarak asla g&amp;ouml;nderilen input'a g&amp;uuml;venmememiz gerekir. Metotlara g&amp;ouml;nderilen parametreleri belli başlı bazı g&amp;uuml;venlik adımlarından&amp;amp;validasyonlardan ge&amp;ccedil;irdikten sonra işlemlere devam ediyor veya etmiyor olmamız gerekir.&amp;nbsp;&lt;strong&gt;FluentValidation&amp;nbsp;&lt;/strong&gt;k&amp;uuml;t&amp;uuml;phanesi ile bu gibi durumlar i&amp;ccedil;in belli validation-rule'lar oluşturarak unexpected-input dediğimiz istenmeyen parametrelere karşı &amp;ouml;nlemler alabiliriz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek &amp;uuml;zerinden ilerleyecek olursa; Bir Web Api projemiz olsun ve bu proje i&amp;ccedil;in Para G&amp;ouml;nderme (Eft &amp;amp; Havale) işlemi yapan bir mod&amp;uuml;l yazalım. &lt;strong&gt;MoneyTransferRequest&amp;nbsp;&lt;/strong&gt;adında bir model'imiz olsun ve bu model &amp;uuml;zerinden para g&amp;ouml;ndermek i&amp;ccedil;in gerekli olan bilgiler kullanıcıdan alalım. &lt;strong&gt;MoneyTransferRequest&amp;nbsp;&lt;/strong&gt;model i&amp;ccedil;in FluentValidation k&amp;uuml;t&amp;uuml;phanesini kullanarak gerekli validation işlemlerini tanımlayalım validation-failed olduğunda&amp;nbsp;bu durumdan client'ı hata mesajları g&amp;ouml;ndererek&amp;nbsp;bilgilendirelim, yani validationMessage'ı response olarak client'a return edelim.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İlk adım olarak vs'de a&amp;ccedil;tığımız Web Api projemize nuget'ten &lt;strong&gt;&lt;a href="https://www.nuget.org/packages/FluentValidation.WebAPI/"&gt;FluentValidation.WebApi&lt;/a&gt;&amp;nbsp;&lt;/strong&gt;k&amp;uuml;t&amp;uuml;phanesini indirip kuralım&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/11/fluentValid_Setup.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;MoneyTransferRequest.cs&lt;/strong&gt;&amp;nbsp;class'ımız aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class MoneyTransferRequest
+    {
+        public decimal Amount { get; set; }
+        public string SenderIBAN { get; set; }
+        public string ReceiverIBAN { get; set; }
+        public DateTime TransactionDate { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi ise sırada MoneyTransferRequest i&amp;ccedil;in yazacağımız Validator class'ı var. Bu class AbstractValidator&amp;lt;T&amp;gt; class'ından inherit olmak zorundadır ve request modelimizin property'leri i&amp;ccedil;in ge&amp;ccedil;erli olan rule'ları burada tanımlayacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class MoneyTransferRequestValidator  : AbstractValidator&amp;lt;MoneyTransferRequest&amp;gt;
+    {
+        public MoneyTransferRequestValidator()
+        {
+            RuleFor(x =&amp;gt; x.Amount).GreaterThan(0).WithMessage("Amount cannot be less than or equal to 0.");
+
+            RuleFor(x =&amp;gt; x.SenderIBAN).NotEmpty().WithMessage("The Sender IBAN cannot be blank.").Length(16, 26).WithMessage("The Sender IBAN must be at least 16 characters long and at most 26 characters long.");
+
+            RuleFor(x =&amp;gt; x.ReceiverIBAN).NotEmpty().WithMessage("The Receiver IBAN cannot be blank.").Length(16, 26).WithMessage("The Receiver IBAN must be at least 16 characters long and at most 26 characters long.");
+
+            RuleFor(x =&amp;gt; x.TransactionDate).GreaterThanOrEqualTo(DateTime.Today).WithMessage("Transaction Date cannot be any past date.");
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Tanımlamış olduğumuz &lt;strong&gt;MoneyTransferRequestValidator&lt;/strong&gt; class'ını &lt;strong&gt;MoneyTransferRequest&lt;/strong&gt; class'ı i&amp;ccedil;in olduğunu belirten tanımlamayı aşağıda olduğu gibi attribute gibi class ismi &amp;uuml;zerinde belirtiyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    [Validator(typeof(MoneyTransferRequestValidator))]
+    public class MoneyTransferRequest
+    {
+        public decimal Amount { get; set; }
+        public string SenderIBAN { get; set; }
+        public string ReceiverIBAN { get; set; }
+        public DateTime TransactionDate { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;FluentValidationModelValidatorProvider'ı WebApiConfig class'ı i&amp;ccedil;erisinde aşağıdaki enable ederek validator i&amp;ccedil;in config işlemlerimizi tamamlamış oluyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public static class WebApiConfig  
+{
+    public static void Register(HttpConfiguration config)
+    {
+        FluentValidationModelValidatorProvider.Configure(config);
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yapılan request'leri tek bir yerden handle edip valid bir işlem mi değil mi kontrol&amp;uuml; i&amp;ccedil;in custom&amp;nbsp;ActionFilter'ımızı tanımlayalım. Bu actionFilter validation'dan success alınamaz ise yani&amp;nbsp;MoneyTransferRequest modeli i&amp;ccedil;in tanımladığımız validasyon&amp;nbsp;kuralları sağlanmaz ise client'a yeni bir response d&amp;ouml;n&amp;uuml;p i&amp;ccedil;erisine validationMessage'ları set ediyor olacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class ValidateModelStateFilter : ActionFilterAttribute  
+{
+    public override void OnActionExecuting(HttpActionContext actionContext)
+    {
+        if (!actionContext.ModelState.IsValid)
+        {
+            actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.BadRequest, actionContext.ModelState);
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Bu action filter i&amp;ccedil;in register işlemini aşağıdaki gibi yapıyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public static class WebApiConfig
+        {
+            public static void Register(HttpConfiguration config)
+            {
+                config.Filters.Add(new ValidateModelStateFilter());//register ettik
+                FluentValidationModelValidatorProvider.Configure(config);
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Client'a d&amp;ouml;nd&amp;uuml;ğ&amp;uuml;m&amp;uuml;z response'lar i&amp;ccedil;in bir base response tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class BaseResponse
+    {
+        public BaseResponse(object content, List&amp;lt;string&amp;gt; modelStateErrors)
+        {
+            this.Result = content;
+            this.Errors = modelStateErrors;
+        }
+        public List&amp;lt;string&amp;gt; Errors { get; set; }
+
+        public object Result { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi ise custom ResponseHandler'ımızı tanımlicaz. Bu handler her bir response'u kontrol ederek yukarıda tanımlamış olduğumuz BaseResponse'a convert edicek ve client'a bu response modeli d&amp;ouml;necek.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ResponseWrappingHandler : DelegatingHandler
+    {
+        protected override async Task&amp;lt;HttpResponseMessage&amp;gt; SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var response = await base.SendAsync(request, cancellationToken);
+
+            return BuildApiResponse(request, response);
+        }
+
+        private HttpResponseMessage BuildApiResponse(HttpRequestMessage request, HttpResponseMessage response)
+        {
+            object content;
+            var modelStateErrors = new List&amp;lt;string&amp;gt;();
+
+            if (response.TryGetContentValue(out content) &amp;amp;&amp;amp; !response.IsSuccessStatusCode)
+            {
+                var error = content as HttpError;
+                if (error != null)
+                {
+                    content = null; 
+
+                    if (error.ModelState != null)
+                    {
+                        var httpErrorObject = response.Content.ReadAsStringAsync().Result;
+
+                        var anonymousErrorObject = new { message = "", ModelState = new Dictionary&amp;lt;string, string[]&amp;gt;() };
+
+                        var deserializedErrorObject = JsonConvert.DeserializeAnonymousType(httpErrorObject, anonymousErrorObject);
+
+                        var modelStateValues = deserializedErrorObject.ModelState.Select(kvp =&amp;gt; string.Join(". ", kvp.Value));
+
+                        for (var i = 0; i &amp;lt; modelStateValues.Count(); i++)
+                        {
+                            modelStateErrors.Add(modelStateValues.ElementAt(i));
+                        }
+                    }
+                }
+            }
+
+            var newResponse = request.CreateResponse(response.StatusCode, new BaseResponse(content, modelStateErrors));
+
+            foreach (var header in response.Headers) 
+            {
+                newResponse.Headers.Add(header.Key, header.Value);
+            }
+
+            return newResponse;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;ResponseHandler'ı da api i&amp;ccedil;in register ediyoruz ve&lt;strong&gt;&amp;nbsp;WebApiConfig&lt;/strong&gt; class'ının son hali aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public static void Register(HttpConfiguration config)
+        {
+            config.MapHttpAttributeRoutes();
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi",
+                routeTemplate: "api/{controller}/{id}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+
+            config.Filters.Add(new ValidateModelStateFilter());
+            config.MessageHandlers.Add(new ResponseWrappingHandler());
+            FluentValidationModelValidatorProvider.Configure(config);
+        }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;Artık Api'ı test edebiliriz. Ben genelde bu tarz işlemler i&amp;ccedil;in postman rest client'ı&amp;nbsp;kullanıyorum. Aşağıdaki gibi hatalı parametreler ile bir request'te bulunduğumuzda nasıl response alıyoruz inceleyelim.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2016/11/fluentValid_postman_req_resp.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre &lt;strong&gt;Amount, SenderIBAN&lt;/strong&gt; ve&lt;strong&gt; TransactionDate&lt;/strong&gt; alanlarını hatalı girdiğimizde yukarıdaki gibi validation message'larının d&amp;ouml;nd&amp;uuml;ğ&amp;uuml; bir response alıyoruz. &lt;strong&gt;ReceiverIBAN&lt;/strong&gt; alanı validasyona takılmadığından bu alan ile ilgili herhangi bir mesaj almadık.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;zetle yazımızın başında da belirttiğim gibi Validasyon olduk&amp;ccedil;a &amp;ouml;nemli bir konudur ve client hatalı bir input g&amp;ouml;nderirse anlaşılması kolay bir response oluşturarak ilgili validasyon mesajını client'a return etmek işimizi olduk&amp;ccedil;a kolaylaştıracaktır.&amp;nbsp;Yapmış olduğumuz bu geliştirme ile birlikte otomatik bir bi&amp;ccedil;imde FluentValidation tarafından fırlatılan validasyon mesajları tam response d&amp;ouml;nme anında handle edilip client'a d&amp;ouml;nd&amp;uuml;rmektedir.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-11-29 22:14:00</pubDate>
+  <lastModified>2020-01-20 08:22:20</lastModified>
+  <raters>2</raters>
+  <rating>5</rating>
+  <slug>web-api-fluentvalidation-kullanimi</slug>
+  <tags>
+    <tag>FluentValidation </tag>
+    <tag>web api</tag>
+    <tag>actionfilterattribute </tag>
+    <tag>modelstate</tag>
+    <tag>FluentValidation  nedir</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

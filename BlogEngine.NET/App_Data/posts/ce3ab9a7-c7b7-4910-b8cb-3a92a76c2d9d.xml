@@ -1,0 +1,236 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Castle Windsor Kullanarak Cache Interceptor Oluşturma</title>
+  <description>using Castle.Core.Internal;
+using Castle.DynamicProxy;
+using Dpay.Api.Model.Response;
+using Dpay.Hel</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki yazılarımızda &lt;a href="/post/ioc-container-nedir-ne-ise-yarar"&gt;IoC nedir&lt;/a&gt; ve &lt;a href="/post/castle-windsor-interceptor-kullanarak-loglama-islemi"&gt;Castle Windsor Kullanarak Cache Interceptor Oluşturma&lt;/a&gt; konularına değinmiştik. Bu yazımızda ise yine&amp;nbsp;Windsor kullanarak projelerimizde sık&amp;ccedil;a kullandığımız bir &amp;ouml;zellik olan Caching işlemini basit&amp;ccedil;e yapabilen bir interceptor oluşturacağız.&lt;/p&gt;
+&lt;p&gt;Bir Api projesi oluşturalım ve projemizde cache&amp;nbsp;ile ilgili işlemlerin y&amp;ouml;netildiği&amp;nbsp;ICache isminde aşağıdaki gibi bir interface'imiz olsun ve arka planda kullandığınız herhangi bir cache yapısı olabilir (Redis, memory cache, vs.) bu interface'in implementasyonunu kullandığınız cache yapısına g&amp;ouml;re yapmış varsayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface ICache : IDisposable
+{
+    object Get(string key);
+ 
+    void Set(string key, object obj, DateTime expireDate);
+ 
+    void Delete(string key);
+ 
+    bool Exists(string key);
+}&lt;/pre&gt;
+&lt;p&gt;Şimdi ise projemize Castle'ı nuget'ten indirip kuralım ve sonrasında aşağıdaki gibi &lt;strong&gt;CacAttribute&lt;/strong&gt; adında bir attribute tanımlayalım. Bu attribute'&amp;uuml; kullanarak cache'e atmak istediğimiz metotları bir nevi flag'lemiş olacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    [AttributeUsage(AttributeTargets.Method)]
+    public class CacheAttribute : Attribute
+    {
+        public int CacheDurationInSecond { get; private set; }
+
+        public CacheAttribute(int cacheDurationInSecond = 300)
+        {
+            CacheDurationInSecond = cacheDurationInSecond;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;Ouml;rnek olarak projemizde LocationController adında bir controller ve i&amp;ccedil;erisinde&amp;nbsp;&lt;strong&gt;GetDistrictsByCityCode&amp;nbsp;&lt;/strong&gt;adında int&amp;nbsp;&lt;strong&gt;cityCode&lt;/strong&gt; parametresine g&amp;ouml;re geriye o şehirde bulunan il&amp;ccedil;elerin listesini d&amp;ouml;nen&amp;nbsp;bir end-point tanımlayalım. Projemizde kullanacağımız modellerimizi aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public class BaseResponse
+        {
+            public bool IsSuccess { get; set; }
+        }
+
+        public class GetDistrictsByCityCodeResponse : BaseResponse
+        {
+            public List&amp;lt;string&amp;gt; CityList { get; set; }
+        }&lt;/pre&gt;
+&lt;p&gt;Controller'ın kullanacağı ILocationService ve onun implementasyonunu aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public interface ILocationService
+        {
+            [Cache(300)]
+            GetDistrictsByCityCodeResponse GetDistrictsByCityCode(int cityCode);
+        }
+
+        public class LocationService : ILocationService
+        {
+            public GetDistrictsByCityCodeResponse GetDistrictsByCityCode(int cityCode)
+            {
+                return new GetDistrictsByCityCodeResponse
+                {
+                    CityList = new List&amp;lt;string&amp;gt; {
+                        "Ala&amp;ccedil;am","Asarcık","Atakum",
+                        "Ayvacık", "Bafra", "Canik",
+                        "&amp;Ccedil;arşamba","Havza", "İlkadım",
+                        "Kavak","Ladik", "Ondokuzmayıs",
+                        "Salıpazarı","Tekkek&amp;ouml;y", "Terme",
+                        "Vezirk&amp;ouml;pr&amp;uuml;", "Yakakent" },
+                    IsSuccess = true
+                };
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre GetDistrictsByCityCode metodu &amp;uuml;zerinde CacheAttribute'&amp;uuml;n&amp;uuml; tanımladık ve cache s&amp;uuml;resi olarak 300 saniye yani 5 dk set ettik.&amp;nbsp;Şimdi ise LocationController'ı oluşturalım ve controller i&amp;ccedil;erisinde tanımlayacağımız end-point ILocationService'i kullanarak&amp;nbsp;GetDistrictsByCityCode metoduna ilgili isteği yapacak. ILocationService'i controller'da kullanabilmek i&amp;ccedil;inde controller'ın constructor'ında seviyesinde&amp;nbsp;ILocationService'i inject edeceğiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public class LocationController : ApiController
+        {
+            private readonly ILocationService _locationService;
+            public LocationController(ILocationService locationService)
+            {
+                _locationService = locationService;
+            }
+            [HttpGet]
+            public HttpResponseMessage GetDistrictsByCityCode(int cityCode)
+            {
+                var response = _locationService.GetDistrictsByCityCode(cityCode);
+                return Request.CreateResponse(response);
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Metodumuz geriye &lt;strong&gt;BaseResponse&lt;/strong&gt;'dan t&amp;uuml;remiş olan&amp;nbsp;&lt;strong&gt;GetDistrictsByCityCodeResponse&lt;/strong&gt; objesini d&amp;ouml;necek&amp;nbsp;ve bu objede bulunan &lt;strong&gt;IsSuccess&lt;/strong&gt; parametresini kontrol ederek modeli cache'e atıp atmamaya karar vereceğiz. Bunu yapmamızın sebebi hatalı response'ları cache atmayı &amp;ouml;nlemek. LocationService i&amp;ccedil;erisindeki metotta dummy olarak geriye Samsun ilinin il&amp;ccedil;elerini return eden bir response oluşturduk ve projemizi deneme ama&amp;ccedil;lı bunu return edeceğiz.&lt;/p&gt;
+&lt;p&gt;Sırada cache işlemlerinin yapıldığı aspect'imizi tanımlama var. Aşağıda olduğu gibi&amp;nbsp;&lt;strong&gt;CacheInterceptor&lt;/strong&gt;&amp;nbsp;adında aspect'imizi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CacheInterceptor : IInterceptor
+    {
+        private readonly ICache _cacheProvider;
+        private readonly object _lockObject = new object();
+        public CacheInterceptor(ICache cacheProvider)
+        {
+            _cacheProvider = cacheProvider;
+        }
+
+        public void Intercept(IInvocation invocation)
+        {
+            //metot i&amp;ccedil;in tanımlı cache flag'i var mı kontrol&amp;uuml; yapıldığı yer
+            var cacheAttribute = invocation.Method.GetAttribute&amp;lt;CacheAttribute&amp;gt;();
+            if (cacheAttribute == null)//eğer o metot cache işlemi uygulanmayacak bir metot ise process normal s&amp;uuml;recinde devam ediyor
+            {
+                invocation.Proceed();
+                return;
+            }
+
+            lock (_lockObject)
+            {
+               //eğer o metot cache işlemlerinin yapılması gereken bir metot ise ilk olarak dynamic olarak aşağıdaki gibi bir cacheKey oluşturuyoruz
+                var cacheKey = string.Concat(invocation.TargetType.FullName, ".", invocation.Method.Name, "(", JsonConvert.SerializeObject(invocation.Arguments), ")");
+                //bu key ile tanımlı bir cache objesi var mı kontrol ediyoruz
+                var cachedObj = _cacheProvider.Get(cacheKey);
+                if (cachedObj != null)//eğer var ise o objeyi alıp client'a return ediyoruz
+                {
+                    invocation.ReturnValue = cachedObj;
+                }
+                else
+                {
+                    //yok ise metottan &amp;ccedil;ıktıktan sonra return edilen response'u 
+                    invocation.Proceed();
+                    var returnValue = invocation.ReturnValue;
+                    var response = returnValue as BaseResponse;
+                    if (response != null)
+                    {
+                        //eğer o response bizim beklediğimiz gibi BaseResponse'dan t&amp;uuml;reyen bir model ise o modeli alıyoruz ve  başarılı bir şekilde client'a d&amp;ouml;n&amp;uuml;len bir response ise cache'e atıyoruz
+                        if (response.IsSuccess)
+                        {
+                            var cacheExpireDate = DateTime.Now.AddSeconds(cacheAttribute.CacheDurationInSecond);
+                            _cacheProvider.Set(cacheKey, invocation.ReturnValue, cacheExpireDate);
+                        }
+                    }
+                }
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki akışı anlatmak gerekirse;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;İlk olarak ilgili metot &amp;uuml;zerinde bir cache flag'i var mı yok mu ona bakıyoruz. Eğer metot &amp;uuml;zerinde tanımlı CacheAttribute'&amp;uuml; var ise o metot bizim i&amp;ccedil;in cacheinterceptor tarafından cache işlemlerine tabi tutulur&amp;nbsp;demek. Yoksa hi&amp;ccedil; cache'i karıştırmadan process devam eder.&lt;/li&gt;
+&lt;li&gt;CacheAttribute varsa sonraki adımda metot &lt;strong&gt;namespace + metot ismi + metot parametrelerinden&lt;/strong&gt; oluşan bir dynamic cacheKey oluşturuluyor ve bu cacheKey ile cache provider'ınızda (redis, memory cache, vs.) daha &amp;ouml;nce tanımlanmış olup halen ge&amp;ccedil;erliliği olan bir cache objesi var mı bu kontrol yapılıyor.&lt;/li&gt;
+&lt;li&gt;Eğer varsa cache de bulunan obje return ediliyor ve &lt;strong&gt;GetDistrictsByCityCode&lt;/strong&gt;&amp;nbsp;metoduna girmeden client'a cevap d&amp;ouml;n&amp;uuml;l&amp;uuml;yor.&lt;/li&gt;
+&lt;li&gt;Eğer cache'de bulunan bir obje yoksa GetDistrictsByCityCode metoduna girip ilgili işlemleri yaptıktan sonra metottan &amp;ccedil;ıkıyor. Sonrasında metodun return ettiği model BaseResponse'dan t&amp;uuml;reyen bir model ise ve IsSuccess'i true ise obje cache'e atılıyor&amp;nbsp;ve daha sonra client'a d&amp;ouml;n&amp;uuml;l&amp;uuml;yor.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Geriye son adım olarak da ilgili bağımlılıkları tanımlayıp CacheInterceptor'ını install etmek kalıyor. &amp;nbsp;Aşağıdaki gibi ilk olarak interceptor'ı install ediyoruz ve sonrasında kullanmak istediğimiz&amp;nbsp;LocationService i&amp;ccedil;in register ediyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public class ServiceInstaller : IWindsorInstaller
+        {
+            public void Install(IWindsorContainer container, IConfigurationStore store)
+            {
+                container.Register(Component.For&amp;lt;CacheInterceptor&amp;gt;().LifestyleSingleton());
+
+                container.Register(Component.For(typeof(ILocationService))
+                         .ImplementedBy(typeof(LocationService))
+                         .Interceptors(typeof(CacheInterceptor)));
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Installer'ı container'a tanımlamak i&amp;ccedil;in projemizde bulunan Global.asax i&amp;ccedil;erisindeki Application_Start metodu i&amp;ccedil;erisinde container'ı aşağıdaki gibi ayağa kaldırıyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;protected void Application_Start()
+{
+    var container = new WindsorContainer();
+    container.Install(new ServiceInstaller());
+    container.Install(new WebApiControllerInstaller());
+    GlobalConfiguration.Configuration.Services.Replace(
+        typeof(IHttpControllerActivator),
+        new ApiControllerActivator(container));
+    GlobalConfiguration.Configure(WebApiConfig.Register);
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda bulunan&amp;nbsp;WebApiControllerInstaller ve ApiControllerActivator&amp;nbsp;daha &amp;ouml;nceki&amp;nbsp;&lt;a href="/post/castle-windsor-interceptor-kullanarak-loglama-islemi"&gt;yazımızda&lt;/a&gt;&amp;nbsp; oluşturduğumuz installer ile&amp;nbsp;birebir aynıdır.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class WebApiControllerInstaller : IWindsorInstaller
+{
+    public void Install(IWindsorContainer container, IConfigurationStore store)
+    {
+        container.Register(Classes.FromThisAssembly()
+            .BasedOn&amp;lt;ApiController&amp;gt;()
+            .LifestylePerWebRequest());
+    }
+}
+
+public class ApiControllerActivator : IHttpControllerActivator
+{
+    private readonly IWindsorContainer _container;
+ 
+    public ApiControllerActivator(IWindsorContainer container)
+    {
+        _container = container;
+    }
+ 
+    public IHttpController Create(
+        HttpRequestMessage request,
+        HttpControllerDescriptor controllerDescriptor,
+        Type controllerType)
+    {
+        var controller =
+            (IHttpController)this._container.Resolve(controllerType);
+ 
+        request.RegisterForDispose(
+            new Release(
+                () =&amp;gt; this._container.Release(controller)));
+ 
+        return controller;
+    }
+ 
+    private class Release : IDisposable
+    {
+        private readonly Action _release;
+ 
+        public Release(Action release)
+        {
+            _release = release;
+        }
+ 
+        public void Dispose()
+        {
+            _release();
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;Projemiz hazır ve artık yazmış olduğumuz end-point'i test edebiliriz. GetDistrictsByCityCode metoduna ilk gelen request'ten sonra return edilen response cache'e atılacaktır ve CacheAttribute tanımlarken verdiğiniz cacheDuration s&amp;uuml;resi i&amp;ccedil;erisindeki ikinci request'i yaptığınızda&amp;nbsp;GetDistrictsByCityCode scope'ları arasındaki işlemleri yapmadan ilgili response&amp;nbsp;oluşturulan cacheKey ile bulup cache'den d&amp;ouml;nd&amp;uuml;ğ&amp;uuml;n&amp;uuml; g&amp;ouml;receksinizdir.&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-05-26 21:19:00</pubDate>
+  <lastModified>2017-04-25 12:41:13</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>castle-windsor-kullanarak-cache-interceptor-olusturma</slug>
+  <tags>
+    <tag>cache interceptor</tag>
+    <tag>castle windsor cache</tag>
+    <tag>cache aspect</tag>
+    <tag>Aspect-Oriented Programming</tag>
+    <tag>castle windsor cache interceptor</tag>
+    <tag>CacheInterceptor</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Builder Design Pattern</title>
+  <description>Design pattern'leri spagetti kodlara veya tekrar eden kod bloklarına çözümler olarak ortaya çıkmışlardı. Builder Design Pattern creational patterns kategorisi altında bulunan patternlerden birisidir ve kısaca basit objeler kullanarak complex objeler inşa etmede kullanılır diyebiliriz.</description>
+  <content>&lt;p&gt;Design pattern'leri spagetti kodlara&amp;nbsp;veya tekrar eden kod bloklarına &amp;ccedil;&amp;ouml;z&amp;uuml;mler olarak ortaya &amp;ccedil;ıkmışlardı. Builder Design Pattern creational patterns kategorisi altında bulunan patternlerden birisidir ve kısaca basit objeler kullanarak complex objeler inşa etmede kullanılır diyebiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Builder'ı DTO yani data transfer object class'larını &amp;ouml;rnek olarak d&amp;uuml;ş&amp;uuml;n&amp;uuml;rsek, bu objeler birden fazla objenin birleşmesinden oluşurlar&amp;nbsp;ve genelde complex objelerdir. Builder pattern'nini de base'de bir obje var ve bu objeye ait alt property'leri&amp;nbsp;oluştururken her bir &amp;ouml;zellik i&amp;ccedil;in ayrı build metotları yazmamız gerekir. Builder design pattern'i bu gibi durumlarda&amp;nbsp;kullanabilecegimiz bir pattern olarak dusunebiliriz. Başka bir deyişle; runtime da yaratılması gereken complex objelerinizin olduğu bir&amp;nbsp;projeniz varsa bu pattern'i kullanmak&amp;nbsp;g&amp;uuml;zel&amp;nbsp;bir se&amp;ccedil;im olabilir veya adım adım obje yaratma işlemlerini&amp;nbsp;y&amp;ouml;netmek istediğiniz&amp;nbsp;bir durum var ise&amp;nbsp;yine bu pattern'i kullanabiliriz.&lt;/p&gt;
+&lt;p&gt;Builder pattern'i &lt;strong&gt;4&lt;/strong&gt; ana yapıdan oluşur;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Product &amp;nbsp;: Build edilen obje,&lt;/li&gt;
+&lt;li&gt;Builder &amp;nbsp; : Product'ı build eden abstract yapı,&lt;/li&gt;
+&lt;li&gt;Concrete Builder : Builder nesnesinin abstract yapıyı&amp;nbsp;kullanarak aynı yapıdaki farklı&amp;nbsp;&amp;uuml;r&amp;uuml;nlerin build edilmesini sağlayan yapı,&lt;/li&gt;
+&lt;li&gt;Director &amp;nbsp;: Kendisine verilen Builder'ı&amp;nbsp;property'lerini kullanarak &amp;uuml;r&amp;uuml;n&amp;uuml; inşa eden yapı.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;Ouml;rnek bir proje&amp;nbsp;&amp;uuml;zerinden Builder Design Pattern'i implement etmeye &amp;ccedil;alışalım. Apple fabrikasında Iphone modelleri &amp;uuml;retimi yapan bir senaryo yazalım ve bunu pattern'imizi uygulayarak yapmaya &amp;ccedil;alışalım.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;ncelikle &amp;uuml;r&amp;uuml;n class'ımızı oluşturalım. Iphone'un farklı modellerini (6, 6S, SE, vs.) &amp;uuml;rettiğimizi d&amp;uuml;ş&amp;uuml;nelim ve constractor seviyesinde hangi modeli &amp;uuml;rettiğimiz bilgisini verelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    //Product'ımız   
+    public class Iphone
+    {
+        string phoneType;
+        public Iphone(string phoneType)
+        {
+            this.phoneType = phoneType;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi ise Builder gibi davranan abstract class'ımızı oluşturalım. Bu class &amp;uuml;retimde kullanacağımız abstract &amp;uuml;yeler i&amp;ccedil;erecektir. Icerisinde &lt;strong&gt;BuildOS&lt;/strong&gt; ve &lt;strong&gt;BuildDevice&lt;/strong&gt; adında iki abstract metot ve hangi iphone modelini &amp;uuml;reteceği bilgisinin olacağı Iphone tipinde olan obje olacaktır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    //abstract Builder nesnemiz   
+    public abstract class IphoneBuilder
+    {
+        public abstract void BuildOS();
+
+        public abstract void BuildDevice();
+
+        Iphone IphoneType { get; }
+    }&lt;/pre&gt;
+&lt;p&gt;Sırada Builder class'larını geliştirme var. 6sBuilder ve SeBuilder adında iki tane iphone modeli i&amp;ccedil;in geliştirme yapalım.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;SeBuilder&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    // SE modeli i&amp;ccedil;in kullanacağımız Concrete Builder class'ımız
+    public class SeBuilder : IphoneBuilder
+    {
+        Iphone device;
+
+        public SeBuilder()
+        {
+            device = new Iphone("Se");
+        }
+
+        public override void BuildOS()
+        {
+            //TODO
+        }
+
+        public override void BuildDevice()
+        {
+            //TODO
+        }
+
+        public Iphone IphoneType
+        {
+            get { return device; }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;_6sBuilder&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   // 6S modeli i&amp;ccedil;in kullanacağımız Concrete Builder class'ımız
+   public class _6SBuilder : IphoneBuilder
+    {
+        Iphone device;
+
+        public _6SBuilder()
+        {
+            device = new Iphone("6S");
+        }
+
+        public override void BuildOS()
+        {
+            //TODO
+        }
+
+        public override void BuildDevice()
+        {
+            //TODO
+        }
+
+        public Iphone IphoneType
+        {
+            get { return device; }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi sırada &amp;uuml;retim var. &lt;strong&gt;Manufacturer&lt;/strong&gt; adında &amp;uuml;retici class'ımızı&amp;nbsp;oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   //Director class'ımız
+   public class Manufacturer
+    {
+        public void Build(IphoneBuilder iphoneBuilder)
+        {
+            iphoneBuilder.BuildDevice();
+
+            iphoneBuilder.BuildOS();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Sıra yaptığımız implementasyonu kullanmaya geldi.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;	public static void Main()
+	{
+		 Manufacturer manufacturer = new Manufacturer();
+
+         _6SBuilder _6s = new _6SBuilder();
+
+         manufacturer.Build(_6s);
+	}&lt;/pre&gt;
+&lt;p&gt;Main fonksiyon i&amp;ccedil;erisinde&amp;nbsp;&lt;strong&gt;Manufacturer&lt;/strong&gt;'ı kullanarak&lt;strong&gt; _6s&lt;/strong&gt; modelini build ettik. Builder pattern'nini elimizden geldiğince projemize entegre ettik ve diğer iphone &amp;uuml;r&amp;uuml;nleri i&amp;ccedil;in de aynı akışı kullanarak &amp;uuml;r&amp;uuml;nlerimizi Build edebiliriz.&lt;/p&gt;
+&lt;p&gt;Builder pattern'i factory ve abstract factory pattern'leri ile bir&amp;ccedil;ok y&amp;ouml;nden benzerlikler g&amp;ouml;stermektedir. Hangisini kullanmalıyım diye teredd&amp;uuml;tte&amp;nbsp;kaldığınız durumlarda, complex objeler yaratıyorsanız Builder'ı, tek bir obje yaratmak istiyorsanız da factory veya abstract factory design pattern'i tercih edebilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-10-11 21:14:00</pubDate>
+  <lastModified>2020-01-20 08:22:21</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>builder-design-pattern</slug>
+  <tags>
+    <tag>Builder Design Pattern</tag>
+    <tag>builder</tag>
+    <tag>design pattern</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

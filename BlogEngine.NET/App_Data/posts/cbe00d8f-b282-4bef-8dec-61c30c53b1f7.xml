@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Factory Method Pattern Nedir Nasıl Kullanılır</title>
+  <description>Design pattern'lar geliştirme yaparken tekrar eden problemlere denenip onaylanıp &amp;ccedil;&amp;ouml;z&amp;uum</description>
+  <content>&lt;p&gt;Design pattern'lar geliştirme yaparken tekrar eden problemlere denenip onaylanıp &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak sunulan kalıplardır. İyi&amp;nbsp;bir tasarım deseni yazmış olduğumuz kodları temiz, okunabilir kılıp sizden sonra gelecek olan kişilere daha kolay adapte olmayı sağlamalıdır.&lt;/p&gt;
+&lt;p&gt;Bu yazıda object oriented programming'in en &amp;ccedil;ok tercih edilen design pattern'lerin den biri olan ve Creational pattern'ler grubundan olan&amp;nbsp;Factory Pattern'i nedir de değildir nasıl implemente edilir &amp;ouml;rnek proje ile inceleyeceğiz.&lt;/p&gt;
+&lt;h3&gt;Factory Pattern&lt;/h3&gt;
+&lt;p&gt;Gang of Four patternleri g&amp;uuml;n&amp;uuml;m&amp;uuml;z d&amp;uuml;nyasında en sıkı şekilde takip edilip en &amp;ccedil;ok kullanılan &amp;uuml;nl&amp;uuml; tasarım desenleridir. Factory pattern'de bu 4 l&amp;uuml; den biridir. Kısaca tanımı ; aynı abstract sınıf veya interface'den t&amp;uuml;reyen nesnelerin &amp;uuml;retiminden sorumlu yapıdır. Bu pattern ile&amp;nbsp;nesne&amp;nbsp;yaratılma işini inheritance&amp;nbsp;yoluyla client-side'dan ayırıp sub-classes'lara vermek ama&amp;ccedil;lanır.&lt;/p&gt;
+&lt;p&gt;Geliştirmekte olduğunuz uygulamaya yeni bir feature eklerken en az dokunuş ile client'ı bu duruma hi&amp;ccedil; sokmadan yapabilmek ama&amp;ccedil;lanır ve factory pattern de bu amaca y&amp;ouml;nelik olarak &amp;ouml;nerilen en &amp;ouml;nemli pattern'lerden birisidir.&lt;/p&gt;
+&lt;p&gt;Factory pattern 2 alt kategoriye ayrılabilir.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Factory Method&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;Abstract Factory&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;Factory Method&lt;/h3&gt;
+&lt;p&gt;Aynı interface'i veya abstract sınıfı implement etmiş etmiş factory nesnelerinin &amp;uuml;retiminden sorumlu pattern dir.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir case &amp;uuml;zerinden ilerleyelim. Ara&amp;ccedil; &amp;uuml;retimi yapan bir fabrikamız olsun. Bu fabrika car, truck ve motorcycle &amp;uuml;retebiliyor olsun. İlk olarak factory nesnelerimizin kullanacağı IVehicleFactory interface'ini ve car, truck, motorcycle nesnelerini oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IVehicle
+    {
+        void DisplayInfo();
+    }
+
+    public class Car : IVehicle
+    {
+        public void DisplayInfo()
+        {
+            Console.WriteLine("Car produced");
+        }
+    }
+
+    public class Truck : IVehicle
+    {
+        public void DisplayInfo()
+        {
+            Console.WriteLine("Truck produced");
+        }
+    }
+
+    public class Motorcycle : IVehicle
+    {
+        public void DisplayInfo()
+        {
+            Console.WriteLine("Motorcycle produced");
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki gibi nesneleri ve aray&amp;uuml;zleri oluşturduktan sonra ismi &lt;strong&gt;VehicleFactory&lt;/strong&gt; olan ve i&amp;ccedil;erisinde geriye &lt;strong&gt;IVehicle&lt;/strong&gt;&amp;nbsp;d&amp;ouml;nd&amp;uuml;ren&amp;nbsp;&lt;strong&gt;ProduceVehicle&lt;/strong&gt; adında bir sınıf tanımlayacağız. ProduceVehicle metodu VehicleType adında bir bir enum parametre olarak alacak. Bu enum'ı kullanarak factory metoduna &amp;uuml;retmesini istediğimiz tip bilgisini ge&amp;ccedil;eceğiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public enum VehicleType
+    {
+        Car = 1,
+        Truck = 2,
+        Motorcycle = 3
+    }
+
+    public interface IVehicleFactory
+    {
+        IVehicle ProduceVehicle(VehicleType type);
+    }
+
+    public class VehicleFactory : IVehicleFactory
+    {
+        public IVehicle ProduceVehicle(VehicleType type)
+        {
+            IVehicle vehicle = null;
+            switch (type)
+            {
+                case VehicleType.Car:
+                    vehicle = new Car();
+                    break;
+                case VehicleType.Truck:
+                    vehicle = new Truck();
+                    break;
+                case VehicleType.Motorcycle:
+                    vehicle = new Motorcycle();
+                    break;
+            }
+            return vehicle;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&lt;br /&gt;Factory metotlarımız da hazır artık &amp;uuml;retime başlayabiliriz. Client dediğimiz kısım aslında tam da aşağıdaki kod par&amp;ccedil;aları oluyor Program.cs i&amp;ccedil;erisinde aşağıdaki gibi &amp;uuml;retmek istediğimiz t&amp;uuml;rdeki aracı factory'e s&amp;ouml;yleyip &amp;uuml;retebiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    class Program
+    {
+        static void Main(string[] args)
+        {
+            var vehicleFactory = new VehicleFactory();
+
+            IVehicle vehicleCar = vehicleFactory.ProduceVehicle(VehicleType.Car);
+            vehicleCar.DisplayInfo();
+
+
+            IVehicle vehicleMotorcycle= vehicleFactory.ProduceVehicle(VehicleType.Motorcycle);
+            vehicleMotorcycle.DisplayInfo();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yazımızın başında da bahsettiğimiz gibi yapılabilecek değişikliklerden client'ı etkilemeden yapabilmek birinci &amp;ouml;nceliğimizdir.&amp;nbsp;Bu &amp;ouml;rneğimizde araba &amp;uuml;retimi yapmak i&amp;ccedil;in IVehicle interface'ini implement eden Car nesnesini kullandık ancak ilerde bir g&amp;uuml;n yine IVehicle interface'ini implement eden XCar adında bir nesne oluşturup &amp;uuml;retim yaparken bu nesnyi kullanabiliriz ve bu durum client a&amp;ccedil;ısından hi&amp;ccedil; bir değişikliğe gidilmeden yapılabilmektedir.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-02-13 19:30:00</pubDate>
+  <lastModified>2017-02-13 16:31:33</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>factory-method-pattern-nedir-nasil-kullanilir</slug>
+  <tags>
+    <tag>factory method</tag>
+    <tag>factory method pattern</tag>
+    <tag>factory method nedir</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+  </categories>
+  <notifications />
+</post>

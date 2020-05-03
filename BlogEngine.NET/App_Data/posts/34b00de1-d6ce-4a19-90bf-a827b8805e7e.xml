@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>"Xap packaging failed. Object reference not set to an instance of an object" Hatası</title>
+  <description>Windows Phone uygulamalarında "Xap packaging failed. Object reference not set to an instance of an o</description>
+  <content>&lt;p&gt;&lt;span style="font-size: medium;"&gt;&lt;img src="http://www.jayway.com/wordpress/wp-content/uploads/2011/06/image_thumb.png" alt="" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;Windows Phone uygulamalarında "&lt;span style="font-size: medium; background-color: #ffffff; color: #ff0000;"&gt;&lt;em style="border: 0px; margin: 0px; padding: 0px; font-size: 14.399999618530273px; font-family: Helvetica; line-height: 22px;"&gt;Xap packaging failed. Object reference not set to an instance of an object.&lt;/em&gt;&lt;/span&gt;" hatası aldığınızda sorunun nedeni b&amp;uuml;y&amp;uuml;k olasılıkla uygulama i&amp;ccedil;erisinde daha &amp;ouml;nceden var olan bir &lt;span style="font-size: medium;"&gt;resim&lt;/span&gt; dosyası yada o t&amp;uuml;r bir dosyanın silinmiş olmasıdır.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;&lt;img style="float: left;" src="http://www.jayway.com/wordpress/wp-content/uploads/2011/06/image_thumb1.png" alt="" width="180" height="164" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;&amp;Ouml;rnek olarak sol tarafta resimde olduğu gibi banner.png dosyası bulunduğu klas&amp;ouml;rden silinmiş ancak solution'da halen bulunmaktadır. &lt;strong&gt;&amp;Ccedil;&amp;ouml;z&amp;uuml;m&lt;/strong&gt;; bu dosyayı solution i&amp;ccedil;erisinden de silmektir.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-06-03 20:58:00</pubDate>
+  <lastModified>2020-01-20 08:22:34</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Xap-packaging-failed-Object-reference-not-set-to-an-instance-of-an-object-Hatası</slug>
+  <tags>
+    <tag>xap error</tag>
+    <tag>Xappackagingfailed</tag>
+    <tag>xapfail</tag>
+    <tag>error</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

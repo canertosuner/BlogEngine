@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core HTTP.sys Web Server Kullanımı</title>
+  <description>Http.sys, IIS bağımsız olmasını istediğiniz asp.net core uygulamarı için kullanılan windows-only bir web server dır. Asp.Net core 1.x versiyonlarında WebListener olarak karşımızdayken 2.x ile birlikte HTTP.sys olarak değiştirildi.</description>
+  <content>&lt;p&gt;Http.sys, IIS bağımsız olmasını istediğiniz asp.net core uygulamarı i&amp;ccedil;in kullanılan windows-only bir web server dır. Asp.Net core 1.x versiyonlarında WebListener olarak karşımızdayken 2.x ile birlikte HTTP.sys olarak değiştirildi.&lt;/p&gt;
+&lt;p&gt;Kestrel'e alternatif olmakla birlikte kestrel'de bulunmayan bazı feature'lara da sahip. Bunlardan bazıları;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Windows Authentication&lt;/li&gt;
+&lt;li&gt;Port sharing&lt;/li&gt;
+&lt;li&gt;HTTPS with SNI&lt;/li&gt;
+&lt;li&gt;HTTP/2 over TLS (Windows 10 or later)&lt;/li&gt;
+&lt;li&gt;Direct file transmission&lt;/li&gt;
+&lt;li&gt;Response caching&lt;/li&gt;
+&lt;li&gt;WebSockets (Windows 8 or later)&lt;/li&gt;
+&lt;li&gt;Supported Windows versions:&lt;/li&gt;
+&lt;li&gt;Windows 7 or later =&amp;gt;&amp;nbsp;Windows Server 2008 R2 or later&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/aspnetcr_ht_tpsys.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Asp.Net Core uygulamaları i&amp;ccedil;in Kestrel best choise olarak &amp;ouml;nerilsede yukarıda da belirttiğimiz gibi sahip olduğu bazı &amp;ouml;zellikler bakımından kestrel'in &amp;ouml;n&amp;uuml;ne ge&amp;ccedil;ebilmektedir. Uygulama doğrudan HTTP.sys &amp;uuml;zerinde built olduğundan kestrel'de olduğu gibi bazı attack'alrdan korunmak adına bir reverse proxy server'a ihtiya&amp;ccedil; duyulmamaktadır ve sunucunun g&amp;uuml;venliğini ve &amp;ouml;l&amp;ccedil;eklenebilirliğini y&amp;ouml;netebildiğinden bir &amp;ccedil;ok saldırı t&amp;uuml;r&amp;uuml;ne karşı uygulamayı koruyabilmektedir.&lt;/p&gt;
+&lt;p&gt;Kullanım olarak bakacak olursak;&lt;br /&gt;Program.cs i&amp;ccedil;erisinde WebHost konfigurasyonlarını tanımlarken uygulamamızın HttpSys &amp;uuml;zerinde run edileceğini aşağıdaki gibi belirtmemiz gerekmekte. Bunun i&amp;ccedil;in UseHttpSys metodunu kullanacağız. Bu metoda erişemezseniz nuget &amp;uuml;zerinden&lt;strong&gt;&amp;nbsp;Microsoft.AspNetCore.Server.HttpSys&lt;/strong&gt;&amp;nbsp;paketini install etmeniz gerekmekte.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Program
+{
+    public static void Main(string[] args)
+    {
+        CreateWebHostBuilder(args).Build().Run();
+    }
+
+    public static IWebHostBuilder CreateWebHostBuilder(string[] args) =&amp;gt;
+        WebHost.CreateDefaultBuilder(args)
+            .UseStartup&amp;lt;Startup&amp;gt;()
+            .UseHttpSys(options =&amp;gt;
+            {
+                options.UrlPrefixes.Add("http://localhost:4440");
+                options.Authentication.Schemes = AuthenticationSchemes.NTLM;
+                options.Authentication.AllowAnonymous = false;
+                options.MaxRequestBodySize = 30000000;
+                options.MaxConnections = 100;
+            });
+}&lt;/pre&gt;
+&lt;p&gt;Uygulama HTTPsys server &amp;uuml;zerinde 4440 portunda &amp;ccedil;alışacaktır. Uygulamayı run edebilmek i&amp;ccedil;in&amp;nbsp;vs'da default IISExpress olan run profile'ını&amp;nbsp;launchsettings.json dosyasında da tanımlı olan profile'ı aşağıdaki resimde olduğu gibi HTTPsysServer yapıp run diyelim.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/htt_sys_prfile_run_pag.png" alt="" width="736" height="476" /&gt;&lt;/p&gt;
+&lt;p&gt;Run dedikten sonra uygulama ilgili bir ka&amp;ccedil; bilginin bulunduğu bir console ekranı a&amp;ccedil;ılacaktır. Browser &amp;uuml;zerinden belirtmiş olduğumuz adrese giderek uygulamaya kolayca erişebiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/htt_sys_prfile_run_cnsle_prnt.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Yazının başında da belirttiğimiz gibi, HTTPsys, Asp.Net Core 2.0 ile birlikte IIS bağımsız uygulamalar geliştirmek istediğimizde Kestrel'e alternatif olarak karşımıza &amp;ccedil;ıkmakta ve sahip olduğu bazı &amp;ouml;zellikler bakımından Kestrel'in yerini de alabilmekte. Tek can sıkıcı noktası Windows-only olsada performans ve security a&amp;ccedil;ısından olduk&amp;ccedil;a faydalı bir option olarak se&amp;ccedil;enekler arasında bulunmakta.&lt;/p&gt;
+&lt;p&gt;HTTPsys ile ilgili daha detaylı bilgilere&amp;nbsp;&lt;a href="https://github.com/aspnet/Docs/blob/master/aspnetcore/fundamentals/servers/httpsys.md"&gt;buradan&lt;/a&gt;&amp;nbsp;ulaşabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-09-29 21:31:00</pubDate>
+  <lastModified>2020-01-20 08:22:11</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>asp-net-core-uygulamalarini-http-sys-web-server-uzerinde-host-etme</slug>
+  <tags>
+    <tag>HTTP.sys nasıl kullanılır</tag>
+    <tag>HTTP.sys nedir</tag>
+    <tag>HTTP.sys Web Server</tag>
+    <tag>Asp.Net Core HTTP.sys</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+  </categories>
+  <notifications />
+</post>

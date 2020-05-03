@@ -1,0 +1,476 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.​Net Core Unit Test Nedir Nasıl Yazılır</title>
+  <description>Çok da uzak olmayan bir süre önce .net core 2.1 release oldu ve 2.0'dan sonra gücüne güç katarak emin adımlarla ilerleyeceğini sunduğu benchmark sonuçları ile bizlere göstermiş oldu desek yalan olmaz. Tabi geliştirmiş olduğumuz bu core uygulamalarına test yazmadan olmaz.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki &lt;a href="/?tag=unit+test"&gt;unit test yazılarında&lt;/a&gt; .net framework uygulamaları i&amp;ccedil;in &amp;ccedil;eşitli k&amp;uuml;t&amp;uuml;phaneler kullanarak unit test nedir ne şekilde neden yazılır gibi konulara değinmiştik. Tekrar kısaca tanımlamak gerekirse; unit test'i yazmış olduğunuz kodun her bir birimi i&amp;ccedil;in testler&amp;nbsp;yazarak o kodu veya business'ı test etmek olarak d&amp;uuml;ş&amp;uuml;nebiliriz. Diğer bir&amp;nbsp;değişle; yazmış olduğumuz sınıf veya metotlara real-case'de gelebilecek olan parametreleri ge&amp;ccedil;erek doğru bir şekilde &amp;ccedil;alışıp &amp;ccedil;alışmadığını kontrol etmektir diyebiliriz. Bu yazıda ise asp.net core uygulamalarında unit test yazmak i&amp;ccedil;in&amp;nbsp;neler yapmak gerekiyor &amp;ouml;rnek bir proje &amp;uuml;zerinden inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;&amp;Ccedil;ok da uzak olmayan bir s&amp;uuml;re &amp;ouml;nce .net core 2.1 release oldu ve 2.0'dan sonra g&amp;uuml;c&amp;uuml;ne g&amp;uuml;&amp;ccedil; katarak emin adımlarla ilerleyeceğini sunduğu&amp;nbsp;benchmark sonu&amp;ccedil;ları ile bizlere g&amp;ouml;stermiş oldu desek yalan olmaz. Tabi geliştirmiş olduğumuz bu core uygulamalarına test yazmadan olmaz. Asp.Net Core i&amp;ccedil;in unit test yazmada kullanılabilecek k&amp;uuml;t&amp;uuml;phaneler nedir diye baktığımızda .net framework'den de hatırlayacağımız&amp;nbsp;Xunit, Moq&amp;nbsp;ve FluentAssertions benzeri k&amp;uuml;t&amp;uuml;phaneler karışımıza &amp;ccedil;ıkmakta. Bu k&amp;uuml;t&amp;uuml;phaneleri kullanarak geliştirdiğimiz .net core uygulamalarına ait sınıflar ve metotlar i&amp;ccedil;in unit test yazmak olduk&amp;ccedil;a kolay ve eğlenceli.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rneğimize başlamadan &amp;ouml;nce terminolojide bulunan bazı terimlere değinmek gerekirse;&lt;/p&gt;
+&lt;h3&gt;Sut (Service Under Test)&lt;/h3&gt;
+&lt;p&gt;Sut "Service Under Test"'in kısaltılmışı olarak unit test metotlarında test etmek istediğimiz sınıfın&amp;amp;service'in ismini belirtmek i&amp;ccedil;in değişken tanımlamada kullanılan kısaltmadır diyebiliriz.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;Mocking&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Sut i&amp;ccedil;erisinde bulunan business'a ait testleri yazarken i&amp;ccedil;erisinde kullanılan nesnelere ait fake sınıflardır. Bu sınıfların&amp;nbsp;&amp;uuml;rettiği&amp;nbsp;process'e g&amp;ouml;re unit testini yazdığımız business'ın her bir koşuluna g&amp;ouml;re assertion'lar oluşturabiliriz. &amp;Ouml;rnek olarak; bir dış servise bağlanıp geriye object return eden bir metodunuz olsun. Siz bu metoda ait unit test yazarken bu dış service gitmek yerine tıpkı o dış service'e gidip response almış veya alamamış gibi&amp;nbsp;bu dış service bağlantısını mock'lamak olarak d&amp;uuml;ş&amp;uuml;nebilirsiniz.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;Expected ve Actual Kavramları&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Expected ; unit test&amp;nbsp;yazdığımız fonksiyonalitenin vermesi beklenen &amp;ccedil;ıktısı, result'ını belirtirken kullanılır. Diğer bir değişyle; bu metot veya sınıf bu parametrelerle bu sonucu &amp;uuml;retmesi beklenir.&lt;/p&gt;
+&lt;p&gt;Actual ;&amp;nbsp;unit test'ini yazdığımız metot yada sınıfın ger&amp;ccedil;ek, o an d&amp;ouml;nd&amp;uuml;ğ&amp;uuml; result'ı tanımlarken kullanılır.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;Assertion&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Actual ve Expected değerlerini karşılaştırırken i&amp;ccedil;erisinde tanımlamalar yapabildiğimiz yapının/metodun/sınıfın ismidir.&lt;/p&gt;
+&lt;p&gt;Yazımızda &amp;ouml;rnek olarak CustomerApi adındaki web api projemiz i&amp;ccedil;in hem controller hemde service&amp;nbsp;katmanları i&amp;ccedil;in unit test projeleri oluşturacağız. Hi&amp;ccedil; vakit kaybetmeden vs'da Customer.Api adında bir asp.net core web api projesi oluştralım. Benim kullandığım environment'da &lt;a href="https://www.microsoft.com/net/download/dotnet-core/2.1"&gt;.net core sdk 2.1&lt;/a&gt; y&amp;uuml;kl&amp;uuml; bu y&amp;uuml;zden projeleri 2.1 olarak oluşturacağım. Sizlerinde &amp;ouml;rneği takip edebilmek adına geliştirme ortamınızda .net core 2.0 ve &amp;uuml;zeri bir&amp;nbsp;sdk y&amp;uuml;kl&amp;uuml; olması gerekmekte.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/prdctapiunttst_vs1.png" alt="" width="1013" height="364" /&gt;&lt;/p&gt;
+&lt;p&gt;Solution a&amp;ccedil;ıldıktan sonra birde Customer.Service adında service layer i&amp;ccedil;in Core Class Library projesi oluşturalım ve geliştirmelerimize başlayalım.&lt;/p&gt;
+&lt;p&gt;İlk olarak Customer domain nesnesini oluşturalım. Bu nesne &amp;uuml;zerinde Id, FullName, CityCode ve BirthDate alanlarını tutalım. Yeni bir customer yaratırken ve mevcut customer'ı update ederken ilgili validation'ları bu sınıf i&amp;ccedil;erisinde aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class Customer : Entity
+    {
+        public string FullName { get; protected set; }
+        public string CityCode { get; protected set; }
+        public DateTime BirthDate { get; protected set; }
+
+        public Customer(string fullName, string cityCode, DateTime birthDate)
+        {
+            if (
+                string.IsNullOrEmpty(fullName) ||
+                string.IsNullOrEmpty(cityCode) ||
+                birthDate.Date == DateTime.Today)
+            {
+                throw new Exception("Fields are not valid to create a new customer.");
+            }
+
+            FullName = fullName;
+            CityCode = cityCode;
+            BirthDate = birthDate;
+        }
+
+        protected Customer()
+        {
+            
+        }
+
+        public void SetFields(string fullName, string cityCode, DateTime birthDate)
+        {
+            if (string.IsNullOrEmpty(fullName) ||
+                string.IsNullOrEmpty(cityCode) ||
+                birthDate.Date == DateTime.Today)
+            {
+                throw new Exception("Fields are not valid to update.");
+            }
+
+            FullName = fullName;
+            CityCode = cityCode;
+            BirthDate = birthDate;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Sonrasında Controller'ın doğrudan iletişim kurabildiği ICustomerService ve onun implementasyonunu i&amp;ccedil;eren sınıfları aşağıdaki gibi tanımlayalım. Bu katman CustomerDbContext &amp;uuml;zerinden crud işlemlerinin yapılabildiği customerRepository sınıfının kullanıldığı service katmanıdır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface ICustomerService
+{
+    void CreateNew(CustomerDto customer);
+    CustomerDto Update(CustomerDto customer);
+    List&amp;lt;CustomerDto&amp;gt; GetAll();
+    List&amp;lt;CustomerDto&amp;gt; GetByCityCode(string cityCode);
+    CustomerDto GetById(Guid id);
+}&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CustomerService : ICustomerService
+    {
+        private readonly ICustomerRepository _customerRepository;
+        private readonly ICustomerAssembler _customerAssembler;
+        public CustomerService(ICustomerRepository customerRepository, ICustomerAssembler customerAssembler)
+        {
+            _customerRepository = customerRepository;
+            _customerAssembler = customerAssembler;
+        }
+
+        public void CreateNew(CustomerDto customerDto)
+        {
+            var customer = _customerAssembler.ToCustomer(customerDto);
+
+            _customerRepository.Save(customer);
+        }
+
+        public CustomerDto Update(CustomerDto customer)
+        {
+            var existing = _customerRepository.Get(customer.Id);
+
+            existing.SetFields(customer.FullName, customer.CityCode, customer.BirthDate);
+
+            _customerRepository.Update(existing);
+
+            var customerDto = _customerAssembler.ToCustomerDto(existing);
+
+            return customerDto;
+        }
+
+        public List&amp;lt;CustomerDto&amp;gt; GetAll()
+        {
+            var all = _customerRepository.All().ToList();
+            return _customerAssembler.ToCustomerDtoList(all);
+        }
+
+        public List&amp;lt;CustomerDto&amp;gt; GetByCityCode(string cityCode)
+        {
+            var list = _customerRepository.Find(c =&amp;gt; c.CityCode == cityCode).ToList();
+            return _customerAssembler.ToCustomerDtoList(list);
+        }
+
+        public CustomerDto GetById(Guid id)
+        {
+            var customer = _customerRepository.Get(id);
+            if (customer == null)
+            {
+                throw new Exception("Customer with this id : " + id + " not found.");
+            }
+            var customerDto = _customerAssembler.ToCustomerDto(customer);
+            return customerDto;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki bağımlılığı&amp;nbsp;ve dbContext registration'ı .net core built-in container'a inject etmemiz gerekiyor bunun i&amp;ccedil;in Startup.cs i&amp;ccedil;erisinde aşağıdaki gibi bağımlıkları register edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddDbContext&amp;lt;CustomerDbContext&amp;gt;(options =&amp;gt;
+                options.UseSqlServer(Configuration.GetSection("CustomerDbConnString").Value));
+
+            services.AddScoped&amp;lt;ICustomerRepository, CustomerRepository&amp;gt;();
+            services.AddScoped&amp;lt;ICustomerService, CustomerService&amp;gt;();
+
+            services.AddTransient&amp;lt;ICustomerAssembler, CustomerAssembler&amp;gt;();
+            services.AddTransient&amp;lt;ICustomerService, CustomerService&amp;gt;();
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+        }&lt;/pre&gt;
+&lt;p&gt;Bu service metotlarını kullanacak olan api projemiz ile ilgili son olarak ise CustomerController.cs adında bir api controller oluşturup i&amp;ccedil;erisinde service sınıfında yer alan metotları kullandığımız api end-point'lerini tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    [Route("api/[controller]")]
+    [ApiController]
+    public class CustomerController : ControllerBase
+    {
+        private readonly ICustomerService _customerService;
+        public CustomerController(ICustomerService customerService)
+        {
+            _customerService = customerService;
+        }
+
+        // GET api/customer
+        [HttpGet]
+        public ActionResult&amp;lt;List&amp;lt;CustomerDto&amp;gt;&amp;gt; Get()
+        {
+            return Ok(_customerService.GetAll());
+        }
+
+        // GET api/customer/id
+        [HttpGet("{id}")]
+        public ActionResult&amp;lt;CustomerDto&amp;gt; Get(Guid id)
+        {
+            return Ok(_customerService.GetById(id));
+        }
+
+        // POST api/customer
+        [HttpPost]
+        public ActionResult Post([FromBody] CustomerDto customer)
+        {
+            _customerService.CreateNew(customer);
+            return Ok();
+        }
+
+        // PUT api/customer
+        [HttpPut]
+        public ActionResult&amp;lt;CustomerDto&amp;gt; Put([FromBody] CustomerDto customer)
+        {
+            return Ok(_customerService.Update(customer));
+        }
+
+        // GET api/customer/getbycitycode/cityCode
+        [HttpGet("getbycitycode/{cityCode}")]
+        public ActionResult&amp;lt;List&amp;lt;CustomerDto&amp;gt;&amp;gt; GetByCityCode(string cityCode)
+        {
+            return Ok(_customerService.GetByCityCode(cityCode));
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Projemiz hazır durumda. Şimdi ufaktan unit-tes projelerini oluşturmaya başlayalım.&lt;/p&gt;
+&lt;p&gt;İlk olarak Service ve Domain sınıfları&amp;nbsp;i&amp;ccedil;in solution'a sağ tıklayıp Add-New Project se&amp;ccedil;eneği se&amp;ccedil;ip aşağıdaki gibi Customer.Service.Test adında bir xUnit Test projesi oluşturalım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/prdctapiunttst_vs2_crt_tst.png" alt="" width="601" height="355" /&gt;&lt;/p&gt;
+&lt;p&gt;Projemiz bir xUnit test projesidir ve testleri yazarken kullanacağımız bazı k&amp;uuml;tphaneler şu şekildedir;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;XUnit&lt;/li&gt;
+&lt;li&gt;Moq&lt;/li&gt;
+&lt;li&gt;FluentAssertions&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;AutoFixture&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;dır. Sırasıyla bu k&amp;uuml;t&amp;uuml;phaneleri projemiz referanslarına nuget &amp;uuml;zerinden ekleyelim. Paketleri ekledikten sonra ilk olarak Customer domain'i ile test yazmaya başlayalım. Customer sınıfına ait bir instance&amp;nbsp;oluştururken Customer'a ait property'leri update ederken belli bazı kontroller bulunmakta. Bu kontroller i&amp;ccedil;in aşağıdaki gibi CustomerTests.cs adında olan sınıf i&amp;ccedil;erisinde unit testleri tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CustomerTests
+    {
+        [Theory, AutoMoqData]
+        public void Create_Customer_Should_Throw_Exception_When_FullName_Is_Empty(string cityCode, DateTime birthDate)
+        {
+            Assert.Throws&amp;lt;Exception&amp;gt;(() =&amp;gt; new Customer(string.Empty, cityCode, birthDate));
+        }
+
+        [Theory, AutoMoqData]
+        public void Create_Customer_Should_Throw_Exception_When_CityCode_Is_Empty(string fullName, DateTime birthDate)
+        {
+            Assert.Throws&amp;lt;Exception&amp;gt;(() =&amp;gt; new Domain.Customer(fullName, string.Empty, birthDate));
+        }
+
+        [Theory, AutoMoqData]
+        public void Create_Customer_Should_Throw_Exception_When_BirthDate_Is_Invalid(string fullName, string cityCode)
+        {
+            Assert.Throws&amp;lt;Exception&amp;gt;(() =&amp;gt; new Domain.Customer(fullName, cityCode, DateTime.Today));
+        }
+
+        [Theory, AutoMoqData]
+        public void Create_Customer_Should_Success(string fullName, string cityCode, DateTime birthDate)
+        {
+            var sut = new Domain.Customer(fullName, cityCode, birthDate);
+
+            sut.FullName.Should().Be(fullName);
+            sut.CityCode.Should().Be(cityCode);
+            sut.BirthDate.Should().Be(birthDate);
+        }
+
+        [Theory, AutoMoqData]
+        public void SetFields_Should_Update_Fields(string fullName, string cityCode, DateTime birthDate, Domain.Customer sut)
+        {
+            sut.SetFields(fullName, cityCode, birthDate);
+
+            sut.FullName.Should().Be(fullName);
+            sut.CityCode.Should().Be(cityCode);
+            sut.BirthDate.Should().Be(birthDate);
+        }
+    }
+    
+   //Method parameter olarak Automoq yapabilmek i&amp;ccedil;in kullanacağımız attribute
+    public class AutoMoqDataAttribute : AutoDataAttribute
+    {
+        public AutoMoqDataAttribute()
+            : base(new Fixture().Customize(new AutoMoqCustomization()))
+        {
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda yazmış olduğumuz testleri run etmek i&amp;ccedil;in ise vs. &amp;uuml;zerinde Test =&amp;gt; Run =&amp;gt; All Test diyerek aşağıda olduğu gibi Test Explorer'da Customer sınıfına ait testlerinizin Passed olduğunu g&amp;ouml;rebilirsiniz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/nutst_rspr__cust_testrslt_img1.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Diğer bir test sınıfı ise ICustomerService interface'ine ait metotları test edebilmek i&amp;ccedil;in oluşturup test case'lerini aşağıdaki gibi yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CustomerServiceTests
+    {
+        [Theory, AutoMoqData]
+        public void CreateNewCustomer_Should_Success([Frozen]Mock&amp;lt;ICustomerAssembler&amp;gt; assembler, [Frozen]Mock&amp;lt;ICustomerRepository&amp;gt; repository, CustomerDto customerDto, Domain.Customer customer, CustomerService sut)
+        {
+            assembler.Setup(c =&amp;gt; c.ToCustomer(customerDto)).Returns(customer);
+            repository.Setup(c =&amp;gt; c.Save(customer)).Returns(It.IsAny&amp;lt;Guid&amp;gt;());
+
+            Action action = () =&amp;gt;
+            {
+                sut.CreateNew(customerDto);
+            };
+            action.Should().NotThrow&amp;lt;Exception&amp;gt;();
+        }
+
+        [Theory, AutoMoqData]
+        public void UpdateCustomer_Should_Success([Frozen]Mock&amp;lt;ICustomerAssembler&amp;gt; assembler, [Frozen]Mock&amp;lt;ICustomerRepository&amp;gt; repository, CustomerDto customerDto, Domain.Customer customer, CustomerService sut)
+        {
+            assembler.Setup(c =&amp;gt; c.ToCustomer(customerDto)).Returns(customer);
+            repository.Setup(c =&amp;gt; c.Update(customer));
+
+            Action action = () =&amp;gt;
+            {
+                sut.Update(customerDto);
+            };
+            action.Should().NotThrow&amp;lt;Exception&amp;gt;();
+        }
+
+        [Theory, AutoMoqData]
+        public void GetAll_Should_Success([Frozen]Mock&amp;lt;ICustomerAssembler&amp;gt; assembler, [Frozen]Mock&amp;lt;ICustomerRepository&amp;gt; repository, List&amp;lt;Domain.Customer&amp;gt; customers, List&amp;lt;CustomerDto&amp;gt; customersDtos, CustomerService sut)
+        {
+            repository.Setup(c =&amp;gt; c.All()).Returns(customers.AsQueryable);
+            assembler.Setup(c =&amp;gt; c.ToCustomerDtoList(customers)).Returns(customersDtos);
+
+            Action action = () =&amp;gt;
+            {
+                var result = sut.GetAll();
+                result.Count.Should().Be(customersDtos.Count);
+            };
+            action.Should().NotThrow&amp;lt;Exception&amp;gt;();
+        }
+
+
+        [Theory, AutoMoqData]
+        public void GetByCityCode_Should_Success([Frozen]Mock&amp;lt;ICustomerAssembler&amp;gt; assembler, [Frozen]Mock&amp;lt;ICustomerRepository&amp;gt; repository, string cityCode, List&amp;lt;Domain.Customer&amp;gt; customers, List&amp;lt;CustomerDto&amp;gt; customersDtos, CustomerService sut)
+        {
+            assembler.Setup(c =&amp;gt; c.ToCustomerDtoList(customers)).Returns(customersDtos);
+            repository.Setup(x =&amp;gt; x.Find(It.IsAny&amp;lt;Expression&amp;lt;Func&amp;lt;Domain.Customer, bool&amp;gt;&amp;gt;&amp;gt;())).Returns(customers.AsQueryable);
+
+            Action action = () =&amp;gt;
+            {
+                var result = sut.GetByCityCode(cityCode);
+                result.Should().BeEquivalentTo(customersDtos);
+            };
+            action.Should().NotThrow&amp;lt;Exception&amp;gt;();
+        }
+
+        [Theory, AutoMoqData]
+        public void GetById_Should_Return_As_Expected([Frozen]Mock&amp;lt;ICustomerAssembler&amp;gt; assembler, [Frozen]Mock&amp;lt;ICustomerRepository&amp;gt; repository, Guid id, CustomerDto customerDto, Domain.Customer customer, CustomerService sut)
+        {
+            assembler.Setup(c =&amp;gt; c.ToCustomerDto(customer)).Returns(customerDto);
+            repository.Setup(c =&amp;gt; c.Get(id)).Returns(customer);
+
+            Action action = () =&amp;gt;
+            {
+                var result = sut.GetById(id);
+                result.Should().BeEquivalentTo(customerDto);
+            };
+            action.Should().NotThrow&amp;lt;Exception&amp;gt;();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Domain ve Service sınıfları i&amp;ccedil;in unit testlerimizi yukarıdaki gibi oluşturduk. Şimdi ise son olarak Controller i&amp;ccedil;in test projesi oluşturup ilgili test case'lerini yazalım. Yine yukarıda olduğu gibi solution'da bir tane Customer.Api.Test adında core xUnit test projesi oluşturalım ve&amp;nbsp;XUnit, Moq, FluentAssertions, AutoFixture k&amp;uuml;t&amp;uuml;phanelerini nuget &amp;uuml;zerinden projemize ekleyelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CustomerControllerTests
+    {
+        [Theory, AutoMoqData]
+        public void GetAll_Should_Return_As_Expected(Mock&amp;lt;ICustomerService&amp;gt; customerServiceMock, List&amp;lt;CustomerDto&amp;gt; expected)
+        {
+            var sut = new CustomerController(customerServiceMock.Object);
+            customerServiceMock.Setup(c =&amp;gt; c.GetAll()).Returns(expected);
+
+            var result = sut.Get();
+
+            var apiOkResult = result.Result.Should().BeOfType&amp;lt;OkObjectResult&amp;gt;().Subject;
+            var actual = apiOkResult.Value.Should().BeAssignableTo&amp;lt;List&amp;lt;CustomerDto&amp;gt;&amp;gt;().Subject;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory, AutoMoqData]
+        public void GetById_Should_Return_As_Expected(Mock&amp;lt;ICustomerService&amp;gt; customerServiceMock, Guid id, CustomerDto expected)
+        {
+            var sut = new CustomerController(customerServiceMock.Object);
+            customerServiceMock.Setup(c =&amp;gt; c.GetById(id)).Returns(expected);
+
+            var result = sut.Get(id);
+
+            var apiOkResult = result.Result.Should().BeOfType&amp;lt;OkObjectResult&amp;gt;().Subject;
+            var actual = apiOkResult.Value.Should().BeAssignableTo&amp;lt;CustomerDto&amp;gt;().Subject;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory, AutoMoqData]
+        public void Post_Should_Return_As_Expected(Mock&amp;lt;ICustomerService&amp;gt; customerServiceMock, CustomerDto customer)
+        {
+            var sut = new CustomerController(customerServiceMock.Object);
+            customerServiceMock.Setup(c =&amp;gt; c.CreateNew(customer));
+
+            var actual = sut.Post(customer);
+
+            actual.GetType().Should().Be(typeof(OkResult));
+        }
+
+        [Theory, AutoMoqData]
+        public void Put_Should_Return_As_Expected(Mock&amp;lt;ICustomerService&amp;gt; customerServiceMock, CustomerDto expected)
+        {
+            var sut = new CustomerController(customerServiceMock.Object);
+            customerServiceMock.Setup(c =&amp;gt; c.Update(expected)).Returns(expected);
+
+            var result = sut.Put(expected);
+
+            var apiOkResult = result.Result.Should().BeOfType&amp;lt;OkObjectResult&amp;gt;().Subject;
+            var actual = apiOkResult.Value.Should().BeAssignableTo&amp;lt;CustomerDto&amp;gt;().Subject;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory, AutoMoqData]
+        public void GetByCityCode_Should_Return_As_Expected(Mock&amp;lt;ICustomerService&amp;gt; customerServiceMock, string cityCode, List&amp;lt;CustomerDto&amp;gt; expected)
+        {
+            var sut = new CustomerController(customerServiceMock.Object);
+            customerServiceMock.Setup(c =&amp;gt; c.GetByCityCode(cityCode)).Returns(expected);
+
+            var result = sut.GetByCityCode(cityCode);
+
+            var apiOkResult = result.Result.Should().BeOfType&amp;lt;OkObjectResult&amp;gt;().Subject;
+            var actual = apiOkResult.Value.Should().BeAssignableTo&amp;lt;List&amp;lt;CustomerDto&amp;gt;&amp;gt;().Subject;
+
+            Assert.Equal(expected, actual);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Controller i&amp;ccedil;in unit testlerimiz bitti. Şimdi solution'da bulunan b&amp;uuml;t&amp;uuml;n testleri run ettiğimizde aşağıdaki gibi hepsinin Passed olduğunu g&amp;ouml;rmemiz gerekir. Toplamda&amp;nbsp;21 tane unit test metodu bulunmakta ve hepsi ge&amp;ccedil;miş durumda.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/nutst_rspr_rslt_img1.png" alt="" width="629" height="701" /&gt;&lt;/p&gt;
+&lt;p&gt;Unit test yazmak olduk&amp;ccedil;a &amp;ouml;nemli ve yılmadan usanmadan keyif alarak yapılması gereken bir ger&amp;ccedil;ek olarak biz developer'ların hayatında bulunmakta. Bazen unit test yazmak istediğiniz service'i geliştirirken daha az zaman harcamış olduğunuz anlar bile&amp;nbsp;yaşanacaktır ancak titizlikle yazılan her bir unit-test'in bize getirisi olduk&amp;ccedil;a fazla olacaktır. Production'ına &amp;ccedil;ıkmadan fonksiyonaliteyi test etmek olsun, arada ka&amp;ccedil;ak k&amp;uuml;&amp;ccedil;ek sa&amp;ccedil;ma sapan bug'ların &amp;ouml;n&amp;uuml;ne ge&amp;ccedil;mek a&amp;ccedil;ısından olsun, hemde isimlendirmeleri doğru yaptığımız taktirde projeye yeni başlayan birinin business'ı daha kolay anlayabilmesi gibi durumları g&amp;ouml;z &amp;ouml;n&amp;uuml;ne alırsak unit test yazmanın bir &amp;ccedil;ok faydalı noktası bulunmakta. &amp;Uuml;şenmeden g&amp;uuml;cenmeden yazmanız dileğiyle..&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/Asp.Net-Core-Entity-Framework-Integration-Test-and-Unit-Test-Using-In-Memory-Database"&gt;Source Code&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-08-17 00:55:00</pubDate>
+  <lastModified>2020-01-20 08:22:11</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-unit-test</slug>
+  <tags>
+    <tag>asp.net core unit test</tag>
+    <tag>sut</tag>
+    <tag>mocking</tag>
+    <tag>assert</tag>
+    <tag>expected actual</tag>
+    <tag>unit test nedir</tag>
+    <tag>unit test nasıl yazılır</tag>
+    <tag>.net core unit test</tag>
+  </tags>
+  <comments>
+    <comment id="8b84c541-b11e-4c81-9025-e6463c2425c6" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-08-30 16:04:47</date>
+      <author>Semih T</author>
+      <email>Semiht@semiht.com</email>
+      <country />
+      <ip>176.54.140.236</ip>
+      <avatar />
+      <content>Yazi icin tesekkurler oldukca faydali olmus.</content>
+    </comment>
+    <comment id="59216327-cb36-4d2e-aa4c-e5a8c59d82cc" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-04-26 08:13:21</date>
+      <author>İsmail Tutumluer</author>
+      <email>ismail.tutumluer@gmail.com</email>
+      <country />
+      <ip>212.156.154.74</ip>
+      <avatar />
+      <content>Belki AutoMoqData için aşağıdaki sınıfı test projesine koymak gerektiğini söylemek lazım.
+public class AutoMoqDataAttribute : AutoDataAttribute
+{
+    public AutoMoqDataAttribute()
+        : base(new Fixture().Customize(new AutoMoqCustomization()))
+    {
+    }
+}</content>
+    </comment>
+    <comment id="7bfcfd9b-7ee8-42e6-8921-e09fb445a407" parentid="59216327-cb36-4d2e-aa4c-e5a8c59d82cc" approved="True" spam="False" deleted="True">
+      <date>2019-05-20 07:21:26</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Yazının sonunda sourceCode paylaşımı yapmıştım. git&amp;#39;te yer alan projeyi incelediysen orda mevcut aslında 
+
+https://github.com/canertosuner/Asp.Net-Core-Entity-Framework-Integration-Test-and-Unit-Test-Using-In-Memory-Database/blob/master/Customer.Api.Test/CustomerControllerTests.cs</content>
+    </comment>
+    <comment id="ce940ba1-2bf1-41df-8974-a1080b9f4e63" parentid="59216327-cb36-4d2e-aa4c-e5a8c59d82cc" approved="True" spam="False" deleted="False">
+      <date>2019-05-20 07:23:09</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Yazının sonunda sourceCode paylaşımı yapmıştım. git&amp;#39;te yer alan projeyi incelediysen orda mevcut aslında 
+
+https://github.com/canertosuner/Asp.Net-Core-Entity-Framework-Integration-Test-and-Unit-Test-Using-In-Memory-Database/blob/3b3551dfa4c96c0bb1802bc50da9775b025b2c61/Customer.Api.Test/CustomerControllerTests.cs#L86</content>
+    </comment>
+    <comment id="3873dda3-a339-48bd-a024-04fdbbf88d12" parentid="ce940ba1-2bf1-41df-8974-a1080b9f4e63" approved="True" spam="False" deleted="False">
+      <date>2019-05-23 14:31:21</date>
+      <author>İsmail Tutumluer</author>
+      <email>ismail.tutumluer@gmail.com</email>
+      <country />
+      <ip>81.214.51.87</ip>
+      <avatar />
+      <content>Süper, elinize sağlık</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>018aedb2-84ba-46ad-89f2-2d551bf7c063</category>
+  </categories>
+  <notifications>
+    <email>ismail.tutumluer@gmail.com</email>
+  </notifications>
+</post>

@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Smart Home Project</title>
+  <description />
+  <content>&lt;h1 style="text-align: left;"&gt;&lt;strong style="font-size: 10px;"&gt;&lt;span style="font-size: medium; text-decoration: underline;"&gt;Summary&lt;/span&gt;&lt;/strong&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;span style="font-size: large; font-family: verdana, geneva;" data-mce-mark="1"&gt;Smart Home project provides users to control the electronic devices via it&amp;rsquo;s desktop application and mobile application. User can create scenarios which are &amp;ldquo;Arrive&amp;rdquo; and &amp;ldquo;Leave&amp;rdquo; scenarios and they can create feature events about sensors or electronic devices which are time-based and the system perform these events according to the different device types. All the actions process on the system are logged in the database and reports to the user.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img style="font-size: 10px; display: block; margin-left: auto; margin-right: auto;" src="http://canertosuner.com/MyImage_Folder/10390368_10203111076313460_960697474749145288_n.jpg" alt="" width="581" height="823" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;Desktop Application&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: large; font-family: verdana, geneva;" data-mce-mark="1"&gt;There is a laptop which is connected to the arduino and it receives and sends data from cloud system to arduino board or arduino board to cloud system. Users can access the in time data that comes from arduino board and it is displayed on a page which works on desktop application. They can create &amp;ldquo;Arrive&amp;rdquo; and &amp;ldquo;Leave&amp;rdquo; scenarios or they can create feature events using that application.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="http://canertosuner.com/MyImage_Folder/sh_6.png" alt="" width="778" height="442" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: large; font-family: verdana, geneva;" data-mce-mark="1"&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span style="font-size: medium; text-decoration: underline;"&gt;Cloud&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;span style="font-size: large; font-family: verdana, geneva;" data-mce-mark="1"&gt;In the cloud side all data and necessary files are stored on azure cloud services. All the tables in the database have been developed by using MS-SQL, and using Entity Framework technology insertion, deletion and update operations performed. There is a virtual machine runs on azure and it communicates with mobile application and desktop application the process the commands.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="http://canertosuner.com/MyImage_Folder/sh_7.png" alt="" width="735" height="464" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span style="font-size: medium; text-decoration: underline;"&gt;Mobile Application&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;span style="font-size: large; font-family: verdana, geneva;" data-mce-mark="1"&gt;There is an application which works on Windows Phone operating system. Users who has Windows Phone device can install the application and login. After processing some security functions they can easily display the device status and values of the sensors that are in smart home system.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="http://canertosuner.com/MyImage_Folder/sh_2.png" alt="" width="247" height="385" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;&lt;span style="font-size: large; font-family: verdana, geneva;" data-mce-mark="1"&gt;Use Case Diagram&lt;/span&gt;&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: large; font-family: verdana, geneva;" data-mce-mark="1"&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="http://canertosuner.com/MyImage_Folder/sh_5.jpg" alt="" width="540" height="518" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2014-05-21 18:04:00</pubDate>
+  <lastModified>2020-01-20 08:22:29</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Smart-Home-Project</slug>
+  <tags>
+    <tag>smart home</tag>
+    <tag>smart</tag>
+    <tag>home</tag>
+    <tag>windows phone</tag>
+    <tag>socket</tag>
+    <tag>azure</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

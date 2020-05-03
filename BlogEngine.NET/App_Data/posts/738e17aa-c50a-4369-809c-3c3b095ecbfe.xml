@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asmx ve WCF Arasındaki Farklar</title>
+  <description>Asmx&amp;nbsp;SOAP ve Http kullanarak mesajlaşabilirken, WCF default olarak Http olmasıyla birlitke TCP/</description>
+  <content>&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;"&gt;&lt;strong style="font-size: medium;"&gt;Asmx&amp;nbsp;&lt;/strong&gt;&lt;span style="color: red;"&gt;SOAP &lt;/span&gt;ve &lt;span style="color: red;"&gt;Http &lt;/span&gt;kullanarak mesajlaşabilirken, &lt;strong style="font-size: medium;"&gt;WCF&lt;/strong&gt; default olarak Http olmasıyla birlitke &lt;span style="color: red;"&gt;TCP/IP, MSMQ, NamedPipes&lt;/span&gt; etc. gibi yapıları da kullanabilmekte.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;"&gt;&lt;strong style="font-size: medium;"&gt;Asmx&lt;/strong&gt; servisler sadece &lt;span style="color: red;"&gt;IIS &lt;/span&gt;&amp;uuml;zerinde Host edilebilirken, &lt;strong style="font-size: medium;"&gt;WCF&amp;nbsp;&lt;/strong&gt;&lt;span style="color: red;"&gt;IIS&lt;/span&gt;, &lt;span style="color: red;"&gt;WAS &lt;/span&gt;(Windows Process Activation Services), &lt;span style="color: red;"&gt;Console Application, Windows NT Services &lt;/span&gt;&amp;uuml;zerinde host edilebilmektedir.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;"&gt;&lt;strong style="font-size: medium;"&gt;Asmx&lt;/strong&gt;&amp;rsquo;de g&amp;uuml;venlik sınırlıdır. Kimlik doğrulama ve yetkilendirme işlemleri &lt;span style="color: red;"&gt;IIS&lt;/span&gt;, &amp;nbsp;&lt;span style="color: red;"&gt;Asp.Net &lt;/span&gt;ve &lt;span style="color: red;"&gt;TCP &lt;/span&gt;Protokol&amp;uuml; kullanılarak yapılır ve kesin bir g&amp;uuml;venlik tutarlılığı yoktur. &lt;strong style="font-size: medium;"&gt;WCF&lt;/strong&gt; her bir protokol i&amp;ccedil;in ayrı bir g&amp;uuml;venlik hizmeti sağlar ve bu y&amp;ouml;nden daha tutarlı bir g&amp;uuml;venlik alt yapısına sahiptir.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;"&gt;&lt;strong style="font-size: medium;"&gt;Asmx&lt;/strong&gt;&amp;rsquo;de class&amp;rsquo;a &lt;span style="color: red;"&gt;[WebService]&lt;/span&gt; tag&amp;rsquo;i eklenmeliyken, &lt;strong style="font-size: medium;"&gt;WCF&lt;/strong&gt;&amp;rsquo;de class&amp;rsquo;a &lt;span style="color: red;"&gt;[ServiceContract&lt;/span&gt;] tag&amp;rsquo;i eklenmelidir&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;"&gt;&lt;strong style="font-size: medium;"&gt;Asmx&lt;/strong&gt; serilization işlemi i&amp;ccedil;in &lt;span style="color: red;"&gt;XmlSerializer&lt;/span&gt; kullanırken &lt;strong style="font-size: medium;"&gt;WCF&amp;nbsp;&lt;/strong&gt;XmlSerializer&amp;rsquo;den daha performanslı olan &lt;span style="color: red;"&gt;DataContractSerializer&lt;/span&gt;&amp;rsquo;ı kullanır.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-05-20 16:30:00</pubDate>
+  <lastModified>2020-01-20 08:22:35</lastModified>
+  <raters>3</raters>
+  <rating>3.333333</rating>
+  <slug>Asmx-ve-WCF-Arasındaki-Farklar</slug>
+  <tags>
+    <tag>wcf</tag>
+    <tag>asmx</tag>
+    <tag>webservice</tag>
+    <tag>service</tag>
+    <tag>.netservice</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+  </categories>
+  <notifications />
+</post>

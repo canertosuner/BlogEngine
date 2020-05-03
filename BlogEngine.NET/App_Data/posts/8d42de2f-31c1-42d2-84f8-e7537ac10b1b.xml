@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Windows Phone Facebook'a Paylaşım Yapma</title>
+  <description>1.Adım | Visual Studio Projesi Oluşturulması
+
+İlk olarak ismi TestApp olan bir adet Windows Phone Pr</description>
+  <content>&lt;p&gt;&lt;span style="font-size: medium; font-family: verdana, geneva;" data-mce-mark="1"&gt;&lt;strong&gt;1.Adım | Visual Studio Projesi Oluşturulması&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: small;" data-mce-mark="1"&gt;İlk olarak ismi &lt;strong&gt;TestApp&lt;/strong&gt; olan bir adet Windows Phone Projesi oluşturuyoruz&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="/MyImage_Folder/app_olustur.png" alt="" width="425" height="295" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;2.Adım | Design Sayfasının Hazırlanması&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: small;" data-mce-mark="1"&gt;Uygulama ekranında bir adet &lt;strong&gt;TextBox&lt;/strong&gt;, bir adette &lt;strong&gt;Button&lt;/strong&gt; ve bir adette &lt;strong&gt;WebBrowser&lt;/strong&gt; Kontrolleri olacak, gerekli kontroller eklediğinde en dışta bulunan Grid Design Kodları aşağıda olduğu şekildedir;&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: 9.5pt; font-family: Consolas; background-position: initial initial; background-repeat: initial initial;" data-mce-mark="1"&gt;&amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;Grid x:Name="LayoutRoot" Background="Transparent"&amp;gt;
+        &amp;lt;Grid.RowDefinitions&amp;gt;
+            &amp;lt;RowDefinition Height="Auto"/&amp;gt;
+            &amp;lt;RowDefinition Height="*"/&amp;gt;
+        &amp;lt;/Grid.RowDefinitions&amp;gt;
+        &amp;lt;StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28"&amp;gt;
+            &amp;lt;TextBlock Text="Caner Tosuner" Style="{StaticResource PhoneTextNormalStyle}" Margin="12,0"/&amp;gt;
+            &amp;lt;TextBlock Text="Facebook" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/&amp;gt;
+        &amp;lt;/StackPanel&amp;gt;
+        &amp;lt;Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0"&amp;gt;
+            &amp;lt;Grid.RowDefinitions&amp;gt;
+                &amp;lt;RowDefinition Height="auto"/&amp;gt;
+                &amp;lt;RowDefinition Height="auto"/&amp;gt;
+            &amp;lt;/Grid.RowDefinitions&amp;gt;
+            &amp;lt;TextBox Grid.Row="0" Height="150" Name="Message"/&amp;gt;
+            &amp;lt;Button Grid.Row="1" Content="Post" Click="Button_Click"/&amp;gt;
+        &amp;lt;/Grid&amp;gt;
+        &amp;lt;phone:WebBrowser Name="Browser" Grid.Row="1" Background="Aqua" Width="450" Height="600" Visibility="Collapsed" Navigated="Browser_Navigated"/&amp;gt;
+    &amp;lt;/Grid&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: small;" data-mce-mark="1"&gt;Bu işlemler sonucunda UI aşağıdaki gibi g&amp;ouml;r&amp;uuml;necektir.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: 9.5pt; line-height: 115%; font-family: Consolas; color: blue; background-position: initial initial; background-repeat: initial initial;"&gt;&lt;img src="/MyImage_Folder/app_design.png" alt="" width="228" height="381" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;3.Adım | Facebook AppID Oluşturma&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: small;" data-mce-mark="1"&gt;Uygulamada Facebook'un geliştirmiş olduğu SDK'yı kullanacağımızdan Facebook bilgilerini kullanacak uygulamayı sistemine kaydetmeyi ve belirli izinler doğrultusunda SDK'yı kullanma izni vermektedir. Bunun i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;&lt;a href="https://developers.facebook.com/apps"&gt;https://developers.facebook.com/apps&lt;/a&gt;&lt;/strong&gt;&amp;nbsp;adresine giderek aşağıda olduğu gibi uygulama oluşturup sonrasında Facebook'un bize vereceği &lt;strong&gt;AppID&lt;/strong&gt;'yi alıp kullanacağız.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="/MyImage_Folder/create_app.png" alt="" width="598" height="194" /&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp;&lt;img src="/MyImage_Folder/appId.png" alt="" width="372" height="81" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;4.Adım | Facebook SDK'nın&amp;nbsp;&lt;/strong&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;Projeye&lt;/strong&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;&amp;nbsp;Eklenmesi&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;" data-mce-mark="1"&gt;Facebook'un geliştirmiş olduğu k&amp;uuml;t&amp;uuml;phaneyi uygulamamıza eklemek i&amp;ccedil;in &lt;strong&gt;Nuget&lt;/strong&gt;'ı kullanıcaz.Bunun i&amp;ccedil;in Visual Studio'dan &lt;strong&gt;Tools&lt;/strong&gt; -&amp;gt; &lt;strong&gt;Library Package Manager&lt;/strong&gt; -&amp;gt; &lt;strong&gt;Package Manager Console&lt;/strong&gt; tıklayıp altta a&amp;ccedil;ılan sayfaya &amp;nbsp;&lt;span style="color: #e2e2e2; background-color: #202020; background-position: initial initial; background-repeat: initial initial;" data-mce-mark="1"&gt;PM&amp;gt;&amp;nbsp;&lt;/span&gt;&lt;span style="color: #e2e2e2; background-color: red; background-position: initial initial; background-repeat: initial initial;" data-mce-mark="1"&gt;Install-Package Facebook&lt;/span&gt;&amp;nbsp;yazıyoruz ve k&amp;uuml;t&amp;uuml;phanenin kurulmasını bekliyoruz. Kurulum tamamlandıktan projemizin References b&amp;ouml;l&amp;uuml;m&amp;uuml;ne aşağıda olduğu gibi Facebook'un eklendiğini g&amp;ouml;r&amp;uuml;yor olacaksınız.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="color: #e2e2e2; font-family: 'andale mono', 'lucida console', monospace; font-size: small; line-height: 30.600000381469727px; background-color: #202020;"&gt;&lt;span style="background-color: #ff0000;"&gt;&lt;span style="background-color: #ffffff; color: #000000;"&gt;&lt;img src="/MyImage_Folder/solut_exp.png" alt="" width="250" height="71" /&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;5.Adım | FacebookClient Oluşturulup AppID Değerinin Kullanılması&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;"&gt;FacebookClient nesnesi bizim Facebook API'ları ile connection'ı kurup b&amp;uuml;t&amp;uuml;n veri alış verişini sağlayacak olan yapıdır. Facebook'ta yeni uygulama oluştururken bize verilen &lt;strong&gt;AppID/App&lt;/strong&gt; &lt;strong&gt;Key&lt;/strong&gt; kodunu aşağıda AppID değişkenine atıyoruz ve Facebook b&amp;ouml;ylece hangi uygulamanın API'larını kullandığı gibi bilgilere ulaşmış oluyor.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;private const string AppID = "Facebok App ID";
+private FacebookClient client;
+// Constructor
+public MainPage()
+{
+InitializeComponent();
+client = new FacebookClient();
+ }&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;6.Adım | Post Buton'u Click Event'i&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;"&gt;Uygulamadaki senaryo şu şekilde işliyor olacak; TextBlock'a girilen string &lt;strong&gt;Post&lt;/strong&gt; butonuna tıklandığı anda SDK'yı kullanarak Facebook'a bağlanıp kullanıcı adı ve şifre bilgileri doğru girildiğinde bize &lt;strong&gt;authentication&lt;/strong&gt; verecek ve sonrasında paylaşım yapmamızı sağlayacak. Aşağıda Post butonuna tıklandığında &amp;ccedil;alışacak olan kodlar bulunmaktadır.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;private void Button_Click(object sender, RoutedEventArgs e)
+{
+//API' ile birlikte g&amp;ouml;nderilecek olan parametreler
+var parameters = newDictionary&amp;lt;string, object&amp;gt;();
+parameters["client_id"] = AppID;
+parameters["redirect_uri"] = "https://www.facebook.com/connect/login_success.html";
+parameters["response_type"] = "token";
+parameters["display"] = "touch";
+ 
+parameters["scope"] = "publish_stream";
+Browser.Visibility = System.Windows.Visibility.Visible;
+Browser.Navigate(client.GetLoginUrl(parameters));
+}&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: small; line-height: 115%; font-family: verdana, geneva;"&gt;B&amp;uuml;t&amp;uuml;n bu işlemleri hatasız bir şekilde yapıp uygulamamızı &amp;ccedil;alıştırdığımızda aşağıdaki gibi bir g&amp;ouml;r&amp;uuml;nt&amp;uuml; alıyor olacağız.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;img src="/MyImage_Folder/fb_loginpage.png" alt="" width="185" height="313" /&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;7.Adım | Browser Navigation Event'i&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;"&gt;Kullanıcı UserName ve Password bilgilerini girip giriş yaptıktan sonra Browser, bizim access token'ımızın yani doğru bir şekilde giriş yaptığımıza dair gerekii bilgiyi API'ları &amp;ccedil;ağırmak i&amp;ccedil;in bir URL'e navigate edilecek. Browser'ın Navigated Event'i aşağıdaki gibi olacak.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;private void Browser_Navigated(object sender, NavigationEventArgs e)
+{
+FacebookOAuthResult oauthResult;
+//URL'in erişim izni olduğunu kontrol ediyoruz
+if (!client.TryParseOAuthCallbackUrl(e.Uri, out oauthResult))
+{
+return;
+}
+//Checking that the user successfully accepted our app, otherwise just show the error
+if (oauthResult.IsSuccess)
+{
+client.AccessToken = oauthResult.AccessToken;
+ 
+Browser.Visibility = System.Windows.Visibility.Collapsed;
+DuvaraGonder();
+}
+else
+{
+MessageBox.Show(oauthResult.ErrorDescription);
+Browser.Visibility = System.Windows.Visibility.Collapsed;
+}
+}&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;8.Adım | DuvaraGonder() Metodu&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;"&gt;B&amp;uuml;t&amp;uuml;n bu işlemleri yaptıktan sonra artık başarılı bir şekilde Facebook'a giriş yaptık ve gerekli izinleri aldık bundan sonra yapmamız gereken şey TextBox'dan girilen değeri &lt;strong&gt;DuvaraGonder()&lt;/strong&gt; metodunu kullanarak Timeline Duvarımıza g&amp;ouml;ndermek.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;private void DuvaraGonder()
+{
+var parameters = new Dictionary&amp;lt;string, object&amp;gt;();
+parameters["message"] = Message.Text;
+client.PostAsync("me/feed", parameters);
+}&lt;/pre&gt;
+&lt;p&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;9.Adım | PostCompleted() Metodu&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;"&gt;Kullanıcı Post butonuna tıkladıktan sonra g&amp;ouml;ndermiş olduğumuz mesajın başarılı bir şekilde gidip gitmediğini &amp;ouml;ğrenmek i&amp;ccedil;in &lt;strong&gt;PostCompleted()&lt;/strong&gt; metodundan yararlanabiliriz. Gerekli kodları&amp;nbsp;constructor'ın i&amp;ccedil;erisinde &lt;strong&gt;EventHandler&lt;/strong&gt;'ın i&amp;ccedil;erisine ekliyor olacağız.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;// Constructor
+public MainPage()
+{
+InitializeComponent();
+client = new FacebookClient();
+client.PostCompleted += (o, args) =&amp;gt;
+{
+//Hata Kontrol&amp;uuml;n&amp;uuml;n yapıldığı b&amp;ouml;l&amp;uuml;m
+if (args.Error != null)
+{
+Dispatcher.BeginInvoke(() =&amp;gt; MessageBox.Show(args.Error.Message));
+}
+else
+{
+Dispatcher.BeginInvoke(() =&amp;gt; MessageBox.Show("Mesaj başarılı bir şekilde g&amp;ouml;nderildi"));
+}
+};
+}&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;10.Adım | Proje Test İşlemi&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;"&gt;Buraya kadar yazmış olduğumuz kodlar sayesinde artık Facebook'a giriş yapıp TextBlock i&amp;ccedil;erisine yazılan metni Post butonuna tıklandığında Facebook sayfamıza g&amp;ouml;nderiyor olacağız. Bir &amp;uuml;stte yazdığımız &lt;strong&gt;9.Adım&lt;/strong&gt;'da&amp;nbsp;g&amp;ouml;ndermiş olduğumuz metnin Gidip Gitmediği hakkında bilgide alabiliyoruz. Uygulamayı &amp;ccedil;alıştırdığımızda ekran g&amp;ouml;r&amp;uuml;nt&amp;uuml;s&amp;uuml; aşağıdaki gibi olacaktır.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&lt;img src="/MyImage_Folder/wp_message.png" alt="" width="169" height="262" /&gt;&lt;img src="/MyImage_Folder/Tutorial-06.png" alt="" width="159" height="266" /&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;11.Adım | Access Token'ın IsolatedStorage ile Kaydedilmesi&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;"&gt;Kullanıcının uygulamayı kullanıp her Facebook Share işleminde UserName ve Password bilgilerini girmesi hi&amp;ccedil; istenen birşey değildir. Bizde bunun i&amp;ccedil;in Access Token bilgisini IsolatedStorage ile uygulama i&amp;ccedil;erisine kaydedecez.Bunun i&amp;ccedil;in SaveAccessToken() adında bir metod yazıcaz.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;private void SaveAccessToken(String token)
+{
+if (!IsolatedStorageSettings.ApplicationSettings.Contains("token"))
+IsolatedStorageSettings.ApplicationSettings.Add("token", token);
+else
+IsolatedStorageSettings.ApplicationSettings["token"] = token;
+IsolatedStorageSettings.ApplicationSettings.Save();
+}&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;12.Adım | Access Token'ın IsolatedStorage'dan Okunması&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;"&gt;Uygulama i&amp;ccedil;erisine kaydettiğimiz Access Token bilgisini kullanıcı paylaşım yapmak istediğinde tekrardan IsolatedStorage'dan okuyor olmamız gerekiyor.Aşağıda bu işlemi yapan GetAccessToken() metodumuzun kodları bulunmaktadır.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;private string GetAccessToken()
+{
+if (!IsolatedStorageSettings.ApplicationSettings.Contains("token"))
+return null;
+else
+return IsolatedStorageSettings.ApplicationSettings["token"] as string;
+ }&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;13.Adım | Uygulama A&amp;ccedil;ıldığında Access Token'ın Kontrol Edilmesi&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;"&gt;Gerekli metodları yazdıktan sonra uygulama a&amp;ccedil;ılış anında ya da her nerde gereki ise AccessToken var mı ? yok mu ? kontrol etmemiz gerekmektedir.Bunuda aşağıda olduğu gibi yapıyoruz.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;//AccessToken var mı yok mu kontrol&amp;uuml;
+if (GetAccessToken() != null)
+client.AccessToken = GetAccessToken();&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&amp;nbsp;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;14.Adım | Expire Olan Token'ın Kontrol Edilmesi&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-family: verdana, geneva; font-size: small;"&gt;PostCompleted handler'ı i&amp;ccedil;erisinde bu kontrol&amp;uuml; yapmamız gerekiyor ve kodlar aşağıda olduğu gibi Contructor'ın i&amp;ccedil;erisinde yazıyoruz.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;client.PostCompleted += (o, args) =&amp;gt;
+{
+//Hata Kontrol&amp;uuml;n&amp;uuml;n yapıldığı b&amp;ouml;l&amp;uuml;m
+if (args.Error != null)
+{
+//Yetki Hatası
+if (args.Error is FacebookOAuthException)
+{
+Dispatcher.BeginInvoke(() =&amp;gt; MessageBox.Show("Yetki Hatası"));
+//Hata oluştuğundan dolayı Saved Token'ı u&amp;ccedil;uruyoruz
+SaveAccessToken(null);
+client.AccessToken = null;
+}
+else
+Dispatcher.BeginInvoke(() =&amp;gt; MessageBox.Show(args.Error.Message));
+}
+else
+   Dispatcher.BeginInvoke(() =&amp;gt; MessageBox.Show("Mesaj başarılı bir şekilde g&amp;ouml;nderildi"));
+
+};&lt;/pre&gt;
+&lt;p class="MsoNormal" style="text-align: justify;"&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;15.Adım | Back Buton'nuna Tıklanılması&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;protected override void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
+{
+//Browser g&amp;ouml;r&amp;uuml;n&amp;uuml;yor ise gizle ve navigation event'i iptal et
+if (Browser.Visibility == System.Windows.Visibility.Visible)
+{
+Browser.Visibility = System.Windows.Visibility.Collapsed;
+e.Cancel = true;
+}
+base.OnBackKeyPress(e);
+}&lt;/pre&gt;
+&lt;p class="MsoNormal" style="text-align: center;"&gt;&lt;span style="color: #ff0000;"&gt;&lt;strong style="font-family: verdana, geneva; font-size: medium;"&gt;16.Adım | Haydi Test Edelim :)&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;img style="font-family: verdana, geneva; font-size: small;" src="/MyImage_Folder/wp_message.png" alt="" width="169" height="262" /&gt;&lt;img style="font-family: verdana, geneva; font-size: small;" src="/MyImage_Folder/Tutorial-06.png" alt="" width="159" height="266" /&gt;&lt;img style="font-family: verdana, geneva; font-size: small;" src="/MyImage_Folder/fb_sent.png" alt="" width="369" height="150" /&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-06-07 13:25:00</pubDate>
+  <lastModified>2020-01-20 08:22:32</lastModified>
+  <raters>18</raters>
+  <rating>3.222222</rating>
+  <slug>Windows-Phone-Facebook-Paylasım-Yapma</slug>
+  <tags>
+    <tag>facebook</tag>
+    <tag>share</tag>
+    <tag>paylaş</tag>
+    <tag>facebooksdk</tag>
+    <tag>facebookshare</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

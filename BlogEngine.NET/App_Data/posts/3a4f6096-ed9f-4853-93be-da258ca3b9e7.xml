@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>SOLID Yazılım Süreçlerini Yavaşlatıyor Mu ?</title>
+  <description>Geçtiğimiz haftalarda  SOLID yazı serisini sonlandırdık ve sırasıyla
+
+SOLID nedir ?
+Single Responsibility
+Open Closed
+Liskov Substitution
+Interface Segregation
+Dependency Inversion</description>
+  <content>&lt;p&gt;Ge&amp;ccedil;tiğimiz haftalarda &amp;nbsp;SOLID yazı serisini sonlandırdık ve sırasıyla&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="/post/solid-prensipleri"&gt;SOLID nedir ?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="/post/SOLID-prensipleri-Single-Responsibility"&gt;Single Responsibility&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="/post/SOLID-Prensipleri-Open-Closed"&gt;Open Closed&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="/post/SOLID-Prensipleri-Liskov-Substitution"&gt;Liskov Substitution&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="/post/SOLID-Prensipleri-Interface-Segregation"&gt;Interface Segregation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="/post/solid-prensipleri-dependency-inversion"&gt;Dependency Inversion&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;konularından bahsettik.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2016/07/solid-principles.png" alt="" width="697" height="372" /&gt;&lt;/p&gt;
+&lt;p&gt;İlk defa SOLID'i araştırırken bir &amp;ccedil;ok blog yazlım forum sitesi vs. dolaştım ve yapılan yorumları okuma fırsatım olmuştu. Bu yorumlardan en &amp;ccedil;ok yaygın olanı kabaca&amp;nbsp;ş&amp;ouml;yle bir şey "ya tamamda ne gerek var bunca şeye ?.. SOLID hem beni hemde yazdığım kodu yavaşlatıyor..." vs. şeklinde yorumlar yapılmıştı. Doğrusu en başlarda bende buna benzer c&amp;uuml;mleler kurmadım değil :)&lt;/p&gt;
+&lt;p&gt;SOLID prensiplerinin asıl amacı &lt;strong&gt;Separation of Concerns&lt;/strong&gt; veya t&amp;uuml;rk&amp;ccedil;e deyimiyle farklı kavramların, işlerin birbirinden&amp;nbsp;ayrılması ilkesini &lt;strong&gt;High Cohesion &amp;amp; Low Coupling&lt;/strong&gt;&amp;nbsp;yoluyla&amp;nbsp;geliştirmek. Prensipleri anlattığımız ilk yazıda şuna benzer bir c&amp;uuml;mle kullanmıştım "asıl ama&amp;ccedil; sonradan kolay m&amp;uuml;dahale edilebilir, yeni mod&amp;uuml;llerin kolay entegre edilebildiği core code'a &amp;ccedil;ok fazla dokunmadan yazılımlar geliştirmek..." ve aslında bu c&amp;uuml;mle 5 temel prensiple bizlere anlatılıyor. İlk bakışta bu prensiplerin uygulaması zahmetli gibi geliyor olabilir ancak bunu ileriye d&amp;ouml;n&amp;uuml;k iyi bir yatırım olarak g&amp;ouml;rmeliyiz ve yazılım geliştirme s&amp;uuml;recini&amp;nbsp;&lt;strong&gt;while(true) {develop}&lt;/strong&gt;şeklinde sonsuz bir d&amp;ouml;ng&amp;uuml; olarak bakmalıyız.&lt;/p&gt;
+&lt;p&gt;SOLID&amp;nbsp;prensiplerine uyalım derken bazı istenmeyen sonu&amp;ccedil;larortaya &amp;ccedil;ıkarmamızda m&amp;uuml;mk&amp;uuml;n;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&amp;Ccedil;ok fazla abstraction ve interface,&lt;/li&gt;
+&lt;li&gt;İstenmeyen Concrete class'lar,&lt;/li&gt;
+&lt;li&gt;Gerektiğidnen fazla layer oluşabilme itimali,&lt;/li&gt;
+&lt;li&gt;Kalıtım ağacıdnaki derinliği gereknden fazla artırma,&lt;/li&gt;
+&lt;li&gt;Yo-yo problemi,&lt;/li&gt;
+&lt;li&gt;vs...&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;SOLID prensiplerinin gelişi g&amp;uuml;zel uygulanması bu ve benzeri durumların olmasına neden oalbilir&amp;nbsp;ancak geliştirme yaparken arada bir geriye gelip geniş a&amp;ccedil;ıdan bakmakta fayda var &amp;ccedil;&amp;uuml;nk&amp;uuml; bazen oop nin dibine vurmaya &amp;ccedil;alışırken farkında olmadan sa&amp;ccedil;malamışta olabiliriz :) . Tabi burda da devreye iyi deneyime sahip, &amp;ccedil;eşitli projelerde g&amp;ouml;rev almış vizyon sahibi bir takım liderine gerek var ki code-review sırasında nokta atışı yaparak yanlış veya gereksiz olan yerleri saptayıp d&amp;uuml;zeltebilme fırsatınız olsun.&lt;/p&gt;
+&lt;p&gt;SOLID yazılım s&amp;uuml;re&amp;ccedil;lerini yavaşlatıyor mu ? sorusuna geri d&amp;ouml;necek olursak, yukarıda da bahsettiğimiz &amp;uuml;zre &amp;ccedil;ok separation of concern'&amp;uuml; d&amp;uuml;ş&amp;uuml;nerek yapacağımız işleri &amp;ccedil;oklu katmanalra ayırarak b&amp;ouml;yle bir duruma sebebiyet verme ihtimalimiz azda olsa var. Diğer bir deyişle tek bir metot &amp;ccedil;ağrısı yaparak &amp;ccedil;&amp;ouml;zebileceğimiz bir sorunu birden fazla instance alarak metot &amp;ccedil;ağrısı yapmaya zorlandığımız durumlar ortaya &amp;ccedil;ıkabilir ve bu da geliştirme s&amp;uuml;resini uzatabilir. Ancak&amp;nbsp;SOLID prensiplerini hangi projeye uygulanması gerektiğine karar vermekte bir o kadar &amp;ouml;nemli &amp;ccedil;&amp;uuml;nk&amp;uuml; small diyebileceğimiz projeler i&amp;ccedil;in dibine kadar SOLID kastırmak &amp;ccedil;okta şart değildir hani. Bunun yerine enterprise veya işlevselliği &amp;ccedil;ok olan b&amp;uuml;&amp;uuml;yk projerlerde SOLID prensiplerini uygulamaya &amp;ccedil;alışmalıyız ve unutmamalıyız ki SOLID'e&amp;nbsp;uygun geliştirmeler yaparak g&amp;uuml;n&amp;uuml; kurtarmıyoruz bunu ileriye d&amp;ouml;n&amp;uuml;k bir yatırım olarak g&amp;ouml;rmeliyiz ve asıl faydalarını projenin ilerleyen&amp;nbsp;fazlarında g&amp;ouml;r&amp;uuml;yor olacağız.&lt;/p&gt;
+&lt;p&gt;Ben kendi projelerimde nasıl ilerliyorum diye soracak olursak, m&amp;uuml;mk&amp;uuml;n olduğunda&amp;nbsp;&lt;strong&gt;separation of concern&lt;/strong&gt;'e odaklanmaya &amp;ccedil;alışıyorum&amp;nbsp;ve ona uygun ilerleyecek&amp;nbsp;sade-temiz bir design pattern se&amp;ccedil;meye &amp;ccedil;alışırım. &amp;Ccedil;ok fazla abstraction'dan dolayı performans sorunları olacağını d&amp;uuml;ş&amp;uuml;nd&amp;uuml;ğ&amp;uuml;m yerler varsa da yaygın kullanılan&amp;nbsp;bir runtime performans tool'u kullanarak testler yapıp sorunu saptamaya odaklanırım.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Sonu&amp;ccedil; olarak SOLID yazılım s&amp;uuml;re&amp;ccedil;lerini yavaşlatıyor&amp;nbsp;mu sorusuna bence en uygun cevap, SOLID'i ne kadar doğru zamanda doğru yerde kullandığınızla ilgili. Eğer prensiplere tamamiyle hakimseniz ve doğru projede uyguladığınızı d&amp;uuml;ş&amp;uuml;n&amp;uuml;yorsanız kesinlikle yazılım s&amp;uuml;re&amp;ccedil;lerini yavaşlatmıyor aksine hızlandırıyor. Şuan i&amp;ccedil;in&amp;nbsp;farkında olmasanız bile ileriye d&amp;ouml;n&amp;uuml;k size bir&amp;ccedil;ok katkı sağlayacağı noktalar olacaktır. Eğer &amp;ccedil;ok gereksiz bir projede hi&amp;ccedil; ihtiya&amp;ccedil; yokken SOLID'in dibine vurmakta tavsiye edilen bir durum olmayacaktır, &amp;ccedil;ok b&amp;uuml;y&amp;uuml;k bir ihtimalle geliştirme sırasında gereksiz zaman kaybına yol a&amp;ccedil;acaktır.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-09-25 21:10:00</pubDate>
+  <lastModified>2020-01-20 08:22:21</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>solid-yazilim-sureclerini-yavaslatiyor-mu</slug>
+  <tags>
+    <tag>solid</tag>
+    <tag>design principles</tag>
+    <tag>Software Design Pattern</tag>
+    <tag>Software Architecture</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

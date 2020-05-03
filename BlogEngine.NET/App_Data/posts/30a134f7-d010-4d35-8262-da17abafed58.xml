@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Interface Segregation Principle</title>
+  <description>SOLID prensipleri yazı dizisinde sırada SOLID'in "I" olan Interface Segregation (ISP) var. Bu prensip bize kısaca şunu söylüyor; "Nesneler asla ihtiyacı olmayan property/metot vs içeren interface'leri implement etmeye zorlanmamalıdır  !".</description>
+  <content>&lt;p&gt;SOLID prensipleri yazı dizisinde sırada SOLID'in "I" olan &lt;strong&gt;Interface Segregation (ISP)&lt;/strong&gt; var. Bu prensip bize kısaca şunu s&amp;ouml;yl&amp;uuml;yor;&amp;nbsp;"&lt;strong&gt;Nesneler asla ihtiyacı olmayan property/metot vs i&amp;ccedil;eren interface'leri implement etmeye zorlanmamalıdır &amp;nbsp;!&lt;/strong&gt;".&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/06/solid_interface_seg.jpg" alt="" width="306" height="306" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Terminolojide bu interface'ler "&lt;strong&gt;fat&lt;/strong&gt;" yada "&lt;strong&gt;polluted&lt;/strong&gt;" interfaces diye adlandırılır. &amp;nbsp;ISP uygulanmadığında bir den fazla sorumluluğu olan nesneler ortaya &amp;ccedil;ıkar ki bu da aslında SOLID'in "&lt;strong&gt;S&lt;/strong&gt;" si olan "&lt;strong&gt;Single Responsibility&lt;/strong&gt;" prensibine aykırı bir şeydir. Bu sınıflar y&amp;uuml;klenen &amp;ccedil;oklu sorumluluklardan dolayı zaman i&amp;ccedil;erisinde y&amp;ouml;netilemez hale gelirler ve projemiz patates olur &amp;ccedil;ıkar. Bu tarz case'ler le karşılaşıldığında interface i&amp;ccedil;erisinde bulunan kullanılmaması gereken &amp;ouml;zellikleri i&amp;ccedil;eren yeni interface'ler tanımlanır ve ihtiyaca g&amp;ouml;re nesneler tarafından implement edilir. Eğer projeniz bu prensibi ihlal ediyorsa Adapter Design Pattern avantajlarını kullanarak da ilerleyebilirsiniz. İlgili nesne interface'i implement edip hi&amp;ccedil; kullanmayacağı metotlara sahip olduğunda class'ınız i&amp;ccedil;erisinde "&lt;strong&gt;NotImplementedException&lt;/strong&gt;" yazan metotlar olacaktır ve buda OOP a&amp;ccedil;ısından hi&amp;ccedil; istenen bir şey değildir.&lt;/p&gt;
+&lt;p&gt;ISP'yi &amp;ouml;rnek bir case &amp;uuml;zerinde anlatmaya &amp;ccedil;alışalım. Bir tane FileLog ve DbLog yapan işlemleri yapan bir proje geliştireceğiz ve i&amp;ccedil;erisinde ILog adında bir interface tanımlayalım ve bu interface'inde Log(), OpenConn(), CloseConn() gibi metodları olsun.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public interface ILog
+{ 
+    void Log(string message);
+
+    void OpenConnection();
+
+    void CloseConnection();
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İlk olarak DBLogger sınıfını yazalım&lt;/p&gt;
+&lt;pre class="brush:c-sharp;toolbar:false" contenteditable="false"&gt;public class DBLogger : ILog
+{		
+        public void Log(string message)
+        {
+            //Code to log data to a database
+        }
+
+        public void OpenConnection()
+        {
+            //Opens database connection
+        }
+
+        public void CloseConnection()
+        {
+           //Closes the database connection
+        }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi de FileLogger class'ını yazalım.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class FileLogger : ILog
+    {
+        public void Log(string message)
+        {
+            //Code to log to a file           
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;FileLog işlemi yaparken Db de olduğu gibi bir Connection a&amp;ccedil;ıp kapama işlemi yok ve bu metotları FileLogger'da kullanmak istemiyoruz sadece ILog interface'inde tanımlı olan&lt;strong&gt; Log(string message)&lt;/strong&gt; metodunu kullanmak istiyoruz. Projeyi derlediğinizde ş&amp;ouml;yle bir hata alırsınız&amp;nbsp;&lt;strong&gt;"&lt;/strong&gt;&lt;strong&gt;FileLogger class doesn't implement the interface members ILog.OpenConnection() and ILog.OpenConnection()&lt;/strong&gt;&lt;strong&gt;" . &amp;nbsp;&lt;/strong&gt;Peki hatayı g&amp;ouml;r&amp;uuml;p eksik interface'in eksik &amp;uuml;yelerini implement edelim. Bu sefer class'ımız aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class FileLogger : ILog
+    {
+        public void Log(string message)
+        {
+             //Code to log to a file           
+        }
+
+        public void CloseConnection()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OpenConnection()
+        {
+            throw new NotImplementedException();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;E şimdi ne oldu ? Patates ! Hi&amp;ccedil; ihtiyacımız olmasa da FileLogger class'ına 2 tane gereksiz metot kazandırdık. İşte &lt;strong&gt;ISP&lt;/strong&gt;&amp;nbsp;burada devreye giriyor. Yapmamız gereken şey yeni interface veya interface'ler tanımlayarak FileLogger ve DbLogger class'larının sadece ihtiyacı olan metotları i&amp;ccedil;eren interface'i implemente etmesini sağlamak.&lt;/p&gt;
+&lt;p&gt;Yeni interface'ler aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;    public interface ILog
+    {
+        void Log(string message);
+    }
+
+    public interface IDBLog: ILog
+    {
+        void OpenConnection();
+
+        void CloseConnection();
+    }
+
+    public interface IFileLog: ILog
+    {
+        void CheckFileSize();
+
+        void GenerateFileName();
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu interface'leri implement eden DbLogger ve FileLogger class'larımızda aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; public class FileLogger : IFileLog
+    {
+        public void CheckFileSize()
+        {
+            //Code to check log file size
+        }
+
+        public void GenerateFileName()
+        {
+            //Code to generate a new file name
+        }
+		
+        public void Log(string message)
+        {
+            //Code to log data to the log file
+        }
+    }
+
+    public class DBLogger : IDBLog
+    {
+        public void Log(string message)
+        {
+            //Code to log data to the database
+        }
+
+        public void OpenConnection()
+        {
+            //Code to open database connection
+        }
+
+         public void CloseConnection()
+         {
+            //Code to close database connection
+         }
+    }&lt;/pre&gt;
+&lt;p&gt;Interface Segregation &amp;ccedil;ok &amp;ouml;nemli bir prensiptir. &amp;Ouml;zellikle Adapter Design Pattern ile haşır neşir olan arkadaşlar i&amp;ccedil;in dahada fazla &amp;ouml;neme sahiptir. İ&amp;ccedil;erisinde 60-70 tane &amp;uuml;yesi bulunan interface'ler yazmaktan da &amp;ccedil;ekinin bu gibi durumlarda bir yolunu bulup interface &amp;uuml;yelerini ayırıp gruplayıp yeni interface'ler t&amp;uuml;retmeye &amp;ccedil;alışmamız daa doğru olacaktır.&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-06-27 21:44:00</pubDate>
+  <lastModified>2020-01-20 08:22:23</lastModified>
+  <raters>4</raters>
+  <rating>4.75</rating>
+  <slug>SOLID-Prensipleri-Interface-Segregation</slug>
+  <tags>
+    <tag>solid</tag>
+    <tag>principles</tag>
+    <tag>Interface Segregation</tag>
+    <tag>ISP</tag>
+    <tag>oop</tag>
+    <tag>s.o.l.i.d</tag>
+    <tag>SoftwareDesign</tag>
+    <tag>SystemArchitecture</tag>
+    <tag>object oriented</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+  </categories>
+  <notifications />
+</post>

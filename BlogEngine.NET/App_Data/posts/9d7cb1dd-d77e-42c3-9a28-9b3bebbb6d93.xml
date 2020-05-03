@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Moq Library Kullanarak Unit Test Yazma</title>
+  <description>Daha önceki yazımızda Unit Test Nedir Nasıl Yazılır konusuna değinmiştik ve basit bir console uygulaması ve onun unit test metotlarının bulunduğu test projemizi yazmıştık. O örneğimizde herhangi bir database veya kendi oluşturduğumuz data modelleri vs yoktu 4 işlem</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki yazımızda &lt;a href="/post/unit-test-nedir"&gt;Unit Test Nedir Nasıl Yazılır&lt;/a&gt;&amp;nbsp;konusuna değinmiştik ve basit bir console uygulaması ve onun unit test metotlarının bulunduğu test projemizi yazmıştık. O &amp;ouml;rneğimizde herhangi bir database veya kendi oluşturduğumuz data modelleri vs yoktu 4 işlem yapan bir projeydi. Bu yazımızda Db operasyonları olan bir projede unit test yazmak istesek ne yapardık bu soruya cevap arıyor olacağız.&lt;/p&gt;
+&lt;p&gt;Bir &lt;strong&gt;UserRepository&lt;/strong&gt; class'ımız olsun ve bu repository i&amp;ccedil;in unit test metotları yazıyor olalım. Peki ama test metotlarını yazarken nasıl bir yol izleyeceğiz ? Her bir test case'i i&amp;ccedil;in gidip database sa&amp;ccedil;ma sapan fake&amp;nbsp;kayıtlar atıp CRUD işlemleri yapmamamız&amp;nbsp;gerekir. Bu gibi durumlar i&amp;ccedil;in mocking dediğimiz "alaycı" veya "sahte" kayıtlar oluşturmamızı sağlayan library'ler bulunmakta. Bu library'lerden &lt;a href="https://github.com/Moq/moq4/wiki/Quickstart"&gt;Moq&lt;/a&gt;'u kullanarak sahte nesneler &amp;uuml;reterek UserRepository i&amp;ccedil;in basit bir test projesi yazacağız.&lt;/p&gt;
+&lt;h3&gt;Moq&lt;/h3&gt;
+&lt;p&gt;Moq .Net tarafında unit test yazmada kullanabildiğimiz bir mocking k&amp;uuml;t&amp;uuml;phanesidir. Testlerimiz i&amp;ccedil;in sahte nesneler &amp;uuml;reterek&amp;nbsp;normal projemizde ki case'leri test etmemizi sağlar.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek projemiz i&amp;ccedil;in &amp;ouml;ncelikle bir tane &lt;strong&gt;UserSample&lt;/strong&gt; adımda Console Application oluşturalım ve i&amp;ccedil;erisine User.cs ve IUserRepository.cs class'larını aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class User
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IUserRepository
+    {
+        IList&amp;lt;User&amp;gt; GetAll();
+        User GetById(int userId);
+        void Insert(User user);
+        void Update(User user);
+        void Delete(int Id);
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi ise &lt;strong&gt;UserSample.Test&lt;/strong&gt; adında test projemizi oluşturalım ve UserSample projemizi referans olarak test projemize ekleyelim. Sonrasında test projemize Nuget &amp;uuml;zerinden Moq k&amp;uuml;t&amp;uuml;phanesini kuralım.&lt;br /&gt;&lt;br /&gt;Tools &amp;gt; Nuget Package Manager &amp;gt; Package Manager Console &amp;gt; PM&amp;gt; Install-Package Moq&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;Kurulum işlemi tamamlandıktan sonra &lt;strong&gt;UserRepositoryTest&lt;/strong&gt;&amp;nbsp;adında bir class oluşturalım.&lt;/p&gt;
+&lt;p&gt;İlk olarak User Repository i&amp;ccedil;in gerekli olan setup işlemlerini yapalım. Setup işlemi kısaca repository'nin i&amp;ccedil;erisindeki metotların sahte objelerle işlemleri yapmasını sağlayacak kodları yazmak diyebiliriz. Mocking setup ile ilgili kodlarımız aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; [TestClass]
+    public class UserRepositoryTest
+    {
+        public readonly IUserRepository MockUserRepository;
+
+        public UserRepositoryTest()
+        {
+            // Test metotları genelinde kullanacağımız User listesi
+            var userList = new List&amp;lt;User&amp;gt;
+            {
+                new User {Id=1,FirstName="User1",LastName="User1LastName" },
+                new User {Id=2,FirstName="User2",LastName="User2LastName" },
+                new User {Id=3,FirstName="User3",LastName="User3LastName" }
+            };
+
+            // Mock the Products Repository using Moq
+            var mockUserRepository = new Mock&amp;lt;IUserRepository&amp;gt;();
+
+            // GetAll metodu i&amp;ccedil;in setup işlemi
+            mockUserRepository.Setup(mr =&amp;gt; mr.GetAll()).Returns(userList);
+
+            // GetById metodu i&amp;ccedil;in setup işlemi
+            mockUserRepository.Setup(mr =&amp;gt; mr.GetById(It.IsAny&amp;lt;int&amp;gt;())).Returns((int i) =&amp;gt; userList.Single(x =&amp;gt; x.Id == i));
+
+            // Insert i&amp;ccedil;in setup işlemi
+            mockUserRepository.Setup(mr =&amp;gt; mr.Insert(It.IsAny&amp;lt;User&amp;gt;())).Callback(
+                (User target) =&amp;gt;
+                {
+                    userList.Add(target);
+                });
+
+            // Update i&amp;ccedil;in setup işlemi
+            mockUserRepository.Setup(mr =&amp;gt; mr.Update(It.IsAny&amp;lt;User&amp;gt;())).Callback(
+                (User target) =&amp;gt;
+                {
+                    var original = userList.Where(q =&amp;gt; q.Id == target.Id).Single();
+
+                    if (original == null)
+                    {
+                        throw new InvalidOperationException();
+                    }
+
+                    original.FirstName = target.FirstName;
+                    original.LastName = target.LastName;
+
+                });
+
+            // Test metotlarından erişilebilmesi i&amp;ccedil;in global olarak tanımladığımız MockUserRepository'e yukarıdaki setup işlemlerini atıyoruz
+            this.MockUserRepository = mockUserRepository.Object;
+        }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda bulunan kodlar kısaca şunları s&amp;ouml;ylemekte;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Arkadaş senin IUserRepository diye CRUD işlemlerinin yapıldığı bir class'ın var ve bu class i&amp;ccedil;erisinde bulunan GetAll, GetById, Insert, Update, Delete metotları i&amp;ccedil;in tanımlanan mocking veya kandırmaca işlemleri yukarıdaki gibidir. Sen Database &amp;uuml;zerinden bu işlemleri yapmak yerine rahat&amp;ccedil;a&amp;nbsp;&lt;strong&gt;userList&lt;/strong&gt; array'i &amp;uuml;zerinden bu işlemleri yapabilirsin.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Buraya kadar her şey OK ise aşağıdaki gibi sırasıyla test metotlarımızı yazalım.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;GetAll&lt;/strong&gt; metodunu &amp;ccedil;ağırarak bize veri d&amp;ouml;nd&amp;uuml;ğ&amp;uuml;n&amp;uuml; g&amp;ouml;steren test metodu.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [TestMethod]
+        public void GetAll_Than_Check_Count_Test()
+        {
+            var expected = this.MockUserRepository.GetAll().Count;
+
+            Assert.IsNotNull(expected);// Test not null
+            Assert.IsTrue(expected &amp;gt; 0);// Test GetAll returns user objects
+        }&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;GetById&lt;/strong&gt; metodu i&amp;ccedil;in doğru objeyi return edip etmediği durumu i&amp;ccedil;in&amp;nbsp;test metodu.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [TestMethod]
+        public void GetById_Than_Check_Correct_Object_Test()
+        {
+            var actual = new User { Id = 2, FirstName = "User2", LastName = "User2LastName" };
+
+            var expected = this.MockUserRepository.GetById(2);
+
+            Assert.IsNotNull(expected); // Test is not null
+            Assert.IsInstanceOfType(expected, typeof(User)); // Test type
+            Assert.AreEqual(actual.Id, expected.Id); // test correct object found
+        }&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Insert&lt;/strong&gt; işleminden sonra GetAll metodundan d&amp;ouml;nen object sayısı doğrumu testi&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [TestMethod]
+        public void Insert_User_Than_Check_GetAll_Count_Test()
+        {
+            var actual = this.MockUserRepository.GetAll().Count + 1;
+
+            var user = new User { Id = 4, FirstName = "User4", LastName = "User4LastName" };
+
+            this.MockUserRepository.Insert(user);
+
+            var expected = this.MockUserRepository.GetAll().Count;
+
+            Assert.AreEqual(actual, expected);
+        }&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;GetById&lt;/strong&gt; metoduna hatalı bir Id ile &amp;ccedil;ağrım yapıldığında &lt;strong&gt;Exception&lt;/strong&gt; d&amp;ouml;neceği durumu i&amp;ccedil;in test metodu.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]//Eğer beklediğimiz bir exception var ise bu şekilde tanımlayabiliriz
+        public void GetyId_With_Undefined_Id_Than_Exception_Occurred_Test()
+        {
+            var expected = this.MockUserRepository.GetById(It.IsAny&amp;lt;int&amp;gt;());
+        }&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Update&lt;/strong&gt; işlemi&amp;nbsp;sonrasında GetById yapılarak d&amp;ouml;nen nesnede bulunan değerler doğrumu test metodu.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [TestMethod]
+        public void Ipdate_User_Than_Check_It_Is_Updated_Test()
+        {
+            var actual = new User { Id = 2, FirstName = "User2_Updated", LastName = "User2LastName_Updated" };
+
+            this.MockUserRepository.Update(actual);
+
+            var expected = this.MockUserRepository.GetById(actual.Id);
+
+            Assert.IsNotNull(expected);
+            Assert.AreEqual(actual.FirstName, expected.FirstName);
+            Assert.AreEqual(actual.LastName, expected.LastName);
+        }&lt;/pre&gt;
+&lt;p&gt;Test metotlarını yazdıktan sonra Run All Tests diyerek testlerimizi &amp;ccedil;alıştırıp success fail durumlarını g&amp;ouml;rebiliriz.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda bir Mocking k&amp;uuml;t&amp;uuml;phanesi olan &lt;strong&gt;Moq&lt;/strong&gt;&amp;nbsp;kullanarak basit&amp;ccedil;e bir Unit Test projesi hazırladık ve halen daha &amp;ccedil;ok fazla &amp;ouml;nemsenmese de unit Test&amp;nbsp;dev-ops s&amp;uuml;re&amp;ccedil;lerinin olgunlaşmasıyla artık bir &amp;ccedil;ok firma i&amp;ccedil;in "&lt;strong&gt;IsMust&lt;/strong&gt;" zorunlu hale gelmiş bir kuraldır ve daha &amp;ouml;nceki yazılarda da bahsettiğim &amp;uuml;zre Unit Test yazıyor olmak artık&amp;nbsp;interview'larda&amp;nbsp;beklenen bir durum haline gelmiştir.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-02-19 22:03:00</pubDate>
+  <lastModified>2020-01-20 08:22:19</lastModified>
+  <raters>2</raters>
+  <rating>4.5</rating>
+  <slug>moq-kullanarak-unittest-yazma</slug>
+  <tags>
+    <tag>unit test</tag>
+    <tag>mocking</tag>
+    <tag>moq library</tag>
+    <tag>moq nedir</tag>
+    <tag>mocking nedir</tag>
+    <tag>unit test nasıl yazılır</tag>
+    <tag>moq ile unit test</tag>
+    <tag>mocking nasıl yapılır</tag>
+  </tags>
+  <comments>
+    <comment id="fff72ae8-59b0-4d0b-949e-6cb19a85900d" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-02-21 14:52:56</date>
+      <author>fatih</author>
+      <email>fatih.erol108@gmail.com </email>
+      <country />
+      <ip>88.241.7.123:38971</ip>
+      <avatar />
+      <content>Guzel makale tşk ederim. Anlamadigim nokta, yukaridaki senaryoda fail olması için hangi şartların oluşması gerektiği.
+Yani list icerisinde 3 kayit var parametreler dogru oldugu sürece tum metotlar success olacaktir, unit test bizim icin farkli parametrelerde deneyip testini yapip bize sonucmu döndüruyor.</content>
+    </comment>
+    <comment id="81ef44c9-c73b-4252-a437-51b5272aaaa8" parentid="fff72ae8-59b0-4d0b-949e-6cb19a85900d" approved="True" spam="False" deleted="False">
+      <date>2017-03-02 15:29:40</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>85.101.41.4:32791</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba,
+Unit test yazmanın asıl amacı yazmış olduğumuz kod&amp;#39;un patlayıp çatlayacağı case&amp;#39;leri öngörüp bunlar için test metotları yazmak değil. Unit test yazmadaki amaç kısaca şu şekilde tanımlayabiliriz; &amp;quot;Benim metotlarım normal akışında bu şekilde davranış gösterir.&amp;quot; yani kodların patlayıp çatladığı durumları handle edecek metotlardan ziyade asıl amaç yazmış olduğun kodlardaki fonksiyonalite veya davranış nasıl olacaktır bunları belirtiriz. Örnek olarak ; &amp;quot;Insert_User_Than_Check_GetAll_Count_Test&amp;quot; metodunu ele alacak olursak biz böyle bir metotla şunu belirtiyoruz &amp;quot;Ben User tablosuna bir User insert ettiğimde User tablosunda bulunan kayıtların sayısı +1 olmalı&amp;quot;. Bu test metodunun fail alma durumunda şunu anlıyoruz &amp;quot;ben user tablosuna bir kullanıcı insert ettiğimde user tablosundaki kullanıcı sayısı bir artmıyor.&amp;quot; böylelikle test metodumuz sayesinde bu işlemin hatalı olduğunu veya test metodunda bir hata olduğu sonucuna varabiliriz.</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>018aedb2-84ba-46ad-89f2-2d551bf7c063</category>
+  </categories>
+  <notifications />
+</post>

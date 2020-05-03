@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>ElasticSearch Nedir ? Windows Üzerinde Kurulumu</title>
+  <description>Elasticsearch, java dilinde open-source olarak geliştirilen, dağıtık mimariye uygun, kolay ölçeklenebilir, enterprise düzeyde bir big-data arama motorudur. Sahip olduğu Http protokolü üzerinde çalışan Restful Api ile CRUD işlemlerini oldukça hızlı bir şekilde yapabilmemize olanak sağlar.</description>
+  <content>&lt;p&gt;Elasticsearch, java dilinde open-source olarak geliştirilen, dağıtık mimariye&amp;nbsp;uygun, kolay &amp;ouml;l&amp;ccedil;eklenebilir, enterprise d&amp;uuml;zeyde bir big-data arama motorudur. Sahip olduğu Http protokol&amp;uuml; &amp;uuml;zerinde &amp;ccedil;alışan&lt;strong&gt; Restful&amp;nbsp;Api&lt;/strong&gt; ile CRUD işlemlerini olduk&amp;ccedil;a hızlı bir şekilde yapabilmemize olanak sağlar.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;ElasticSearch veya diğer search engine'lerin geliştirilmesine asıl sebep olan şey big-data dır. Her an her saniye milyonlarca satır veri &amp;uuml;retiminden bahsediyoruz ve toplanmış olan bu verileri analiz etmek istediğimizde bu işlemi database seviyesinde yapıyorsak yani SQL'e bağımlıysak hız konusunda geride kalıyoruz. ElasticSearch core kısmında yer alan &amp;ccedil;eşitli&amp;nbsp;algoritmalarıyla &lt;strong&gt;text-search&lt;/strong&gt; işlemini olduk&amp;ccedil;a kısa s&amp;uuml;rede hızlı bir şekilde yapabilmektedir.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;Kurulum&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Yukarıda bahsettiğimiz &amp;uuml;zre elasticsearch Java tabanlı bir k&amp;uuml;t&amp;uuml;phane olduğundan windows &amp;uuml;zerinde kurulum yapmadan &amp;ouml;nce pc'nizde en az &lt;a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html"&gt;Java 8&lt;/a&gt;&amp;nbsp;versiyonu kurulu olmak şartıyla&amp;nbsp;JRE ve JDK y&amp;uuml;kl&amp;uuml; olmak zorundadır.&lt;/p&gt;
+&lt;p&gt;Elasticsearch &lt;a href="http://www.elasticsearch.org/download/"&gt;elasticsearch.org&lt;/a&gt;&amp;nbsp;adresinde ZIP and TAR.GZ gibi değişik formatlarda kurulum paketi sunmaktadır. Ancak ben temiz bir kurulum yapmanız adına MSI formatında olan paketi indirmeyi tercih edicem. İndirme işlemi bittiğinde exe'yi &amp;ccedil;alıştıralım ve &lt;a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/windows.html"&gt;bu adreste&lt;/a&gt; belirtildiği şekilde veya aşağıdaki g&amp;ouml;rselde de olduğu gibi gerekli konfigurasyonları yaparak kurulumu tamamlayalım.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/elastic_installation_flow.gif" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Kurulum sırasında path, memory-size gibi &amp;ccedil;eşitli konfigurasyonlar yapabilirsiniz. Eğer kurulumu&amp;nbsp;&lt;strong&gt;Install as a service&lt;/strong&gt;&amp;nbsp;se&amp;ccedil;eneği ile yaptıysanız elasticsearch service olarak arka planda pc niz a&amp;ccedil;ık olduğu s&amp;uuml;rece &amp;ccedil;alışacaktır. Service'i g&amp;ouml;r&amp;uuml;nt&amp;uuml;lemek i&amp;ccedil;in Windows Search kısmına "Services" yazdığınızda &amp;ccedil;ıkan icon'a tıklayalım ve aşağıdaki gibi service listesinde elasticsearch'&amp;uuml; g&amp;ouml;relim.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/elastic_services_list_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Son olarak&amp;nbsp;ES'&amp;uuml;n &amp;ccedil;alışıp &amp;ccedil;alışmadığını browser &amp;uuml;zerinden de kontrol edebiliriz. Browser'ın adres kısmına &lt;a href="http://localhost:9200/"&gt;http://localhost:9200/&lt;/a&gt;&amp;nbsp;yazarak aşağıdaki gibi mevcut pc'niz de kurulu olan ES ile ilgili bilgilere ulaşabilirsiniz.&lt;/p&gt;
+&lt;pre class="brush:java;auto-links:false;toolbar:false" contenteditable="false"&gt;{
+  "name" : "DESKTOP-GRKHT7E",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "saiTqKiQRr6m_GQ03BCH0Q",
+  "version" : {
+    "number" : "5.5.0",
+    "build_hash" : "260387d",
+    "build_date" : "2017-06-30T23:16:05.735Z",
+    "build_snapshot" : false,
+    "lucene_version" : "6.6.0"
+  },
+  "tagline" : "You Know, for Search"
+}&lt;/pre&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;Mimarisi&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Elasticsearch'&amp;uuml; database &amp;uuml;zerinden anlamaya &amp;ccedil;alışacak olursak;&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/elastic_search_term_imgg.jpg" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;SQL de bulunan Database ES'de Index'e denk gelmektedir. Tablo ise Tip yani ES'e Index yaparken vereceğimiz modellerimize denk gelmektedir. Tabloya kaydettiğimiz her bir row ise ES de Document olarak adlandırılır. Tabloda bulunan Column'lar Field yani Tip olarak verdiğimiz model de bulunan property veya field'lar dır. Schema ise Mapping olarak adlandırılır.&lt;/p&gt;
+&lt;p&gt;Aslında Code-First yaklaşımına aşina olan arkadaşlar yukarıdaki g&amp;ouml;rsele baktıklarında ES'&amp;uuml;nde bir nevi code-first mantığıyla &amp;ccedil;alıştığını g&amp;ouml;rebilirler.&lt;/p&gt;
+&lt;p&gt;ES ile ilgili bu yazımızda sona geldik ancak bir sonraki yazımızda yapmış olduğumuz bu kurulum &amp;uuml;zerinden bir .Net projesi geliştirerek ES Client'ların dan biri olan NEST'i kullanarak &amp;ouml;rnekler&amp;nbsp;vermeye devam edeceğiz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-08-15 21:50:00</pubDate>
+  <lastModified>2020-01-20 08:22:16</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>elasticsearch-nedir-windows-uzerinde-kurulumu</slug>
+  <tags>
+    <tag>elasticsearch nedir</tag>
+    <tag>elastic search nedir</tag>
+    <tag>elasticsearch</tag>
+    <tag>indexer</tag>
+    <tag>elastic search kurulum</tag>
+    <tag>elasticsearch kurulum</tag>
+    <tag>elasticsearch windows</tag>
+  </tags>
+  <comments>
+    <comment id="3e20f1a7-a945-4732-8e11-c39f8d86cdba" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="True" deleted="True">
+      <date>2017-08-28 13:31:34</date>
+      <author>mert can</author>
+      <email>mertcany@gmail.com</email>
+      <country />
+      <ip>95.70.163.97:53783</ip>
+      <avatar />
+      <content>a</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>a0313877-509c-481a-954b-6e000b44433d</category>
+  </categories>
+  <notifications />
+</post>

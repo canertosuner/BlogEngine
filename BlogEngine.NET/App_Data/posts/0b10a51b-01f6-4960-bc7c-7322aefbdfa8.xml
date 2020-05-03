@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Local Functions C# 7.0</title>
+  <description>Local Functions C# 7.0</description>
+  <content>&lt;p&gt;Local Functions bizlere method scope'ları i&amp;ccedil;erisinde function'lar tanımlamamızı sağlar ve o fonction'ı&amp;nbsp;tıpkı o scope aralığında tanımlanmış bir değişken gibi kullanabiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Local Functions C# 7.0 ile gelen olduk&amp;ccedil;a &amp;ouml;zel &amp;ouml;zelliklerden biridir. Loca Function tanımladığımız yer bir mthod, property veya bir constructor olabilir. IL kodlarına baktığımızda local function'lar compiler tarafından private metotlara d&amp;ouml;n&amp;uuml;şt&amp;uuml;r&amp;uuml;l&amp;uuml;rler.&lt;/p&gt;
+&lt;p&gt;Geliştirme yaparken bir UpdateModel&amp;nbsp;adında bir metodunuzun olduğunu varsayalım ve akış gereği bu metodun i&amp;ccedil;erisinde k&amp;uuml;&amp;ccedil;&amp;uuml;k&amp;nbsp;operasyonel işler yapan kod par&amp;ccedil;acıkları olduğunu d&amp;uuml;ş&amp;uuml;nelim. Bu kod par&amp;ccedil;acıkları sadece o metot tarafından kullanılacağından o metot dışında ayrı birer metot olarak yazma gereği duymayız. Ancak o metoda baktığımızda da belki 200 satırdan fazla koddan oluşmuş almış başını gitmiştir. Local function tam da bunun gibi durumlarda karşımıza &amp;ccedil;ıkıyor. O k&amp;uuml;&amp;ccedil;&amp;uuml;k kod par&amp;ccedil;acıklarını UpdateModel metodu i&amp;ccedil;erisinden ayrı k&amp;uuml;&amp;ccedil;&amp;uuml;k birer metot olarak tanımlayabiliyoruz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek olarak aşağıdaki gibi k&amp;uuml;&amp;ccedil;&amp;uuml;k bir toplama işlemi yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Program
+{
+	public static void Main()
+	{ 
+		int Topla(int x, int y, int z)
+        {
+           return x + y + z;
+		}
+
+		Console.WriteLine(Topla(3, 4, 6));
+	}
+}&lt;/pre&gt;
+&lt;p&gt;Projeyi &amp;ccedil;alıştırdığınızda 3,4 ve 6 nın toplamı olan 13 değerini ekranda g&amp;ouml;r&amp;uuml;yor olacaksınız.&lt;/p&gt;
+&lt;p&gt;Local function'lar aynı zamanda tanımlandığı metot i&amp;ccedil;erisindeki değişkenlere de access &amp;ouml;zelliği taşır. &amp;Ouml;rnek olarak aşağıdaki gibi bir local function tanımlayabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;	public static void Main()
+	{ 
+		int Topla(int x, int y, int z)
+        {
+           return x + y + z + t;
+		}
+
+		int t = 8;
+		
+		Console.WriteLine(Topla(3, 4, 6));
+	}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Local Function'lar kısaca bu şekilde. K&amp;uuml;&amp;ccedil;&amp;uuml;k bir&amp;nbsp;feature gibi g&amp;ouml;r&amp;uuml;nse de doğru yerde doğru zamanda olduk&amp;ccedil;a faydalı olacakları aşikardır :)&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-05-15 21:11:00</pubDate>
+  <lastModified>2017-04-05 15:10:08</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>local-functions-c-7-0</slug>
+  <tags>
+    <tag>local functions</tag>
+    <tag>local function nedir</tag>
+    <tag>local function c# 7</tag>
+    <tag>C# 7.0</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

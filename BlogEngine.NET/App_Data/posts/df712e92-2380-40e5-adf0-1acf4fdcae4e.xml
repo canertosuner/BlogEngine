@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Curator Kullanarak Elasticsearch Index'lerini Periyodik Olarak Temizleme</title>
+  <description>Curator ile, hangi indeksin temizleneceğini ve kaç günlük verinin saklanacağını bir config-file ile tanımlayabilirsiniz ve belli periyotlar ile background-job run ederek rule'lara göre silme işlemini gerçekleştirir.</description>
+  <content>&lt;p&gt;Verilerinizi elasticsearch'de index'lemeye başladıktan belli bir s&amp;uuml;re sonra disk alanınızın hızla dolduğunu fark edeceksiniz ve akabinde kibana'da yavaşlıklar başlayacak veya grafana elk-disc alert'iniz slack &amp;uuml;zerinden size alarmlar g&amp;ouml;nderme başlayacaktır. Eğer elasticsearch'de index'lediğimiz veriler silmekten&amp;nbsp;yana bir sıkıntı olmayacak t&amp;uuml;rde ise;&amp;nbsp;sonrasında muhtemelen b&amp;uuml;y&amp;uuml;k bir &amp;ccedil;oğunluğumuz ilk y&amp;ouml;ntem olarak elasticsearch-api kullanarak eski indexleri silmek aklımıza gelecektir.&amp;nbsp;Olduk&amp;ccedil;a ilkel&amp;nbsp;işleyen bir s&amp;uuml;re&amp;ccedil; gibi; disk doldu gir makinaya yada postman &amp;uuml;zerinden api-call ile log sil. Herhalde hi&amp;ccedil;birimizin yapmak istemeyeceği bir y&amp;ouml;ntem.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/elastic/curator"&gt;Curator&lt;/a&gt;&amp;nbsp;bu gibi işlemleri belli rule'lara g&amp;ouml;re otomatik olarak yapmaya yarayan bir tool'dur. Curator ile, hangi indeksin temizleneceğini ve ka&amp;ccedil; g&amp;uuml;nl&amp;uuml;k verinin saklanacağını bir config-file ile tanımlayabilirsiniz ve belli periyotlar ile background-job run ederek rule'lara g&amp;ouml;re silme işlemini ger&amp;ccedil;ekleştirir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/els_curator_img1.jpg" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rneğin payment-logs-* index'i hari&amp;ccedil; elasticsearch'de bulunan ve&amp;nbsp;90 g&amp;uuml;nden daha eski b&amp;uuml;t&amp;uuml;n index'leri silmesini Curator'a tanımlayabilir ve Curator'ı haftada bir cron-job olarak &amp;ccedil;alışacak şekilde programlayarak index'leri sildirebiliriz.&lt;/p&gt;
+&lt;h4&gt;Kurulum&lt;/h4&gt;
+&lt;p&gt;Curator i&amp;ccedil;in makinanızda python-pip kurulu olması gerekmekte.&lt;/p&gt;
+&lt;p&gt;1)&amp;nbsp;&lt;span style="text-decoration: underline;"&gt;Install Python pip&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"&gt;$ sudo apt-get install python-pip&lt;/pre&gt;
+&lt;p&gt;2)&amp;nbsp;&lt;span style="text-decoration: underline;"&gt;Install Curator&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"&gt;$ sudo pip install elasticsearch-curator&lt;/pre&gt;
+&lt;p&gt;3.)&amp;nbsp;&lt;span style="text-decoration: underline;"&gt;Create new directory for config-files&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"&gt;mkdir curator
+cd curator
+touch config.yml&lt;/pre&gt;
+&lt;p&gt;vim komutu ile&lt;strong&gt;&amp;nbsp;config.yml&lt;/strong&gt;&amp;nbsp;dosyasının i&amp;ccedil;ine girip i&amp;ccedil;erisinde bulunacak komutları&amp;nbsp;aşağıdaki gibi yazalım. Bu dosyada elasticsearch adresi ve connection kurarken gerekli olan tanımlar yer almakta.&lt;/p&gt;
+&lt;pre class="brush:ps;auto-links:false;toolbar:false" contenteditable="false"&gt;client:
+	hosts:
+		- 127.0.0.1
+	port: 9200
+	url_prefix:
+	use_ssl: False
+	certificate:
+	client_cert:
+	client_key:
+	ssl_no_validate: False
+	http_auth:
+	timeout: 30
+	master_only: False
+
+logging:
+	loglevel: INFO
+	logfile:
+	logformat: default
+	blacklist: ['elasticsearch', 'watches', '.watches','.kibana']&lt;/pre&gt;
+&lt;p&gt;Şimdi ise rule ve aciton'ların yer aldığı&amp;nbsp;&lt;strong&gt;actions.yml&lt;/strong&gt;&amp;nbsp;dosyasını oluşturup i&amp;ccedil;erisini ihtiyacımıza uygun&amp;nbsp;olacak işekilde&amp;nbsp;aşağıdaki komutlarda olduğu gibi yazalım.&lt;/p&gt;
+&lt;pre class="brush:ps;auto-links:false;toolbar:false" contenteditable="false"&gt;actions:
+  1:
+    action: delete_indices
+    description: &amp;gt;-
+      Delete indices older than 90 days except payment-logs indices !
+    options:
+      ignore_empty_list: True
+      disable_action: False
+    filters:
+    - filtertype: pattern
+      kind: prefix
+      value: payment-logs-
+      exclude: True
+    - filtertype: age
+      source: name
+      direction: older
+      timestring: '%Y.%m.%d'
+      unit: days
+      unit_count: 90&lt;/pre&gt;
+&lt;p&gt;&amp;Ouml;zetle;&amp;nbsp;&lt;strong&gt;filtertype: age&lt;/strong&gt;'i yani creationdate'i 90 g&amp;uuml;nden fazla olan index'leri&amp;nbsp;&lt;strong&gt;filtertype: pattern&lt;/strong&gt;&amp;nbsp;payment-logs index'i hari&amp;ccedil; silmesini belirttik.&lt;/p&gt;
+&lt;p&gt;Curator dry-run komutu ile bir nevi test yaparmışcasına komutumuzu &amp;ccedil;alıştırıp hangi indexleri delete edeceğini silmeden g&amp;ouml;rebiliriz. Bunun i&amp;ccedil;in kullanacağımız komut ;&lt;/p&gt;
+&lt;pre class="brush:ps;auto-links:false;toolbar:false" contenteditable="false"&gt;curator --config /root/curator/config.yml --dry-run /root/curator/actions.yml&lt;/pre&gt;
+&lt;p&gt;Artık service olarak &amp;ccedil;alıştırmak istediğimiz curator'u run etmek i&amp;ccedil;in kullanacağımız komut ise aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;p&gt;Curator job'ının 2 g&amp;uuml;nde bir gece saat 02:00 da &amp;ccedil;alışmasını istiyoruz komutumuz;&lt;/p&gt;
+&lt;pre class="brush:ps;auto-links:false;toolbar:false" contenteditable="false"&gt;0 2 */2 * * curator --config /root/curator/config.yml /root/curator/actions.yml&lt;/pre&gt;
+&lt;p&gt;&amp;Ouml;zetleyecek olursak; curator kullanarak silmek istediğimiz elasticsearch index'lerini belli rule'lar tanımlayarak otomatik bir şekilde silmemizi sağlayan bir tool'dur. Bu tool'u kullanarak kolay bir şekilde manuel bir m&amp;uuml;dahale gerektirmeden eski index'lerden kurtulup elasticsearch makinanızda free disc-space yaratabilirsiniz. Daha fazla bilgi i&amp;ccedil;in&amp;nbsp;&lt;a href="https://www.elastic.co/guide/en/elasticsearch/client/curator/current/index.html"&gt;elasticsearch-curator&lt;/a&gt;&amp;nbsp;sayfasına g&amp;ouml;z atabilirsiniz.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/curator-elasticsearch"&gt;Source&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2020-02-26 21:25:00</pubDate>
+  <lastModified>2020-03-01 14:33:00</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>curator-kullanarak-elasticsearch-index-lerini-periyodik-olarak-temizleme</slug>
+  <tags>
+    <tag>curator kurulum</tag>
+    <tag>elasticsearch</tag>
+    <tag>elasticsearch curator</tag>
+    <tag>install curator</tag>
+    <tag>delete old elasticsearch indices</tag>
+    <tag>kibana</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>a0313877-509c-481a-954b-6e000b44433d</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

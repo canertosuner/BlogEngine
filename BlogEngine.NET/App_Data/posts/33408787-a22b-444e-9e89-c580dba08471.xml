@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>JQuery Mobile Google Analytics kodu ekleme</title>
+  <description>JQuery Mobile website geliştirip i&amp;ccedil;erisine Google Analytics script'i eklemek istediğinizde te</description>
+  <content>&lt;p&gt;&lt;span style="font-size: medium;"&gt;JQuery Mobile website geliştirip i&amp;ccedil;erisine Google Analytics script'i eklemek istediğinizde tek yapmanız gereken&amp;nbsp;&lt;a style="font-size: 10px;" href="http://www.google.com/analytics/"&gt;http://www.google.com/analytics/&lt;/a&gt;&amp;nbsp;adresine giderek uygulamanızı oluşturmanız ve Google'ın size verdiği ID'yi alarak aşağıdaki script'te ilgili yere yazmanız.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;&amp;lt;&lt;/span&gt;&lt;span style="font-family: Consolas; color: maroon;"&gt;script&lt;/span&gt;&lt;span style="font-family: Consolas; color: red;"&gt;type&lt;/span&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;="text/javascript"&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium; font-family: Consolas;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0cm 0cm 0.0001pt 35.4pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;var&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt; _gaq = _gaq || [];&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0cm 0cm 0.0001pt 35.4pt;"&gt;&lt;span style="font-size: medium; font-family: Consolas;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0cm 0cm 0.0001pt 35.4pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-family: Consolas;"&gt;_gaq.push([&lt;/span&gt;&lt;span style="font-family: Consolas; color: #a31515;"&gt;'_setAccount'&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;, &lt;/span&gt;&lt;span style="font-family: Consolas; color: #a31515;"&gt;'Google-App-ID'&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;]);&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0cm 0cm 0.0001pt 35.4pt;"&gt;&lt;span style="font-size: medium; font-family: Consolas;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0cm 0cm 0.0001pt 35.4pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-family: Consolas;"&gt;_gaq.push([&lt;/span&gt;&lt;span style="font-family: Consolas; color: #a31515;"&gt;'_trackPageview'&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;]);&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0cm 0cm 0.0001pt 35.4pt;"&gt;&lt;span style="font-size: medium; font-family: Consolas;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0cm 0cm 0.0001pt 35.4pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-family: Consolas;"&gt;(&lt;/span&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;function&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt; () {&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0cm 0cm 0.0001pt 35.4pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;var&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt; ga = document.createElement(&lt;/span&gt;&lt;span style="font-family: Consolas; color: #a31515;"&gt;'script'&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;); ga.type = &lt;/span&gt;&lt;span style="font-family: Consolas; color: #a31515;"&gt;'text/javascript'&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;; ga.async = &lt;/span&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;true&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0cm 0cm 0.0001pt 35.4pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-family: Consolas;"&gt;ga.src = (&lt;/span&gt;&lt;span style="font-family: Consolas; color: #a31515;"&gt;'https:'&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt; == document.location.protocol ? &lt;/span&gt;&lt;span style="font-family: Consolas; color: #a31515;"&gt;'https://ssl'&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt; : &lt;/span&gt;&lt;span style="font-family: Consolas; color: #a31515;"&gt;'http://www'&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;) + &lt;/span&gt;&lt;span style="font-family: Consolas; color: #a31515;"&gt;'.google-analytics.com/ga.js'&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0cm 0cm 0.0001pt 35.4pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;var&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt; s = document.getElementsByTagName(&lt;/span&gt;&lt;span style="font-family: Consolas; color: #a31515;"&gt;'script'&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;)[0]; s.parentNode.insertBefore(ga, s);&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-left: 35.4pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="line-height: 115%; font-family: Consolas;"&gt;})();&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;&amp;lt;/&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: maroon;"&gt;script&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&amp;Uuml;stte bulunan bu script'i&amp;nbsp;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;&amp;lt;&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: maroon;"&gt;head&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;&amp;gt;&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt; &amp;lt;/&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: maroon;"&gt;head&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;&amp;gt;&amp;nbsp;&lt;/span&gt;tagleri arasına yazıp Google'ın sitenizle ilgili verileri tutmasını sağlayabilirsiniz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2014-04-25 18:01:00</pubDate>
+  <lastModified>2020-01-20 08:22:30</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>JQuery-Mobile-Google-Analytics-kodu-ekleme</slug>
+  <tags>
+    <tag>google analytics</tag>
+    <tag>analytic</tag>
+    <tag>jquery</tag>
+    <tag>javascript</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>27e5276b-0227-42f3-a037-9d3992022f96</category>
+  </categories>
+  <notifications />
+</post>

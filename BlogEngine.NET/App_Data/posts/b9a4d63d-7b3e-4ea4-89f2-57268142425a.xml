@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Aspect Oriented Programming Nedir</title>
+  <description>Aspect Oriented Programming (AOP) tükçesi "Cephe Yönelimli Programlama" bir programlama paradigmasıdır. İsim olarak bazılarımıza yabancı geliyor olabilir çünkü çok yeni bir kavram değil ve gelişen yazılım teknolojileri ve AOP nin daha kolay ve verimli implement edilmesini sağlayacak</description>
+  <content>&lt;p&gt;&lt;strong&gt;Aspect Oriented Programming (AOP)&lt;/strong&gt; t&amp;uuml;k&amp;ccedil;esi "&lt;strong&gt;Cephe Y&amp;ouml;nelimli Programlama&lt;/strong&gt;" bir programlama paradigmasıdır. İsim olarak bazılarımıza yabancı geliyor olabilir &amp;ccedil;&amp;uuml;nk&amp;uuml; &amp;ccedil;ok yeni bir kavram değil ve gelişen yazılım teknolojileri ve AOP nin daha kolay ve verimli implement edilmesini sağlayacak "&lt;strong&gt;PostSharp&lt;/strong&gt;" gibi tool'ların &amp;ccedil;ıkmasıyla birlikte epey bir &amp;ouml;nemli hale gelir oldu AOP.&lt;/p&gt;
+&lt;p&gt;Biz yazılımcılar daha iyi kodlar yazmak i&amp;ccedil;in hep kullandığımız bir c&amp;uuml;mle var "Separation of Concern". AOP'nin &amp;ccedil;ıkış noktası aslında buna dayanıyor diyebiliriz. AOP birbiriyle kesişen ilgilerin (&lt;strong&gt;Cross-Cutting Concerns&lt;/strong&gt;) ayrılması &amp;uuml;zerinedir. Uygulama genelinde kullanılacak olan yapıları (logging,exception hand., cache, etc.) core tarafta yazdığımız koddan ayırarak bir &amp;ccedil;eşit ayrı k&amp;uuml;&amp;ccedil;&amp;uuml;k programcıklar şeklinde yazıp projede kullanmayı hedefler diyebiliriz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek olarak 70.000 kişinin &amp;ccedil;alıştığı &amp;ccedil;ok b&amp;uuml;y&amp;uuml;k bir holding i&amp;ccedil;in uygulama geliştiriyoruz geriye b&amp;uuml;t&amp;uuml;n &amp;ccedil;alışan listesini d&amp;ouml;nen bir metod yazıyor olalım ve klasik her uygulamada olması gereken belli başlı şeyler vardır; Cache,ExceptionHandling, Logging gibi bizde metodumuzda bunları yapıyor olalım;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; public IEnumerable&amp;lt;Employee&amp;gt; GetEmployeeList()
+        {
+			//Request'i yapan kişinin yetkisi varmı yokmu kontrol et
+			//metoda girerken request'i log'la
+			
+            try
+            {
+                var resultList = DbQuery("Select * from Employee"); // database de ki tabloya sorgu attığımız varsayalım ve 70 bin kayıt gelsin
+				
+                //geriye d&amp;ouml;nen sonu&amp;ccedil;ları cache'e at bir sonrakine cache'den ver
+
+                return resultList;
+            }
+            catch (Exception ex)
+            {
+                // meydana gelen Exception'ı handle edip log'la ve client'a gidecek olan response'u modify et  
+                throw;
+            }
+			
+			//metoddan &amp;ccedil;ıkarken response'u log'la
+        }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda bulunan metodu incelediğimizde ne kadar eksik olduğunu g&amp;ouml;rebiliyoruz. Yorum satırlarında yazan işlemler i&amp;ccedil;in geliştirmeler yapmamız gerekmekte ancak bu geliştirmeyi nasıl yapacağız &amp;nbsp;? &lt;strong&gt;CheckUserAuth(), LogRequest(), LogException(), LogResponse(), ModifyResponse() &lt;/strong&gt;gibi metodlar yazıp bu metodları ilgili yerlerde her metodda yazmak herhalde ilk akla gelen &amp;ccedil;&amp;ouml;z&amp;uuml;m ancak &lt;strong&gt;AOP&lt;/strong&gt; bize daha farklı şekilde yapmamız gerektiğini s&amp;ouml;yl&amp;uuml;yor. Bunları ayrı mod&amp;uuml;ller olarak tasarlayıp daha kullanılabilir, okunabilir ve SOLID prensiplerine uygun geliştirmeler yapmamız gerektiğini s&amp;ouml;yler.&lt;/p&gt;
+&lt;p&gt;Peki birbirleri ile &amp;ccedil;akışan ilgileri birbirlerinden nasıl ayıracağız ? İşte bu noktada karşımıza &lt;strong&gt;interceptor&lt;/strong&gt;&amp;nbsp;&amp;ccedil;ıkmakta.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Interceptor&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Interceptor&amp;rsquo; belirli noktalarda metot &amp;ccedil;ağrımları sırasında araya girerek &amp;ccedil;akışan ilgilerimizi işletmemizi ve y&amp;ouml;netmemizi sağlamakta. Buda metotların &amp;ccedil;alışmasından &amp;ouml;nce veya sonra bir takım işlemleri ger&amp;ccedil;ekleştirebilmemeizi sağlar ve &lt;strong&gt;AOP &lt;/strong&gt;nin yapısı tamamiyle bunun &amp;uuml;zerine kurulu desek yanlış olmaz heralde. Interceptor'u implemente etme olayına girmicem &amp;ccedil;&amp;uuml;nk&amp;uuml; yukarıda da bahsettiğim gibi .Net tarafında Nuget &amp;uuml;zerinden indirip kullanabileceğimiz &lt;strong&gt;Postsharp&lt;/strong&gt;&amp;nbsp;k&amp;uuml;t&amp;uuml;phanesi bu işi diplerine kadar yapmakta ve bizlere sadece attribute tanımlamaları yapmayı bırakmakta.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi yukarıda yazmış olduğumuz kodu gelin birde AOP standartlarına uygun şekilde yazalım.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;        [UserAuthAspect]
+        [LoggingAspect]
+        [AppCacheAspect(25000)]
+        [ExceptionAspect]
+        public IEnumerable&amp;lt;Employee&amp;gt; GetEmployeeList()
+        {
+            var resultList = DbQuery("Select * from Employee");
+            return resultList;
+        }&lt;/pre&gt;
+&lt;p&gt;[UserAuthAspect] [LoggingAspect] [AppCacheAspect] [ExceptionAspect] attribute'lerini tanımladık ve AOP nin dediği gibi Cross-Cutting yani kesişen yerleri Aspect'ler kullanarak attribute seviyesinde kullanılabilir hale getirdik.Yazmış olduğumuz 2. metot ile 1. metot arasındaki satır sayısı farkına baktığımızda dağlar kadar fark var ve en &amp;ouml;nemlisi daha okunabilir bir kod yazmış olduk. &amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Aspect-Oriented Programming'in Sağladıkları&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;İ&amp;ccedil;i i&amp;ccedil;e yazılmış ve s&amp;uuml;rekli tekrar eden kodlardan kurtulabiliyoruz,&lt;/li&gt;
+&lt;li&gt;Daha temiz ve anlaşılır kodlar yazabiliyoruz,&lt;/li&gt;
+&lt;li&gt;Yazmış olduğumuz kodları daha abstract hale getirerek mod&amp;uuml;lerliğini arttırıyoruz,&lt;/li&gt;
+&lt;li&gt;Bakım ve geliştirme maliyetlerini azaltıyoruz,&lt;/li&gt;
+&lt;li&gt;Uygulamamızı daha y&amp;ouml;netilebilir ve daha esnek hale getirebiliyoruz.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre AOP yaklaşımı geliştirdiğimiz uygulamalar i&amp;ccedil;in bizlere bir &amp;ccedil;ok faydalar sunmakta ve Postsharp gibi &amp;ccedil;eşitli tool'lar ile birlikte projenize AOP'ye uygun hale getirmek dahada kolay hale gelmiş durumda. Bundan sonraki AOP ile ilgili yazılarda Postsharp kullanarak Cache, Logging, ExceptionHandling gibi &amp;ouml;rnekler ile deva ediyor olacağız. &amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-06-13 10:04:00</pubDate>
+  <lastModified>2020-01-20 08:22:24</lastModified>
+  <raters>4</raters>
+  <rating>5</rating>
+  <slug>Aspect-Oriented-Programming</slug>
+  <tags>
+    <tag>Aspect-Oriented Programming</tag>
+    <tag>Aspect</tag>
+    <tag>AOP</tag>
+    <tag>Architecture</tag>
+    <tag>Aspect-Oriented Programming nedir</tag>
+    <tag>AOP nedir</tag>
+    <tag>Aspect-Oriented Programming Kavramı</tag>
+    <tag>Aspect Oriented nedir</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

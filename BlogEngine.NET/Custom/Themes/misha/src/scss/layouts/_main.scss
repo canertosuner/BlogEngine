@@ -1,0 +1,27 @@
+body {
+  font-family: $font;
+  cursor: default;
+}
+
+.blog-body {
+  padding-top: 3rem;
+}
+
+.blog-sidebar {
+  padding-left: 4rem !important;
+}
+
+.container {
+  width: 100%;
+  max-width: 80rem;
+}
+@media screen and (max-width:991px) {
+  .blog-sidebar {
+    padding: 0;
+    display: none;
+  }
+
+  .blog-body {
+    padding-top: 1rem;
+  }
+}

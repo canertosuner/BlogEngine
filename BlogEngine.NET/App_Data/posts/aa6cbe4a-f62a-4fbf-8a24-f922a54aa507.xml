@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Api Projelerinde Versiyonlama</title>
+  <description>Yazmış olduğunuz Api projelerinde versiyonlama yapmak oldukça önemlidir. Düzenli bir versiyonlama yaparak hem mevcut hemde yeni versiyonu kullanacak olan client'lar için tutarlı response'lar sağlayabilirsiniz. Örneğin v1.0 için çalışan listesi dönen bir api metodu yazdınız ve mevcutta kullanan kullanıcılar var.</description>
+  <content>&lt;p&gt;Yazmış olduğunuz Api projelerinde versiyonlama yapmak olduk&amp;ccedil;a &amp;ouml;nemlidir. D&amp;uuml;zenli bir versiyonlama yaparak hem mevcut hemde yeni versiyonu kullanacak olan client'lar i&amp;ccedil;in tutarlı response'lar sağlayabilirsiniz. &amp;Ouml;rneğin v1.0 i&amp;ccedil;in &amp;ccedil;alışan&amp;nbsp;listesi d&amp;ouml;nen bir api metodu yazdınız ve mevcutta kullanan kullanıcılar var. production'da. Sonra v2.0 de dediler ki&amp;nbsp;&amp;ccedil;alışan isimlerinin&amp;nbsp;yanında departman kodu da yazsın (Caner Tosuner, IT gibi). Her ne kadar kullanıcılar v2.0 geliştirmesini yapacak olsalarda belli bir s&amp;uuml;re daha eski versiyon i&amp;ccedil;in destek veriyor olmak gerekir &amp;ccedil;&amp;uuml;nk&amp;uuml; b&amp;uuml;t&amp;uuml;n herkes aynı anda v2.0'a ge&amp;ccedil;emeyebilir veya v1.0 da kalmak isteyebilir. İşte bu gibi durumları en iyi şekilde y&amp;ouml;netilmemiz i&amp;ccedil;in versiyonlamayı son derece iyi yapmamız gerekir.&lt;/p&gt;
+&lt;p&gt;Web Api i&amp;ccedil;in versiyonlama yapmanın ortak kabul g&amp;ouml;rm&amp;uuml;ş bir ka&amp;ccedil; yol bulunmakta;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;URL&lt;/strong&gt; de versiyon bilgisini query string olarak ge&amp;ccedil;ebiliriz,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Request Header&lt;/strong&gt;'a "appVersion" gibi bir key/value&amp;nbsp;ekleyebiliriz,&lt;/li&gt;
+&lt;li&gt;Genelde media type i&amp;ccedil;in kullanılsada &lt;strong&gt;AcceptHeader&lt;/strong&gt;'a versiyon bilgisini ekleyebiliriz,&lt;/li&gt;
+&lt;li&gt;Her request'te BaseRequest'te i&amp;ccedil;erisinde bir versiyon bilgisini alma.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Yukarıda sıralanan 4 yol da versiyonlama i&amp;ccedil;in &amp;ccedil;&amp;ouml;z&amp;uuml;m ancak WebApi'ın son s&amp;uuml;r&amp;uuml;m&amp;uuml;yle birlikte tercih edilmemeye başlandı hatta ve hatta yanlış &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak s&amp;ouml;yleyenler bile mevcut.&lt;/p&gt;
+&lt;p&gt;WebApi i&amp;ccedil;in versiyonlamayı Api metodlarının başına attribute olarak ekleyeceğimiz&amp;nbsp;&lt;strong&gt;Route &lt;/strong&gt;class'ı bulunmakta. Bu class'ı kullanarak kısaca hangi url bilgisi ile o metod &amp;ccedil;ağrılabilir onu belirtmiş oluyoruz.&lt;/p&gt;
+&lt;p&gt;Burda dikkat etmemiz gereken konuların başında elimizden geldiğince mevcut &lt;strong&gt;URL&lt;/strong&gt;'i bozmamaız gerekiyor.&lt;/p&gt;
+&lt;p&gt;Şimdi gelelim &amp;ouml;rneğimize.&lt;/p&gt;
+&lt;p&gt;Yukarıda bahsettiğimiz &amp;ouml;rnek &amp;uuml;zerinden ilerleyelim ve EmployeeController adında bir ApiController'ımız var&amp;nbsp;ve i&amp;ccedil;erisinde GetEmployeeList() adında bir metod olsun. Bu metod &amp;ouml;ncelikle v1.0 i&amp;ccedil;in geriye &amp;ccedil;alışan adı ve soyadı bilgilerini i&amp;ccedil;eren bir string array d&amp;ouml;ns&amp;uuml;n.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [HttpGet]
+        [Route("api/v1/Employee/{GetEmployeeList}")]
+        public IHttpActionResult GetEmployeeList()
+        {
+            var list = new string[] { "İlhan Mansız", "T&amp;uuml;mer Metin" };
+
+            return Ok(list);
+        }&lt;/pre&gt;
+&lt;p&gt;Yukarıda ki gibi v1.0 i&amp;ccedil;in kullanıcılar bu metodu kullanmakta. GetEmployeeList() metoduna request'te bulunmak i&amp;ccedil;in url "&lt;strong&gt;http://localhost/api/v1/Employee/GetEmployeeList&lt;/strong&gt;".&lt;/p&gt;
+&lt;p&gt;Ancak v2.0 da ad soyad bilgisinin yanında bir de departman adı istenmekte&amp;nbsp;&lt;strong&gt;İlhan Mansız, Pazarlama&amp;nbsp;&lt;/strong&gt;gibi.&lt;/p&gt;
+&lt;p&gt;Şimdide v2.0 metodunu yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [HttpGet]
+        [Route("api/v2/Employee/{GetEmployeeList}")]
+        public IHttpActionResult GetEmployeeListV2()
+        {
+            var list = new string[] { "İlhan Mansız, Pazarlama", "T&amp;uuml;mer Metin, Satış" };
+
+            return Ok(list);
+        }&lt;/pre&gt;
+&lt;p&gt;v2.0 metodunuda yazdık. Bu metoda request'te bulunmak i&amp;ccedil;in url&lt;strong&gt; "http://localhost/api/v2/Employee/GetEmployeeList".&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Yukarıda da bahsettiğmiz gibi en dikkat etmemiz gerekn konuların başında client'ın yapacağı request'i ve api url'ini elimizden geldiğinde aynı tutmak ve b&amp;uuml;t&amp;uuml;n versiyonlarda url i&amp;ccedil;in değişen&amp;nbsp;tek şeyin versiyon numarası olduğunu belirtmek. B&amp;ouml;ylelikle service tarafı i&amp;ccedil;in ayrımı url de bulunan versiyon numarasından alarak yapabiliriz.&lt;/p&gt;
+&lt;p&gt;Route attribute'&amp;uuml; kullanmadan versiyonlama işlemini farklı controller'lar kullanarak ta yapabilirsiniz. &amp;Uuml;stteki &amp;ouml;rneğimizde olduğu gibi &lt;strong&gt;GetEmployeeList()&lt;/strong&gt; meetodlarını i&amp;ccedil;eren 2 farklı &lt;strong&gt;EmployeeV1Controller&lt;/strong&gt; ve &lt;strong&gt;EmployeeV2Controller&lt;/strong&gt; adında controller'lar tanımlayabiliriz. Url route işini de WebApiConfig.cs class'ı i&amp;ccedil;erisine yine yukarıdaki url'leri kullanarak gerekli controller'lar da bulunan metodlara y&amp;ouml;nlendirmeleri yapabilirsiniz. &amp;Ouml;rneğin şu şekilde;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;config.Routes.MapHttpRoute(
+            name: "ApiV1_Route",
+            routeTemplate: "api/v1/{controller}/{id}",
+            defaults: new { controller = "EmployeeV1Controller", action = "GetEmployeeList", id = RouteParameter.Optional }
+            );
+
+config.Routes.MapHttpRoute(
+            name: "Apiv2_Route",
+            routeTemplate: "api/v2/{controller}/{id}",
+            defaults: new { controller = "EmployeeV2Controller", action = "GetEmployeeList", id = RouteParameter.Optional }
+            );&lt;/pre&gt;
+&lt;p&gt;Yine&amp;nbsp;&lt;strong&gt;"http://localhost/api/v1/Employee/GetEmployeeList" &lt;/strong&gt;metoduna istekte bulunduğumuzda yukarıda yaptığımız config'den dolayı EmployeeV1Controller'ında bulunan GetEmployeeList metoduna y&amp;ouml;nlendirecektir. v2 i&amp;ccedil;in ise&amp;nbsp;EmployeeV2Controller'ında bulunan&amp;nbsp;GetEmployeeList metoduna y&amp;ouml;nlendirecektir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Versiyonlama b&amp;uuml;y&amp;uuml;k &amp;ccedil;apta olan projeler i&amp;ccedil;in olduk&amp;ccedil;a &amp;ouml;nemlidir. Production'a uygulamanızı &amp;ccedil;ıktıktan sonraki zaman i&amp;ccedil;erisinde tekrardan update'ler &amp;ccedil;ıkmaya devam edeceksinizdir ve versiyonlama yaparak bu işlemleri y&amp;uuml;r&amp;uuml;t&amp;uuml;yor olmak hem kolaylıklar sağlar hem de projenizi daha y&amp;ouml;netilebilir hale getirir.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-09-06 06:05:00</pubDate>
+  <lastModified>2020-01-20 08:22:22</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>web-api-versiyonlama</slug>
+  <tags>
+    <tag>web api versiyonlama</tag>
+    <tag>web api versioning</tag>
+    <tag>web api</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

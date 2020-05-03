@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Sharepoint Query Exclude AllItems.aspx or AllPages.aspx </title>
+  <description />
+  <content>&lt;p&gt;To exclude&amp;nbsp;&lt;strong&gt;AllItems.aspx&lt;/strong&gt; from your query result;&lt;/p&gt;
+&lt;pre class="brush: cf; first-line: 1; tab-size: 4; toolbar: false; "&gt;-filename:AllItems.aspx&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;To exclude&amp;nbsp;&lt;strong&gt;AllPages.aspx&lt;/strong&gt;&amp;nbsp;from your query result;&lt;/p&gt;
+&lt;pre class="brush: cf; first-line: 1; tab-size: 4; toolbar: false; "&gt;-filename:AllPages.aspx&lt;/pre&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-09-07 15:48:00</pubDate>
+  <lastModified>2020-01-20 08:22:28</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Sharepoint-Query-Exclude-AllItemsaspx-or-AllPagesaspx</slug>
+  <tags />
+  <comments />
+  <categories>
+    <category>0b1e407c-eda9-4959-8552-c6da2babf29d</category>
+  </categories>
+  <notifications />
+</post>

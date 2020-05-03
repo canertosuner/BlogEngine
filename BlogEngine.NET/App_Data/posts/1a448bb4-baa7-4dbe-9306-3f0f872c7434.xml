@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Log4Net Database Logx</title>
+  <description>Log4Net .net uygulamaları i&amp;ccedil;in geliştirilmiş olan a&amp;ccedil;ık kaynak kodlu bir log&amp;rsquo; lam</description>
+  <content>&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;Log4Net .net uygulamaları i&amp;ccedil;in geliştirilmiş olan a&amp;ccedil;ık kaynak kodlu bir log&amp;rsquo; lama k&amp;uuml;t&amp;uuml;phanesi ve Java&amp;rsquo;da bulunan loglama aracı Log4J'nin .NET uyarlamasıdır.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNoSpacing"&gt;&lt;span style="text-decoration: underline; color: #0000ff; font-size: large;"&gt;&lt;strong&gt;Log Seviyeleri&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNoSpacing"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;ALL :&lt;/strong&gt;&amp;nbsp;T&amp;uuml;m mesajların loglandığı seviyedir.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNoSpacing"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;DEBUG :&lt;/strong&gt;&amp;nbsp;Developement aşamasına y&amp;ouml;nelik loglama seviyesidir.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNoSpacing"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;INFO :&lt;/strong&gt;&amp;nbsp;Uygulama i&amp;ccedil;erisindeki bilgileri loglayabildiğiniz seviyedir.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNoSpacing"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;WARN :&lt;/strong&gt;&amp;nbsp;Hata olmayan fakat &amp;ouml;nemli bir durumun oluştuğunu belirtebileceğimiz seviye.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNoSpacing"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;ERROR :&lt;/strong&gt;&amp;nbsp;Hata durumunu belirten seviye. Sistem hala &amp;ccedil;alışır haldedir.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNoSpacing"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;FATAL :&lt;/strong&gt;&amp;nbsp;Uygulamanın sonlanacağını, faaliyet g&amp;ouml;steremeyeceğini belirten mesajlar i&amp;ccedil;in kullanılacak seviyedir.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNoSpacing"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;OFF :&lt;/strong&gt;&amp;nbsp;Hi&amp;ccedil; bir mesajın loglanmadığı seviyedir.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Log&amp;rsquo;lanacak bilgiler &lt;strong&gt;file system&lt;/strong&gt; tarafında ya da &lt;strong&gt;database&lt;/strong&gt;&amp;rsquo;de kaydedilebilmektedir. &lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;DBLog&lt;/strong&gt; adında bir database oluşturalım ve Log kayıtlarını tutacağımız &lt;strong&gt;Log&lt;/strong&gt; adında aşağıda olduğu gibi bir tablo yaratalım&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: sql; first-line: 1; tab-size: 4; toolbar: false; "&gt;CREATE TABLE [dbo].[Log] (
+    [Id] [int] IDENTITY (1, 1) NOT NULL,
+    [Date] [datetime] NOT NULL,
+    [Thread] [varchar] (255) NOT NULL,
+    [Level] [varchar] (50) NOT NULL,
+    [Logger] [varchar] (255) NOT NULL,
+    [Message] [varchar] (4000) NOT NULL,
+    [Exception] [varchar] (2000) NULL
+)&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Uygulama i&amp;ccedil;erisinde &lt;strong&gt;App.cofig&lt;/strong&gt; ya da &lt;strong&gt;Web.config&lt;/strong&gt; sayfalarının i&amp;ccedil;erişini aşağıda olduğu gibi yapıp sadece &lt;strong&gt;connectionstring&lt;/strong&gt;&amp;rsquo;ini değiştirmeniz yeterli olacaktır.&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:xml;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;lt;?xmlversion="1.0"encoding="utf-8" ?&amp;gt;
+&amp;lt;configuration&amp;gt;
+  &amp;lt;configSections&amp;gt;
+    &amp;lt;section name="log4net"type="log4net.Config.Log4NetConfigurationSectionHandler,
+Log4net"/&amp;gt;
+  &amp;lt;/configSections&amp;gt;
+  &amp;lt;log4net&amp;gt;
+    &amp;lt;root&amp;gt;
+      &amp;lt;levelvalue="DEBUG" /&amp;gt;
+      &amp;lt;appender-refref="ADONetAppender" /&amp;gt;
+    &amp;lt;/root&amp;gt;
+    &amp;lt;appendername="ADONetAppender"type="log4net.Appender.ADONetAppender"&amp;gt;
+      &amp;lt;bufferSizevalue="100" /&amp;gt;
+      &amp;lt;connectionTypevalue="System.Data.SqlClient.SqlConnection, System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" /&amp;gt;
+      &amp;lt;connectionStringvalue="server=serveradi; database=databaseadi;trusted_connection=true;" /&amp;gt;
+      &amp;lt;commandTextvalue="INSERT INTO Log ([Date],[Thread],[Level],[Logger],[Message],[Exception]) VALUES (@log_date, @thread, @log_level, @logger, @message, @exception)" /&amp;gt;
+      &amp;lt;parameter&amp;gt;
+        &amp;lt;parameterNamevalue="@log_date"/&amp;gt;
+        &amp;lt;dbTypevalue="DateTime"/&amp;gt;
+        &amp;lt;layouttype="log4net.Layout.RawTimeStampLayout"/&amp;gt;
+      &amp;lt;/parameter&amp;gt;
+      &amp;lt;parameter&amp;gt;
+        &amp;lt;parameterNamevalue="@thread"/&amp;gt;
+        &amp;lt;dbTypevalue="String"/&amp;gt;
+        &amp;lt;sizevalue="255"/&amp;gt;
+        &amp;lt;layouttype="log4net.Layout.PatternLayout"&amp;gt;
+          &amp;lt;conversionPatternvalue="%thread"/&amp;gt;
+        &amp;lt;/layout&amp;gt;
+      &amp;lt;/parameter&amp;gt;
+      &amp;lt;parameter&amp;gt;
+        &amp;lt;parameterNamevalue="@log_level"/&amp;gt;
+        &amp;lt;dbTypevalue="String"/&amp;gt;
+        &amp;lt;sizevalue="50"/&amp;gt;
+        &amp;lt;layouttype="log4net.Layout.PatternLayout"&amp;gt;
+          &amp;lt;conversionPatternvalue="%level"/&amp;gt;
+        &amp;lt;/layout&amp;gt;
+      &amp;lt;/parameter&amp;gt;
+      &amp;lt;parameter&amp;gt;
+        &amp;lt;parameterNamevalue="@logger"/&amp;gt;
+        &amp;lt;dbTypevalue="String"/&amp;gt;
+        &amp;lt;sizevalue="255"/&amp;gt;
+        &amp;lt;layouttype="log4net.Layout.PatternLayout"&amp;gt;
+          &amp;lt;conversionPatternvalue="%logger"/&amp;gt;
+        &amp;lt;/layout&amp;gt;
+      &amp;lt;/parameter&amp;gt;
+      &amp;lt;parameter&amp;gt;
+        &amp;lt;parameterNamevalue="@message"/&amp;gt;
+        &amp;lt;dbTypevalue="String"/&amp;gt;
+        &amp;lt;sizevalue="4000"/&amp;gt;
+        &amp;lt;layouttype="log4net.Layout.PatternLayout"&amp;gt;
+          &amp;lt;conversionPatternvalue="%message"/&amp;gt;
+        &amp;lt;/layout&amp;gt;
+      &amp;lt;/parameter&amp;gt;
+      &amp;lt;parameter&amp;gt;
+        &amp;lt;parameterNamevalue="@exception"/&amp;gt;
+        &amp;lt;dbTypevalue="String"/&amp;gt;
+        &amp;lt;sizevalue="2000"/&amp;gt;
+        &amp;lt;layouttype="log4net.Layout.ExceptionLayout"/&amp;gt;
+      &amp;lt;/parameter&amp;gt;
+    &amp;lt;/appender&amp;gt;
+  &amp;lt;/log4net&amp;gt;
+&amp;lt;/configuration&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;&lt;span style="line-height: 115%; font-family: Consolas;"&gt;CodeBehind&lt;/span&gt;&lt;/strong&gt;&lt;span style="line-height: 115%; font-family: Consolas;"&gt; tarafında ki kodlar ise şu şekilde olacaktır&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;toolbar:false" contenteditable="false"&gt;private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.
+MethodBase.GetCurrentMethod().DeclaringType);
+        private void button1_Click(object sender, EventArgs e)
+        {
+            log4net.Config.XmlConfigurator.Configure();
+            log.Debug("log Debug");
+            log.Info("log Info");
+            log.Warn("log Warn");
+            log.Error("log Error");
+            log.Fatal("log Fatal");
+        }&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium; line-height: 115%; font-family: Consolas;"&gt;Bu işlemler sonrasında database&amp;rsquo;de ki tabloya kayıtlar insert olmuş olacaktır.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-06-06 13:46:00</pubDate>
+  <lastModified>2020-01-20 08:22:33</lastModified>
+  <raters>15</raters>
+  <rating>3.066666</rating>
+  <slug>Log4Net-Database-Log</slug>
+  <tags>
+    <tag>Log4Net</tag>
+    <tag>Log</tag>
+    <tag>appender</tag>
+  </tags>
+  <comments />
+  <categories />
+  <notifications />
+</post>

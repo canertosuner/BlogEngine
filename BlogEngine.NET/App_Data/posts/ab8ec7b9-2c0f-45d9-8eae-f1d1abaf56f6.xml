@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Api Projelerine Swagger Ekleme</title>
+  <description>Server-side bir geliştirme yapıyorsanız ve yazmış olduğunuz end-point'ler farklı client'lar tarafından kullanılacaksa api da bulunan end-point'lerin kullanımını açıklayıp request-response örneklerini içeren bir döküman yazmak bizler için kaçınılmaz bir iş.</description>
+  <content>&lt;p&gt;Server-side bir geliştirme yapıyorsanız ve yazmış olduğunuz end-point'ler farklı client'lar tarafından kullanılacaksa api da bulunan end-point'lerin kullanımını a&amp;ccedil;ıklayıp request-response &amp;ouml;rneklerini i&amp;ccedil;eren bir d&amp;ouml;k&amp;uuml;man yazmak bizler i&amp;ccedil;in ka&amp;ccedil;ınılmaz bir iş.&lt;/p&gt;
+&lt;p&gt;Asp.Net Web Api mimarları aslında bu durum i&amp;ccedil;in &lt;strong&gt;Help Page&lt;/strong&gt; ile bir &amp;ccedil;&amp;ouml;z&amp;uuml;m sunmaya &amp;ccedil;alışmışlar ancak tam anlamıyla yeterli olamamış. Yeni bir empty olmayan web api projesi oluşturduğunuzda nuget &amp;uuml;zerinde &lt;a href="https://www.nuget.org/packages/Microsoft.AspNet.WebApi.HelpPage/5.2.3" target="_blank"&gt;Microsoft ASP.NET Web Api Help Page&lt;/a&gt;&amp;nbsp;projenize y&amp;uuml;kl&amp;uuml; olarak gelir ve browser &amp;uuml;zerinden adres kısmına &lt;strong&gt;{IIS de ki uygulama ismi}/help&lt;/strong&gt; diyerek web api i&amp;ccedil;in hazırlanmış olan help page d&amp;ouml;k&amp;uuml;manına ulaşabiliriz ve ekran g&amp;ouml;r&amp;uuml;nt&amp;uuml;s&amp;uuml; aşağıdaki gibidir.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/web_api_help_page_docmnt.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Ancak bu d&amp;ouml;k&amp;uuml;man bize yazının başında bahsettiğimiz &amp;ouml;rnek request atıp response alabilmemizi sağlamamakta. Yani bir nevi api'ı ger&amp;ccedil;ek veya fake datalarla test etmemize olanak sağlamamakta. Help page kabaca; yazılan controller'lar da bulunan end-point'ler ve bu end-point'lerin request response modellerini listelemekte.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Swagger&lt;/h3&gt;
+&lt;p&gt;Help Page'in hem yapabildiklerini yapan hemde yapamadıklarının fazlasını yapabilen bir tool olan swagger'dan bahsedeceğiz.&amp;nbsp;Swagger.io tarafından şekilde&amp;nbsp;tanımlanmıştır;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;"Swagger is a simple yet powerful representation of your RESTful API. With the largest ecosystem of API tooling on the planet, thousands of developers are supporting Swagger in almost every modern programming language and deployment environment. With a Swagger-enabled API, you get interactive documentation, client SDK generation and discoverability."&lt;/p&gt;
+&lt;p&gt;-&lt;a href="http://swagger.io/" target="_blank"&gt;swagger.io&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Swagger yazılım d&amp;uuml;nyası tarafından olduk&amp;ccedil;a b&amp;uuml;y&amp;uuml;k &amp;ccedil;apta kabul g&amp;ouml;rm&amp;uuml;ş yaygın olarak kullanılan bir dynamic d&amp;ouml;k&amp;uuml;man oluşturma tool'u dur. .Net tarafı i&amp;ccedil;in entegrasyonu olduk&amp;ccedil;a basittir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2017/swagge_def_img.jpeg" alt="" width="419" height="157" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;Not:&lt;/span&gt; Swagger'ı projenize entegre ettikten sonra hep page'i de kullanmaya devam edebiliyorsunuz yani biri diğerinin yerini almıyor.&lt;/p&gt;
+&lt;h3&gt;Swagger Kurulumu&lt;/h3&gt;
+&lt;p&gt;Projemize swagger eklemek i&amp;ccedil;in open source olarak geliştirilen &lt;a href="https://www.nuget.org/packages/Swashbuckle/" target="_blank"&gt;Swashbuckle&lt;/a&gt;&amp;nbsp;adındaki k&amp;uuml;t&amp;uuml;phaneyi projemizde Nuget Package Manager Console kullanarak indirip kuracağız.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;PM&amp;gt; Install-Package Swashbuckle&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Kurulum işlemi bittikten sonra solution da bulunan &lt;strong&gt;App_Start&lt;/strong&gt; klas&amp;ouml;r&amp;uuml;n&amp;uuml; a&amp;ccedil;arak i&amp;ccedil;erisine swagger configuration işlemleri i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;SwaggerConfig.cs&lt;/strong&gt; adında bir class eklendiğini g&amp;ouml;receğiz.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2017/swagger_project_config_class_1.png" alt="" width="267" height="232" /&gt;&lt;/p&gt;
+&lt;h3&gt;Configuring Swagger&lt;/h3&gt;
+&lt;p&gt;SwaggerConfig.cs i&amp;ccedil;erisi default olarak aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class SwaggerConfig
+    {
+        public static void Register()
+        {
+            var thisAssembly = typeof(SwaggerConfig).Assembly;
+
+            GlobalConfiguration.Configuration
+                .EnableSwagger(c =&amp;gt;
+                    {
+                        c.SingleApiVersion("v1", "WebApplication1");
+                    })
+                .EnableSwaggerUi();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Projenizi run ettiğinizde browser &amp;uuml;zerinden Swagger Ui sayfasına &lt;strong&gt;{IIS de ki uygulama ismi}&lt;/strong&gt;&lt;strong&gt;/swagger&lt;/strong&gt; şeklinde ulaşabilirsiniz ve&amp;nbsp;sayfa default olarak aşağıdaki gibidir.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/swagger_default_ui_page_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Yukarıda da g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi projemizde controller'lar i&amp;ccedil;erisinde tanımlı end-point'ler, Http Request t&amp;uuml;rleri, aldıkları parametreler vs gibi bilgiler yer almaktadır.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek olarak&amp;nbsp;&lt;strong&gt;POST /api/Values&amp;nbsp;&lt;/strong&gt;metodunu deneyelim. Metot isminin &amp;uuml;zerine tıkladığımızda altta bir view expand olur ve burada request olarak g&amp;ouml;ndereceğimiz parametreleri yazıp response'u alabiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/swagger_request_resp_sample_try_it_out.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Yukarıdaki&amp;nbsp;ekran g&amp;ouml;r&amp;uuml;nt&amp;uuml;s&amp;uuml;nde kısaca Values metodu string bir parametre alıyor ve geriye string bir response d&amp;ouml;n&amp;uuml;yor. Request&amp;nbsp;parametresini yazdıktan sonra &lt;strong&gt;Try it out&lt;/strong&gt;&amp;nbsp;butonuna tıkladığımızda aşağıdaki gibi bir ekranla karşılaşıyoruz.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/swagger_request_response_img_200.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;&amp;Ouml;zetle&lt;/h3&gt;
+&lt;p&gt;Biz yazılımcılar i&amp;ccedil;in &amp;ccedil;ile haline gelen request response &amp;ouml;rnek kodları a&amp;ccedil;ıklama&amp;nbsp;d&amp;ouml;k&amp;uuml;man vs gibi konuları swagger ile gayet basit ve kullanışlı bir hale getirebiliriz. Swagger ile ilgili daha bir &amp;ccedil;ok configuration bulunmakta. VS &amp;uuml;zerinden XML dosya generate ederek kodlarınızın &amp;uuml;zerinde bulunan yorumlardan yola &amp;ccedil;ıkarak api d&amp;ouml;k&amp;uuml;manı oluşturma gibi bir &amp;ccedil;ok &amp;ouml;zelliği&amp;nbsp;bulunmakta. Ayrıntılı bilgi i&amp;ccedil;in &lt;a href="http://swagger.io/"&gt;Swagger.io&lt;/a&gt;&amp;nbsp;Swashbuckle ile ilgili g&amp;uuml;ncel ve daha ayrıntılı bilgileri &lt;a href="https://github.com/domaindrivendev/Swashbuckle"&gt;bu linkten&lt;/a&gt; takip edebilirsiniz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;Not:&lt;/span&gt; Yukarıda basit anlamıyla swagger'ı anlatmaya &amp;ccedil;alıştım ancak yazının başında da&amp;nbsp;belirttiğim gibi&amp;nbsp;swagger.config dosyasını&amp;nbsp;doğru yorumlayabildikten sonra daha bir &amp;ccedil;ok &amp;ouml;zelliğini keşfedebilirsiniz.&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-03-22 22:38:00</pubDate>
+  <lastModified>2020-01-20 08:22:18</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>web-api-projelerine-swagger-ekleme</slug>
+  <tags>
+    <tag>swagger </tag>
+    <tag>web api swagger</tag>
+    <tag>documentation</tag>
+    <tag>web api documentation</tag>
+    <tag>web api swagger configuration</tag>
+    <tag>swagger kurulumu</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

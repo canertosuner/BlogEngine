@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Windows Phone Bing Map Kullanımı</title>
+  <description>Windows Phone Bing Map Kullanımı&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;
+Windows Phone&amp;rsquo</description>
+  <content>&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Windows Phone Bing Map Kullanımı&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Windows Phone&amp;rsquo;da i&amp;ccedil;erisinde harita kullanımını gerektiren bir uygulama geliştirmek istediğinizde Bing Map Apı lerinden kolaylıkla yararlanabilirsiniz. &amp;Ouml;ncelikle ilk yapmanız gereken geliştireceğiniz uygulama i&amp;ccedil;in Bing Map Key almanız. Bunun i&amp;ccedil;in ilk olarak&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&lt;a href="https://www.bingmapsportal.com/"&gt;https://www.bingmapsportal.com/&lt;/a&gt; sitesine giderek var olan Microsoft hesabı yada yeni hesap oluşturarak giriş yapmalısınız&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;sonrasında sol tarafta bulunan men&amp;uuml;den &lt;strong&gt;Create or view keys&lt;/strong&gt; &amp;lsquo;e tıklayıp&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;img src="/MyImage_Folder/qe21321.png" alt="" width="234" height="291" /&gt;&lt;br /&gt;&lt;!--[endif]--&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Gerekli yerleri doldurduktan sonra create key butonuna tıklıyoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;img src="/MyImage_Folder/createkey.jpg" alt="" width="300" height="230" /&gt;&lt;br /&gt;&lt;!--[endif]--&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Uygulama i&amp;ccedil;in bir adet Key oluşuturyoruz ve bu Key&amp;rsquo;i sonrasında uygulama i&amp;ccedil;erisinde Map kontrol&amp;uuml;n&amp;uuml;n i&amp;ccedil;erisine atıyoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;img src="/MyImage_Folder/key.jpg" alt="" width="300" height="154" /&gt;&lt;br /&gt;&lt;!--[endif]--&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Windows Phone uygulamamızın Design sayfasına bir adet &lt;strong&gt;Map&lt;/strong&gt; Kontrol&amp;uuml; atıyoruz ve &lt;span style="line-height: 115%; font-family: Consolas; color: red;" data-mce-mark="1"&gt;CredentialsProvider&lt;/span&gt;i&amp;ccedil;erisine oluşturmuş olduğumuz Key&amp;rsquo;i yazıyoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="line-height: 115%; font-family: Consolas;"&gt;&amp;nbsp; &lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;&amp;lt;&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: #a31515;"&gt;Maps&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;:&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: #a31515;"&gt;Map&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;"&gt; Name&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;="mymap"&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;"&gt; CredentialsProvider&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;="BinMapKey"&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;"&gt; Width&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;="480"&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;"&gt; Height&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;="300"&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;"&gt; VerticalAlignment&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;"&gt;="Bottom"/&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium; line-height: 115%; font-family: Consolas; color: blue;"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Gerekli işlemleri yaptıktan sonra uygulamamızı &amp;ccedil;alıştırıyoruz ve daha &amp;ouml;nceleri geliştirmiş olduğumda &lt;strong&gt;&lt;a href="http://www.windowsphone.com/tr-tr/store/app/son-depremler/267b5b52-c99a-438b-b409-3e12480d3fb4"&gt;Son Depremler&lt;/a&gt; &lt;/strong&gt;uygulamasında ki BingMap&amp;rsquo;in ekran g&amp;ouml;r&amp;uuml;nt&amp;uuml;s&amp;uuml; aşağıda olduğu gibidir.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;img src="/MyImage_Folder/bingmap_screen.png" alt="" width="195" height="293" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-06-02 19:33:00</pubDate>
+  <lastModified>2020-01-20 08:22:34</lastModified>
+  <raters>2</raters>
+  <rating>5</rating>
+  <slug>Windows-Phone-Bing-Map-Kullanımı</slug>
+  <tags>
+    <tag>bingmap</tag>
+    <tag>bing</tag>
+    <tag>map</tag>
+    <tag>windowsphone</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

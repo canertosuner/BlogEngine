@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Nancy Nedir (NancyFx)</title>
+  <description>Nancy .Net ve Mono için HTTP protokolü üzerinde çalışan uygulamalar geliştirmemizi sağlayan bir lightweight framework dür. Ruby de kullanılan Sinatra framework'ün den esinlenerek geliştirilmiştir ve az kaynak tüketmesinden dolayı performansıyla ön plana çıkmıştır.</description>
+  <content>&lt;p&gt;Nancy .Net ve Mono i&amp;ccedil;in HTTP protokol&amp;uuml; &amp;uuml;zerinde &amp;ccedil;alışan uygulamalar geliştirmemizi sağlayan bir lightweight framework d&amp;uuml;r. Ruby de kullanılan Sinatra framework'&amp;uuml;n den esinlenerek geliştirilmiştir ve az kaynak t&amp;uuml;ketmesinden dolayı performansıyla &amp;ouml;n plana &amp;ccedil;ıkmıştır.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/nancy-fx_blg_img.png" alt="" width="486" height="188" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Nancy developer'ları MVC(Model-View-Controller) pattern'nini veya başka herhangi bir pattern kullanmaya zorlamadan basit bir şekilde geliştirme yapmamıza olanak sağlar. Sebebi ise yukarıda bahsettiğimiz gibi sadece HTTP isteklerine cevap veren k&amp;uuml;&amp;ccedil;&amp;uuml;k ve orta &amp;ouml;l&amp;ccedil;ekli bir uygulama g&amp;ouml;revi g&amp;ouml;r&amp;uuml;yor olması.&lt;/p&gt;
+&lt;p&gt;MVC pattern'nini implement etmeye zorlamıyor derken edemeyeceğimiz anlamına da gelmemekte. Tıpkı ASP.Net MVC yada WebApi projelerinde olduğun gibi solution'da View klas&amp;ouml;r&amp;uuml; yaratarak projeniz i&amp;ccedil;in olan&amp;nbsp;.cshtml'leri bu dosya altında oluşturabilir veya Model klas&amp;ouml;r&amp;uuml; yaratarak projede kullandığınız request response yada viewModel sınıflarınızı bu klas&amp;ouml;r altına oluşturabilirsiniz. &amp;Ouml;zetle Nancy ASP.Net MVC ve Web Api'nin bir alternatifi diyebiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;En b&amp;uuml;y&amp;uuml;k &amp;ouml;zelliği ise IIS e bağımlı olmadan Windows'da &amp;ccedil;alışmakta kalmayıp&amp;nbsp;OSX, Linux hatta Raspberry Pi &amp;uuml;zerinde bile &amp;ccedil;alışabilmektedir. Raspberry Pi &amp;uuml;zerinden&amp;nbsp;ASP.Net MVC &amp;ccedil;alıştırmak nasıl olurdu acaba..&lt;/p&gt;
+&lt;p&gt;Nancy ile &amp;ouml;rnek bir api projesi yapalım. İlk olarak&amp;nbsp; vs. da Nancy_Sample adında bir console app. oluşturalım ve sonrasında aşağıdaki gibi nuget &amp;uuml;zerinden ihtiyacımız olan dll leri kuralım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2017/nancy_nuget_packages_list.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Nancy k&amp;uuml;t&amp;uuml;phanesini kullanabilmek i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;Nancy&lt;/strong&gt;&amp;nbsp;ve host edebilmemizi sağlayan&amp;nbsp;&lt;strong&gt;Nancy.Hosting.Self&lt;/strong&gt;&amp;nbsp;ve cshtml view'lerini kullanabilmemizi sağlayan&amp;nbsp;&lt;strong&gt;Nancy.Viewengines.Razor&lt;/strong&gt;&amp;nbsp;paketlerini projemize ekleyelim.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Sonrasında Program.cs i&amp;ccedil;erisine aşağıdaki gibi nancy konfigurasyonlarımızı yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;class Program
+{
+    private readonly NancyHost _nancy;
+
+    public Program()
+    {
+        var uri = new Uri("http://localhost:7880");
+        var hostConfigs = new HostConfiguration { UrlReservations = { CreateAutomatically = true } };
+        _nancy = new NancyHost(uri, new DefaultNancyBootstrapper(), hostConfigs);
+    }
+
+    private void Start()
+    {
+        _nancy.Start();
+        Console.WriteLine($"Started listenig address {"http://localhost:7880"}");
+        Console.ReadKey();
+        _nancy.Stop();
+    }
+
+    static void Main(string[] args)
+    {
+        var p = new Program();
+        p.Start();
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Yukarıdaki kod bloğunda Nancy bizim i&amp;ccedil;in host edilen makinada&amp;nbsp;&lt;a href="http://localhost:7880/"&gt;http://localhost:7880&lt;/a&gt;&amp;nbsp;portunu reserv ederek dinlemeye başlayacaktır. Bu adrese&amp;nbsp;gelen http isteklerini ilgili route'a y&amp;ouml;nlendirecektir.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Browser &amp;uuml;zerinden bu adrese gittiğimizde aşağıdaki gibi bir ekran ile karşılaşırız.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/nancy_host_first_page.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;404 Not Found sayfasını almamızın sebebi projemizde hen&amp;uuml;z endpoint'leri tanımlayacağımız&amp;nbsp;NancyModule class'ından t&amp;uuml;reyen bir Module olmaması.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Hemen projemize&amp;nbsp;&lt;strong&gt;SampleModule&lt;/strong&gt;&amp;nbsp;adında&amp;nbsp;&lt;strong&gt;NancyModule&lt;/strong&gt;&amp;nbsp;class'ından&amp;nbsp;inherit alan bir class oluşturalım ve i&amp;ccedil;erisine httpGet isteği alan bir end-point tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class SampleModule : NancyModule
+{
+    public SampleModule()
+    {
+        Get["/"] = parameters =&amp;gt; "Que pasa primo !";
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Projeyi tekrar run edip browser'dan kontrol ettiğimizde aşağıdaki gibi Get metodunun return ettiği response'u g&amp;ouml;receğiz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/nancy_hello_worl_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Şimdi birde HttpPost &amp;ouml;rneği yapalım. Request olarak 2 sayı alan ve geriye bu 2 sayının toplamını return eden bir&amp;nbsp;end-point yazalım. Request ve Response modellerimiz aşağıdaki gibi olacak şekilde oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class SumRequestModel
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+}
+
+public class SumResponseModel
+{
+    public int Result { get; set; }
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;SampleModule i&amp;ccedil;erisine yazacağımız end-point ise aşağıdaki gibi g&amp;ouml;nderilen request parametrelerine g&amp;ouml;re geriye toplamlarını d&amp;ouml;necektir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class SampleModule : NancyModule
+{
+    public SampleModule()
+    {
+        Post["/sum"] = parameters =&amp;gt;
+        {
+            var request = this.Bind&amp;lt;SumRequestModel&amp;gt;();
+
+            return new SumResponseModel { Result = request.X + request.Y };
+        };
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Postman &amp;uuml;zerinden aşağıdaki gibi bir httpPost request'inde bulunduğumuzda request olarak g&amp;ouml;nderilen parametrelere g&amp;ouml;re response da toplamlarını d&amp;ouml;nmektedir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/nancy_httppost_img_postman.png" alt="" width="679" height="358" /&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Yukarıda yaptığımız &amp;ouml;rnek ile Nancy kullanarak&amp;nbsp;basit bir api nasıl geliştirebiliriz inceledik. Yazının başında da s&amp;ouml;ylediğimiz &amp;uuml;zre Nancy ile geriye View de yani html sayfaları da return edebiliriz.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&amp;Ouml;rnek olarak&amp;nbsp;solution'da View adında bir klas&amp;ouml;r ve i&amp;ccedil;erisine&amp;nbsp;&lt;strong&gt;Home&lt;/strong&gt;&amp;nbsp;adında&amp;nbsp;&lt;strong&gt;.cshml&lt;/strong&gt;&amp;nbsp;uzantılı bir htmlFile oluşturalım. İ&amp;ccedil;erisine de aşağıdaki gibi body tagleri arasına basit bir form input'ları ekleyelim.&lt;/p&gt;
+&lt;pre class="brush:html;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;lt;!DOCTYPE html&amp;gt;
+
+&amp;lt;html lang="en" xmlns="http://www.w3.org/1999/xhtml"&amp;gt;
+&amp;lt;head&amp;gt;
+    &amp;lt;meta charset="utf-8" /&amp;gt;
+    &amp;lt;title&amp;gt;&amp;lt;/title&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body&amp;gt;
+    &amp;lt;form method="post" name="myForm"&amp;gt;
+        First name: &amp;lt;input type="text" name="fname"&amp;gt;&amp;lt;br&amp;gt;
+        Last name: &amp;lt;input type="text" name="lname"&amp;gt;&amp;lt;br&amp;gt;
+        &amp;lt;input type="button" value="Send"&amp;gt;
+    &amp;lt;/form&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Oluşturduğumuz bu sayfaya solution'da sağ tıklayıp Properties'den&amp;nbsp;&lt;strong&gt;Copy to Output Directory&lt;/strong&gt;&amp;nbsp;&amp;ouml;zelliğini&lt;strong&gt;&amp;nbsp;Copy always&lt;/strong&gt;&amp;nbsp;olarak değiştirmemiz gerekmekte aksi taktirde proje run edildiğinde Home.cshtml&amp;nbsp;dosyasına erişemiyor.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Yukarıdakileri yaptıktan sonra browser'dan&amp;nbsp;&lt;a href="http://localhost:7880/home"&gt;http://localhost:7880/home&lt;/a&gt;&amp;nbsp;adresine&amp;nbsp;bir istek geldiğinde Home.cshtml sayfamıza y&amp;ouml;nlendirecek kodu yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class SampleModule : NancyModule
+{
+    public SampleModule()
+    {
+        Get["/home"] = parameters =&amp;gt;
+        {
+            return View["View/Home.cshtml"];
+        };
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Projeyi run edip browser'dan&amp;nbsp;&lt;a href="http://localhost:7880/home"&gt;http://localhost:7880/home&lt;/a&gt;&amp;nbsp;adresine gittiğimizde bizi Home.cshtml sayfasına y&amp;ouml;nlendirip ekrana&amp;nbsp;formu&amp;nbsp;yazdıracaktır.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/nancy_view_form_html.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&lt;strong&gt;&amp;Ouml;zetle;&lt;/strong&gt;&amp;nbsp;Nancy Microsoft tarafından ASP.Net'in core dll'i olan System.Web'e bağımlı olmadan &amp;ouml;zg&amp;uuml;rce geliştirdiği şahane bir framework d&amp;uuml;r. Genelde &amp;ccedil;ok b&amp;uuml;y&amp;uuml;k &amp;ouml;l&amp;ccedil;ekli projelerde tercih edilmese de ihtiya&amp;ccedil; olduğunda bizleri &amp;ccedil;ok fazla iş y&amp;uuml;k&amp;uuml;nden kurtararak ve de bence en &amp;ouml;nemlisi IIS'e bağlı kalmadan belli bir g&amp;ouml;reve hizmet eden k&amp;uuml;&amp;ccedil;&amp;uuml;k &amp;ouml;l&amp;ccedil;ekli&amp;nbsp;lightweight uygulamalar geliştirmemize olanak sağlar. Daha fazla bilgi i&amp;ccedil;in&amp;nbsp;&lt;a href="http://nancyfx.org/"&gt;nancyfx.org&lt;/a&gt;&amp;nbsp;sayfasına g&amp;ouml;z atabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-10-13 21:24:00</pubDate>
+  <lastModified>2020-01-20 08:22:15</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>nancy-nedir-nancyfx</slug>
+  <tags>
+    <tag>nancy nedir</tag>
+    <tag>nancy projesi</tag>
+    <tag>nancy mvc</tag>
+    <tag>nancy html</tag>
+    <tag>nancy cshtml</tag>
+    <tag>nancyfx nedir</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>27e5276b-0227-42f3-a037-9d3992022f96</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

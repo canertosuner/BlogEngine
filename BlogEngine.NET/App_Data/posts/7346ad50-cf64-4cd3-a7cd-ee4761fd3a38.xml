@@ -1,0 +1,325 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core JSON Web Token Kullanımı</title>
+  <description>Bu yazımızda asp.net core uygulamalarında token based&amp;nbsp;authentication nedir, nasıl sağlanır bir </description>
+  <content>&lt;p&gt;Bu yazımızda asp.net core uygulamalarında token based&amp;nbsp;authentication nedir, nasıl sağlanır bir &amp;ouml;rnek &amp;uuml;zerinden inceleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;ProductApi adında bir service projenizin olduğunu d&amp;uuml;ş&amp;uuml;n&amp;uuml;n ve bu service &amp;uuml;zerinde product tablonuz i&amp;ccedil;in CRUD işlemlerini yapan belli endpoint'ler sağladığınızı varsayalım. Herhangi bir g&amp;uuml;venlik kontrol&amp;uuml;&amp;nbsp;bulunmayan&amp;nbsp;ProductApi'nize call yapmak isteyen bir kişi geliştirme yaparken doğrudan erişebiliyor. Peki ama &amp;ccedil;ok basit bir şekilde d&amp;uuml;ş&amp;uuml;necek olursak&amp;nbsp;service url'lerini bulan herhangi bir kişi servisinizi manip&amp;uuml;le etmek adına CRUD metotlarınıza doğrudan call yapabilir yada bazı metotları call edebilir bazılarını edemez vs. gibi riskler barındırmaktadır.&lt;/p&gt;
+&lt;p&gt;Bu gibi durumlara &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak token-based&amp;nbsp;authentication y&amp;ouml;ntemleri geliştirilmiştir.&lt;/p&gt;
+&lt;p&gt;Token based&amp;nbsp;authentication'ın genel konsepti olduk&amp;ccedil;a basit;&amp;nbsp;kullanıcıdan bir username ve password vs. gibi bir bilgi alıp bu bilgiyi server'a g&amp;ouml;ndermek ve eğer valid bir username ve password ise karşılığında bir token d&amp;ouml;n&amp;uuml;p o kullanıcının artık token expire oluncaya dek b&amp;uuml;t&amp;uuml;n api işlemlerini o token &amp;uuml;zerinden yapması beklenir.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/jwt-img_1.png" alt="" width="709" height="368" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;JSON Web Token Nedir Nasıl Kullanılır;&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Base64 olarak oluşturulmuş 3 ayrı b&amp;ouml;l&amp;uuml;mden oluşur;&lt;/p&gt;
+&lt;p&gt;HEADER.PAYLOAD.SIGNATURE&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Header&lt;/strong&gt;&lt;/span&gt;&amp;nbsp;b&amp;ouml;l&amp;uuml;m&amp;uuml;nde; hangi token t&amp;uuml;r&amp;uuml;n&amp;uuml;n ve şifreleme algoritmasının kullanıldığı bilgisi yer alır.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Payload&lt;/strong&gt;&lt;/span&gt;; uygulama bazlı bilgilerin&amp;nbsp;yer aldığı(claim,userId vs.) yani uygulamaya &amp;ouml;zel b&amp;ouml;l&amp;uuml;md&amp;uuml;r.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Signature&lt;/strong&gt;&lt;/span&gt;&amp;nbsp;ise adından da anlaşıldığı gibi server tarafından &amp;uuml;retilen signature'ın bulunduğu b&amp;ouml;l&amp;uuml;md&amp;uuml;r.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2018/jwt_headerpayloadsignature.jpeg" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Şimdi ise bir asp.net core projesinde JWT nasıl entegre edilir ve kullanılır bunu inceleyelim.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İlk olarak aşağıdaki gibi&amp;nbsp;&lt;strong&gt;Startup.cs&lt;/strong&gt;&amp;nbsp;bulunan&amp;nbsp;&lt;strong&gt;ConfigureServices&lt;/strong&gt;&amp;nbsp;metodu i&amp;ccedil;erisinde uygulama boyunca ge&amp;ccedil;erli olan JWT Authentication middleware konfigurasyonlarını yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(jwtBearerOptions =&amp;gt;
+    {
+        jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateActor = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = Configuration["Issuer"],
+            ValidAudience = Configuration["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["SigningKey"]))
+        };
+    });
+    services.AddMvc();
+}&lt;/pre&gt;
+&lt;p&gt;Middleware tanımlamasını yukarıdaki gibi yaptıktan sonra bunu builder'a eklememiz gerekmekte. Bunun i&amp;ccedil;inde yine&amp;nbsp;&lt;strong&gt;Startup.cs&lt;/strong&gt;&amp;nbsp;de&amp;nbsp;&lt;strong&gt;Configure&lt;/strong&gt;&amp;nbsp;metodu i&amp;ccedil;erisinde aşağıdaki tanımlamayı yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    app.UseAuthentication();
+    app.UseMvc();
+}&lt;/pre&gt;
+&lt;p&gt;Sırada JWT generate edecek olan endpoint'i oluşturma var. Bunun i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;TokenController&lt;/strong&gt;&amp;nbsp;adında bir controller oluşturalım ve i&amp;ccedil;erisine&amp;nbsp;kullanıcıyı validate ederken kullanılacak olan bilgilerin bulunduğu request modeli alıp geriye tokenResponse d&amp;ouml;nen bir endpoint oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[AllowAnonymous]
+[HttpPost]
+[Route("token")]
+public IActionResult Post([FromBody]LoginRequest request)
+{
+    if (ModelState.IsValid)
+    {
+        var user = _userService.Get(request.UserName, request.Password); 
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, request.Username),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var token = new JwtSecurityToken
+        (
+            issuer: _configuration["Issuer"], //appsettings.json i&amp;ccedil;erisinde bulunan issuer değeri
+            audience: _configuration["Audience"],//appsettings.json i&amp;ccedil;erisinde bulunan audince değeri
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(30), // 30 g&amp;uuml;n ge&amp;ccedil;erli olacak
+            notBefore: DateTime.UtcNow,
+            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SigningKey"])),//appsettings.json i&amp;ccedil;erisinde bulunan signingkey değeri
+                    SecurityAlgorithms.HmacSha256)
+        );
+        return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+    }
+    return BadRequest();
+}
+
+public class LoginRequest
+{
+	public string UserName {get;set;}
+	public string Password {get;set;}
+}&lt;/pre&gt;
+&lt;p&gt;JWT based&amp;nbsp;authentication yapısı projemiz i&amp;ccedil;in hazır. Sırada bunu test etmek var. Bunun i&amp;ccedil;in asp.net core projesi oluşturulurken default gelen ValuesController.cs i&amp;ccedil;erisindeki Get metodunu kullanarak testimizi yapalım. Controller seviyesinde&amp;nbsp;&lt;strong&gt;[Authorize]&lt;/strong&gt;&amp;nbsp;atrtribute'&amp;uuml; kullanarak&amp;nbsp;authentication zorunlu olduğunu belirtebiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Authorize]
+[Route("api/[controller]")] 
+public class ValuesController : Controller
+{
+    [HttpGet]
+    public IEnumerable&amp;lt;string&amp;gt; Get()
+    {
+        return new string[] { "value1", "value2" };
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Postman kullanarak projemizi test edelim.&lt;/p&gt;
+&lt;p&gt;İlk olarak token almadan&amp;nbsp;&lt;strong&gt;ValuesController&lt;/strong&gt;'a HttpGet request'inde bulunalım&amp;nbsp;ancak token bilgisi set etmediğimizden&amp;nbsp;bize geriye successful bir response (http200) d&amp;ouml;nmemesi gerekir. Aşağıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre response olarak 401 yani Unauthorized cevabı aldık.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/jwt_api_img_pstmn_1.png" alt="" width="705" height="277" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Şimdi ise&amp;nbsp;&lt;strong&gt;TokenController&lt;/strong&gt;&amp;nbsp;da bulunan metoda request atarak token&amp;nbsp;response'unu aşağıdaki gibi alalım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/jwt_api_img_pstmn_3.png" alt="" width="705" height="391" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Almış olduğumuz tokenResponse'u g&amp;ouml;ndereceğimiz request'in Authorization header'ına set ederek tekrardan ValuesController'a istekte bulunduğumuzda bu sefer http200 ile geriye value array'ini d&amp;ouml;nen cevabı almış olacağız.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/jwt_api_img_pstmn_5.png" alt="" width="705" /&gt;&lt;/p&gt;
+&lt;p&gt;JWT'nin kullanımı &amp;ouml;zetle bu şekilde. Sizlerde geliştirdiğiniz bir api projenizi dış d&amp;uuml;nyaya a&amp;ccedil;arken token-based&amp;nbsp;authentication yapmak istediğinizde&amp;nbsp;implementasyonu&amp;nbsp;olduk&amp;ccedil;a basit olan basit&amp;nbsp;jwt den faydalanabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-05-03 21:40:00</pubDate>
+  <lastModified>2020-02-25 17:12:14</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>asp-net-core-json-web-token-kullanimi</slug>
+  <tags>
+    <tag>json web token nedir</tag>
+    <tag>asp.net core jwt</tag>
+    <tag>jwt kullanımı</tag>
+    <tag>jwt nedir</tag>
+    <tag>as.net core token</tag>
+  </tags>
+  <comments>
+    <comment id="6fa967ff-c4b1-48a2-9982-256e29e1eb2e" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-09-21 06:29:20</date>
+      <author>Ilhan</author>
+      <email>ilhandemirtepe@gmail.com</email>
+      <country />
+      <ip>5.47.247.9</ip>
+      <avatar />
+      <content>Merhaba hocam  cok guzel anlatmissiniz.   _userService     yazmissiniz  token controller  içinde  .bu degiskenmi .  Bu nerde geliyor.   Bende hata verdi. Merak ettim. Tsk ederim
+
+</content>
+    </comment>
+    <comment id="fb4da469-44f7-40bb-9fde-7f10daf0e9e6" parentid="6fa967ff-c4b1-48a2-9982-256e29e1eb2e" approved="True" spam="False" deleted="False">
+      <date>2018-09-24 06:39:11</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba, değerli yorumun için teşekkürler. O service layer&amp;#39;ınızda bulunan herhangi bir service&amp;#39;in instance&amp;#39;ı aslında, business layer olarakda düşünebilirsiniz örnek olması açısından oluşturmuştum.</content>
+    </comment>
+    <comment id="634c87d7-6487-49ad-add4-6a5eedf32422" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-10-01 13:21:51</date>
+      <author>Eray Han</author>
+      <email>erayhan41@yandex.com</email>
+      <country />
+      <ip>188.119.57.181</ip>
+      <avatar />
+      <content>hocam çok teşekkür ederim sırf su konuyu öğrenmek için udemy den bir ders almıştım orda token oluşturma yı göstermişti ancak token ile işlem yapmamıştı class&amp;#39;ın başına sadece [Authorize] eklemem yetiyormuş çok sağolun</content>
+    </comment>
+    <comment id="91fa8310-025f-4d4a-a3ac-aa84fca32ffd" parentid="634c87d7-6487-49ad-add4-6a5eedf32422" approved="True" spam="False" deleted="False">
+      <date>2018-10-01 15:56:27</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.161.60</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumun için teşekkürler :)</content>
+    </comment>
+    <comment id="7e0fbc92-286b-4048-b23c-9f8e806e98c1" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-11-12 13:20:34</date>
+      <author>Abdurrahman</author>
+      <email>isikabdurrahman@yandex.com</email>
+      <country />
+      <ip>95.2.20.115</ip>
+      <avatar />
+      <content>Selam Cihan, çok faydalı bir içerik olmuş yalnız _configuration[&amp;quot;SigningKey&amp;quot;] değerini nasıl aldığını da gösterebilirsen (hem controller&amp;#39;da hem startup&amp;#39;da) eksikliği gidermiş olursun bence..
+Kolay gelsin !</content>
+    </comment>
+    <comment id="aef073ab-0574-4c1d-881a-35c5c8dfa7c3" parentid="7e0fbc92-286b-4048-b23c-9f8e806e98c1" approved="True" spam="False" deleted="True">
+      <date>2018-11-19 05:49:53</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>31.223.36.208</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Selam, Caner demek istedin heralde.
+.net core da yenisin sanırsam, Configuration sınıfı .net core uygulamalarında default olarak gelen kütüphane sınıflarından biridir ve uygulama conf. source&amp;#39;larına erişmek gibi çeşitli işler için kullanılır.
+Kodlarda da belirtiğim gibi SigningKey veya diğer değişkenler appSettings.json içerisinde değerlerine kendin karar verebilceğin &amp;quot;ışık&amp;quot; yada &amp;quot;appDur&amp;quot; gibi değerler dahi set edebileceğin değişkenlerdir.
+Daha fazla bilgi için aşağıdaki linke göz atabilirsin.
+
+https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-2.1</content>
+    </comment>
+    <comment id="2edd11bc-003e-44f6-afeb-5bfcbc7e462c" parentid="7e0fbc92-286b-4048-b23c-9f8e806e98c1" approved="True" spam="False" deleted="True">
+      <date>2018-11-19 05:51:13</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>31.223.36.208</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Selam, Caner demek istedin heralde.
+.net core da yenisin sanırsam, Configuration sınıfı .net core uygulamalarında default olarak gelen kütüphane sınıflarından biridir ve uygulama conf. source&amp;#39;larına erişmek gibi çeşitli işler için kullanılır.
+Kodlarda da belirtiğim gibi SigningKey veya diğer değişkenler appSettings.json içerisinde değerlerine kendin karar verebilceğin &amp;quot;ışık&amp;quot; yada &amp;quot;appDur&amp;quot; gibi değerler dahi set edebileceğin değişkenlerdir. Bu değerleri set ederek hem startup hemde controller içerisinde yaşadığın eksiklikleri giderebilirsin.
+
+Daha fazla bilgi için aşağıdaki linke göz atabilirsin.
+
+https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-2.1</content>
+    </comment>
+    <comment id="e802d51e-af4b-4627-8570-e04c68326095" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-01-23 13:54:21</date>
+      <author>asdd</author>
+      <email>adsada@asdasdad.com</email>
+      <country />
+      <ip>195.142.101.194</ip>
+      <avatar />
+      <content>hello dude how you been out there?!</content>
+    </comment>
+    <comment id="9c49190a-420b-4182-9a7e-a57d11f69d2e" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-04-21 21:10:45</date>
+      <author>Emre</author>
+      <email>tayyipemreornek@gmail.com</email>
+      <country />
+      <ip>85.106.40.181</ip>
+      <avatar />
+      <content>Hocam JWTde yeniyim. Bu örneği tüm dosyaları ile paylaşabilir misiniz? _userservice ve _configuration kısmını tam olarak anlamadım.</content>
+    </comment>
+    <comment id="5be525cf-6fac-4304-b05a-6a975937a630" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-04-23 07:17:48</date>
+      <author>Furkan</author>
+      <email>furrknyilmaz@gmail.com</email>
+      <country />
+      <ip>95.70.166.95</ip>
+      <avatar />
+      <content>Hocam merhaba, ben sistemde oturum açmış kullanıcının id sini almak istiyorum.
+Örneğin bir içerik eklenirken ekleyen kişinin id sinide eklemek istiyorum. Bu id ye nasıl ulaşabilirim ?</content>
+    </comment>
+    <comment id="95cdfe55-d755-4088-9840-73c4048efebf" parentid="9c49190a-420b-4182-9a7e-a57d11f69d2e" approved="True" spam="False" deleted="False">
+      <date>2019-05-20 07:18:16</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>UserService dummy olarak yazdığım bir sınıf, kısaca içerisinde kullanıcı bilgisini aldığın bir metot olan sınıf gibi düşünebilirsin
+_configuration ise .net core&amp;#39;un kendi configurationSource sınıfı. Kısaca appSettings değerlerine erişmeni sağlar</content>
+    </comment>
+    <comment id="09845767-c233-4450-9cb5-88ca9bd37c42" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-06-13 13:22:29</date>
+      <author>Mustafa Aktepe</author>
+      <email>mustafa.aktepe@gmail.com</email>
+      <country />
+      <ip>88.255.154.173</ip>
+      <avatar />
+      <content>Teşekkürler. Faydalı bir yazı olmuş.</content>
+    </comment>
+    <comment id="c7139a91-8e8b-4b29-914b-141ca783f55a" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-06-20 20:48:08</date>
+      <author>Gündoğdu</author>
+      <email>ibrahim.gundogdu@gmail.com</email>
+      <country />
+      <ip>212.252.82.170</ip>
+      <avatar />
+      <content>Caner Bey.
+_userservice kısmı nı da dummy değilde gerçekten bir örnek mahiyetinde yapsaydınız güzel olurdu. ilk başlayanlar için bu eksik kalmış gibi olmuş. bu kadar yazmışsınız elinize sağlık örnek proje dosyası linki verseydiniz tam süper olurdu.
+teşekkürler</content>
+    </comment>
+    <comment id="9be6cd65-157b-4944-ad0b-6f2300886e08" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-07-12 08:47:06</date>
+      <author>Burak Ç</author>
+      <email>burakcatikkas@hotmail.com</email>
+      <country />
+      <ip>176.54.72.22</ip>
+      <avatar />
+      <content>Merhaba,
+Yazılmış olan bir web api&amp;#39;yi C#&amp;#39;dan çağırmak için apikey ve secretkey bilgileri mevcut.Apikey ve secretkey bilgilerini birleştirip bearer&amp;lt;token&gt; bilgilerine erişebiliyorum.(token bilgisine base64encode.org sitesinden birleştirip erişebiliyorum)Web apiyi çağırırken uygulama içerisinde kullanıcı adı ve şifre yerine apikey ve secretkey tanımlayabilir miyim?Konuyla ilgili yardımcı olur musunuz?
+</content>
+    </comment>
+    <comment id="0882f279-5408-451f-8204-36e02e72a430" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-07-20 09:03:22</date>
+      <author>Özkan</author>
+      <email>ozpinar09@gmail.com</email>
+      <country />
+      <ip>85.105.188.174</ip>
+      <avatar />
+      <content>Hocam merhaba ben bu _userservice kısmını çözemiyorum. Yardımcı olabilir.</content>
+    </comment>
+    <comment id="d6434b63-4122-4fdb-ad92-2bbfd306abe4" parentid="5be525cf-6fac-4304-b05a-6a975937a630" approved="True" spam="False" deleted="False">
+      <date>2019-08-16 11:45:42</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba,
+Aslında sana kalmış, bu bilgiyi kullanıyı login yaptıktan sonra token(jwt yada diğer türler olabilir) içerisinde saklayabilirsin ve ihtiyacın olduğunda da kullanabilirsin.</content>
+    </comment>
+    <comment id="e99a364d-b6db-4648-86e6-78502ba7c01e" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-10-26 14:09:08</date>
+      <author>FatihEngin</author>
+      <email>fatihengingm@gmail.com</email>
+      <country />
+      <ip>159.146.62.11</ip>
+      <avatar />
+      <content>Merhabalar,
+Proje IIS Express de debug ederken çok güzel çalışıyor ama aynı kodu Publish ile IIS de servis edildiğinde [AllowAnonymous] işaretli metodlara 404 Not Found cevabı veriyor</content>
+    </comment>
+    <comment id="f243afc0-893c-4547-b157-341df24e32c8" parentid="e99a364d-b6db-4648-86e6-78502ba7c01e" approved="True" spam="False" deleted="False">
+      <date>2019-11-04 05:08:59</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba kullanmış olduğun framework ile ilgili. Hangi versiyonu kullanıyorsan nuget üzerinden search etmeyi deneyebilirsin.</content>
+    </comment>
+    <comment id="656ee6dc-4183-45f9-8eb9-db1124bc5a21" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2020-01-31 14:52:56</date>
+      <author>Burak</author>
+      <email>gunes.burak@outlook.com.tr</email>
+      <country />
+      <ip>78.163.25.40</ip>
+      <avatar />
+      <content>Selamlar,
+appsettings.js içerisinde Issuer,Audience,SigningKey değerlerini nasıl/neye göre tanımlamamız gerekiyor?</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+  </categories>
+  <notifications>
+    <email>ilhandemirtepe@gmail.com</email>
+    <email>tayyipemreornek@gmail.com</email>
+  </notifications>
+</post>

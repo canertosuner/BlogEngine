@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Chain of Responsibility Pattern Nedir</title>
+  <description>http://safakunel.blogspot.com.tr/2013/12/c-chain-of-responsibility-pattern.html</description>
+  <content>&lt;p&gt;Chain of Responsibility pattern&amp;nbsp;behavioral patterns gurubuna&amp;nbsp;ait olan ve &amp;ouml;z&amp;uuml;nde birbirini takip eden iş dizisine ait process'leri redirect ve handle etmek&amp;nbsp;yada istekte bulunan-confirm eden s&amp;uuml;re&amp;ccedil;leri i&amp;ccedil;in&amp;nbsp;&amp;ccedil;&amp;ouml;z&amp;uuml;m olarak ortaya &amp;ccedil;ıkmış bir tasarım desendir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/chain_of_Resp_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Yukarıda tanım yaparken birbirini takip eden iş dizesinden kasıt birbirlerine&amp;nbsp;Loosly Coupled bir şekilde zincir gibi bağlı olan s&amp;uuml;re&amp;ccedil;leri process etmek i&amp;ccedil;in kullanabileceğimiz bir pattern dir.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Bir &amp;ouml;rnek ile ele alacak olursak; veznede &amp;ccedil;alışan bir kişi i&amp;ccedil;in g&amp;uuml;nl&amp;uuml;k&amp;nbsp;nakit para &amp;ccedil;ekim miktarı 40 bin TL olan bir banka d&amp;uuml;ş&amp;uuml;nelim ve bu bankaya gelen bir m&amp;uuml;şteri veznede bulunan kişiden 240 bin TL para &amp;ccedil;ekmek istediğini s&amp;ouml;yledi. Banka kuralları gereği bu işlemin sırasıyla veznedar, y&amp;ouml;netici, m&amp;uuml;d&amp;uuml;r ve b&amp;ouml;lge sorumlusu tarafından sırasıyla onaylaması&amp;nbsp;gerekmekte. Bakacak olduğumuzda zincir&amp;nbsp;şeklinde birbirine bağlı olan bir onay yapısı bulunmakta.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;Akış olarak &amp;ouml;zetleyecek olursak;&lt;/span&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li style="text-align: left;"&gt;&amp;nbsp;M&amp;uuml;şteri 480 bin TL lik para &amp;ccedil;ekme isteğini veznedar'a iletir.&lt;/li&gt;
+&lt;li style="text-align: left;"&gt;&amp;nbsp;Veznedar bu isteği alır ve kontrol eder eğer onaylayabileceği bir tutar ise onaylar, onaylayabileceği bir tutar değilse y&amp;ouml;neticisine g&amp;ouml;nderir,&lt;/li&gt;
+&lt;li style="text-align: left;"&gt;&amp;nbsp;Y&amp;ouml;netici isteği alır &amp;nbsp;onaylayabileceği bir tutar değilse m&amp;uuml;d&amp;uuml;re iletir,&lt;/li&gt;
+&lt;li style="text-align: left;"&gt;&amp;nbsp;M&amp;uuml;d&amp;uuml;r kontrol eder eğer&amp;nbsp;onaylayabileceği bir tutar değilse b&amp;ouml;lge sorumlusunun onayına g&amp;ouml;nderir,&lt;/li&gt;
+&lt;li style="text-align: left;"&gt;&amp;nbsp;B&amp;ouml;lge sorumlusu onaylar ve para&amp;nbsp;m&amp;uuml;şteriye verilir.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p style="text-align: left;"&gt;Yukarıda bahsettiğimiz bu &amp;ouml;rneğimizi&amp;nbsp;Chain of Responsibility pattern uygulayarak geliştirelim.&lt;/p&gt;
+&lt;p&gt;İlk olarak Withdraw adında domain model tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   public class Withdraw
+    {
+        public string CustomerId { get; }
+        public decimal Amount { get; }
+        public string CurrencyType { get; }
+        public string SoruceAccountId { get; }
+
+        public Withdraw(string customerId, decimal amount, string currencyType, string soruceAccountId)
+        {
+            CustomerId = customerId;
+            Amount = amount;
+            CurrencyType = currencyType;
+            SoruceAccountId = soruceAccountId;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Sornasında abstract bir Employee sınıfı tanımlayalım ve i&amp;ccedil;erisinde aşağıdaki gibi property'lerinı yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public abstract class Employee
+    {
+        protected Employee NextApprover;
+
+        public void SetNextApprover(Employee supervisor)
+        {
+            this.NextApprover = supervisor;
+        }
+
+        public abstract void ProcessRequest(Withdraw req);
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda&amp;nbsp;bulunan NextApprover isimli property o sınıfa ait kişinin y&amp;ouml;neticisi olarak atanan kişidir ve ProcessRequest metodunda ilgili condition'ı yazıp sırasıyla NextApprover'ları call edeceğiz.&lt;/p&gt;
+&lt;p&gt;Veznedar, Yonetici, Mudur ve BolgeSorumlusu sınıfları yukarıda tanımladığımız Employee sınıfından inherit olacak şekilde aşağıdaki gibi oluşturalım.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class Veznedar : Employee
+    {
+        public override void ProcessRequest(Withdraw req)
+        {
+            if (req.Amount &amp;lt;= 40000)
+            {
+                Console.WriteLine("{0} tarafından para &amp;ccedil;ekme işlemi onaylandı #{1}",
+                    this.GetType().Name, req.Amount);
+            }
+            else if (NextApprover != null)
+            {
+                Console.WriteLine("{0} TL işlem tutarı {1} max. limitini aştığından işlem y&amp;ouml;neticiye g&amp;ouml;nderildi.", req.Amount, this.GetType().Name);
+
+                NextApprover.ProcessRequest(req);
+            }
+        }
+    }
+
+    public class Yonetici : Employee
+    {
+        public override void ProcessRequest(Withdraw req)
+        {
+            if (req.Amount &amp;lt;= 70000)
+            {
+                Console.WriteLine("{0} tarafından para &amp;ccedil;ekme işlemi onaylandı #{1} TL",
+                    this.GetType().Name, req.Amount);
+            }
+            else if (NextApprover != null)
+            {
+                Console.WriteLine("{0} TL işlem tutarı {1} max. limitini aştığından işlem y&amp;ouml;neticiye g&amp;ouml;nderildi.", req.Amount, this.GetType().Name);
+
+                NextApprover.ProcessRequest(req);
+            }
+        }
+    }
+
+    public class Mudur : Employee
+    {
+        public override void ProcessRequest(Withdraw req)
+        {
+            if (req.Amount &amp;lt;= 150000)
+            {
+                Console.WriteLine("{0} tarafından para &amp;ccedil;ekme işlemi onaylandı #{1} TL",
+                    this.GetType().Name, req.Amount);
+            }
+            else if (NextApprover != null)
+            {
+                Console.WriteLine("{0} TL işlem tutarı {1} max. limitini aştığından işlem y&amp;ouml;neticiye g&amp;ouml;nderildi.", req.Amount, this.GetType().Name);
+
+                NextApprover.ProcessRequest(req);
+            }
+        }
+    }
+
+    public class BolgeSorumlusu : Employee
+    {
+        public override void ProcessRequest(Withdraw req)
+        {
+            if (req.Amount &amp;lt;= 750000)
+            {
+                Console.WriteLine("{0} tarafından para &amp;ccedil;ekme işlemi onaylandı #{1} TL",
+                    this.GetType().Name, req.Amount);
+            }
+            else
+            {
+                throw new Exception(
+                    $"Limit banka g&amp;uuml;nl&amp;uuml;k işlem limitini aştığından para &amp;ccedil;ekme işlemi #{req.Amount} TL onaylanmadı.");
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Son olarak ise domain modeli initialize&amp;nbsp;edip chain'i oluşturup process metodunu call edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    static void Main(string[] args)
+    {
+        var withdraw = new Withdraw("a6e193dc-cdbb-4f09-af1a-dea307a9ed15", 480000, "TRY", "TR681223154132432141412");
+ 
+        Employee veznedar = new Veznedar();
+        Employee yonetici = new Yonetici();
+        Employee mudur = new Mudur();
+        Employee bolgeSorumlusu = new BolgeSorumlusu();
+ 
+        veznedar.SetNextApprover(yonetici);
+        yonetici.SetNextApprover(mudur);
+        mudur.SetNextApprover(bolgeSorumlusu);
+ 
+ 
+        withdraw.Process(veznedar);
+ 
+        Console.ReadKey();
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki gibi 480000 TL lik bir işlem i&amp;ccedil;in istekte bulunduğumuzda console &amp;ccedil;ıktısı aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/chain_of_Resp_Console_img.png" alt="" width="834" height="222" /&gt;&lt;/p&gt;
+&lt;p&gt;İşlem sırasıyla veznedar, y&amp;ouml;netici, m&amp;uuml;d&amp;uuml;r b&amp;ouml;lge sorumlusunun &amp;ouml;n&amp;uuml;nde d&amp;uuml;şecektir. Son olarak ise b&amp;ouml;lge sorumlusunun onaylayabileceği bir tutar olduğundan onay verip banka m&amp;uuml;şterisine &amp;ouml;deme işlemini yapacaktır.&lt;/p&gt;
+&lt;p&gt;Chain of Responsibility pattern bir chain halinde process edilmesi gereken&amp;nbsp;operasyonlar i&amp;ccedil;in&amp;nbsp;rahatlıkla kullanabileceğimiz bir pattern dir. Yazılım d&amp;uuml;nyasında kullanım olarak diğer desing pattern'lar arasında %30-%40 lık bir orana sahip olduğu iddia edilir ve sık&amp;ccedil;a kullanılmaktadır.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-01-25 07:35:00</pubDate>
+  <lastModified>2018-03-10 12:55:02</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>chain-of-responsibility-pattern-nedir</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

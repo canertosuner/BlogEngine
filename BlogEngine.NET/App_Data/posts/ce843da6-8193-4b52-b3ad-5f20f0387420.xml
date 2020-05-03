@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Response Caching</title>
+  <description>Response Caching de bu feature'lardan bir tanesidir ve Aspect Oriented yaklaşımına uygun olarak geliştirilmiş bir ResponseCaching Middleware'i framework ile birlikte default gelmektedir. </description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki &lt;a href="/category/Net-Core"&gt;asp.net core yazılarında&lt;/a&gt; k&amp;uuml;t&amp;uuml;phane ile birlikte default olarak tıpkı bir feature gibi hazır gelen ve biz developer'lar i&amp;ccedil;in sadece bu feature enable/disable etmek gibi ufak birka&amp;ccedil; konfigurasyonla implementasyon tamamlayabileceğimiz bir &amp;ccedil;ok &amp;ouml;zelliğin olduğundan bahsetmiştik.&lt;/p&gt;
+&lt;p&gt;Response Caching de bu feature'lardan bir tanesidir ve Aspect Oriented yaklaşımına uygun olarak geliştirilmiş bir ResponseCaching Middleware'i framework ile birlikte default gelmektedir. Asp.net core projelerinde &amp;ccedil;ok k&amp;uuml;&amp;ccedil;&amp;uuml;k birka&amp;ccedil; kod&amp;nbsp;extension-method call ederek response caching &amp;ouml;zelliğini projemize kazandırabiliriz. Default olarak memory-cache yapsada&amp;nbsp;istersek redis gibi cache-server'lar da kullanabiliriz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir proje ile devam edelim, ilk olarak Visual Studio'da &lt;strong&gt;ResponseCachingSample&lt;/strong&gt; adında bir empty api projesi oluşturalım.&lt;/p&gt;
+&lt;p&gt;Sonrasında Startup.cs i&amp;ccedil;erisinde yer alan&amp;nbsp;ConfigureServices metodu i&amp;ccedil;erisinde projemiz serviclerine responseCaching Middleware'ini ekleyelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+     //responseCaching enable
+    services.AddResponseCaching();
+
+    services.AddMvc();
+}&lt;/pre&gt;
+&lt;p&gt;ResponseCaching i&amp;ccedil;in ge&amp;ccedil;erli &lt;strong&gt;3 options&lt;/strong&gt; bulunmakta. Bunlar;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;SizeLimit&lt;/strong&gt; : Maximum size of the response cache. Default olarak 100 MB dır.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;UseCaseSensitivePaths&lt;/strong&gt; : Cache de bulunan path'ler case sensitive path olup olmamasını belirleyen option.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MaximumBodySize&lt;/strong&gt; : Cache'lenecek response body'ler i&amp;ccedil;in&amp;nbsp;ge&amp;ccedil;erli maximum size. Default olarak 64 MB dır.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Dilersek bu &amp;ouml;zellikleri kullanarak da responseCache'i aşağıdaki gibi service'lere ekleyebiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddResponseCaching(options =&amp;gt;
+     {
+          options.UseCaseSensitivePaths = true;
+          options.MaximumBodySize = 1024;
+     });
+    services.AddMvc();
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Service olarak eklediğimiz bu &amp;ouml;zelliği uygulamamızda kullanabilmek i&amp;ccedil;inde yine Startup.cs i&amp;ccedil;erisinde yer alan Configure metodu i&amp;ccedil;erisinde UseResponseCaching extension metodunu call edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+{
+    app.UseResponseCaching();   
+}&lt;/pre&gt;
+&lt;p&gt;Gerekli konfigurasyonları yaptıktan sonra artık controller metotlarında&amp;nbsp;&lt;strong&gt;[ResponseCache]&lt;/strong&gt; attribute'&amp;uuml;n&amp;uuml; kullanarak metodun d&amp;ouml;nd&amp;uuml;ğ&amp;uuml; response'u cache'e atabiliriz.&lt;/p&gt;
+&lt;p&gt;ResponseCache attribute'&amp;uuml;ne ait parametrelere bakacak olursak;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Duration : Saniye cinsinden response'un ne kadar s&amp;uuml;re cache'de tutulacağını belirttiğimiz property.&lt;/li&gt;
+&lt;li&gt;Location : Response'un nerede cache'leneceğini belirttiğimiz parametre. Any, Client, or None. Default olarak Any set edilmiştir.&lt;/li&gt;
+&lt;li&gt;NoStore : Cache data sı store&amp;nbsp;edilip edilmeyeceği bilgisinin sete dildiği parametre.&lt;/li&gt;
+&lt;li&gt;CacheProfileName : Adından da anlaşıalcağı &amp;uuml;zre cache profil ismi&lt;/li&gt;
+&lt;li&gt;VaryByHeader : Response header da bulunan Vary key'ine ait value değerini temsil eder.&lt;/li&gt;
+&lt;li&gt;VaryByQueryKeys : Query string parametresine g&amp;ouml;re&amp;nbsp;hangi response'un cache'leneceği&amp;nbsp;belirtmek i&amp;ccedil;in kullanılır. &amp;Ouml;rnek olarak ;&amp;nbsp;VaryByQueryKeys = new string[] { "clientName" } query string de bulunan farklı "clientName" parametrelerine g&amp;ouml;re cache'lenecektir.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ResponseCache attribute'&amp;uuml;n&amp;uuml; aşağıdaki gibi ValuesController i&amp;ccedil;erisinde bulunan Get metodu i&amp;ccedil;in kullanalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Route("api/[controller]")] 
+public class ValuesController : Controller
+{
+    [HttpGet]
+    [ResponseCache(Duration = 30)]
+    public IEnumerable&amp;lt;string&amp;gt; Get()
+    {
+        var time= "The response time is : " + DateTime.Now.ToString();
+
+        return new string[] { "CachedItems", time};
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda responseCache attribute'&amp;uuml;n&amp;uuml; kullanarak Get metodunun return ettiği response'u 30 sn exprie s&amp;uuml;resi olacak şekilde cache'lenmesini&amp;nbsp;belirttik. Uygulama&amp;nbsp;&amp;ccedil;alıştıktan sonra Get metodundan başarılı d&amp;ouml;nen ilk response CacheMiddleware'ine d&amp;uuml;şecek ve &lt;strong&gt;30 saniye&lt;/strong&gt; boyunca response'u cache'e atacak. Bu 30 sn i&amp;ccedil;erisinde gelen b&amp;uuml;t&amp;uuml;n request'lere ait response'lar metoda d&amp;uuml;şmeden doğrudan middleware tarafından y&amp;ouml;netilip cache'den return edilecektir.&lt;/p&gt;
+&lt;p&gt;Tabiki şunuda unutmamak gerek; sadece &lt;strong&gt;Http200&lt;/strong&gt; result'ları i&amp;ccedil;in response'u cache'lemekte.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Cache doğru kullanıldığı taktirde olduk&amp;ccedil;a hayat kurtaran birşey dir. &amp;Ouml;zellikle response'un &amp;ccedil;ok sık değişmeyip request'in &amp;ccedil;ok fazla geldiği endpoint'ler i&amp;ccedil;in kullanmak&amp;nbsp;core uygulamanızı ve onun bulunduğu storage'ı s&amp;uuml;rekli meşgul etmemek adına projelerde olduk&amp;ccedil;a yaygın kullanılmaktadır.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-05-02 05:49:00</pubDate>
+  <lastModified>2018-05-07 05:58:28</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-response-caching</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

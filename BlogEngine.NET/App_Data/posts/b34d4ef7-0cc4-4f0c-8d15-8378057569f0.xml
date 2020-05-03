@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>yield nedir nasıl kullanılır</title>
+  <description>Bilineceği üzere bir class ın foreach iterasyonuna sahip olabilmesi için IEnumerable interfacesini implement etmesi gerekmekte. IEnumerable 'ı implemente eden class bu implementle birlikte override edilmesi gereken GetEnumerator metoduna sahip olur ve bu metodun içerisini doldurduktan sonra</description>
+  <content>&lt;p&gt;&lt;span style="font-size: small;"&gt;Bilineceği &amp;uuml;zere bir class ın&amp;nbsp;&lt;/span&gt;&lt;span style="font-size: small;"&gt;foreach iterasyonuna sahip olabilmesi i&amp;ccedil;in&lt;/span&gt;&lt;span style="font-size: small;"&gt;&amp;nbsp;&lt;strong&gt;IEnumerable&lt;/strong&gt; interfacesini implement etmesi gerekmekte. IEnumerable 'ı implemente eden class bu implementle birlikte override edilmesi gereken GetEnumerator metoduna sahip olur ve bu metodun i&amp;ccedil;erisini doldurduktan sonra artik bu class da foreach ile gezebilecek duruma gelir. GetEnumerator metodunu override ederken, MoveNext(), Reset() metotlarini ve Current isimli propertyleri ile ilgili logic'i handle etmemiz gerekiyordu. İşte yield sayesinde bunları yapmaktan kurtuluyoruz.&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;Mantigi oldukca basit ama bazi projelerde uygulamaya entegrasyonu sıkıntı &amp;ccedil;ıkarabiliyor. Iste bu &amp;nbsp;sıkıntıları gidermek i&amp;ccedil;in C# 2.0 ile birlikte gelen yield keywordu sayesinde bu işlemlerin tumu bizim i&amp;ccedil;in arka planda yapilmis olacak.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;Senaryomuz şu şekilde olsun; geriye db de kayıtlı olan &amp;uuml;r&amp;uuml;nleri d&amp;ouml;nen bir metodumuz var ve bu metodu yield kullanmadan ve yield kullanarak yazmaya &amp;ccedil;alışalım.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong style="font-size: small;"&gt;&lt;span style="font-size: small;"&gt;Yield kullanmadan&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;     public static IEnumerable&amp;lt;Product&amp;gt; GetAllProducts()
+            {
+                using (var db = new DbEntity())
+                {
+                    var productList = from product in db.Product
+                                      select product;
+                    return productList.ToList();
+                }
+            }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;Bu normal şartlarda kullandığımız y&amp;ouml;ntem. İlgile metodu aşağıdaki gibi &amp;ccedil;ağırıp d&amp;ouml;nen listeye direk olarak erişebilirsiniz.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;var productList = GetAllProducts();&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;yield kullanarak ise şu şekilde yazabiliriz&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;&lt;strong&gt;&lt;span style="font-size: small;"&gt;Yield Kullanarak&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public static IEnumerable&amp;lt;Product&amp;gt; GetAllProducts()
+            {
+                using (var db = new DbEntity())
+                {
+                    var productList = from product in db.Product
+                                   select product;
+                    foreach (var item in productList)
+                    {
+                        yield return product;
+                    }
+                }
+            }&lt;/pre&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;yield da ise şu şekilde &amp;ccedil;alışır;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt; d&amp;ouml;ng&amp;uuml;ye her girdiğinde yield return product satırında fonksiyonun &amp;ccedil;ağrıldığı yere ilgili product item'ını d&amp;ouml;ner yani return'&amp;uuml; g&amp;ouml;rd&amp;uuml; diye foreach den ve metoddan direkt &amp;ccedil;ıkmaz ve listenin i&amp;ccedil;indeki t&amp;uuml;m elemanlar bitinceye kadar bu işlemi yapmaya devam eder.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;IL Disassambler(ILDASM) acarak code tarafında &lt;/span&gt;&lt;strong style="color: #333333; font-family: Arial, serif; font-size: 14.3px; line-height: 22.88px; background-color: #f8f8f8;"&gt;MoveNext&lt;/strong&gt;&lt;span style="font-size: small;"&gt;,&lt;/span&gt;&lt;strong style="color: #333333; font-family: Arial, serif; font-size: 14.3px; line-height: 22.88px; background-color: #f8f8f8;"&gt;Reset&lt;/strong&gt;&lt;span style="font-size: small;"&gt;&amp;nbsp;ve&amp;nbsp;&lt;/span&gt;&lt;strong style="color: #333333; font-family: Arial, serif; font-size: 14.3px; line-height: 22.88px; background-color: #f8f8f8;"&gt;Current&amp;nbsp;&lt;/strong&gt;&lt;span style="font-size: small;"&gt;gibi uyeler yazmamamiza ragmen yield keywordu sayesinde arka planda bunlarin yazildigini goruyoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;span style="font-size: small;"&gt;Bir diğer &amp;ouml;rnek olarak ise şunu verebiliriz;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public void Consumer()
+{
+    foreach(int i in Integers())
+    {
+        Console.WriteLine(i.ToString());
+    }
+}
+
+public IEnumerable&amp;lt;int&amp;gt; Integers()
+{
+    yield return 1;
+    yield return 2;
+    yield return 4;
+    yield return 8;
+    yield return 16;
+    yield return 45;
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;Foreach de d&amp;ouml;nerken her bir int i i&amp;ccedil;in&amp;nbsp;&lt;/span&gt;IEnumerable&amp;lt;int&amp;gt; Integers()&amp;nbsp;&lt;span style="font-size: small;"&gt;&lt;span style="font-size: small;"&gt;metoduna giderek değerleri bize teker teker d&amp;ouml;nd&amp;uuml;rebiliyor.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-01-06 21:14:00</pubDate>
+  <lastModified>2020-04-17 11:34:56</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>yield-nedir-nasil-kullanilir</slug>
+  <tags>
+    <tag>yield</tag>
+    <tag>IEnumerable</tag>
+  </tags>
+  <comments>
+    <comment id="efda7f91-b5e9-48b5-94f4-b78f6b043994" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="True">
+      <date>2016-04-09 22:44:10</date>
+      <author>murat</author>
+      <email>canertosuner@gmail.com</email>
+      <country>tr</country>
+      <ip>78.183.20.138</ip>
+      <moderatedby>Rule:white list</moderatedby>
+      <avatar />
+      <content>yararlı bir yazı olmuş teşekk&amp;#252;rler</content>
+    </comment>
+    <comment id="65a86cd9-83e3-4b74-937d-a1304b5607e9" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2020-04-17 08:01:08</date>
+      <author>mehmet ali acer</author>
+      <email>mali1433@yahoo.com</email>
+      <country />
+      <ip>176.88.143.101</ip>
+      <avatar />
+      <content>anlatım güzel, yield kod okunabilirliğini bozmuş biraz</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications>
+    <email>canertosuner@gmail.com</email>
+  </notifications>
+</post>

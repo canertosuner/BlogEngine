@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Windows Phone Uygulamasında İnternet Kontrol Etme</title>
+  <description>Windows Phone&amp;rsquo;da i&amp;ccedil;erisinde internet kullanımı gerektiren bir uygulama geliştirdiğimizd</description>
+  <content>&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="line-height: 115%;"&gt;Windows Phone&amp;rsquo;da i&amp;ccedil;erisinde internet kullanımı gerektiren bir uygulama geliştirdiğimizde uygulama i&amp;ccedil;erisinde s&amp;uuml;rekli olarak internet var mı ? &amp;nbsp;yok mu ? diye kontrol etmek zorundayız. İster uygulama ilk a&amp;ccedil;ıldığında Page_Load anında bunu yapabilir istersekde uygulama i&amp;ccedil;erisinde bir Buton&amp;rsquo;a tıklanıldığında.Aşağıda internet olduğunda &lt;span style="color: #0000ff;"&gt;True&lt;/span&gt; olmadığında &lt;span style="color: #0000ff;"&gt;False&lt;/span&gt; değer d&amp;ouml;nen&amp;nbsp;&lt;/span&gt;CheckConnection()&lt;span style="line-height: 115%;"&gt;&amp;nbsp;metod&amp;rsquo;unu uygulamalarda kullanabiliriz.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: small;"&gt;&lt;span style="font-family: Consolas; color: blue;"&gt; public&lt;/span&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;bool&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt; CheckConnection()&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: left;"&gt;&lt;span style="font-size: small; font-family: Consolas;"&gt;{&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: small;"&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;if&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp;((Microsoft.Phone.Net.NetworkInformation.&lt;/span&gt;&lt;span style="font-family: Consolas; color: #2b91af;"&gt;NetworkInterface&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;.NetworkInterfaceType ==&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: small;"&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp;Microsoft.Phone.Net.NetworkInformation.&lt;/span&gt;&lt;span style="font-family: Consolas; color: #2b91af;"&gt;NetworkInterfaceType&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;.None))&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: small;"&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&lt;/span&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;return&amp;nbsp;&lt;/span&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;false&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;;&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: small;"&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp;&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;else&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: small;"&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&lt;/span&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;return&amp;nbsp;&lt;/span&gt;&lt;span style="font-family: Consolas; color: blue;"&gt;true&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;;&lt;/span&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="text-align: left;"&gt;&lt;span style="font-size: small; line-height: 115%; font-family: Consolas;"&gt;}&lt;/span&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-03-01 15:45:00</pubDate>
+  <lastModified>2020-01-20 08:22:35</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Windows-Phone-Uygulamasında-Internet-Kontrol-Etme</slug>
+  <tags>
+    <tag>windowsphone</tag>
+    <tag>windows</tag>
+    <tag>internet</tag>
+    <tag>connection</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

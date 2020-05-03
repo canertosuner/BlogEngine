@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Constructor Injection Hell (IoC)</title>
+  <description>Daha &amp;ouml;nceki IoC yazılarımızda nedir ne değildir den uzunca bahsedip hayatımıza ne gibi g&amp;uuml;z</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki IoC yazılarımızda nedir ne değildir den uzunca bahsedip hayatımıza ne gibi g&amp;uuml;zellikler getirdiğini anlatmıştık. Basit&amp;ccedil;e tekrar değinmek gerekirse uygulamadaki instance y&amp;ouml;netiminden sorumlu ve bu instance'ları interface seviyesinde kullanıp runtime da container tarafından resolve edilip uygulamada kullanabiliyoruz.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;Projenin İlk G&amp;uuml;nlerinde...&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Kullanmak istediğimiz interface'leri aşağıdakine benzer bir şekilde constructor'a inject ediyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class FooController : ApiController
+    {
+        private readonly IUserService _userService;
+
+        public FooController(IUserService userService)
+        {
+            _userService = userService;
+        }
+    }&lt;/pre&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;1-2 Yıl Sonra...&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Projenin ilk başlarında aslında ne de g&amp;uuml;zel duygularla geliştirme yaparken 1-2 sene sonra&amp;nbsp;FooController'ın son durumunun aşağıdaki gibi bir hal aldığını g&amp;ouml;rebiliyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class FooController : ApiController
+    {
+        private IUserService _userService;
+        private ICustomerService _customerService;
+        private IBankService _bankService;
+        private IAccountService _accountService;
+        private ITransferService _transferService;
+        private IBranchService _branchService;
+        private IEmployeeService _employeeService;
+        private IMoneyService _moneyService;
+        private IBasketService _basketService;
+        private IAyService _ayService;
+        private IVayService _vayService;
+        private ILayService _layService;
+        private IUserService _userService;
+        private ICustomerService _customerService;
+        private IBankService _bankService;
+        private IAccountService _accountService;
+        private ITransferService _transferService;
+        private IBranchService _branchService;
+        private IEmployeeService _employeeService;
+        private IMoneyService _moneyService;
+        private IBasketService _basketService;
+        private IAyService _ayService;
+        private IVayService _vayService;
+        private ILayService _layService;
+        private IUserService _userService;
+        private ICustomerService _customerService;
+        private IBankService _bankService;
+        private IAccountService _accountService;
+        private ITransferService _transferService;
+        private IBranchService _branchService;
+        private IEmployeeService _employeeService;
+        private IMoneyService _moneyService;
+        private IBasketService _basketService;
+        private IAyService _ayService;
+        private IVayService _vayService;
+        private ILayService _layService;
+        private IUserService _userService;
+        private ICustomerService _customerService;
+        private IBankService _bankService;
+        private IAccountService _accountService;
+        private ITransferService _transferService;
+        private IBranchService _branchService;
+        private IEmployeeService _employeeService;
+        private IMoneyService _moneyService;
+        private IBasketService _basketService;
+        private IAyService _ayService;
+        private IVayService _vayService;
+        private ILayService _layService;
+
+        public FooController(IUserService userService,
+                             ICustomerService customerService,
+                             IBankService bankService,
+                             IAccountService accountService,
+                             ITransferService transferService,
+                             IBranchService branchService,
+                             IEmployeeService employeeService,
+                             IMoneyService moneyService,
+                             IBasketService basketService,
+                             IAyService ayService,
+                             IVayService vayService,
+                             ILayService layService,
+                             IUserService userService,
+                             ICustomerService customerService,
+                             IBankService bankService,
+                             IAccountService accountService,
+                             ITransferService transferService,
+                             IBranchService branchService,
+                             IEmployeeService employeeService,
+                             IMoneyService moneyService,
+                             IBasketService basketService,
+                             IAyService ayService,
+                             IVayService vayService,
+                             ILayService layService,
+                             IUserService userService,
+                             ICustomerService customerService,
+                             IBankService bankService,
+                             IAccountService accountService,
+                             ITransferService transferService,
+                             IBranchService branchService,
+                             IEmployeeService employeeService,
+                             IMoneyService moneyService,
+                             IBasketService basketService,
+                             IAyService ayService,
+                             IVayService vayService,
+                             ILayService layService,
+                             IUserService userService,
+                             ICustomerService customerService,
+                             IBankService bankService,
+                             IAccountService accountService,
+                             ITransferService transferService,
+                             IBranchService branchService,
+                             IEmployeeService employeeService,
+                             IMoneyService moneyService,
+                             IBasketService basketService,
+                             IAyService ayService,
+                             IVayService vayService,
+                             ILayService layService)
+        {
+            _userService = userService;
+            _customerService = customerService;
+            _bankService = bankService;
+            _accountService = accountService;
+            _transferService = transferService;
+            _branchService = branchService;
+            _employeeService = employeeService;
+            _moneyService = moneyService;
+            _basketService = basketService;
+            _ayService = ayService;
+            _vayService = vayService;
+            _userService = userService;
+            _customerService = customerService;
+            _bankService = bankService;
+            _accountService = accountService;
+            _transferService = transferService;
+            _branchService = branchService;
+            _employeeService = employeeService;
+            _moneyService = moneyService;
+            _basketService = basketService;
+            _ayService = ayService;
+            _vayService = vayService;
+            _userService = userService;
+            _customerService = customerService;
+            _bankService = bankService;
+            _accountService = accountService;
+            _transferService = transferService;
+            _branchService = branchService;
+            _employeeService = employeeService;
+            _moneyService = moneyService;
+            _basketService = basketService;
+            _ayService = ayService;
+            _vayService = vayService;
+            _userService = userService;
+            _customerService = customerService;
+            _bankService = bankService;
+            _accountService = accountService;
+            _transferService = transferService;
+            _branchService = branchService;
+            _employeeService = employeeService;
+            _moneyService = moneyService;
+            _basketService = basketService;
+            _ayService = ayService;
+            _vayService = vayService;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Kullanılan interface sayısı bir elin parmaklarıyla sınırlı olduğunda constructor injection uygulamak olduk&amp;ccedil;a&amp;nbsp;g&amp;uuml;zel duruyor ancak &amp;ccedil;ok daha b&amp;uuml;y&amp;uuml;k bir projede&amp;nbsp;aylar yıllar ge&amp;ccedil;tik&amp;ccedil;e yukarıdaki gibi bir&amp;nbsp;&lt;strong&gt;constructor injection hell&lt;/strong&gt; dediğimiz durum ortaya &amp;ccedil;ıkabiliyor.&lt;/p&gt;
+&lt;p&gt;Bu durumu sadece Controller &amp;uuml;zerinde değilde constructor injection uyguladığımız her hangi bir yer Service class'ı, Repository olabilir. &amp;nbsp;&lt;/p&gt;
+&lt;p&gt;TDD&amp;nbsp;uyguladığımızı da d&amp;uuml;ş&amp;uuml;n&amp;uuml;rsek bu controller'ın birde test class'ları olacaktır. Aynı injection muhabbeti ordada &amp;ouml;n&amp;uuml;m&amp;uuml;zde &amp;ccedil;ıkacaktır.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;&amp;Ccedil;&amp;ouml;z&amp;uuml;m Olarak..&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Aslında bu durumu bir sorun olarak da g&amp;ouml;rmeyebiliriz de. Sonu&amp;ccedil;ta "kod &amp;ccedil;alışıyor abi tıkır tıkır devam.." diyebiliriz ancak bunun bir sıkıntı&amp;nbsp;olduğunu geliştirme yaparken anlıyorsunuz. Alt alta veya yan yana satırlarca kod ortaya &amp;ccedil;ıktığında kodu okumak istemiyorsunuz ve bir s&amp;uuml;re sonra yeni bir interface enjecte etmeye kalktığınızda Vs kasmaya başladığını anlıyorsunuz.&lt;/p&gt;
+&lt;p&gt;Peki ne yapabiliriz bunun i&amp;ccedil;in ?&lt;/p&gt;
+&lt;p&gt;Projemizde container olarak Castle Windsor kullandığımızdan yola &amp;ccedil;ıkarak windsor'ın g&amp;ouml;revi bize instance y&amp;ouml;netimini sağlamaksa bizde Controller'larda kullanacağımız interface'leri&amp;nbsp;implementasyonu olmayan bir IServiceFactory adında bir interface'de tanımlayıp container'a &lt;strong&gt;&lt;a href="https://github.com/castleproject/Windsor/blob/master/docs/typed-factory-facility-interface-based.md"&gt;Typed Factory Facility&lt;/a&gt;&amp;nbsp;&lt;/strong&gt;servisini register edip sonrasında interface'imizi register edeceğiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IServiceFactory
+    {
+        IUserService CreateUserService();
+        void Release(IUserService userService);
+
+        ICustomerService CreateCustomerService();
+        void Release(ICustomerService customerService);
+
+        IBankService CreateBankService();
+        void Release(IBankService bankService);
+
+        IAccountService CreateAccountService();
+        void Release(IAccountService accountService);
+
+        ITransferService CreateTransferService();
+        void Release(ITransferService transferService);
+
+        IBranchService CreateBranchService();
+        void Release(IBranchService branchService);
+
+        IEmployeeService CreateEmployeeService();
+        void Release(IEmployeeService employeeService);
+
+        IMoneyService CreateMoneyService();
+        void Release(IMoneyService moneyService);
+
+        IBasketService CreateBasketService();
+        void Release(IBasketService basketService);
+
+        IAyService CreateAyService();
+        void Release(IAyService ayService);
+
+        IVayService CreateVayService();
+        void Release(IVayService ayService);
+
+        ILayService CreateLayService();
+        void Release(ILayService layService);
+    }&lt;/pre&gt;
+&lt;p&gt;Bu interface bir dummyService interface'i ve tek g&amp;ouml;revi bize istediğimiz service'in instance'ını container'dan resolve ederek vermek.&lt;/p&gt;
+&lt;p&gt;Sırada son adım olarak Factory interface'ini register etmek. Yukarıda bahsettiğimiz gibi container'a&amp;nbsp;&lt;strong&gt;Typed Factory Facility &lt;/strong&gt;servisini register edip sonrasında IServiceFactory interface'ini aşağıdaki gibi register edeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;Container.AddFacility&amp;lt;TypedFactoryFacility&amp;gt;();
+Container.Register(Component.For&amp;lt;IServiceFactory&amp;gt;().AsFactory());&lt;/pre&gt;
+&lt;p&gt;Geliştirmemiz hazır. Artık FooController'a gidip&amp;nbsp;IServiceFactory interface'ini constructor injection y&amp;ouml;ntemiyle inject edebiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class FooController : ApiController
+    {
+        private IServiceFactory _serviceFactory;
+
+        public FooController(IServiceFactory serviceFactory)
+        {
+            _serviceFactory = serviceFactory;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre satırlarca uzayan kodlardan kurtulduk ve artık tek bir interface &amp;uuml;zerinden ihtiya&amp;ccedil; duyduğumuz service'in Create() metodunu &amp;ccedil;ağırarak service i&amp;ccedil;erisinde tanım olan metotları vs. kullanabiliriz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek olarak;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class FooController : ApiController
+    {
+        private IServiceFactory _serviceFactory;
+
+        public FooController(IServiceFactory serviceFactory)
+        {
+            _serviceFactory = serviceFactory;
+        }
+
+
+        [HttpGet]
+        public HttpResponseMessage GetCustomers()
+        {
+            var response = _serviceFactory.CreateCustomerService().GetAllCustomers;
+            return Request.CreateResponse(response);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Geliştirmemiz bu kadar. B&amp;uuml;y&amp;uuml;k &amp;ouml;l&amp;ccedil;ekte projelerde &amp;ccedil;alışanların b&amp;uuml;y&amp;uuml;k bir kısmı&amp;nbsp;benzer bir sorunla karşılaşmıştır veya karşılaşacaktır. &amp;Ccedil;&amp;ouml;z&amp;uuml;m olarak farklı alternatiflerde mevcut bu sadece onlardan bir tanesiydi.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Typed Factory Facility ile ilgili daha geniş bilgiyi &lt;a href="https://github.com/castleproject/Windsor/blob/master/docs/typed-factory-facility-interface-based.md"&gt;bu linkten&lt;/a&gt;&amp;nbsp;bulabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-05-26 21:43:00</pubDate>
+  <lastModified>2017-06-01 05:14:24</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>ioc-constructor-injection-in-basa-bela-olabilmesi</slug>
+  <tags>
+    <tag>IoC</tag>
+    <tag>constructor injection</tag>
+    <tag>constructor injection hell</tag>
+    <tag>Typed Factory Facility</tag>
+    <tag>constructor injection problem</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>01a365a0-dea4-4805-8375-c19bfa24f287</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

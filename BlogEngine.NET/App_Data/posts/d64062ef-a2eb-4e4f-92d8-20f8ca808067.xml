@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Redis Server Windows Üzerinde Kurulumu ve Kullanımı</title>
+  <description>Redis için kısaca open source bir NOSQL Memcached veritabanı sistemidir diyebiliriz. Her ne kadar ilk olarak Linux için tasarlanmış olsada ihtiyaç doğrultusunda Windows işletim sistemlerinde de kullanılabilir hale getirildi. Çalışma şekli olarak Key-Value şeklinde gönderilen bilgileri store etmektedir.</description>
+  <content>&lt;p&gt;Bu yazıda Distributed Caching sistemlerinden biri olan Redis'i inceliyor olacağız.&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;Redis Nedir ?&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Redis i&amp;ccedil;in kısaca open source bir NOSQL&amp;nbsp;Memcached veritabanı sistemidir diyebiliriz. Her ne kadar ilk olarak Linux i&amp;ccedil;in tasarlanmış&amp;nbsp;olsada ihtiya&amp;ccedil; doğrultusunda Windows işletim sistemlerinde de kullanılabilir hale getirildi. &amp;Ccedil;alışma şekli olarak Key-Value şeklinde g&amp;ouml;nderilen bilgileri store etmektedir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Veri Tipleri&lt;/h3&gt;
+&lt;p&gt;Redis verileri String, Hashe, List, Set ve Sorted List olarak saklayabilir.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/redis-data-types.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;Veri tipleri ile ilgili daha ayrıntılı bilgiyi bu &lt;a href="https://redis.io/topics/data-types-intro"&gt;linkte &lt;/a&gt;bulabilirsiniz.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Kurulum ve Kullanımı&lt;/h3&gt;
+&lt;p&gt;&amp;Ouml;ncelikle Redis'i indirip service olarak bilgisayarımıza kuruyoruz. Bunun i&amp;ccedil;in &lt;strong&gt;&lt;a href="https://github.com/MSOpenTech/redis/releases"&gt;bu linkten&lt;/a&gt;&lt;/strong&gt; sizin i&amp;ccedil;in uygun olan .rar uzantılı s&amp;uuml;r&amp;uuml;m&amp;uuml; bulup&amp;nbsp;bilgisayarımıza indiriyoruz. Sonrasında indirmiş olduğunuz dosyalardan &lt;strong&gt;redis-server.exe&lt;/strong&gt;&amp;nbsp;adlı exe'yi &amp;ccedil;alıştırıp kurulumu yapıyoruz. Default olarak &lt;strong&gt;6379&lt;/strong&gt; port'unu hizmete sokar ancak istersek bunu değiştirebiliriz de. Exe &amp;ccedil;alıştıktan sonra aşağıdaki gibi bir ekran g&amp;ouml;rd&amp;uuml;yseniz kurulum OK dir.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/redis_install_command.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Redis &amp;ccedil;alışıp &amp;ccedil;alışmadığına dair kontrol i&amp;ccedil;in &lt;strong&gt;redis-cli.exe&lt;/strong&gt;'yi&lt;strong&gt;&amp;nbsp;&lt;/strong&gt;&amp;ccedil;alıştıralım ve aşağıdaki&amp;nbsp;resimde olduğu gibi test ama&amp;ccedil;lı bir key-value tanımlayıp&amp;nbsp;sonrasında &lt;strong&gt;get set&lt;/strong&gt; işlemi yapalım&lt;/p&gt;
+&lt;p&gt;&lt;img alt="" /&gt;&lt;img src="/image.axd?picture=/2017/redis_install_check_client_.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Bu yazımızda Windows &amp;uuml;zerinde Redis Server nasıl kurulur ve kullanılır bunu g&amp;ouml;rd&amp;uuml;k.&amp;nbsp;Bir sonraki Redis yazımızda &lt;strong&gt;StackExchange.Redis&lt;/strong&gt; redis client kullanarak NET dilleri i&amp;ccedil;in (C# etc) &amp;ouml;rnek proje yapıyor olacağız.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-01-20 22:09:00</pubDate>
+  <lastModified>2020-01-20 08:22:19</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>windows-uzerinde-redis-server-kurulumu-ve-kullanimi</slug>
+  <tags>
+    <tag>redis</tag>
+    <tag>redis cache</tag>
+    <tag>redis kullanımı</tag>
+    <tag>redis kurulumu</tag>
+    <tag>redis nedir</tag>
+    <tag>cache</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+  </categories>
+  <notifications />
+</post>

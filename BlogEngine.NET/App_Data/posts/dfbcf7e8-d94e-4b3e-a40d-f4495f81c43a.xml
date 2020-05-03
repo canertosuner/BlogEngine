@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>XAML Binding Mode OneWay, TwoWay</title>
+  <description>Binding, Binding..
+
+Eski den WPF ile uğraşanların oldukça haşır neşir olduğu ve Windows8-WindowsPhone sonrası tamamen hayatımıza girmiş olan XAML ve onun getirdikleri. XAML ile UI geliştirenler Binding'i yakından tanırlar.</description>
+  <content>&lt;p&gt;Binding, Binding..&lt;/p&gt;
+&lt;p&gt;Eski den WPF ile uğraşanların olduk&amp;ccedil;a haşır neşir olduğu ve Windows8-WindowsPhone sonrası tamamen hayatımıza girmiş olan XAML ve onun getirdikleri. XAML ile UI geliştirenler Binding'i yakından tanırlar.&lt;/p&gt;
+&lt;p&gt;Nedir bu Binding diye soracak olursak;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;"Databinding(Veri Bağlama) kısaca bir veri kaynağını (Array, Dictionary,Object), bir UI kontrol&amp;uuml;ne bağlamaya yarayan bir tekniktir."&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img src="http://blog.scottlogic.com/archive/2012/04/binding.png" alt="" width="524" height="97" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Uuml;stteki g&amp;ouml;rselde de g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre Source olarak kullandığımız bir objemiz var ve bu objede ki property'ler de set edilen değerleri XAML tarafta bulunan UI kontrollerine Binding yaparak aktarıyoruz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;Peki ya UI Control i&amp;ccedil;in Binding nasıl yapılır dersek aşağıda bulunan g&amp;ouml;rsel nasıl kullanıldığını olduk&amp;ccedil;a iyi &amp;ouml;zetler gibi.&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://blog.scottlogic.com/archive/2012/04/BindingMarkup.png" alt="" width="500" height="183" /&gt;&lt;/p&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre Source "&lt;strong&gt;Article&lt;/strong&gt;" adında bir class ve i&amp;ccedil;erisinde string tipinde bir "&lt;strong&gt;Title&lt;/strong&gt;" property'si olsun. Bu property'yi TextBox'ın Text'ine Binding olarak set ediyoruz. B&amp;ouml;ylece şu olmuş oluyor Article objesindeki Title propery'si nin değeri değiştiğinde UI thread'i tetikleyerek Bind olduğu control'&amp;uuml;n property'sini de g&amp;uuml;ncelleyecektir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Binding Modları&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Binding Modları, binding işlemi sırasında source'ta bulunan verinin değiştiğinde UI'da Bind edildiği yrerin değişip değişmeyeceği veya UI da Bind edilen property'nin i&amp;ccedil;eriği değiştiğinde source da bulunan verinin değişip değişmeyeceğine karar veren &amp;ouml;zellik diyebiliriz. Bu &amp;ouml;zellik Binding sınıfının &amp;ldquo;Mode&amp;rdquo; property'si ile belirlenir. Bunlar; &lt;strong&gt;OneWay&lt;/strong&gt;, &lt;strong&gt;TwoWay&lt;/strong&gt;, &lt;strong&gt;OneTime&lt;/strong&gt;, &lt;strong&gt;OneWayToSource&lt;/strong&gt; ve &lt;strong&gt;Default&lt;/strong&gt;&amp;rsquo; dur.&lt;/p&gt;
+&lt;p&gt;&lt;img src="https://i-msdn.sec.s-msft.com/dynimg/IC140401.png" alt="" width="438" height="157" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;OneWay&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Source yani Bind edilen property update edildiği anda UI taraftaki yani target control'de Bind edilen yer de değişir.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; public class Person : INotifyPropertyChanged 
+    {
+        public string Name { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;Ouml;rneğin bir INotifyPropertyChanged interface'ini implemente etmiş bir Person class'ımız olsun ve bu class'ta bulunan Name alanı UI tarafta bir Textbox'ın Text alanına Bind edilmiş olsun. (INotifyPropertyChanged implementasyonun &lt;a href="http://canertosuner.com/post/INotifyPropertyChanged-nedir-nasil-kullanilir"&gt;şu &lt;/a&gt;yazıda bulabilirsiniz.)&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;TextBox Text="{Binding Name}, Mode=OneWay}"/&amp;gt;&lt;/pre&gt;
+&lt;p&gt;Person objesinde ki Name alanı Codebehind'dan değiştirildiğinde bu değişimden TextBox'ı da haberdar edip Text property'sini de g&amp;uuml;ncelleyecektir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong style="font-size: small;"&gt;TwoWay&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Source yani Bind edilen property update edildiği anda UI da Bind edilen yer de değişir. Aynı şekilde UI'da bulunan control'&amp;uuml;n property'si kullanıcı tarafından değiştirildiğinde yani TextBox'a birisi birşeyler yazdığında codeBehind'da Bind edildiği alanıda g&amp;uuml;nceller.&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;TextBox Text="{Binding Name}, Mode=TwoWay}"/&amp;gt;&lt;/pre&gt;
+&lt;p&gt;Yukarıda verdiğimiz &amp;ouml;rnekten devam edelim. Kullanıcı ilgili TextBox'a kendisi birşeyler girip Text'i değiştiğinde bu değişiklikten source'u yani Person objesinde ki Name alanını g&amp;uuml;ncelleyecektir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong style="font-size: small;"&gt;OneTime&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;UI tarafında ki control source'dan yani Person objesindeki Name property'sinden sadece 1 defa değerini alır ve ondan sonra ki Name property'sinin g&amp;uuml;ncellenmesi UI tarafı etkilenmez. &amp;Ouml;rdeğin uygulama a&amp;ccedil;ıldıktan sonra Name = "Caner" dedik ve TextBox'ın Text'i de "Caner" oldu ancak bundan sonraki b&amp;uuml;t&amp;uuml;n Name="bla bla.." değişikliklerinden TextBox'ın Text'i etkilenmeyecektir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong style="font-size: small;"&gt;OneWayToSource&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;OneWay BindingMode'unun tam tersi gibi &amp;ccedil;alışır. TextBox'ın Text'ine kullanıcı tarafından birşeyler girildiğinde Person objesindeki Name alanını da update eder.&amp;Ouml;rnek olarak; kullanıcı uygulamada TextBox'ın Text'ine bir şeyler girdiği anda Person class'ında ki Name alanıda otomatik update olur ancak CodeBehind'dan Name alanı değiştirildiğinde bu değişiklik TextBox'ın Text'ine yansımaz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-03-12 22:16:00</pubDate>
+  <lastModified>2020-01-20 08:22:29</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>XAML-Binding-Mode-OneWay-TwoWay</slug>
+  <tags>
+    <tag>binding</tag>
+    <tag>wpf</tag>
+    <tag>xaml</tag>
+    <tag>oneway</tag>
+    <tag>twoway</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

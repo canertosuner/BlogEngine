@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp .Net Web Api Nedir </title>
+  <description>Daha önceki yazılarımızda Web Api dedik, Cache dedik, Exception Handling dedik ama Web Api nedir bir türlü bahsedemedik. Bu yazımızda kısaca Api &amp; Asp.Net Web Api nedir konuşuyor olacağız.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki yazılarımızda &lt;a href="http://canertosuner.com/post/Web-API-Icin-5-Altin-Kural"&gt;Web Api&lt;/a&gt; dedik, &lt;a href="http://canertosuner.com/post/Web-Api-Cache"&gt;Cache&lt;/a&gt; dedik, &lt;a href="http://canertosuner.com/post/WebApi-Exception-Handling-Logging"&gt;Exception Handling&lt;/a&gt; dedik ama Web Api nedir bir t&amp;uuml;rl&amp;uuml; bahsedemedik. Bu yazımızda kısaca Api &amp;amp; Asp.Net Web Api nedir konuşuyor olacağız.&lt;/p&gt;
+&lt;h2&gt;Api Nedir ?&lt;/h2&gt;
+&lt;p&gt;Asp .Net Web Api'a ge&amp;ccedil;meden &amp;ouml;nce Api nedir ondan bahsedelim. Aoi a&amp;ccedil;ılımı "&lt;strong&gt;Application Programming Interface&lt;/strong&gt;" olan T&amp;uuml;rk&amp;ccedil;e'de uygulama geliştirme aray&amp;uuml;z&amp;uuml; anlamına gelir ve sahip olduğumuz service veya verileri dış d&amp;uuml;nyaya a&amp;ccedil;ıp başka uygulamaların-platformların kullanımına sunmak i&amp;ccedil;in belli kurallar &amp;ccedil;er&amp;ccedil;evesinde tanımlamalar yaptığımız aray&amp;uuml;z d&amp;uuml;r.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Asp .Net Web Api&amp;nbsp;Nedir ?&lt;/h2&gt;
+&lt;p&gt;Microsoft yetkilileri Web Api sunumlarından birinde şuna benzer bir şey s&amp;ouml;yledi "&lt;strong&gt;Biz daha iyisini yapana kadar en iyisi bu..!&lt;/strong&gt;"&lt;/p&gt;
+&lt;p&gt;Asp .Net Web Api ise farklı t&amp;uuml;rde sayısız client (browsers, mobile phones, tablets, pc, etc.) tarafından consume edilebilen HTTP protokol&amp;uuml; &amp;uuml;zerinden haberleşebilen servisler oluşturmak i&amp;ccedil;in kullanılan bir framework şeklinde tanımlayabiliriz. Asp .net MVC ile&amp;nbsp;routing, controllers, action results, filter, model binders gibi ortak feature'lara sahip olduklarından bir takım benzerlikler g&amp;ouml;stermektedir ancak MVC Framework'&amp;uuml;n bir par&amp;ccedil;ası değildir. Asp .net Web Api Core Asp .Net'in bir par&amp;ccedil;asıdır ve MVC veya diğer web application t&amp;uuml;rleri ile birlikte kullanılabilir. Aynı zamanda b&amp;uuml;t&amp;uuml;n bunlardan bağımsız stand-alone Web services application olarakta kullanılabilir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Neden Asp.Net We Api ?&lt;/h2&gt;
+&lt;p&gt;G&amp;uuml;n&amp;uuml;m&amp;uuml;z d&amp;uuml;nyasında teknolojini gelişmesiyle birlikte firmalar artık web tabanlı uygulamalar &amp;uuml;zerinden m&amp;uuml;şterilerine tam olarak ulaşamaz hale geldiler. İnsanlar artık g&amp;uuml;nl&amp;uuml;k hayatlarının nerdeyse %50 sini akıllı telefonlar, tablet pc vs ile ge&amp;ccedil;iriyorlar ve bu cihazlarda insanların hayatlarını kolaylaştıracak olan milyonlarca uygulama mevcut. Bunların yanında birde İOT ile birlikte gelecek 5 yılda d&amp;uuml;nyada 30 milyara yakın internete bağlanabilen cihazlar olacağından bahsediliyor ve buda belki milyonlarca Api geliştirmesi demek.&lt;/p&gt;
+&lt;p&gt;Firmalar veya uygulama geliştiriciler m&amp;uuml;şterilere daha kolay ve hızlı bir şekilde ulaşmada kullanmak i&amp;ccedil;in servislerini ve sahip oldukları verilerin bir kısmını browserlar yada internete bağlanabilen bu akıllı cihazlar tarafından consume edilebilmeleri i&amp;ccedil;in Api'lar geliştirmeleri gerekmektedir. &amp;Ccedil;&amp;uuml;nk&amp;uuml; Api'lar yapısı gereği b&amp;uuml;t&amp;uuml;n programlama dilleri tarafından ortak kabul g&amp;ouml;rm&amp;uuml;ş medya tiplerini (XML-JOSN..etc.) response olarak alıp gerekli parse işlemlerinden sonra kolayca kullanabilir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=%2f2016%2f06%2fwebapi_nedirr.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Web Api sahip olduğunuz veri ve servisleri bir&amp;ccedil;ok farklı cihazda kullanıma sunmak i&amp;ccedil;in expose edebilmenizi sağlayan şahane bir framework ve dahası Web Api .Net Framework &amp;uuml;zerinde RESTful servisler inşa etmenizi sağlayacak ideal bir open source platform.&amp;nbsp;WCF Rest service'lerinin aksine Web Api HTTP protokol&amp;uuml;n&amp;uuml;n b&amp;uuml;t&amp;uuml;n&amp;nbsp;&amp;ouml;zelliklerini kullanır (URIs, request/response headers, caching, versioning, &amp;ccedil;eşitli content format'ları) WCF Rest Service'lerinde yapıldığı gibi farklı cihazlar i&amp;ccedil;in extra config ayarları vs yapmamıza da gerek bulunmamaktadır. Request'i yapılırken d&amp;ouml;nmesi gereken response'un XML mi yoksa JSON formatında mı olacağına client'ın se&amp;ccedil;imine bırakılmıştır &amp;ccedil;&amp;uuml;nk&amp;uuml; Web Api birden fazla medya formatında response d&amp;ouml;nebilmektedir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Başlıca Web API &amp;Ouml;zellikleri&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Http Get, Post, Put ve Delete metodlarıyla &amp;ccedil;alışabildiğinden CRUD işlemelrini destekler,&lt;/li&gt;
+&lt;li&gt;Response'larda HttpStatusCode ve Accept Header parametreleri bulunur,&lt;/li&gt;
+&lt;li&gt;Response'lar kullanıcının istediği t&amp;uuml;rde MediaTypeFormatter tarafından formatlanabilir,&lt;/li&gt;
+&lt;li&gt;OData desteği bulunmaktadır ve Query yazması olduk&amp;ccedil;a kolaydır,&lt;/li&gt;
+&lt;li&gt;Bir uygulama i&amp;ccedil;erisinde veya IIS &amp;uuml;zerinde host edilebilir,&lt;/li&gt;
+&lt;li&gt;MVC'nin bazı &amp;ouml;zelliklerini taşır (routing, controllers, action results, filter, model binders)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Neden Web Api'ı Se&amp;ccedil;meliyiz ?&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Bir web service'e ihtiyacınız varsa ve soap'a ihtiyacınız yoksa en iyi se&amp;ccedil;enek Web Api dir,&lt;/li&gt;
+&lt;li&gt;Geliştirme s&amp;uuml;rece WCF de olduğu kadar zahmetli ve sıkıntılı değildir,&lt;/li&gt;
+&lt;li&gt;Http tabanlı olduğundan Rest-ful servisler geliştirmek i&amp;ccedil;in en iyi se&amp;ccedil;enektir,&lt;/li&gt;
+&lt;li&gt;Exception ve Cache mimarileri olduk&amp;ccedil;a performanslı ve y&amp;ouml;netilebilir dir,&lt;/li&gt;
+&lt;li&gt;Open Source olduğundan s&amp;uuml;rekli olarak geliştirilip yeni feature'lar eklenmektedir,&lt;/li&gt;
+&lt;li&gt;Microsoft yetkilileri Web Api sunumlarından birinde şuna benzer bir şey s&amp;ouml;yledi "Biz daha iyisini yapana kadar en iyisi bu..!" bu demek oluyor ki tam destek.&lt;/li&gt;
+&lt;/ul&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-01-07 23:00:00</pubDate>
+  <lastModified>2020-01-20 08:22:27</lastModified>
+  <raters>2</raters>
+  <rating>5</rating>
+  <slug>Web-Api-Nedir</slug>
+  <tags>
+    <tag>webapi</tag>
+    <tag>features</tag>
+    <tag>api</tag>
+    <tag>asp.net</tag>
+    <tag>ozellikleri</tag>
+    <tag>neden web api</tag>
+  </tags>
+  <comments>
+    <comment id="2602f1b8-6097-4392-825b-c106d9a37285" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-01-02 17:50:45</date>
+      <author>Enes</author>
+      <email>enskcmn3@gmail.com</email>
+      <country />
+      <ip>212.156.47.210:60585</ip>
+      <avatar />
+      <content>Tebrik ederim güzel bir özet olmuş. Katkısını gördüm başarılar...</content>
+    </comment>
+    <comment id="f52754c5-436c-4783-a526-51182cc17f45" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-08-29 11:24:52</date>
+      <author>Mümin VARICI</author>
+      <email>mumin.varici@hotmail.com</email>
+      <country />
+      <ip>212.109.99.106:20312</ip>
+      <avatar />
+      <content>Merhaba,
+Kafamda bazı sorular vardı ve cevaplarını aldım. Umarım geliştirme aşamasında da sorunlar yaşamam ve ihtiyacımı tam anlamıyla karşılar.</content>
+    </comment>
+    <comment id="c7e6ac6b-65e5-4e9a-b789-94210770eb09" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-10-18 13:40:32</date>
+      <author>Funda</author>
+      <email>Sidelyaf@gmail.com</email>
+      <country />
+      <ip>37.154.169.3:13714</ip>
+      <avatar />
+      <content>Elinize emeginize saglık. Gayet faydalı bir makale olmuş. Tesekkurler.</content>
+    </comment>
+    <comment id="41e3ddd2-4081-498b-b8c2-f48501c8fd49" parentid="c7e6ac6b-65e5-4e9a-b789-94210770eb09" approved="True" spam="False" deleted="False">
+      <date>2017-10-20 09:07:19</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.139:34768</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Teşekkürler iyi yorumlarınız için.</content>
+    </comment>
+    <comment id="06008745-ad01-4bfd-97ee-d50706794f73" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2018-04-24 13:46:47</date>
+      <author>Hande</author>
+      <email>handedogan@hotmail.com</email>
+      <country />
+      <ip>213.254.131.250</ip>
+      <avatar />
+      <content>Kopyalayıp yapıştırmışsınız. </content>
+    </comment>
+    <comment id="719a249e-01f9-410e-bcb1-e3f5ba44a68c" parentid="06008745-ad01-4bfd-97ee-d50706794f73" approved="True" spam="False" deleted="True">
+      <date>2018-04-24 14:13:48</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>195.142.118.220</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>merci beaucou.</content>
+    </comment>
+    <comment id="f004d289-6e29-41fc-98c3-2b1b31ced9aa" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-09-24 08:47:34</date>
+      <author>Alican</author>
+      <email>alicangunay@gmail.com</email>
+      <country />
+      <ip>81.8.20.163</ip>
+      <avatar />
+      <content>Faydalı bir yazı, oldukça bilgilendirici. 
+Teşekkürler.</content>
+    </comment>
+    <comment id="a2e4cd11-6a28-4c03-97fc-d00f1a9f97f8" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2018-12-21 10:57:12</date>
+      <author>sdf</author>
+      <email>s@s.com</email>
+      <country />
+      <ip>178.233.43.62</ip>
+      <avatar />
+      <content>adsa</content>
+    </comment>
+    <comment id="7e5da60d-ead2-4d53-a245-aca0f65ee459" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-06-19 07:14:39</date>
+      <author>ramazan</author>
+      <email>ramazanorhanor@hotmail.com</email>
+      <country />
+      <ip>88.255.26.97</ip>
+      <avatar />
+      <content>İOT   nedir ? neyin kısaltılması    </content>
+    </comment>
+    <comment id="a14c3ab1-664a-4f09-8526-11de12201226" parentid="7e5da60d-ead2-4d53-a245-aca0f65ee459" approved="False" spam="False" deleted="True">
+      <date>2019-10-19 14:57:07</date>
+      <author>Hüsamettin</author>
+      <email>heyibil76@gmail.com</email>
+      <country />
+      <ip>178.240.201.206</ip>
+      <avatar />
+      <content>IOT: Internet of Things</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

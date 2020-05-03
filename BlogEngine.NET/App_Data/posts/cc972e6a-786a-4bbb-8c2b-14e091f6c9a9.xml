@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>gRPC Server Streaming RPC Client .Net Core'da Nasıl Oluşturulur ?</title>
+  <description>Creating gRPC NotifyCustomer Client&amp;nbsp;
+Şimdi bir diğer service metodumuz olan NotifyCustomer i&amp;cc</description>
+  <content>&lt;h2&gt;Creating gRPC NotifyCustomer Client&amp;nbsp;&lt;/h2&gt;
+&lt;p&gt;Şimdi bir diğer service metodumuz olan NotifyCustomer i&amp;ccedil;inde bir client uygulaması oluşturalım ve ilgili iadeler i&amp;ccedil;in bu client'a işlemlerin iletildiğini g&amp;ouml;relim. Yine bunu i&amp;ccedil;in solution'da NotifyCustomerClient adında bir consoleApp oluşturalım ve aynı bir &amp;ouml;nceki client'ta yaptığımız gibi nuget dll'leri referanslara ekleyelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;static async Task Main(string[] args)
+{
+    var channel = GrpcChannel.ForAddress("https://localhost:5001");
+    var refundClient = new RefundService.RefundService.RefundServiceClient(channel);
+
+    Console.WriteLine("gRPC notifyCustomer client is up !");
+
+    using (var serverStreamingCall = refundClient.NotifyCustomer(new NotifyRequest()))
+    {
+        while (await serverStreamingCall.ResponseStream.MoveNext())
+        {
+            var notifyReply = serverStreamingCall.ResponseStream.Current;
+            if (notifyReply != null)
+            {
+                Console.WriteLine("Dear Customer your order " + notifyReply.OrderId + " is refunded.");
+            }
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Geliştirmelerimiz bitmiş bulunmakta. &amp;Ouml;zetle; 1 service ve 2 client uygulaması geliştirdik. Şimdi bu uygulamaların &amp;uuml;&amp;ccedil;&amp;uuml;n&amp;uuml; aynı anda &amp;ccedil;alıştırıp aralarında iletişim kurduklarını aşağıdaki ekran g&amp;ouml;r&amp;uuml;nt&amp;uuml;s&amp;uuml;nde olduğu gibi&amp;nbsp;g&amp;ouml;rebilmekteyiz.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2020/ntcr_grp_c_img7.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Sırasıyla ilk olarak RefundClinet RefundService Unary RPC tipinde bağlantı kurarak bir refund isteği olduğunu iletti ve sonrasında service uygulaması bu isteği işleyip refundClient'a reply message'ı d&amp;ouml;nd&amp;uuml;. NotifyCustomerClient uygulaması RefundService ilk ayağa kalkarken ben&amp;nbsp;Server Streaming RPC tipinde bağlantı a&amp;ccedil;arak senin Notify metodunu consume edeceğim dedi.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda bir s&amp;uuml;redir&amp;nbsp;hayatımzıda olan ancak yeni yeni populer olan&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://medium.com/@letienthanh0212/what-is-grpc-and-how-to-implement-grpc-with-asp-net-core-3-x-affe83686123"&gt;https://medium.com/@letienthanh0212/what-is-grpc-and-how-to-implement-grpc-with-asp-net-core-3-x-affe83686123&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://medium.com/@letienthanh0212/what-is-grpc-and-how-to-implement-grpc-with-asp-net-core-3-x-affe83686123"&gt;https://medium.com/@letienthanh0212/what-is-grpc-and-how-to-implement-grpc-with-asp-net-core-3-x-affe83686123&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2020-05-03 10:09:00</pubDate>
+  <lastModified>2020-05-03 10:09:20</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>grpc-server-streaming-rpc-client-net-core-da-nasil-olusturulur</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

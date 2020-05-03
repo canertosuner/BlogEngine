@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Service'de Güvenlik | Soap Header</title>
+  <description>Bu makalede&amp;nbsp;Web Service Nasıl Yazılır ?&amp;nbsp;makalesinde bahsettiğim &amp;uuml;zre Web Service'de S</description>
+  <content>&lt;p&gt;&lt;strong&gt;&lt;span style="font-size: medium; font-family: verdana, geneva;" data-mce-mark="1"&gt;Bu makalede&amp;nbsp;&lt;a href="/post/Web-Service-Nas%C4%B1l-Yaz%C4%B1l%C4%B1r.aspx"&gt;Web Service Nasıl Yazılır ?&lt;/a&gt;&amp;nbsp;makalesinde bahsettiğim &amp;uuml;zre Web Service'de Soap Header Kimlik Denetimi yani Username Password ile service'i kullanabilme konusundan bahsediyor olacağım.&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="color: #333333; font-family: verdana, geneva; font-size: medium; line-height: 19.200000762939453px;" data-mce-mark="1"&gt;&lt;strong&gt;Web Service'i&lt;/strong&gt;n tanımına değinecek olursa&amp;nbsp;&lt;/span&gt;&lt;strong style="margin: 0px; padding: 0px; border: 0px; font-size: medium; line-height: 19.200000762939453px; font-family: verdana, geneva; color: #333333;"&gt;M2M&lt;/strong&gt;&lt;span style="color: #333333; font-family: verdana, geneva; font-size: medium; line-height: 19.200000762939453px;" data-mce-mark="1"&gt;&amp;nbsp;iletişimin &amp;ouml;n&amp;uuml;n&amp;uuml; a&amp;ccedil;mak ve&amp;nbsp;&lt;/span&gt;&lt;strong style="margin: 0px; padding: 0px; border: 0px; font-size: medium; line-height: 19.200000762939453px; font-family: verdana, geneva; color: #333333;"&gt;back-end&amp;nbsp;&lt;/strong&gt;&lt;span style="color: #333333; font-family: verdana, geneva; font-size: medium; line-height: 19.200000762939453px;" data-mce-mark="1"&gt;sistemlerde var olan &amp;ccedil;eşitli&amp;nbsp;&lt;/span&gt;&lt;strong style="margin: 0px; padding: 0px; border: 0px; font-size: medium; line-height: 19.200000762939453px; font-family: verdana, geneva; color: #333333;"&gt;database&lt;/strong&gt;&lt;span style="color: #333333; font-family: verdana, geneva; font-size: medium; line-height: 19.200000762939453px;" data-mce-mark="1"&gt;&amp;nbsp;yada&amp;nbsp;&lt;/span&gt;&lt;strong style="margin: 0px; padding: 0px; border: 0px; font-size: medium; line-height: 19.200000762939453px; font-family: verdana, geneva; color: #333333;"&gt;enterprise&lt;/strong&gt;&lt;span style="color: #333333; font-family: verdana, geneva; font-size: medium; line-height: 19.200000762939453px;" data-mce-mark="1"&gt;&amp;nbsp;yapıların diğer platformlarla iletişimini g&amp;uuml;venli bir şekilde sağlamak i&amp;ccedil;in geliştirilmiş yapılardır, Kısacası farklı platformların haberleşmelerini sağlamak i&amp;ccedil;in kullanılan teknolojilere verilen isimdir. Web Service Nasıl Yazılır ? makalesinde local'de bulunan Northwind database'ine bağlanarak Employees tablosundaki &amp;ccedil;alışanların bilgilerini getiren bir .asmx servis geliştirmiştik, hatırlicak olursanız projeyi kendi bilgisayarımızda &amp;ccedil;alıştırdığımızda aşağıdaki resimlerde olduğu gibi &amp;ccedil;ok rahat bir şekilde metod isimlerine tıklayıp &amp;Ccedil;ağır butonuna bastığımızda servis &amp;ccedil;alışıp istenilen verileri bize getiriyordu.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="color: #333333; font-family: verdana, geneva; font-size: medium; line-height: 19.200000762939453px;" data-mce-mark="1"&gt;&lt;img src="http://www.canertosuner.com/MyImage_Folder/wc_cllempl.png" alt="" width="293" height="146" /&gt;&amp;nbsp;&lt;img src="http://www.canertosuner.com/MyImage_Folder/ws_cagir.png" alt="" width="352" height="145" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="color: #333333; font-family: verdana, geneva; font-size: medium; line-height: 19.200000762939453px;" data-mce-mark="1"&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="http://www.canertosuner.com/MyImage_Folder/ws_last_img.png" alt="" width="294" height="249" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;span style="color: #333333; font-family: verdana, geneva; font-size: medium; line-height: 19.200000762939453px;" data-mce-mark="1"&gt;Yukarıda da g&amp;ouml;rd&amp;uuml;ğ&amp;uuml;m&amp;uuml;z gibi her şey sorunsuz &amp;ccedil;alışıyor ancak anormal olan durum service URL'ini bulan herhangi biri gidip aynı service'i kullanarak database'de kayıtlı bulunan verilere erişebilir ve bu durum hi&amp;ccedil; bir şirket yada service sahibi tarafında istenilen bir durum değildir.G&amp;uuml;venlik durumunda web service'ler i&amp;ccedil;in kullanılabilecek &amp;ccedil;eşitli y&amp;ouml;ntemler vardır bunlardan en&amp;ccedil;ok tercih edileni kuşkusuz &lt;/span&gt;&lt;strong style="color: #333333; font-family: verdana, geneva; font-size: medium; line-height: 19.200000762939453px;"&gt;Soap Header&lt;/strong&gt;&lt;span style="color: #333333; font-family: verdana, geneva; font-size: medium; line-height: 19.200000762939453px;" data-mce-mark="1"&gt;'dır. Soap Header kullanarak service tarafında belirleyeceğimiz UserName ve Password ile Client'ın service'e bu UserName ve Password kullanarak girişine izin vereceğiz.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong style="margin: 0px; padding: 0px; border: 0px; font-size: medium; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333; text-decoration: underline;"&gt;&lt;span data-mce-mark="1"&gt;1.Adım | Proje ve Class'ın Oluşturulması&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="margin: 0px; padding: 0px; border: 0px; font-size: medium; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;" data-mce-mark="1"&gt;&lt;span style="margin: 0px; padding: 0px; border: 0px; font-size: medium; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;" data-mce-mark="1"&gt;Visual Studio'da "&lt;strong&gt;Northwind&lt;/strong&gt;" isminde bir adet ASP.Net Empty Web Application oluşturuyoruz. Sonrasında proje i&amp;ccedil;erisine aşağıda olduğu gibi 1 adet User adında "&lt;strong&gt;SoapHeader&lt;/strong&gt;"'dan kalıtım alan class oluşturuyoruz ve i&amp;ccedil;erisine service'e login esnasında kullanacağımız attributeleri yazıyoruz.&lt;/span&gt;&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: 9.5pt; font-family: Consolas; background-position: initial initial; background-repeat: initial initial;" data-mce-mark="1"&gt;&amp;nbsp; &amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; public class User : SoapHeader
+    {
+        public string Username;
+        public string Password;
+    }&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;strong style="margin: 0px; padding: 0px; border: 0px; font-size: medium; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333; text-decoration: underline;"&gt;2.Adım | Service Sayfasının ve WebMethod'un Oluşturulması&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="color: #333333; font-family: calibri, sans-serif; font-size: medium;" data-mce-mark="1"&gt;&lt;span style="line-height: 19.200000762939453px;" data-mce-mark="1"&gt;Bu adımda projemize sağ tıklayıp 1 adet "&lt;strong&gt;MyService&lt;/strong&gt;" adında Web Service sayfası ekliyoruz ve i&amp;ccedil;erisine aşağıda olduğu gibi kullanacağımız WebMethod'larını yazıyoruz&lt;/span&gt;&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public User User;  //Oluşturmuş olduğumuz User class'ından 1 adet User tanımlıyoruz
+ 
+[WebMethod]        
+[SoapHeader("User")]  //G&amp;uuml;venlik burda devreye giriyor, WebMethod'a SoapHeader i&amp;ccedil;erisinde bulunan User nesnesi ile giriş yapıldığını belirtiyoruz
+public string KullanıcıGirisi()
+{ 
+   //Client tarafında UserName ve Password bilgileri doğru girildiğinde ve girilmediğinde yapılması gerekenleri belirtiyoruz
+   if (User.Username == "caner" &amp;amp;&amp;amp; User.Password == "tosuner")
+      return "Kullanıcı Girişi Başarılı";
+   else
+      return "Kullanıcı Girişi Başarısız";
+ }&lt;/pre&gt;
+&lt;p&gt;&lt;img style="float: right;" src="/MyImage_Folder/soapheader_solution.png" alt="" width="226" height="156" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;B&amp;uuml;t&amp;uuml;n bu işlemler sonrasında Projemizin Solution b&amp;ouml;lm&amp;uuml;m&amp;uuml; sağ tarafta olduğu gibidir&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;strong style="margin: 0px; padding: 0px; border: 0px; font-size: medium; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333; text-decoration: underline;"&gt;3.Adım | Client Tarafından Service'e İstekte Bulunulması&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="color: #333333; font-family: calibri, sans-serif; font-size: medium;" data-mce-mark="1"&gt;&lt;span style="color: #333333; font-family: calibri, sans-serif; font-size: medium;" data-mce-mark="1"&gt;Solution'a sağ tıklayıp 1 adet "&lt;strong&gt;Client&lt;/strong&gt;" adında ConsoleApplication oluşturuyoruz ve sonrasında solution'da bulunan iki projenin haberleşebilmesi i&amp;ccedil;in Client ta bulunan References'a sağ tıklayıp "&lt;span style="color: #333333; font-family: calibri, sans-serif; font-size: medium;" data-mce-mark="1"&gt;Add Service Reference&lt;/span&gt;" diyoruz ve a&amp;ccedil;ılan penceren &lt;span style="color: #333333; font-family: calibri, sans-serif; font-size: medium;" data-mce-mark="1"&gt;Discover&lt;/span&gt;'a tıklayıp solution'da bulunan&amp;nbsp;&lt;span style="color: #333333; font-family: calibri, sans-serif; font-size: medium;" data-mce-mark="1"&gt;Northwind&lt;/span&gt; projesini g&amp;ouml;rmesini sağlayıp Service bir isim Verdikten sonra OK butonuna basıyoruz. Client'ta bulunan Program.cs class'ını a&amp;ccedil;ıp Main metodunun i&amp;ccedil;erisini aşağıda olduğu gibi dolduruyoruz.&lt;/span&gt;&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: 9.5pt; font-family: Consolas; background-position: initial initial; background-repeat: initial initial;" data-mce-mark="1"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;Northwind.ServiceReference1 sc = new Northwind.ServiceReference1 ();  //Referans olarak eklediğimiz service'in ismi
+Northwind.User user= new Northwind.User ();   //Servis i&amp;ccedil;erisinde bulunan SoapHeader'dan kalıtım almış nesnemizi se&amp;ccedil;iyoruz.
+ 
+user.Username = "caner";   //Servis tarafında oluşturduğumuz Username ve Password bilgilerini user nesnesinin attributlerine yazıyoruz
+user.Password = "tosuner";
+ 
+string result= sc.KullanıcıGirisi(user);  //KullnıcıGirisi WebMethod'una user nesnesini veriyoruz ve return edilen sonucu ekranda yazıdırıyoruz.
+Console.WriteLine(result);
+ 
+Console.ReadKey();&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Projeyi &amp;ccedil;alıştırdığımızda UserName ve Password bilgilerini doğru yazdığımızdan aşağıda olduğu gibi &lt;strong&gt;Kullanıcı Girişi Başarılı&lt;/strong&gt; mesajını ekranda g&amp;ouml;rm&amp;uuml;ş olacağız.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;img src="/MyImage_Folder/soapheader_result.png" alt="" width="305" height="162" /&gt;&lt;/span&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-06-29 14:58:00</pubDate>
+  <lastModified>2020-01-20 08:22:32</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Web-Servicede-Guvenlik-Soap-Header</slug>
+  <tags>
+    <tag>asmx</tag>
+    <tag>webservice</tag>
+    <tag>soapheader</tag>
+    <tag>security</tag>
+    <tag>güvenlik</tag>
+  </tags>
+  <comments>
+    <comment id="3e1dfd46-a732-4447-9b7a-d585c4b931f8" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="True" deleted="True">
+      <date>2017-06-20 08:27:54</date>
+      <author>Esra</author>
+      <email>esra.ulas@hotmail.com.tr</email>
+      <country />
+      <ip>195.142.118.5</ip>
+      <avatar />
+      <content>Merhaba,
+servisi publish edip erişmeye çalıştığımda aşağıdaki hatayı alıyorum. localde herhangi bir problem yok. Yardımcı olabilir misiniz?
+The header property/field MyService.User could not be written to.
+
+</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+  </categories>
+  <notifications>
+    <email>esra.ulas@hotmail.com.tr</email>
+  </notifications>
+</post>

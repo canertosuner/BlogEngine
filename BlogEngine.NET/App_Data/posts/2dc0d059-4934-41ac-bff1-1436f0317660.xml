@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Tuples Nedir - C# 7.0</title>
+  <description>Tuple custom bir class oluşturmadan üzerinde birden fazla specific değer tutabilen bir veri yapısıdır. Diğer bir değişle; geriye birden fazla parametre döndürmek istediğimiz bir metot var diyelim ve bu parametreler için normalde gidip custom bir nesne oluşturup sonra</description>
+  <content>&lt;p&gt;&lt;strong&gt;Tuple&lt;/strong&gt; custom bir class oluşturmadan &amp;uuml;zerinde birden fazla specific değer tutabilen bir veri yapısıdır. Diğer bir değişle; geriye birden fazla parametre d&amp;ouml;nd&amp;uuml;rmek istediğimiz bir metot var diyelim ve bu parametreler i&amp;ccedil;in normalde gidip custom bir nesne&amp;nbsp;oluşturup sonra gidip bu nesneyi initialize edip property'lerini set'leyip metottan return ederdik veya&amp;nbsp;bu bahsettiğimizi yeni bir object tanımlamadan &lt;strong&gt;out&lt;/strong&gt; parametresini kullanarak da geriye d&amp;ouml;nd&amp;uuml;rebilirdik ancak bir &amp;ccedil;ok kişiye g&amp;ouml;re hem biraz maliyetli olarak kabul edilir hemde out async metotlarda kullanılamamaktadır. Bunun yerine daha basit ve anlaşılır olan tuple kullanarak &amp;ccedil;ok rahat bir şekilde metottan geriye birden fazla parametre return edebiliyoruz.&lt;/p&gt;
+&lt;p&gt;Tuple ilk olarak .net 4.0 ile hayatımıza girdi. C#7.O ile birlikte kullanım olarak &amp;ccedil;ok daha basit bir hale getirilmiş ve sanki ilerleyen g&amp;uuml;nlerde projelerimizde biraz daka sık kullanacağız gibi duruyor.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Tuple System.ValueTuple namespace'i altında yer almakta ve ilgili namespace'i nuget &amp;uuml;zerinden bulup projemize indirelim.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek olarak aşağıdaki gibi 3 tane integer değer alan &lt;strong&gt;ToplamlariCarpimlari&amp;nbsp;&lt;/strong&gt;adında Tuple &amp;ouml;zelliği olan bir metot tanımlayalım ve bu metot geriye ilk değer olarak toplamlarını ikinci değer olarak bu sayıların &amp;ccedil;arpımlarından elde dilen sayıyı return ediyor olsun.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;	public static void Main()
+	{
+		var sonuc = ToplamlariCarpimlari(2,5,7);
+		
+		Console.WriteLine(sonuc.toplami);
+		Console.WriteLine(sonuc.carpimi);
+	}
+	
+	public static (int toplami, int carpimi) ToplamlariCarpimlari (int x,int y,int z)
+	{
+	   var t = x + y + z;
+	   var c = x * y *z;
+		
+	   return (t,c);
+	}&lt;/pre&gt;
+&lt;p&gt;Yukarıda olduğu gibi main function i&amp;ccedil;erisinde metodumuzu &amp;ccedil;ağırdıktan sonra return ettiği değeri sanki i&amp;ccedil;erisinde &lt;strong&gt;toplami&lt;/strong&gt;, &lt;strong&gt;carpimi&lt;/strong&gt; adında iki property barındıran bir custom nesneymiş gibi rahat&amp;ccedil;a kullanabiliyoruz ve&amp;nbsp;&lt;strong&gt;intellisense&lt;/strong&gt; de direkt olarak nokta "."&amp;nbsp;operat&amp;ouml;r&amp;uuml; kullanarak bu return değerlerini algılayabilmekte.&lt;/p&gt;
+&lt;p&gt;Tuple kısaca bu şekilde. Basit bir &amp;ouml;zellik gibi g&amp;ouml;r&amp;uuml;nsede bizleri fazladan nesneler oluşturmaktan ve async metotlar&amp;nbsp;out parametresini kullanamıyorken &amp;ccedil;ok rahat bir şekilde yukarıdaki metodu async olarak yazmamıza olanak sağlamakta.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-03-30 21:32:00</pubDate>
+  <lastModified>2020-01-20 08:22:18</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>tuples-nedir-c-7-0</slug>
+  <tags>
+    <tag>tuple nedir</tag>
+    <tag>c#7.0</tag>
+    <tag>tuples</tag>
+    <tag>c# tuple</tag>
+    <tag>tuples nedir</tag>
+    <tag>7.0</tag>
+  </tags>
+  <comments>
+    <comment id="bcfcab45-848f-4c93-9889-38b81bb9fb3b" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-01-30 12:26:28</date>
+      <author>Naci</author>
+      <email>naciyetkin@hotmail.com</email>
+      <country />
+      <ip>78.160.196.97</ip>
+      <avatar />
+      <content>Teşekkürler :)</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

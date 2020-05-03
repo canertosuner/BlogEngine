@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Windows Phone, Windows 8 Converter Kullanımı</title>
+  <description>Windwos Phone yada Windows 8 app. dev.’da ItemSource ile uğraşıyorsanız emin olun muhakkak uygulamanın bir yerinde Converter’a ihtiyacınız olmuştur yada olacaktır. Peki nedir Converter, Ne işe yarar, Nasıl kullanılır ?</description>
+  <content>&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Windwos Phone yada Windows 8 app. dev.&amp;rsquo;da ItemSource ile uğraşıyorsanız emin olun muhakkak uygulamanın bir yerinde Converter&amp;rsquo;a ihtiyacınız olmuştur yada olacaktır. Peki nedir Converter, Ne işe yarar, Nasıl kullanılır ? &lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Converter kısaca ; ItemSource olarak verilen Data&amp;rsquo;ya Binding işleminden &amp;ouml;nce m&amp;uuml;dahale etmektir şeklinde tanımlayabiliriz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&amp;Ouml;rneğin bir sayfa var ve o sayfada WebService&amp;rsquo;den gelen bir liste var elimizde ve i&amp;ccedil;erisinde Product objesi ve objeninde ProductName ProductID ve Quantity bilgileri var diyelim. Servisten gelen bu response&amp;rsquo;u alıp bir WinPhone uygulamasında Binding ile ekrana taşımak istiyoruz. Binding le uğraşan arkadaşlar biliyorlardır buraya kadar hi&amp;ccedil;bir sorun yok direk olarak Listbox yada başka bir kontrole ItemSource verip gerekli Binding&amp;rsquo; leri verdikten sonra ekranda kolayca g&amp;ouml;receğizdir. &lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Peki ya m&amp;uuml;şteriden ş&amp;ouml;yle bir istek gelirse ; &amp;ldquo;Ben Qantity bilgisi sıfır gelen &amp;uuml;r&amp;uuml;nlerin adet satırında sıfır değilde&amp;nbsp;Not Available&amp;nbsp;yazsın istiyorum&amp;rdquo; derse ne yapacağız ? Gereksiz yere Database'de ilgili tabloda alan a&amp;ccedil;ıp o bilgiyide orada saklayacak halimiz yok. İşte Converter bu ve benzeri durumlarda devreye giriyor ve işimizi kolaylaştırıyor. Şimdi yukarıda bahsettiğimiz case'i aşağıda olduğu gibi bir adet ConverterSample adında WinPhone projesi oluşturarak inceleyelim.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&amp;nbsp;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&amp;Ouml;ncelikle aşağıda olduğu gibi Producta adında bir class tanımlıyoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class Product
+{
+public int ProductID { get; set; }
+public string ProductName { get; set; }
+public int Quantity { get; set; }
+}&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&amp;nbsp;&lt;/span&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Sornasında geriye&amp;nbsp;&lt;span style="color: #0000ff;"&gt;List&amp;lt;Product&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&amp;nbsp;d&amp;ouml;nen&amp;nbsp;&lt;strong&gt;GetAllProducts()&lt;/strong&gt;&amp;nbsp;adında metod yazıyoruz ve &amp;ouml;rnek &amp;uuml;r&amp;uuml;nleri store ediyoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public List&amp;lt;Product&amp;gt; GetAllProducts()
+{
+List&amp;lt;Product&amp;gt; _allProducts = new List&amp;lt;Product&amp;gt;();
+_allProducts.Add(newProduct()
+{
+ProductID = 111,
+ProductName = "Product 111",
+Quantity = 124
+});
+_allProducts.Add(newProduct()
+{
+ProductID = 112,
+ProductName = "Product 112",
+Quantity = 75
+});
+_allProducts.Add(newProduct()
+{
+ProductID = 113,
+ProductName = "Product 113",
+Quantity = 47
+});
+_allProducts.Add(newProduct()
+{
+ProductID = 114,
+ProductName = "Product 114",
+Quantity = 32
+});
+_allProducts.Add(newProduct()
+{
+ProductID = 115,
+ProductName = "Product 115",
+Quantity = 0
+});
+_allProducts.Add(newProduct()
+{
+ProductID = 116,
+ProductName = "Product 116",
+Quantity = 4
+});
+return _allProducts;
+}&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="line-height: 18.399999618530273px;" data-mce-mark="1"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Code behind da en son olarak Constructor i&amp;ccedil;erisinde &amp;uuml;stte yazdığımız metoddan d&amp;ouml;nen List&amp;rsquo;i alıp Xaml tarafta oluşturacağımız ListBox&amp;rsquo;a ItemSource olarak vereceğiz.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;// Constructor
+public MainPage()
+{
+InitializeComponent();
+lb_products.ItemsSource = GetAllProducts();
+}&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="line-height: 18.399999618530273px;" data-mce-mark="1"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Xaml tarafında ise Grid i&amp;ccedil;erisinde Row, ve &amp;nbsp;ListBox&amp;rsquo;ı oluşturup gerekli Bind işlemlerini yapıp projemizi &amp;ccedil;alıştırıyoruz ve aşağıdaki gibi bir g&amp;ouml;r&amp;uuml;nt&amp;uuml; alıyoruz.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 0.0001pt; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: 8pt; font-family: Consolas;" data-mce-mark="1"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;!--LayoutRoot is the root grid where all page content is placed--&amp;gt;
+    &amp;lt;Grid x:Name="LayoutRoot" Background="Transparent"&amp;gt;
+        &amp;lt;Grid.RowDefinitions&amp;gt;
+            &amp;lt;RowDefinition Height="Auto"/&amp;gt;
+            &amp;lt;RowDefinition Height="*"/&amp;gt;
+        &amp;lt;/Grid.RowDefinitions&amp;gt;
+ 
+        &amp;lt;StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28"&amp;gt;
+            &amp;lt;TextBlock Text="Converter Expample" Style="{StaticResource PhoneTextNormalStyle}" Margin="12,0"/&amp;gt;
+            &amp;lt;TextBlock Text="Product List" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/&amp;gt;
+        &amp;lt;/StackPanel&amp;gt;
+ 
+        &amp;lt;!--ContentPanel - place additional content here--&amp;gt;
+        &amp;lt;Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0"&amp;gt;
+            &amp;lt;Grid.RowDefinitions&amp;gt;
+                &amp;lt;RowDefinition Height="50"/&amp;gt;
+                &amp;lt;RowDefinition Height="*"/&amp;gt;
+            &amp;lt;/Grid.RowDefinitions&amp;gt;
+            &amp;lt;Grid.ColumnDefinitions&amp;gt;
+                &amp;lt;ColumnDefinition Width="50"/&amp;gt;
+                &amp;lt;ColumnDefinition Width="250"/&amp;gt;
+                &amp;lt;ColumnDefinition Width="*"/&amp;gt;
+            &amp;lt;/Grid.ColumnDefinitions&amp;gt;
+            &amp;lt;TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
+                Text="ID"
+                FontWeight="Bold"/&amp;gt;
+            &amp;lt;TextBlock
+                Grid.Row="0"
+                Grid.Column="1"
+                Text="ProductName"
+                FontWeight="Bold"/&amp;gt;
+            &amp;lt;TextBlock
+                Grid.Row="0"
+                Grid.Column="2"
+                Text="Quantity"
+                FontWeight="Bold"/&amp;gt;
+            &amp;lt;ListBox
+                x:Name="lb_products"
+                Margin="0,60,0,0"
+                Width="480"&amp;gt;
+                &amp;lt;ListBox.ItemTemplate&amp;gt;
+                    &amp;lt;DataTemplate&amp;gt;
+                        &amp;lt;Grid&amp;gt;
+                            &amp;lt;Grid.RowDefinitions&amp;gt;
+                                &amp;lt;RowDefinition Height="50"/&amp;gt;
+                            &amp;lt;/Grid.RowDefinitions&amp;gt;
+                            &amp;lt;Grid.ColumnDefinitions&amp;gt;
+                                &amp;lt;ColumnDefinition Width="50"/&amp;gt;
+                                &amp;lt;ColumnDefinition Width="250"/&amp;gt;
+                                &amp;lt;ColumnDefinition Width="*"/&amp;gt;
+                            &amp;lt;/Grid.ColumnDefinitions&amp;gt;
+                            &amp;lt;TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                FontWeight="Bold"
+                                Text="{Binding ProductID}"/&amp;gt;
+                            &amp;lt;TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                FontWeight="Bold"
+                                Text="{Binding ProductName}"/&amp;gt;
+                            &amp;lt;TextBlock
+                                Grid.Row="0"
+                                Grid.Column="2"
+                                FontWeight="Bold"
+                                Text="{Binding Quantity}"/&amp;gt;
+                        &amp;lt;/Grid&amp;gt;
+                    &amp;lt;/DataTemplate&amp;gt;
+                &amp;lt;/ListBox.ItemTemplate&amp;gt;
+            &amp;lt;/ListBox&amp;gt;
+        &amp;lt;/Grid&amp;gt;
+    &amp;lt;/Grid&amp;gt;
+&amp;lt;/phone:PhoneApplicationPage&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 0.0001pt; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: 8pt; line-height: 11.199999809265137px; font-family: Consolas; color: blue;" data-mce-mark="1"&gt;&lt;img style="margin: 0px; padding: 0px; line-height: 1.5; font-family: inherit; max-width: 100%;" src="/MyImage_Folder/converter_img2.png" alt="" width="227" height="379" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Yujkarıda olduğu gibi listbox'ımıza Itemsource olarak &amp;uuml;r&amp;uuml;nlerimizi verdik ve Quantity b&amp;ouml;l&amp;uuml;m&amp;uuml;ndeki bilgileri uygulamamızda g&amp;ouml;sterdik. ID'si 115 olan &amp;uuml;r&amp;uuml;n&amp;uuml;n Quantity değeride "0" olarak geldi. Buraya kadar herşey g&amp;uuml;zel ancak m&amp;uuml;şteri bizden Quantity b&amp;ouml;l&amp;uuml;m&amp;uuml;nde sıfır olan &amp;uuml;r&amp;uuml;nler i&amp;ccedil;in Not Available yazılmasını s&amp;ouml;yledi ama biz ekrana Service&amp;rsquo;den gelen datayı yazdırdık.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Converter i&amp;ccedil;in ilk olarak Projemize bir adet QuantityConverter adında class ekliyoruz ve class&amp;rsquo;ımıza&amp;nbsp;&lt;span style="line-height: 18.399999618530273px; font-family: Consolas; color: #2b91af;" data-mce-mark="1"&gt;IvalueConverter&amp;nbsp;&lt;/span&gt;interface&amp;rsquo;ini uyarlıyoruz ve&amp;nbsp;&lt;span style="line-height: 18.399999618530273px; font-family: Consolas; color: #2b91af;" data-mce-mark="1"&gt;IvalueConverter&amp;nbsp;&lt;/span&gt;Convert ve ConvertBack adında sahip olduğu 2 adet metodu class&amp;rsquo;ımıza ekleniyor.Biz şimdilik Convert metodunu kullanacağız. ConvertBack&amp;rsquo;in ne işe yaradığını ilerki yazılarda bahsedeceğiz. Convert metodunun i&amp;ccedil;erisini aşağıda olduğu gibi değiştiriyoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+{
+return (int)value == 0 ? "Not Available" : value.ToString();
+}
+public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+{
+throw new NotImplementedException();
+}&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Şimdi sırada yazmış olduğumuz Converter&amp;rsquo;ı Binding işlemine entegre etmek. Bunun i&amp;ccedil;in xaml tarafına yazmış olduğumuz Converter&amp;rsquo;ı tanıtmalıyız. İlk olarak&amp;nbsp;&lt;/span&gt;&lt;span style="color: #0000ff;" data-mce-mark="1"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;xmlns&lt;/span&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;:&lt;/span&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Converter&lt;/span&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;="clr-namespace:ConverterSample"&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Converter adını verdiğimiz namespace&amp;rsquo;i eklemek ve en dıştaki Grid&amp;rsquo;in &amp;uuml;st&amp;uuml;ne aşağıda olduğu gibi Converter&amp;rsquo;ı Resource olarak yazmak.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 0.0001pt; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: 9.5pt; font-family: Consolas;" data-mce-mark="1"&gt;&amp;nbsp; &amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt; &amp;lt;phone:PhoneApplicationPage.Resources&amp;gt;
+        &amp;lt;ResourceDictionary&amp;gt;
+            &amp;lt;Converter:QuantityConverter x:Key="QuantityConverter"/&amp;gt;
+        &amp;lt;/ResourceDictionary&amp;gt;
+    &amp;lt;/phone:PhoneApplicationPage.Resources&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 0.0001pt; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="line-height: 18.399999618530273px;" data-mce-mark="1"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Son işlem olarak Quantity bilgisini Bind ettiğimiz yere QuantityConverter&amp;rsquo;ı yazmak,&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;TextBlock
+Grid.Row="0"
+Grid.Column="2"
+FontWeight="Bold"
+           Text="{Binding Quantity,Converter={StaticResource QuantityConverter}}"/&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin: 0px 0px 15px 35.4pt; padding: 0px; border: 0px; font-size: 16px; line-height: 19.200000762939453px; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;img style="font-family: inherit; line-height: 1.5; margin: 0px; padding: 0px; max-width: 100%;" src="/MyImage_Folder/converter_img3.png" alt="" width="238" height="396" /&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-10-03 01:11:00</pubDate>
+  <lastModified>2020-01-20 08:22:31</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Windows-Phone-Windows-8-Converter-Kullanımı</slug>
+  <tags>
+    <tag>Converter</tag>
+    <tag>Xaml</tag>
+    <tag>Binding</tag>
+    <tag>IvalueConverter</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

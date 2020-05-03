@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Uygulamalarında Third-Party DI/IoC Container Kullanımı</title>
+  <description>&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+https://gunnarpeipman.com/aspnet/aspnet-core-structuremap-autofac/</description>
+  <content>&lt;p&gt;Asp.net core default olarak olduk&amp;ccedil;a lightweight bir s&amp;uuml;r&amp;uuml;m olan built-in dependency injection tool'ı ile birlikte gelmekte ve bu di tool'ını kullanarak basit bir şekilde uygulama genelindeki instance y&amp;ouml;netimini sağlayabilmekteyiz. &lt;a href="http://www.canertosuner.com/post/asp-net-core-dependency-injection"&gt;Şu yazımızda&lt;/a&gt;&amp;nbsp;built-in DI container nedir nasıl kullanılır değinmiştik. Bununla birlikte asp.net core third-party dependency injection tool'larını da desteklemekte.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2019/aspnetcr_ico.png" alt="" width="454" height="343" /&gt;&lt;/p&gt;
+&lt;p&gt;Bu yazımızda bir asp.net core uygulamasına &lt;a href="https://autofac.org/"&gt;Autofac &lt;/a&gt;k&amp;uuml;t&amp;uuml;phanesini default DI container'ı olarak nasıl implement ederiz inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;Yazımızın başındada bahsettiğimiz gibi asp.net core default built-in DI Container desteği sunmakta ve kullanım olarakta aşağıdaki gibi bağımlılıkları register edebilmekteyiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddTransient&amp;lt;ICustomerRepository, CustomerRepository);
+
+    services.AddMvc();
+}&lt;/pre&gt;
+&lt;p&gt;Ihtiya&amp;ccedil; duyduğumuz yerde de bu bağımlılığı constructor injection y&amp;ouml;ntemiyle inject edip kullanabilmekteyiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class CustomerController : Controller
+{
+    private readonly ICustomerRepository _customerRepository;
+
+    public HomeController(ICustomerRepository customerRepository)
+    {
+        _customerRepository = customerRepository;
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Aynı bu bağımlılıkları autofac, NInject, Unity StructureMap gibi bir&amp;ccedil;ok DI Container k&amp;uuml;t&amp;uuml;phanesini kullanarakta tanımlayabiliriz. B&amp;uuml;t&amp;uuml;n bu DI Container'ların instance y&amp;ouml;netimi dışında developer'lar tarafından sevilen ve beğenilen bir &amp;ccedil;ok farklı &amp;ouml;zellikleri bulunmakta. Bunu sağlayan şey ise&amp;nbsp;&lt;strong&gt;IServiceProvider&lt;/strong&gt;&amp;nbsp;interface'i. Asp.Net Core yumlu DI k&amp;uuml;t&amp;uuml;phaneleri bu interface'i implement edip bağımlılıkları bu ortak interface &amp;uuml;zerine inşa ettiklerinden asp.net core uygulamalarında third-party DI k&amp;uuml;t&amp;uuml;phanelerini kullanabilmekteyiz. Uygulamaya third-party DI k&amp;uuml;t&amp;uuml;phanesini belirttiğimiz yer ise &lt;strong&gt;Startup.cs&lt;/strong&gt; i&amp;ccedil;erisinde yer alan void &lt;strong&gt;ConfigureServices&lt;/strong&gt; metodunu aşağıdaki gibi&amp;nbsp;IServiceProvider&amp;nbsp;return edecek şekilde değiştirmek.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public IServiceProvider ConfigureServices(IServiceCollection services)
+{
+   // add services
+   
+   // return third-party tool's class which is implemented IServiceProvider
+}&lt;/pre&gt;
+&lt;p&gt;Bizde &amp;ouml;rnek olarak &lt;a href="https://autofac.org/"&gt;Autofac &lt;/a&gt;DI Container k&amp;uuml;t&amp;uuml;phanesini projemize implement edip bağımlılıkları bunun &amp;uuml;zerinden register edicez. Projemize nuget &amp;uuml;zerinden Autofac k&amp;uuml;t&amp;uuml;phanesini install ettiğimizi varsayalım ve autofac builder işlemlerini ConfigureServices metodu i&amp;ccedil;erisinde aşağıki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public IServiceProvider ConfigureServices(IServiceCollection services)
+{
+    services.AddMvc();
+
+    var builder = new ContainerBuilder();
+	
+    builder.RegisterType&amp;lt;CustomerRepository&amp;gt;().As&amp;lt;ICustomerRepository&amp;gt;();
+	
+    builder.Populate(services);
+ 
+    var appContainer = builder.Build();
+ 
+    return new AutofacServiceProvider(appContainer);
+}&lt;/pre&gt;
+&lt;p&gt;Kullanım basit haliyle yukarıdaki gibi&amp;nbsp;Builder oluşturup bağımlılıkları register edip sonrasında&amp;nbsp;IServiceProvider interface'ini implement eden AutofacServiceProbider sınıfını return ettik ve artık uygulamamız i&amp;ccedil;in DI Container built-in container yerine Autofac olarak implement ettik.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Autofac dışında diğer DI Container tool'larını kullanmak isterseniz aynen yukarıdaki gibi Startup.cs i&amp;ccedil;erisinde ConfigureService metodunu kullandığınız DI tool'un da yer alan IServiceProvider interface'ini&amp;nbsp;implement eden sınıfı&amp;nbsp;&amp;nbsp;bağımlılıkları register ettikten sonra return etmeniz yeterli olacaktır.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2019-05-24 17:00:00</pubDate>
+  <lastModified>2019-05-24 05:19:07</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-uygulamalarinda-third-party-di-ioc-container-kullanimi</slug>
+  <tags>
+    <tag>dependency injection</tag>
+    <tag>IoC nedir</tag>
+    <tag>autofac</tag>
+    <tag>asp.net core autofac</tag>
+    <tag>.net core autofac</tag>
+    <tag>Dependency Inversion </tag>
+    <tag>IoC</tag>
+    <tag>asp.net core</tag>
+    <tag>IServiceProvider</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+  </categories>
+  <notifications />
+</post>

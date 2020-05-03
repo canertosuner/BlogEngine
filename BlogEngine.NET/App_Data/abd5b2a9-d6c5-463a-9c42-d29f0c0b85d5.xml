@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core'a Giriş</title>
+  <description>.Net Core Microsoft tarafından open-source olarak geliştirilmiş  modüler bir framework'dür. Asp.Net Core ise klasik bildiğimiz Asp.Net kütüphanesinin open-source olarak microsoft tarafından release edilmiş halidir.</description>
+  <content>&lt;p style="text-align: left;"&gt;.Net Core Microsoft tarafından open-source olarak geliştirilmiş olduk&amp;ccedil;a geniş &amp;ccedil;aplı bir framework'd&amp;uuml;r. Asp.Net Core ise klasik bildiğimiz Asp.Net k&amp;uuml;t&amp;uuml;phanesinin open-source olarak microsoft tarafından release edilmiş halidir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/aspcorenetimg.png" alt="" width="579" height="294" /&gt;&lt;/p&gt;
+&lt;p&gt;Asp.Net yaklaşık 15 yıl &amp;ouml;nce Microsoft tarafından geliştirilmiş olup g&amp;uuml;n&amp;uuml;m&amp;uuml;z web teknolojileri arasından olduk&amp;ccedil;a pop&amp;uuml;ler olan bir k&amp;uuml;t&amp;uuml;phanedir. Microsoft open-source d&amp;uuml;nyanın &amp;ouml;nlenemez y&amp;uuml;kselişi ile birlikte daha fazla dayanamadı ve en base de bildiğimiz .Net &amp;ccedil;atısı altında olan b&amp;uuml;t&amp;uuml;n teknolojilerini yeniden yapılandırıp open-souce olarak b&amp;uuml;t&amp;uuml;n d&amp;uuml;nya ile paylaşacağını bizlere 4 yıl &amp;ouml;nce duyurmuştu. Akabinde sırayla .Net &amp;ccedil;atısı altındaki framework'ler git-hub &amp;uuml;zerinde yayınlanmaya başlandı.&lt;/p&gt;
+&lt;p&gt;Ms'in web i&amp;ccedil;in geliştirdiği k&amp;uuml;t&amp;uuml;phanelerin kronolojik sırasına bakacak olursak&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;2002 - ASP.Net&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;2008 - ASP.Net MVC&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;2012 - ASP.Net Web API and SignalR&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;son olarak ise .Net Core ile birlikte Asp.Net Core hayatımıza girdi.&lt;/p&gt;
+&lt;p&gt;Asp.Net Core Asp.Net'in daha sade ve modern bir y&amp;uuml;z&amp;uuml; olarak karşımıza &amp;ccedil;ıkıyor. Microsoft'un Zamarin'i satın alması sonrası sahip olduğu cross-platform deneyiminide işin i&amp;ccedil;ine katarak Asp.Net Core'u bir Cross Platform k&amp;uuml;t&amp;uuml;phane olarak bizlere sundu. Framework'&amp;uuml; kullanarak IoT uygulamaları, back-end service uygulamaları ve web projeleri geliştirebiliriz.&lt;/p&gt;
+&lt;h3&gt;&lt;br /&gt;.Net Standart 2.0&lt;/h3&gt;
+&lt;p&gt;Ms ilk olarak .Net Core 1.0 olarak release edildi ancak bu s&amp;uuml;r&amp;uuml;m aslında biz .net developer'lar i&amp;ccedil;in biraz alışkın olduğumuzdan farklı bir mimariye sahipti ve geliştirme yaparkende bazı zorluklar &amp;ccedil;ekiyorduk a&amp;ccedil;ıkcası. Microsoft 1.0 dan sonra yayınladığı 2.0 versiyonu ile birlikte .Net Standart 2.0 adında bir yenilik daha getirdi. .Net standart microsoft i&amp;ccedil;in şu demekti ben b&amp;uuml;t&amp;uuml;n .net teknolojilerini, dillerini vs hepsini bir standart altında topluyorum ve bunun adınıda .Net standart 2.0 koyuyorum dedi. Bu standart ile birlikte b&amp;uuml;t&amp;uuml;n .net platformlarının base'i .Net Standart olmuş oldu ve CoreCLR adında yeni bir ortak iletişim dili geliştirildi.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/netcorestandart20.png" alt="" width="620" height="410" /&gt;&lt;/p&gt;
+&lt;p&gt;Asp.Net Core'un getirdiği yenilikleri&amp;nbsp;ve faydaları sıralayacak olursak&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Cross platform&lt;/li&gt;
+&lt;li&gt;High performance&lt;/li&gt;
+&lt;li&gt;Flexible deployment&lt;/li&gt;
+&lt;li&gt;Open source&lt;/li&gt;
+&lt;li&gt;Support for built-in dependency injection&lt;/li&gt;
+&lt;li&gt;Light-weight and modular&lt;/li&gt;
+&lt;li&gt;Side by side support&lt;/li&gt;
+&lt;li&gt;Faster development&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br /&gt;Mac ve Linux işletim sistemlerinde &amp;ccedil;alışır hale getirildi ve cross platfrom coverage'ını&amp;nbsp;y&amp;uuml;kseltmiş oldu.&lt;/p&gt;
+&lt;h3&gt;&lt;br /&gt;Geliştirme Yaparken&lt;/h3&gt;
+&lt;p&gt;İlk olarak bilgisayarınızda Vs 2015 update 3 yada vs2017 .Net Core SDK ile birlikte y&amp;uuml;kl&amp;uuml; olması gerekmekte.&lt;br /&gt;Proje oluşturuken ise klasik herzaman yaptığımız gibi new aşağıdaki gibi new project diyerek geliştirmek istediğimiz proje t&amp;uuml;r&amp;uuml;n&amp;uuml; se&amp;ccedil;erek solution'ımızıo yaratabiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/aspcore_vs1_img2.jpg" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;Bu yazıda Asp.Net Core'a k&amp;uuml;&amp;ccedil;&amp;uuml;k bir giriş yaptık. Diğer yazılarımızda framework'&amp;uuml; &amp;ouml;rnek uygulamalar ile incelemeye devam edeceğiz.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-12-29 11:13:00</pubDate>
+  <lastModified>2017-12-30 10:36:25</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-a-giris</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

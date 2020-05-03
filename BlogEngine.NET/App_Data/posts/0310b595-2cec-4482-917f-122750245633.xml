@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Parallel LINQ Nedir</title>
+  <description>Linq(Language Integrated Query), heralde .Net framework'e ait en önemli 4-5 özellikten birisidir desek kimsenin itirazı olmaz. .NET 3.5 ile hayatımıza giren linq temelde; senkron bir biçimde veri üzerinde çeşitli query'ler yazıp filtreler oluşturabildiğimiz çok zengin içeriği olan bir .Net teknolojisidir.</description>
+  <content>&lt;p&gt;Linq(Language Integrated Query), heralde .Net framework'e ait en &amp;ouml;nemli 4-5 &amp;ouml;zellikten birisidir desek kimsenin itirazı olmaz.&amp;nbsp;.NET 3.5 ile hayatımıza giren linq temelde; senkron bir bi&amp;ccedil;imde veri &amp;uuml;zerinde &amp;ccedil;eşitli query'ler&amp;nbsp;yazıp filtreler oluşturabildiğimiz &amp;ccedil;ok zengin i&amp;ccedil;eriği olan bir .Net teknolojisidir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Parallel&amp;nbsp;Linq (PLINQ), IEnumerable yada Enumerable&amp;lt;T&amp;gt; t&amp;uuml;r&amp;uuml;ndeki data-source'lar &amp;uuml;zerinde linq işlemlerini paralel bir şekilde async olarak yapıalbilmesini sağlayan yapıdır.&amp;nbsp;Bu işlemler PLinq'e ait bazı extension metotlar &amp;uuml;zerinden yapılabilmektedir ve bu metotlar sayesinde eşzamanlı olarak işlem process edilebilmektedir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek &amp;uuml;zerinden ilerleyecek olursak, console'a 0-100 arası 4'e b&amp;ouml;l&amp;uuml;nebilen sayıları &amp;ouml;nce linq sonrada plinq kullanarak yazdıralım. İlk olarak aşağıdaki gibi&amp;nbsp;kullanacağımız veriyi hazırlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    var source = new List&amp;lt;int&amp;gt;();
+    for (int i = 0; i &amp;lt;= 100; i++)
+    {
+        source.Add(i);
+    }&lt;/pre&gt;
+&lt;p&gt;Linq kullanarak aşağıdaki kod bloğunu yazıp projeyi run edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    Console.WriteLine("Non Parallel Result\n");
+    var nonParallelResults =
+                     from item in source
+                     where item % 4 == 0
+                     select item;
+
+    foreach (int item in nonParallelResults)
+    {
+        Console.Write(item + " ");
+    }
+    Console.WriteLine("\n");
+    Console.WriteLine("\n");&lt;/pre&gt;
+&lt;p&gt;Projemizi run ettiğimizde aşağıdaki gibi sırasıyla&amp;nbsp;sayıları ekrana display edecektir.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/plinq_nonprallel.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Şimdi ise aynı işlemi plinq kullanarak paralel&amp;nbsp;olarak yaptıralım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    Console.WriteLine("Parallel Result\n");
+    var parallelResults =
+                     from item in source.AsParallel()
+                     where item % 4 == 0
+                     select item;
+    foreach (int item in parallelResults)
+    {
+        Console.Write(item + " ");
+    }&lt;/pre&gt;
+&lt;p&gt;Tekrardan projeyi run ettiğimizde ekran &amp;ccedil;ıktısı aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/plinq_prallel.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;Yukarıdaki işlemi paralel bi&amp;ccedil;imde yapmamızı sağlayan şey&amp;nbsp;&lt;strong&gt;.AsParallel()&amp;nbsp;&lt;/strong&gt;extension metodu dur. Linq kullanarak baktığımızda 4'e b&amp;ouml;l&amp;uuml;ne bilen sayıları k&amp;uuml;&amp;ccedil;&amp;uuml;kten b&amp;uuml;y&amp;uuml;ğe sıralayarak ekrana print ettiğini g&amp;ouml;r&amp;uuml;rken PLinq kullanarak sayıların herhangi bir sıraya uymadan paralel bir şekilde print edildiğini g&amp;ouml;rd&amp;uuml;k.&lt;/p&gt;
+&lt;p&gt;Source &amp;uuml;zerinde Linq mu yoksa PLinq mu kullanılacağı tamamiyle yapacağınız iş ile ilgili bir durum yani "it depends on the business". Eğer sırasıyla&amp;nbsp;devam etmesini istediğiniz bir process değilse ve process edilen işlemler arası herhangi bir bağımlılık vs. bulunmuyorsa PLinq &amp;ccedil;ok rahat bir şekilde kullanabiliriz.&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-12-26 08:00:00</pubDate>
+  <lastModified>2020-04-22 06:27:22</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>parallel-linq-nedir</slug>
+  <tags>
+    <tag>PLinq nedir</tag>
+    <tag>PLinq</tag>
+    <tag>Linq</tag>
+    <tag>Parallel LINQ Nedir</tag>
+    <tag>Parallel LINQ</tag>
+    <tag>AsParallel()</tag>
+  </tags>
+  <comments>
+    <comment id="708d9f30-652e-4586-920e-08e0ebbdf16a" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2020-04-21 10:40:21</date>
+      <author>sda</author>
+      <email>asdasdasd</email>
+      <country />
+      <ip>176.216.214.80</ip>
+      <avatar />
+      <content>asdasdasdasd</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

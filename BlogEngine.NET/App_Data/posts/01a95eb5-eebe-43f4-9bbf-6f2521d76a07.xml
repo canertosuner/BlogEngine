@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Logging</title>
+  <description>Asp.net core yazılarında daha önce asp.net core'a giriş yapmıştık ve devamında build-in container'dan bahsetmiştik. Kısaca tanımlayacak olursak; asp.net core microsoft tarafından open-source olarak geliştirilmiş asp.net'e göre daha modüler bir cross platform web kütüphanesidir. </description>
+  <content>&lt;p&gt;&lt;a href="/?tag=asp.net+core"&gt;Asp.net core&lt;/a&gt; yazılarında daha &amp;ouml;nce asp.net core'a giriş yapmıştık ve devamında build-in container'dan bahsetmiştik. Kısaca tanımlayacak olursak; asp.net core microsoft tarafından open-source olarak geliştirilmiş&amp;nbsp;asp.net'e g&amp;ouml;re daha mod&amp;uuml;ler bir cross platform web k&amp;uuml;t&amp;uuml;phanesidir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu&amp;nbsp;yazıda ise asp.net core'da logging nedir nasıl yapılır inceleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/aspcore_nlog_img3.png" alt="" width="543" height="285" /&gt;&lt;/p&gt;
+&lt;p&gt;Log bir uygulama i&amp;ccedil;in olmazsa olmazların başında gelir ve projeler i&amp;ccedil;in olduk&amp;ccedil;a &amp;ouml;nemli bir feature'dır. Yukarıda da yazdığımız gibi asp.net core mod&amp;uuml;ler bir framework d&amp;uuml;r ve logging de asp.net core uygulamanızda kolayca ayağa kaldırabileceğiniz bir service olarak yer almaktadır.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;ncelikle Vs'da bir Asp.Net Core projesi oluşturalım. Eğer oluşturduğunuz proje asp.net core 1.x versiyonu ise projemize&amp;nbsp;Microsoft.Extensions.Logging dll'ini referans olarak eklememiz gerekmekte ama eğer asp.net core 2.x versiyonlarından birine ait ise default olarak gelmekte.&lt;/p&gt;
+&lt;p&gt;Microsoft.Extensions.Logging&amp;nbsp;namespace'i bizim asp.net core i&amp;ccedil;erisinde logging&amp;nbsp;i&amp;ccedil;in gerekli olan sınıf&amp;amp;aray&amp;uuml;z ve metotları vs. i&amp;ccedil;ermekte.&lt;/p&gt;
+&lt;p&gt;Bu namespace'e bakacak olursak;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ILogger&lt;/li&gt;
+&lt;li&gt;ILoggingFactory&lt;/li&gt;
+&lt;li&gt;LoggingFactory&lt;/li&gt;
+&lt;li&gt;ILoggingProvider&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;built-in class ve interface'leri bu namespace altında bulunmakta.&lt;/p&gt;
+&lt;p&gt;ILogger interface'i kullanacağımız log-storage'a log kaydetmemizi sağlayan gerekli metotları i&amp;ccedil;erir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface ILogger
+{ 
+   void Log&amp;lt;TState&amp;gt;(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func&amp;lt;TState, Exception, string&amp;gt; formatter);
+   bool IsEnabled(LogLevel logLevel);
+   IDisposable BeginScope&amp;lt;TState&amp;gt;(TState state);
+}&lt;/pre&gt;
+&lt;p&gt;Geliştireceğimiz custom-logger'ı oluşturmak i&amp;ccedil;in ILogger interface'ine ait metotları extend edip metotlarını kullanacağız.&lt;/p&gt;
+&lt;p&gt;ILoggerFactory interface'i ise yukarıda bahsettiğimiz ILogger aray&amp;uuml;z&amp;uuml;n&amp;uuml; extend eden custom-logger'ın instance'ını oluşturmada kullanacağımız&amp;nbsp;interface'dir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface ILoggerFactory : IDisposable
+{
+    ILogger CreateLogger(string categoryName);
+    void AddProvider(ILoggerProvider provider);
+}&lt;/pre&gt;
+&lt;p&gt;Asp.net Core i&amp;ccedil;erisinde yukarıda bahsettiğimiz ILoggerFactor interface'ini implement eden LoggerFactory sınıfı bulunmakta. Runtime'da asp.net core framework bu sınıfa ait instance yaratarak default gelen kendi built-in IoC container'ına register eder.&lt;/p&gt;
+&lt;p&gt;ILoggingProvider interface'i istenilen logging kategorisindeki gerekli logger sınıflarını&amp;nbsp;yaratır ve y&amp;ouml;netir. Framework i&amp;ccedil;erisinde default olarak gelen provider'lar şu şekildedir;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li style="text-align: left;"&gt;Console&lt;/li&gt;
+&lt;li style="text-align: left;"&gt;Debug&lt;/li&gt;
+&lt;li style="text-align: left;"&gt;EventSource&lt;/li&gt;
+&lt;li style="text-align: left;"&gt;EventLog&lt;/li&gt;
+&lt;li style="text-align: left;"&gt;TraceSource&lt;/li&gt;
+&lt;li style="text-align: left;"&gt;Azure App Service&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface ILoggerProvider : IDisposable
+{
+   ILogger CreateLogger(string categoryName);
+}&lt;/pre&gt;
+&lt;p&gt;Bu interface'i bize projede kullanacağımız customLogger'ın instance'ını oluşturmamızı sağlayacak sınıfı tanımlarken kullanacağız.&lt;/p&gt;
+&lt;h3&gt;File Logging Impl.&lt;/h3&gt;
+&lt;p&gt;Şimdi ise yukarıda bahsettiğimiz adımları fileLogging i&amp;ccedil;in geliştirmeye başlayalım. Vs'da AspCoreLogging adında bir web-api projesi oluşturalım ve İlk olarak ILogger interface'ini implement eden &lt;strong&gt;FileLogger&lt;/strong&gt; sınıfını aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public void Log&amp;lt;TState&amp;gt;(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func&amp;lt;TState, Exception, string&amp;gt; formatter)
+    {
+        var message = string.Format("{0}: {1} - {2}", logLevel.ToString(), eventId.Id, formatter(state, exception));
+        WriteMessageToFile(message);
+    }
+    private static void WriteMessageToFile(string message)
+    {
+        const string filePath = "C:\\AspCoreFileLog.txt";
+        using (var streamWriter = new StreamWriter(filePath, true))
+        {
+            streamWriter.WriteLine(message);
+            streamWriter.Close();
+        }
+    }
+    public IDisposable BeginScope&amp;lt;TState&amp;gt;(TState state)
+    {
+        return null;
+    }
+    public bool IsEnabled(LogLevel logLevel)
+    {
+        return true;
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda da g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre projede &amp;uuml;retilen loglar server'da bulunan C s&amp;uuml;r&amp;uuml;c&amp;uuml;s&amp;uuml;nde AspCoreFileLog.txt adındaki dosyaya yazılacak. FileLogger sınıfını oluşturduktan sonra bu sınıfı projemize inject etmemizi sağlayacak olan&amp;nbsp;ILoggerProvider interface'ini implement edecek olan &lt;strong&gt;FileLogProvider&lt;/strong&gt; sınıfını tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class FileLogProvider : ILoggerProvider
+{
+    public ILogger CreateLogger(string category)
+    {
+        return new FileLogger();
+    }
+    public void Dispose()
+    {
+
+    }
+}&lt;/pre&gt;
+&lt;p&gt;FileLogProvider sınıfı proje i&amp;ccedil;erisinde&amp;nbsp;tanımlanan logger'ın&amp;nbsp;instance'ının create edilmesini sağlar.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Son adım olarak yukarıda tanımladığımız FileLogProvider'ı &lt;strong&gt;Startup.cs&lt;/strong&gt; sınıfında bulunan &lt;strong&gt;Configure&lt;/strong&gt; metodunda loggerFactory'nin provider'larına eklememiz kalıyor. Bu işlemi de aşağıdaki gibi startup.cs i&amp;ccedil;erisinde yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+{
+    //provider'ı ekledik
+    loggerFactory.AddProvider(new FileLogProvider());
+
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+
+    app.UseMvc();
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Geliştirmemiz bitti artık yazdığımız kodları test edebiliriz. Bunun i&amp;ccedil;in ILogger interface'inin projede yer alan aşağıdaki controller'a constructor seviyesinde inject ettikten sonra end-point'lere sırasıyla browser &amp;uuml;zerinden get işlemi yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Route("api/[controller]")]
+public class ValuesController : Controller
+{
+    private readonly ILogger&amp;lt;ValuesController&amp;gt; _logger;
+    public ValuesController(ILogger&amp;lt;ValuesController&amp;gt; logger)
+    {
+        this._logger = logger;
+    }
+
+    // GET api/values
+    [HttpGet]
+    public IEnumerable&amp;lt;string&amp;gt; Get()
+    {
+        _logger.LogInformation("Hi from logger !");
+        return new string[] { "value1", "value2" };
+    }
+
+    // GET api/values/5
+    [HttpGet("{id}")]
+    public string Get(int id)
+    {
+        throw new NullReferenceException("Null exp. from myApp !");
+        return "value";
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Http-Get request'i yolladıktan sonra&amp;nbsp;C:\\AspCoreFileLog.txt adresine gittiğimizde i&amp;ccedil;erisinde&amp;nbsp;hem framework'&amp;uuml;n &amp;uuml;rettiği hemde bizim controller metodunda yazdırdığımız log row'larını g&amp;ouml;rebilirsiniz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2018/aspcore_filelog_png.png" alt="" width="498" height="179" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yazının başında da bahsettiğimiz &amp;uuml;zre Asp.Net Core'da logging moduler bir şekilde ayrı bir service olarak gelmekte ve&amp;nbsp;fileLog dışında database,&amp;nbsp;flat file yada diğer log target t&amp;uuml;rlerini kullanarak logging'i genişletebilirsiniz. Bunun dışında&amp;nbsp;NLog, Serilog yada .net core desteği olan third-party logging provider'ları da kullanabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-12-29 11:16:00</pubDate>
+  <lastModified>2018-02-14 15:21:52</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-logging</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

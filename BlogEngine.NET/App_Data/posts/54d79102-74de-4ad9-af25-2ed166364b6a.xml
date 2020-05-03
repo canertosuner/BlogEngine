@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Distributed Cache Redis</title>
+  <description>&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+https://blog.couchbase.com/distributed-caching-aspn</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki yazılarımızda Asp.Net Core da &lt;a href="/post/asp-net-core-in-memory-cache"&gt;in-memory cache&lt;/a&gt;&amp;nbsp;nedir nasıl kullanılır konularına&amp;nbsp;değinmiştik. Bu yazımızda ise&amp;nbsp;asp.net core projelerinde distributed cache nasıl uygulanır inceleyeceğiz.&lt;/p&gt;
+&lt;h3&gt;Distributed Cache&lt;/h3&gt;
+&lt;p&gt;Distributed cache projelerimizde daha performanslı ve &amp;ouml;l&amp;ccedil;eklenebilir (scalability)&amp;nbsp;mod&amp;uuml;ller&amp;nbsp;geliştirebilmemize olanak sağlar. In-Memory cache'de&amp;nbsp;o an uygulamanın &amp;ccedil;alışmakta olduğu server'ı&amp;nbsp;cache storage olarak kullandığımızdan birden fazla server'da &amp;ccedil;alışan uygulamalar i&amp;ccedil;in bu cache'in dağıtık olarak b&amp;uuml;t&amp;uuml;n sunucularda bulunan uygulamalara paylaştırılması ve y&amp;ouml;netilmesi gerekmektedir. Distributed cache'de veriler merkezi olarak store edilir ve b&amp;ouml;ylelikle sunuculardan herhangi biri down olduğunda bile diğer sunucularda bulunan uygulamalar cache'de bulunan data'yı kullanabilmektedirler. Ayrıca cache yapısını bozmadan istediğiniz kadar yeni app-server eklediğinizde veya stop ettiğinizde cache bundan etkilenmeyecektir.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/distrbted_CAche_img1.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;1-)&lt;/strong&gt;&lt;/span&gt; İlk adım olarak&amp;nbsp;Makinamızda redis-server kurulu olması gerekmektedir. Kurulum ile ilgili &lt;a href="/post/windows-uzerinde-redis-server-kurulumu-ve-kullanimi"&gt;şu yazıdan &lt;/a&gt;yararlanabilirsiniz ve localhost:6379'dan bağlanacağımız varsayalım.&lt;/p&gt;
+&lt;h3 style="text-align: left;"&gt;&amp;Ouml;rnek proje&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;Redis kurduktan sonra &amp;ouml;rnek proje &amp;uuml;zerinden ilerleyelim. İlk olarak vs'da bir asp.net core web api uygulaması oluşturalım.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Asp.Net Core uygulamalarında distributed-cache &amp;ouml;zelliğini kullanabilmek i&amp;ccedil;in &lt;strong&gt;Microsoft.Extensions.Caching&lt;/strong&gt;&amp;nbsp;nasmespace'i altında bulunan&amp;nbsp;ve nuget'ten de kurabildiğimiz&amp;nbsp;&lt;strong&gt;IDistributedCache&lt;/strong&gt; interface'i bulunmaktadır ve bu interface i&amp;ccedil;erisinde cache CRUD&amp;nbsp;işlemlerini senkron-asenkron şekilde&amp;nbsp;yapabilmemizi sağlayan&amp;nbsp;metotlar bulunmaktadır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;  public interface IDistributedCache
+  {
+    byte[] Get(string key);
+    Task&amp;lt;byte[]&amp;gt; GetAsync(string key, CancellationToken token = default (CancellationToken));
+    void Set(string key, byte[] value, DistributedCacheEntryOptions options);
+    Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default (CancellationToken));
+    void Refresh(string key);
+    Task RefreshAsync(string key, CancellationToken token = default (CancellationToken));
+    void Remove(string key);
+    Task RemoveAsync(string key, CancellationToken token = default (CancellationToken));
+  }&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;2-)&lt;/strong&gt;&lt;/span&gt;&amp;nbsp;İkinci adım olarak&amp;nbsp;&lt;strong&gt;Startup.cs&lt;/strong&gt; i&amp;ccedil;erisinde bulunan &lt;strong&gt;ConfigureServices&lt;/strong&gt; metodu i&amp;ccedil;erisinde uygulamamız servislerine redis-distributed-cache'i configure edip eklememiz gerekmekte.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; public void ConfigureServices(IServiceCollection services)
+ {
+     services.AddDistributedRedisCache(option =&amp;gt;
+     {
+         option.Configuration = "localhost:6379";
+     });
+ }&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;3-) &amp;Uuml;&amp;ccedil;&amp;uuml;nc&amp;uuml; ve son adım ise&amp;nbsp;IDistributedCache interface'ini kullanarak cache crud işlemlerini yapmak. Bunun i&amp;ccedil;in asp.net core web api projelerinde default olarak gelen ValuesController'ı kullanalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Route("api/[controller]")]
+public class ValuesController : Controller
+{
+    private readonly IDistributedCache _distributedCache;
+
+    public ValuesController(IDistributedCache distributedCache)
+    {
+        _distributedCache = distributedCache;
+    }
+
+    // GET api/values
+    [HttpGet]
+    public async Task&amp;lt;string&amp;gt; Get()
+    {
+        const string cacheKey = "values";
+
+        var cachedItem = await _distributedCache.GetStringAsync(cacheKey);
+        if (!string.IsNullOrEmpty(cachedItem))
+        {
+            return cachedItem; 
+        }
+        else
+        {
+            const string str = "value1 value2 value3 value4 etc.";
+            await _distributedCache.SetStringAsync(cacheKey, str);
+            return str;
+        }
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre Get metoduna gelen istekte ilk olarak ilgili key'e ait cache'de bir değer var mı kontrol edilir varsa cache'de bulunan değer return edilir yoksa ilgili storage'a (database etc.) gidilir return value alınır &amp;ouml;nce cache'e atılır sonrasında return edilir.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Asp.Net Core uygulamalarında distributed-cache konfigurasyonu ve kullanımı bu kadar basitti diyebiliriz. Redis gibi&amp;nbsp;couchbase veya sql server kullanarak da asp.net core uygulamalarında distributed cache &amp;ouml;zelliğini kazandırabilirsiniz ve&amp;nbsp;IDistributedCache interface'ini kullanarak basit&amp;ccedil;e cache crud işlemlerini y&amp;ouml;netebilirsiniz.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-06-01 21:47:00</pubDate>
+  <lastModified>2018-05-19 13:47:38</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-distributed-cache</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

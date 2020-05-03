@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Smart Enum, Strongly Typed Enum Nedir ?</title>
+  <description>Smart enum; içerisinde read-only property'ler bulunan bir class tanımlayarak kendi type-safe enumeration'larını yaratabileceğimizi belirtmekte. Bize sağladığı en iyi çözüm içerisinde enum'ın özelliklerini barındıran istediğimiz kadar property tanımlayabilmemiz ve böylelikle attribute-reflection vs kullanmadan daha basit bir kullanım söz konusu olmakta.</description>
+  <content>&lt;p&gt;Enumeration&amp;nbsp;projelerimizde sıkca kullandığımız value-type'lardan biridir. .net framework'de sabit bir değer k&amp;uuml;mesinden oluşan ve basit karşılaştırmalar yapmak i&amp;ccedil;in kullandığımız temelde compile-time'da type safety sağlamak i&amp;ccedil;in tanımlanan &amp;ouml;zel bir sınıf t&amp;uuml;r&amp;uuml;d&amp;uuml;r. &amp;Ouml;rnek olarak; ToString, GetValues, Parse, TryParse gibi metodlar i&amp;ccedil;erir.&amp;nbsp;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir enumeration&amp;nbsp;tanımlayacak olursak; Eft/Havale işlemleri yapan bir proje geliştiriyorsunuz&amp;nbsp;ve bankalara ait eft kodlarını i&amp;ccedil;eren bir enumeration tanımlayarak bu kodları ilgili enum'da tutmak istedik. T&amp;uuml;rkiyedeki bankaları ele alacak olursak;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public enum Bank
+{
+    Ziraat = 10,
+    Garanti = 62,
+    Isbank = 64,
+    YapiKredi= 67,
+}&lt;/pre&gt;
+&lt;p&gt;vs şeklinde giden bir enumeration'ımız olsun. Tamda istediğimiz gibi aslında int olarak code&amp;rsquo;ları&amp;nbsp;bulundurması&amp;nbsp;gerekiyor ve banka bazlı değelerimizi tanımlamış olduk.&amp;nbsp;Ek olarak bu bankalara ait isimleride biyerde tutalım dendi. Enum'lar property &amp;uuml;zerinde attribute tanımlamaya olanak sağlıyor Description attribute'&amp;uuml;&amp;nbsp;kullanarak yapabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public enum Bank
+{
+    [Description("Ziraat Bankası")]
+    Ziraat = 10,
+    [Description("Garanti Bankası")]
+    Garanti = 62,
+    [Description("İş Bankası")]
+    Isbank = 64,
+    [Description("Yapı Kredi Bankası")]
+    YapiKredi = 67,
+}&lt;/pre&gt;
+&lt;p&gt;Bu değerleri okumak i&amp;ccedil;inde bir extension metod yazarsınız ve okursunuz vs. Ancak yapabileceklerimiz aslında&amp;nbsp;sınırlı, bir ka&amp;ccedil; g&amp;uuml;n sonra bankanın shortName'i de gelsin yada bankaların eft saatleride&amp;nbsp;yazsın&amp;nbsp;vs. farklı bir custom&amp;nbsp;attribute tanımlayarak bir &amp;ccedil;&amp;ouml;z&amp;uuml;m &amp;uuml;retebilirsinizde. Ancak bu hem okuması zor hemde development olarak s&amp;uuml;rekli bir extension metod ve akabinde reflection&amp;lsquo;lar ile bu değerler okumamız gerekecekdir. Lots of attributes..Can you imagine it ?&lt;/p&gt;
+&lt;p&gt;Bu gibi problemlere &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak &amp;ouml;nerilen y&amp;ouml;ntem ise&amp;nbsp;Type Safe or&amp;nbsp;Strongly Typed Enum&amp;rsquo;lar tanımlamak. Steve (&lt;a href="https://ardalis.com/enum-alternatives-in-c"&gt;ardalis&lt;/a&gt;) Smith yazılarında detaylıca bahsettiği ve benimde ilk olarak o yazılardan araştırmaya başladığım smart-enum'lar i&amp;ccedil;erisinde read-only property'ler bulunan bir class&amp;nbsp;tanımlayarak kendi type-safe&amp;nbsp;enumeration'larını yaratabileceğimizi belirtmekte. Bize&amp;nbsp;sağladığı en&amp;nbsp;iyi &amp;ccedil;&amp;ouml;z&amp;uuml;m i&amp;ccedil;erisinde&amp;nbsp;enum'ın &amp;ouml;zelliklerini barındıran istediğimiz kadar property tanımlayıp kendi business&amp;rsquo;larını burada geliştirmemize olanak sağlar&amp;nbsp;ve b&amp;ouml;ylelikle&amp;nbsp;attribute-reflection vs kullanmadan daha basit ve bir &amp;ccedil;eşit ValueObject based bir kullanıma olanak sağlamakta.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/smrtnenum_img112.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rneğimize geri d&amp;ouml;necek olursak; smart enum tanımlarken dikkat etmemiz gereken en &amp;ouml;nemli konu safety. SmartEnum class'ını sealed olarak tanımlayıp herhangi bir inheritance alınmasının &amp;ouml;n&amp;uuml;ne&amp;nbsp;ge&amp;ccedil;meliyiz ve constructor başta olmak &amp;uuml;zere b&amp;uuml;t&amp;uuml;n property'lerinin&amp;nbsp;setter'larını private olarak tanımlayarak unsafe bir şekilde initialize edilmesine engel olacak şekilde tanımlamalıyız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public sealed class Bank
+{
+    public static Bank Ziraat { get; } = new Bank(10, "Ziraat", "Ziraat Bankası", "08:30 &amp;ndash; 17:00");
+    public static Bank Garanti { get; } = new Bank(62, "Garanti", "Garanti Bankası", "09:00 &amp;ndash; 17:15");
+    public static Bank Isbank { get; } = new Bank(64, "Isbank", "İş Bankası", "09:00 &amp;ndash; 17:00");
+    public static Bank YapiKredi { get; } = new Bank(67, "YapiKredi", "Yapı Kredi Bankası", "09:00 &amp;ndash; 16:45");
+
+    private Bank(int eftCode, string name, string description, string processingTime)
+    {
+        EftCode = sode;
+        Name = name;
+        Description = description;
+        ProcessingTime = processingTime;
+    }
+
+    public int EftCode{ get; }
+    public string Name { get; }
+    public string Description { get; }
+    public string ProcessingTime { get; }
+}&lt;/pre&gt;
+&lt;p&gt;Klasik bir&amp;nbsp;enumeration i&amp;ccedil;in sıkca kullandığımız bazı &amp;ouml;zellikleride&amp;nbsp;smart enum'a kazandıracak olursak;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public sealed class Bank
+{
+    public override string ToString() =&amp;gt; Name;
+    public static IEnumerable&amp;lt;string&amp;gt; GetNames() =&amp;gt; GetValues().Select(role =&amp;gt; role.Name);
+    public static Bank GetValue(int code) =&amp;gt; GetValues().First(role =&amp;gt; role.Code == code);
+    public static Bank GetValue(string name) =&amp;gt; GetValues().First(role =&amp;gt; role.Name == name);
+
+    public static IReadOnlyList&amp;lt;Bank&amp;gt; GetValues()
+    {
+        return typeof(Bank).GetProperties(BindingFlags.Public | BindingFlags.Static)
+            .Select(property =&amp;gt; (Bank)property.GetValue(null))
+            .ToList();
+    }
+
+    public static explicit operator int(Bank role) =&amp;gt; role.Code;
+    public static explicit operator Bank(int code) =&amp;gt; GetValue(code);
+}&lt;/pre&gt;
+&lt;p&gt;Bu fonksiyonlarla birlikte Bank smart-enum'ının ihtiyacı olam b&amp;uuml;t&amp;uuml;n &amp;ouml;zelliklerini kazandırmış olduk.&lt;/p&gt;
+&lt;p&gt;Enumeration'lar switch-case statement'ı ile&amp;nbsp;birlikte olduk&amp;ccedil;a sık kullanılırlar, bizde aşağıdaki gibi Bank smart-enum'ını switch statement ile birlikte kullanabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;var value = Bank.Garanti;
+switch (value)
+{
+    case var _ when value == Bank.Garanti:
+        break;
+    case var _ when value == Bank.Isbank:
+        break;
+    case var _ when value == Bank.Ziraat:
+        break;
+    case var _ when value == Bank.YapiKredi:
+        break;
+}&lt;/pre&gt;
+&lt;p&gt;&amp;Ouml;zetleyecek olursak; enum tipi yerine&amp;nbsp;smart-enum'ları kolay bir şekilde projelerinizde tanımlayabilirsiniz ve başta&amp;nbsp;Serializable olmak &amp;uuml;zere daha bir&amp;ccedil;ok &amp;ouml;zelliğide smart-enum'larınıza kazandırabilirsiniz. Ancak şu demek değildir ki b&amp;uuml;t&amp;uuml;n enum tipinde olan sınıflarınızı smart-enum'a &amp;ccedil;evirin. &lt;span style="text-decoration: underline;"&gt;It depends on the business&lt;/span&gt; &lt;span style="text-decoration: underline;"&gt;!&lt;/span&gt; yani ger&amp;ccedil;ekten ihtiyacınız varsa işinize yarayacaksa; yukarıda&amp;nbsp;yazıdaki &amp;ouml;rnek misali gayet saf duygularla oluşturduğunuz bir enum almış başını gidiyor, attribute'lerle dolup taşma ihtimali gibi&amp;nbsp;bir durum s&amp;ouml;z konusu ise enum&amp;nbsp;tiplerinizi strongle typed enum sınıflarına &amp;ccedil;evirip daha esnek ve gelişime a&amp;ccedil;ık kullanışlı&amp;nbsp;yapılar tasarlayabilirsiniz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/strongly-typed-enum"&gt;source&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2020-03-31 21:01:00</pubDate>
+  <lastModified>2020-04-07 11:05:04</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>smart-enum-strongly-typed-enum-nedir</slug>
+  <tags>
+    <tag>smart enum</tag>
+    <tag>c# enumeration </tag>
+    <tag>Strongly Typed Enum</tag>
+    <tag>enum alternative</tag>
+  </tags>
+  <comments>
+    <comment id="2da1a86f-aca1-486d-b336-3f7de0bda80b" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2020-04-06 14:35:56</date>
+      <author>Recep Demir</author>
+      <email>recepdemir3438@gmail.com</email>
+      <country />
+      <ip>178.233.210.30</ip>
+      <avatar />
+      <content>Hocam teşekkürler faydalı bilgiler için.
+ </content>
+    </comment>
+    <comment id="5586f7b6-cfe7-4c32-a614-d24b961e4a0c" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2020-04-07 11:05:04</date>
+      <author>gturedi</author>
+      <email>turedi.gokhan@gmail.com</email>
+      <country />
+      <ip>78.173.237.110</ip>
+      <avatar />
+      <content>Allahın enumuna 2-3 field eklemek icin bunca tatava.. c# üzdün kardeshhim</content>
+    </comment>
+    <comment id="3919f610-54c0-4532-ac8e-dc0aab72911b" parentid="5586f7b6-cfe7-4c32-a614-d24b961e4a0c" approved="True" spam="False" deleted="False">
+      <date>2020-04-14 06:11:36</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>159.146.18.104</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumunuz için teşekkürler gtüredi :)</content>
+    </comment>
+    <comment id="23ffc7ab-3d39-4451-a77d-0c83eb0a5571" parentid="2da1a86f-aca1-486d-b336-3f7de0bda80b" approved="True" spam="False" deleted="False">
+      <date>2020-04-14 06:11:44</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>159.146.18.104</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumunuz için teşekkürler.</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

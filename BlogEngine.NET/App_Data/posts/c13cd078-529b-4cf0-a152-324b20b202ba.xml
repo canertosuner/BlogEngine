@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Entity Framework Core Nedir, Nasıl Kullanılır ? Generic Repository Pattern Kullanarak Asp.Net Core Web Api Projesi Geliştirme</title>
+  <description>Net Core'un duyurulmasıyla birlikte microsoft .Net Framework çatısı altında geliştirmekte olduğu bütün ürünlerin -core versiyonlarını geliştirmeye devam ediyor ve Entity Framework Core da bunlardan bir tanesi.</description>
+  <content>&lt;p&gt;.Net Core'un duyurulmasıyla birlikte microsoft .Net Framework &amp;ccedil;atısı altında geliştirmekte olduğu&amp;nbsp;b&amp;uuml;t&amp;uuml;n &amp;uuml;r&amp;uuml;nlerin -core versiyonlarını geliştirmeye devam ediyor ve&amp;nbsp;&lt;a href="https://github.com/aspnet/EntityFrameworkCore"&gt;Entity Framework Core&lt;/a&gt;&amp;nbsp;da bunlardan bir tanesi. En son 2.1 versiyonu ile birlikte benchmark testlerinde en hızlı orm olarak karşımıza &amp;ccedil;ıktı. Bizde bu yazımızda entity framework 2.1 kullanarak Generic Repository&amp;nbsp;Pattern ile birlikte bir Asp.Net Core 2.1 WebApi uygulaması geliştireceğiz.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;Proje Oluşturulması&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;İlk olarak vs'da&amp;nbsp;EfCoreWithWebApiSample adında versiyon olarak Asp.Net Core 2.1 se&amp;ccedil;erek bir Web Api Application oluşturalım.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Not&lt;/strong&gt;&lt;/span&gt;&lt;strong&gt;:&lt;/strong&gt;&amp;nbsp;Geliştirmeye başlamadan &amp;ouml;nce makinanızda&amp;nbsp;&lt;a href="https://download.microsoft.com/download/B/1/9/B19A2F87-F00F-420C-B4B9-A0BA4403F754/dotnet-sdk-2.1.300-rc1-008673-win-x64.exe"&gt;.Net Core&amp;nbsp;sdk 2.1.3 rc1&lt;/a&gt;&amp;nbsp;ve host edebilmemizi sağlayan&amp;nbsp;&lt;a href="https://download.microsoft.com/download/D/0/B/D0B7F62D-9C5D-4CF3-AB6C-88F56B4FC1A9/dotnet-hosting-2.1.0-rc1-final-win.exe"&gt;.Net hosting 2.1.0 rc1&lt;/a&gt;&amp;nbsp;kurulumlarının olması gerekmekte.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2018/aspcoreefgrp_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;DbContext-Entity Tanımlaması&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Api projemizde bir ProductDbContext'i ile product database'inde bulunan &amp;uuml;r&amp;uuml;nler i&amp;ccedil;in CRUD işlemlerini i&amp;ccedil;eren api end-point'leri yer alacaktır. Bunun i&amp;ccedil;in ilk olarak projemizde&amp;nbsp;ProductDbContext'ini ve Product entity sınıfını oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ProductDbContext : DbContext
+    {
+        public ProductDbContext(DbContextOptions&amp;lt;ProductDbContext&amp;gt; options) : base(options)   {  }
+
+        public DbSet&amp;lt;Product&amp;gt; Product { get; set; }
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+        }
+    }
+
+    public class Product
+    {
+        [Key]
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre context ve entity tanımlamalarını yaptık şimdi ise&amp;nbsp;ProductDbContext'i Startup.cs i&amp;ccedil;erisinde service olarak ekleme işlemini yapalım. Bunun i&amp;ccedil;in projemizde yer alan&amp;nbsp;&lt;strong&gt;appsettings.json&lt;/strong&gt;&amp;nbsp;dosyasına connstring'i aşağıdaki gibi tanımlayalım ve sonrasında&amp;nbsp;&lt;strong&gt;Startup.cs&lt;/strong&gt;'de yer alan&amp;nbsp;&lt;strong&gt;ConfigureServices&lt;/strong&gt;&amp;nbsp;metodu i&amp;ccedil;erisinde context'i servislere ekleyelim.&lt;/p&gt;
+&lt;pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false"&gt;{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ProductDbConnString": "Server=.;Initial Catalog=productdb;Persist Security Info=False;User ID=productuser;Password=qwerty135-;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+}
+&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   public void ConfigureServices(IServiceCollection services)
+   {
+       services.AddDbContext&amp;lt;ProductDbContext&amp;gt;(options =&amp;gt;
+           options.UseSqlServer(Configuration.GetSection("ProductDbConnString")));
+
+       services.AddMvc();
+   }&lt;/pre&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;Generic Repository Oluşturulması&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Repository katmanı doğrudan context'i constructor injection y&amp;ouml;ntemi ile alarak database CRUD işlemlerini yapmamızı sağlayacak olan katman. Bunun i&amp;ccedil;in ilk olarak IGenericRepository adında bir interface tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   public interface IGenericRepository&amp;lt;T&amp;gt; where T : class, IEntity
+    {
+      Guid Save(T entity);
+      T Get(Guid id);
+      void Update(T entity);
+      void Delete(Guid id);
+      IQueryable&amp;lt;T&amp;gt; All();
+      IQueryable&amp;lt;T&amp;gt; Find(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; predicate);
+   }&lt;/pre&gt;
+&lt;p&gt;Bu interface'e ait abstract GenericRepository sınıfını aşağıdaki gibi&amp;nbsp;IGenericRepository interface'inden implement ederek metotlarını oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public abstract class GenericRepository&amp;lt;T&amp;gt; : IGenericRepository&amp;lt;T&amp;gt; where T : class, IEntity
+{
+    private readonly ProductDbContext _dbContext;
+    private readonly DbSet&amp;lt;T&amp;gt; _dbSet;
+
+    protected GenericRepository(ProductDbContext dbContext)
+    {
+        this._dbContext = dbContext;
+        this._dbSet = _dbContext.Set&amp;lt;T&amp;gt;();
+    }
+
+    public Guid Save(T entity)
+    {
+        entity.Id = Guid.NewGuid();
+        _dbSet.Add(entity);
+
+        return entity.Id;
+    }
+
+    public T Get(Guid id)
+    {
+        return _dbSet.Find(id);
+    }
+
+    public void Update(T entity)
+    {
+        _dbSet.Attach(entity);
+        _dbContext.Entry(entity).State = EntityState.Modified;
+    }
+
+    public void Delete(Guid id)
+    {
+        var entity = Get(id);
+        _dbSet.Remove(entity);
+    }
+
+    public IQueryable&amp;lt;T&amp;gt; All()
+    {
+        return _dbSet.AsNoTracking();
+    }
+
+    public IQueryable&amp;lt;T&amp;gt; Find(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; predicate)
+    {
+        return _dbSet.Where(predicate);
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Generic Repository i&amp;ccedil;in gerekli olan base sınıf ve interface'i yukarıdaki gibi tanımladık. Şimdi sırada Product entity'si i&amp;ccedil;in kullanacağımız ProductRepository ve onun interface'i var.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface IProductRepository : IGenericRepository&amp;lt;Product&amp;gt;
+{ }
+
+public class ProductRepository : GenericRepository&amp;lt;Product&amp;gt;, IProductRepository
+{
+    public ProductRepository(ProductDbContext dbContext) : base(dbContext)
+    {
+    }
+}&lt;/pre&gt;
+&lt;h3&gt;Service Layer Oluşturulması&lt;/h3&gt;
+&lt;p&gt;Service layer controller ile repository arasında kullanacağımız katman olacak ve uygula i&amp;ccedil;in business'ların bulunduğu katmanda diyebiliriz. Bunun i&amp;ccedil;in aşağıdaki gibi IProductService ve onun implementasyonu ile birlikte request-response dto sınıflarını oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface IProductService
+{
+    GetAllProductResponse GetAllProducts();
+    void AddProduct(AddProductRequest reqModel);
+}
+
+public class ProductService : IProductService
+{
+    private readonly IProductRepository _productRepository;
+    public ProductService(IProductRepository productRepository)
+    {
+        _productRepository = productRepository;
+    }
+
+    public GetAllProductResponse GetAllProducts()
+    {
+        var result = _productRepository.All();
+        var mappedList = new List&amp;lt;ProductDto&amp;gt;();
+
+        foreach (var item in result)
+        {
+            mappedList.Add(new ProductDto { Id = item.Id, Name = item.Name });
+        }
+
+        return new GetAllProductResponse
+        {
+            ProductList = mappedList
+        };
+    }
+
+    public void AddProduct(AddProductRequest reqModel)
+    {
+        _productRepository.Save(new Product { Name = reqModel.Name });
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Controller'a ge&amp;ccedil;meden şu ana kadar oluşturduğumuz dependency'leri inject edelim. Bunun i&amp;ccedil;in Startup.cs i&amp;ccedil;erisinde yer alan ConfigureServices metodu i&amp;ccedil;erisinde aşağıdaki tanımlamaları yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   services.AddScoped&amp;lt;IProductRepository, ProductRepository&amp;gt;();
+   services.AddScoped&amp;lt;IProductService, ProductService&amp;gt;();&lt;/pre&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;Api Controller Oluşturulması&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Son adım olarak ise service'de yer alan bu iki metot i&amp;ccedil;in end-ponit'leri oluşturmak var. Bunun i&amp;ccedil;in projede yer alan Controller klas&amp;ouml;r&amp;uuml; i&amp;ccedil;erisine ProductController adında bir Controller ekleyelim ve aşağıdaki 2 end-point'i tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Route("api/[controller]")]
+[ApiController]
+public class ProductController : ControllerBase
+{
+    private readonly IProductService _productService;
+    public ProductController(IProductService productService)
+    {
+        _productService = productService;
+    }
+
+    [HttpGet]
+    public ActionResult&amp;lt;GetAllProductResponse&amp;gt; GetAll()
+    {
+        var response = _productService.GetAllProducts();
+        return Ok(response);
+    }
+
+    [HttpPost]
+    public ActionResult Post([FromBody] AddProductRequest reqModel)
+    {
+        _productService.AddProduct(reqModel);
+        return Ok();
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Geliştirmelerimiz bu kadardı. Entity Framework Core ve Asp.Net Core Web Api kullanarak u&amp;ccedil;tan uca bir ProductApi oluşturduk ve data access layer i&amp;ccedil;in Generic Repository Pattern'den faydalandık.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yukarıda da bahsettiğim gibi Entity Framework Core benchmark testlerinde en performanslı orm olarak karşımıza &amp;ccedil;ıkmakta ve microsoft'un core &amp;ccedil;atısı altında en &amp;ccedil;ok &amp;ouml;nem verdiği &amp;uuml;r&amp;uuml;nlerin başında gelmekte. Sizlerde bu yazımızda olduğu gibi&amp;nbsp;hızlı bir şekilde u&amp;ccedil;tan uca bir api projesi geliştirebilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-06-23 21:17:00</pubDate>
+  <lastModified>2020-03-04 08:02:55</lastModified>
+  <raters>2</raters>
+  <rating>5</rating>
+  <slug>entity-framework-core-nedir-generic-repository-pattern-kullanarak-asp-net-core-web-api-projesi-gelistirme</slug>
+  <tags>
+    <tag>entity framework core nedir</tag>
+    <tag>entity framework core kullanımı</tag>
+    <tag>Generic Repository</tag>
+    <tag>asp.net core web api</tag>
+  </tags>
+  <comments>
+    <comment id="a976e525-1d2b-45ca-a215-b3e8918f3206" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-01-24 14:48:03</date>
+      <author>dadas</author>
+      <email>asda</email>
+      <country />
+      <ip>195.244.36.231</ip>
+      <avatar />
+      <content>sada</content>
+    </comment>
+    <comment id="6be018d2-f211-4914-a198-44ab3b110d68" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2020-03-01 17:31:23</date>
+      <author>Ferit</author>
+      <email>Ferit@hot.com</email>
+      <country />
+      <ip>85.101.253.201</ip>
+      <avatar />
+      <content>Başıkta Entity Framework Core Nedir de vardı. Onu es geçmişsin</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>12fb8d4e-b852-4059-a0cb-9565196e4f88</category>
+  </categories>
+  <notifications>
+    <email>asda</email>
+  </notifications>
+</post>

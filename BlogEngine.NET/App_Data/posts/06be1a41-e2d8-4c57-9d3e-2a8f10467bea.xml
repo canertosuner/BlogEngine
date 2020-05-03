@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>NLog EventLog</title>
+  <description>Daha önce ki Log4Net yazımızda log tutmanın ne kadar önemli olduğu ve .Net tarafında kullanabileceğimiz free yapılardan biri olan Log4Net implementasyonunu incelemiştik. Bu yazıda ise bir diğer free framework olan NLOG dan bahsedeceğim. Nlog ile mail atabilir, file log'a, console'a, event log'a log, db ye log atabiliriz.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nce ki &lt;a href="http://canertosuner.com/post/Log4Net-Entegrasyonu.aspx"&gt;Log4Net&lt;/a&gt;&amp;nbsp;yazımızda log tutmanın ne kadar &amp;ouml;nemli olduğu ve .Net tarafında kullanabileceğimiz free yapılardan biri olan Log4Net implementasyonunu incelemiştik. Bu yazıda ise bir diğer free framework olan &lt;strong&gt;NLOG &lt;/strong&gt;dan bahsedeceğim. Nlog ile mail atabilir, file log'a, console'a, event log'a log, db ye log atabiliriz.&lt;/p&gt;
+&lt;p&gt;NLog ile ;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Fatal &lt;/strong&gt;&amp;Uuml;st Seviye : Sistem &amp;ccedil;&amp;ouml;kmeleri&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Error &lt;/strong&gt;Uygulama hataları ( Exceptions )&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Warn &lt;/strong&gt;Uyarılar, yinede uygulama &amp;ccedil;alışmaya devam edebilir.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Info &lt;/strong&gt;Bilgilendirme herhangi bir ama&amp;ccedil;lı olabilir. Kullanıcı bilgileri g&amp;uuml;ncellendi vs.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Debug &lt;/strong&gt;&amp;Ccedil;alıştırılan sorgular, oturum s&amp;uuml;resinin bitmesi vs.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Trace &lt;/strong&gt;Bir eylem başladı diğeri bitti gibi. &amp;Ouml;rn : Fonksiyon başlangıcı ve bitişi durumları( En Alt Seviye )&lt;/p&gt;
+&lt;p&gt;seviyelerinde log tutabiliriz. Biz bu yazıda NLog ile Event Log'a nasıl log atılır bunu inceliyor olucaz.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1.Adım&amp;nbsp;&lt;/strong&gt;İlk olarak işletim daha &amp;ouml;nceden yğklenmiş olan PowerShell programını y&amp;ouml;netici olarak a&amp;ccedil;ıyoruz ve &lt;strong&gt;MyTestAppLog&amp;nbsp;&lt;/strong&gt;adında bir event log ve bu event log altında &lt;strong&gt;MyTestAppSource&amp;nbsp;&lt;/strong&gt;adında bir source oluşturuyoruz. Daha sonrasında oluşturduğumuz uygulama ve source isimlerini webconfig tarafta konfigurasyon yaparken ilgili alanlara set edicez.&lt;/p&gt;
+&lt;p&gt;PowerShell de aşağıdaki gibi code satırını yazıyoruz.&lt;/p&gt;
+&lt;p&gt;&lt;span style="color: #ffffff; background-color: #888888;"&gt;&amp;nbsp; New-EventLog -LogName MyTestAppLog -Source&amp;nbsp;MyTestAppSource &amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Sonradan işletim sisteminde bulunan search kısmına view event log yazarak event viewer'ı a&amp;ccedil;ıyoruz ve oluşturduğumuz&amp;nbsp;MyTestAppLogve&amp;nbsp;MyTestAppSource&amp;nbsp;ekranda g&amp;ouml;rmemiz gerekiyor.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img src="https://i.imgsafe.org/7f68383.png" alt="" width="183" height="224" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2.Adım&lt;/strong&gt; İkinci olarak VS da boş bir Web projesi a&amp;ccedil;ıp Nuget paket y&amp;ouml;neticisine Install-Package NLog yazıp ilgili k&amp;uuml;t&amp;uuml;phaneyi indiriyoruz ve projemizdeki WebConfig dosyası i&amp;ccedil;erisine NLog configurasyonunu sağlayan satırları yazıyoruz.&lt;/p&gt;
+&lt;p&gt;Configuration tagları arasına aşağıdakini yazıyoruz&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;section name="nlog" type="NLog.Config.ConfigSectionHandler, NLog"/&amp;gt;  &lt;/pre&gt;
+&lt;p&gt;Daha sonrada configuration tag'inin kapandığı yerin altına da şu şekilde yazıyoruz&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;nlog
+    autoReload="true"
+    throwExceptions="true"&amp;gt;
+    &amp;lt;variable name="appName" value="MyTestApp" /&amp;gt;
+ 
+    &amp;lt;targets async="true"&amp;gt;
+        &amp;lt;target type="EventLog"
+            log="MyTestAppLog"
+            name="eventlog"
+            source="MyTestAppSource"
+            layout="${message}${newline}${exception:format=ToString}"/&amp;gt;
+    &amp;lt;/targets&amp;gt;
+
+    &amp;lt;rules&amp;gt;
+      &amp;lt;logger name="*" writeTo="eventlog" minlevel="Info" /&amp;gt;
+    &amp;lt;/rules&amp;gt;
+  &amp;lt;/nlog&amp;gt;&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&amp;Uuml;stteki configurasyonda ;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&amp;lt;target type="EventLog"&amp;nbsp;&lt;/strong&gt;diyerek EventLog configurasyonu olduğunu belirtiyoruz,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;log="MyTestAppLog"&amp;nbsp;&lt;/strong&gt;EventLog adı, &amp;nbsp;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;name="eventlog"&amp;nbsp;&lt;/strong&gt;diyerek isimlendiriyoruz,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;source="MyTestAppSource"&amp;nbsp;&lt;/strong&gt;EventLog da tanımlı olan Source adı.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;layout="$&amp;nbsp;&lt;/strong&gt;ile log formatını belirliyoruz.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;lt;rules&amp;gt;&amp;nbsp;&lt;/strong&gt;tag'i arasına yazdığımız kod satırıyla eventlog adında tanımlı olan log configurasyonu i&amp;ccedil;in minimum Info seviyesinde log tut.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;3.Adım&amp;nbsp;&lt;/strong&gt;Şimdi C# tarafına ge&amp;ccedil;ip nasıl log atacağız onu yazalım&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; public class NLogManager 
+    {
+        //WebConfigde tanımladığımız gibi info ve yukarı seviyeler i&amp;ccedil;in eventLog'a log atacaktır
+        public void LogError(LogModel entry)
+        {
+           var logger = NLog.LogManager.GetCurrentClassLogger();
+           logger.Log(LogLevel.Info, "Info Logged");
+           logger.Log(LogLevel.Error, "Error Logged");
+        }
+    }&lt;br /&gt;&lt;br /&gt;Uygulamamızı &amp;ccedil;alıştırdığımızda event log da aşağıdaki gibi log d&amp;uuml;şt&amp;uuml;ğ&amp;uuml;n&amp;uuml; g&amp;ouml;receğiz&lt;/pre&gt;
+&lt;p&gt;&lt;img style="float: left;" src="https://i.imgsafe.org/8060c48.png" alt="" width="562" height="237" /&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;nbsp;&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-03-23 23:41:00</pubDate>
+  <lastModified>2020-01-20 08:22:25</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>nlog-eventlog</slug>
+  <tags>
+    <tag>nlog</tag>
+    <tag>eventlog</tag>
+    <tag>log</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+  </categories>
+  <notifications />
+</post>

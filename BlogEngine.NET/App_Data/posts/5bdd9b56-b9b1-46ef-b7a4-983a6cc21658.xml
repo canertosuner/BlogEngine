@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Entity Framework Core Data Concurrency Optimistic Lock</title>
+  <description>Data Concurrency yönetimi server-side bir projede oldukça büyük önem arzetmektedir. Kullanıcıya hem doğru hemde fresh dediğimiz bayat olmayan veriyi Concurrency conflicts'lerine yol açmadan ulaştırabilmek gerekir. Concurrency conflict'leri dediğimiz durum Optimistic Lock Nedir ? Pessimistic Lock Nedir ?</description>
+  <content>&lt;p&gt;Data Concurrency y&amp;ouml;netimi server-side bir projede olduk&amp;ccedil;a b&amp;uuml;y&amp;uuml;k &amp;ouml;nem arzetmektedir. Kullanıcıya hem doğru hemde&amp;nbsp;fresh dediğimiz bayat olmayan veriyi Concurrency conflicts'lerine yol a&amp;ccedil;madan ulaştırabilmek gerekir. Concurrency conflict'leri dediğimiz durum Optimistic Lock Nedir ? Pessimistic Lock Nedir ?&lt;/p&gt;
+&lt;p&gt;Data concurrency yazımızdada bahsettiğimiz &amp;uuml;zre;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Bir internet sitesinde kayıtlı bulunan adres bilginizi g&amp;uuml;ncellemek istiyorsunuz. Aynı anda 2 farklı bilgisayardan bilgileri g&amp;uuml;ncelle sayfasını a&amp;ccedil;tınız ve adresiniz o an "Samsun" olarak kayıtlı yani 2 ekranda da "Samsun" yazıyor. İlk bilgisayarda bulunan kişi adres bilgisini "Ankara" olarak değiştirdi ve g&amp;uuml;ncelle butonuna basıp bilgiyi g&amp;uuml;ncelledi.&lt;/p&gt;
+&lt;p&gt;İkinci ekranda bulunan kişi ise ekranda halen "Samsun" yazılı iken adres bilgisini "İstanbul" olarak değiştirdi ve g&amp;uuml;ncelle butonuna basıp bilgiyi g&amp;uuml;ncelledi. Ekranda yazan "Samsun" kaydı artık bizim i&amp;ccedil;in bayat bir kayıttır ve birinci kullanıcı değişikliği "Samsun" =&amp;gt; "Ankara" yaptığını d&amp;uuml;ş&amp;uuml;n&amp;uuml;rken ikinci kişi bu değişikliği "Samsun" =&amp;gt; "İstanbul" yaptığını d&amp;uuml;ş&amp;uuml;n&amp;uuml;yor. Halbuki ger&amp;ccedil;ekte olan ikinci kişi adres bilgisi ekranda "Ankara" iken =&amp;gt; "İstanbul" olarak değiştirmiş oldu.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Kısaca&amp;nbsp;Last In Wins yani son gelen kazanır.&amp;nbsp;Bu gibi durumlara yol a&amp;ccedil;mamak adına kullanmış olduğunuz ORM &amp;ccedil;eşidine g&amp;ouml;re farklı &amp;ccedil;&amp;ouml;z&amp;uuml;mler sunulmakta.&amp;nbsp;Data Concurrency'yi sağlayabilmek adına genellikle &amp;uuml;zerinde işlem yapılan data'ya lock işlemi uygulanır. Locking işlemi i&amp;ccedil;in 2 farklı yaklaşım vardır. Pessimistik Lock ve Optimistic Lock.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda ise Entity Framework Core&amp;nbsp;kullandığımız bir projede Concurrency sağlamak adına neler yapabiliriz değineceğiz.&lt;/p&gt;
+&lt;p&gt;Entity Framework Core Concurrency Conflict'lerini engel olmak adına 2 se&amp;ccedil;enek sunmakta.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Mevcut Property'i bir Concurrency Token attribute'&amp;uuml; ile konfig&amp;uuml;re etmek,&lt;/li&gt;
+&lt;li&gt;RowVersion oluşturarak tıpkı bir concurency token gibi davranmasını sağlamak.&amp;nbsp;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;&lt;strong&gt;Property Based Configuration (ConcurrencyCheck&amp;nbsp;Attribute)&lt;/strong&gt;&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Property'ler&amp;nbsp;ConcurrencyCheck attribute'&amp;uuml; kullanılarak o property i&amp;ccedil;in bir concurrency token oluşturmasını sağlar ve conflict'lere engel olmamıza olanak sağlar.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Customer
+{
+    [ConcurrencyCheck]
+    public string FullName { get; set; }
+    public string CityCode { get; set; }
+    public DateTime BirthDate { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;Concurrency Token tanımlamanın bir diğer yoluda&amp;nbsp;mapping oluştururken property i&amp;ccedil;in bu bilgiyi&amp;nbsp;&lt;strong&gt;IsConcurrencyToken()&lt;/strong&gt; metodunu kullanarak set etmek.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class CustomerDbContext : DbContext
+{
+    public DbSet&amp;lt;Customer&amp;gt; Customers { get; set; }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+         modelBuilder.Entity&amp;lt;Customer&amp;gt;()
+            .Property(a =&amp;gt; a.FullName).IsConcurrencyToken();
+    } 
+}
+
+public class Customer
+{
+    public string FullName { get; set; }
+    public string CityCode { get; set; }
+    public DateTime BirthDate { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda yaptığımız konfigurasyonlar sonucunda model'i retrieve ederken almış olduğumuz concurrency token bilgisi her bir Update ve Delete query'si i&amp;ccedil;in where koşuluna eklenir. Execution sırasında Entity Framework where koşuluna eklediği bu token bilgisi konfig&amp;uuml;re edilmiş kolonlardan birisi data'nın retrieve edildiği ve update işlemi g&amp;ouml;nderildiği zaman diliminde değiştirilmişse DbUpdateConcurrencyException throw eder.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Database operation expected to affect 1 row(s) but actually affected 0 row(s). Data may have been modified or deleted since entities were loaded.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p style="text-align: left;"&gt;Test ettiğimizde update işlemi g&amp;ouml;nderdiğimiz sırada data&amp;nbsp;retrieve anında db de ilgli alanı&amp;nbsp;manuel olarak update ettikten sonra devam ettiğimizde aşağıdaki gibi hata alırız.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/lck_efcore_err_msg.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Concurrency token&amp;nbsp;kullanarak modelinizde bulunan property'ler i&amp;ccedil;in tanımlamalar yaparak data-concurrency'i sağlayabilirsiniz ancak unutmamalıyız ki aynı modelde bulunan &amp;ccedil;ok fazla property i&amp;ccedil;in(more than 20) kullanmak where koşulunda belirtilen condition'ları arttırmak demektir ve buda execution&amp;nbsp;s&amp;uuml;resinin artmasına sebep olacaktır.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="color: #ff0000;"&gt;RowVersion Column&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Data Concurrency sağlamak adına kullanılabilecek ikinci y&amp;ouml;ntem ise Rowversion kullanmak. İlgili tabloya RowVersion adında yeni bir column ekleyerek o row i&amp;ccedil;in ge&amp;ccedil;erli bir concurrency token yada version bilgisi store ederek. Concerrency Conflict oluşmasına engel olabiliriz. RowVersion incremental olması gerekmekte bu sebeple numeric bir değeri olmalı. &amp;Ouml;rnek olarak ; userA ve userB aynı model'i rowVersion 1 olarak&amp;nbsp;retrieve ettiler ancak userA bir update işlemi yaparak rowVersion'ı 2 yaptı. userB update işlemi g&amp;ouml;nderdiğinde Entity Framework Core&amp;nbsp;DbUpdateConcurrencyException throw ederek conflict hatası verecektir ve update ger&amp;ccedil;ekleşmeyecektir.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/optimistic_pessimistic_sample_img.png" alt="" width="652" height="271" /&gt;&lt;/p&gt;
+&lt;p&gt;RowVersion property'sinin tipi byte array olması gerekmekte ve TimeStamp&amp;nbsp;data annotations attribute'&amp;uuml; kullanarak&amp;nbsp;konfig&amp;uuml;re edilebilmekte.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Customer
+{
+    public string FullName { get; set; }
+    public string CityCode { get; set; }
+    public DateTime BirthDate { get; set; }
+    [TimeStamp]
+    public byte[] RowVersion { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;Fluent Api kullanarak yapmak istersekte aşağıdaki gibi mapping sırasında bu bilgiyi set edebiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class CustomerDbContext : DbContext
+{
+    public DbSet&amp;lt;Customer&amp;gt; Customers { get; set; }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+         modelBuilder.Entity&amp;lt;Customer&amp;gt;()
+            .Property(a =&amp;gt; a.RowVersion).IsRowVersion();
+    } 
+}
+
+public class Customer
+{
+    public string FullName { get; set; }
+    public string CityCode { get; set; }
+    public DateTime BirthDate { get; set; }
+    public byte[] RowVersion { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;Yine yukarıdaki gibi projeyi&amp;nbsp;&amp;ccedil;alıştırıp&amp;nbsp;2 farklı session'da data get işleminden ilgili row'Da bulunan&amp;nbsp;column'lar dan herhangi birini başarılı bir şekilde update edip&amp;nbsp;sonra diğerinde update işlemi g&amp;ouml;nderdiğimizde&amp;nbsp;entity franework tarafından data-conflict olduğunu s&amp;ouml;yleyen&amp;nbsp;DbUpdateConcurrencyException throw edildiğini g&amp;ouml;receksinizdir.&lt;/p&gt;
+&lt;p&gt;Bu exception'ı bir try-catch bloğu kullanarak handle edebilir ve ikinci kullanıcıya anlamlı bir error-message g&amp;ouml;stererek tekrardan en g&amp;uuml;ncel olan kaydı g&amp;ouml;sterip ardından yeniden update işlemi yapmasını sağlayabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-10-08 21:21:00</pubDate>
+  <lastModified>2020-04-08 18:05:47</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>entity-framework-core-concurrency</slug>
+  <tags>
+    <tag>entity framework core nedir</tag>
+    <tag>entity framework core lock</tag>
+    <tag>entity framework core optimistic lock</tag>
+    <tag>data concurrency</tag>
+  </tags>
+  <comments>
+    <comment id="38881651-370c-4f44-8c24-eb82b1f3cfa9" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2020-04-08 18:05:47</date>
+      <author>Mürsel Doğrusözlü</author>
+      <email>murseldogrusozlu@gmail.com</email>
+      <country />
+      <ip>185.150.2.179</ip>
+      <avatar />
+      <content>Teşekkürler Caner bey güzel ve oldukça faydalı bir yazı olmuş. 
+Elinize sağlık.....</content>
+    </comment>
+    <comment id="c5b0b0fa-5471-40bb-a213-9bda9b8ba22f" parentid="38881651-370c-4f44-8c24-eb82b1f3cfa9" approved="True" spam="False" deleted="False">
+      <date>2020-04-14 06:09:53</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>159.146.18.104</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumunuz için teşekkürler.</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>12fb8d4e-b852-4059-a0cb-9565196e4f88</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Api MemoryCache Kullanımı</title>
+  <description>Daha &amp;ouml;nce Web Api&amp;nbsp;ile ilgili yazdığımız yazılarda &amp;ccedil;eşitli konulara değinmiştik ve b</description>
+  <content>&lt;pre class="brush:html;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;nbsp;&lt;/pre&gt;
+&lt;p&gt;Daha &amp;ouml;nce &lt;strong&gt;&lt;a href="/category/WebApi"&gt;Web Api&lt;/a&gt;&lt;/strong&gt;&amp;nbsp;ile ilgili yazdığımız yazılarda &amp;ccedil;eşitli konulara değinmiştik ve bunlardan bir tanesi de yazısıydı. Bu yazımızda yine web api i&amp;ccedil;in cache'den bahsediyor olacağız anack bu sefer output cache değilde uygumala i&amp;ccedil;erisinde kendimiz manuel olarak memory'e atıp daha sonra kullanmak istediğimiz de alıp modify edebilmemizi sağlayan veya direkt olarak output cache de olduğu gibi alıp client'a d&amp;ouml;nmemizi sağlayan yapı &lt;strong&gt;MemoryCache&amp;nbsp;&lt;/strong&gt;den bahsediyor olacağız. MemoryCache .Net 4.0 ile birlikte&amp;nbsp;&lt;strong&gt;System.Runtime.Caching.dll&lt;/strong&gt; i&amp;ccedil;erisinde sunulmuş bir yapı olarak karşımıza &amp;ccedil;ıkıyor. Projemize bu dll'i referans olarak eklemek i&amp;ccedil;in solution'da bulunan references'a sağ tıklayıp add reference deyip Assemblies =&amp;gt; Framework&amp;nbsp;kategorisine tıkalyıp gelen listeden&amp;nbsp;&lt;strong&gt;System.Runtime.Caching.dll&lt;/strong&gt;'ini se&amp;ccedil;ip ekliyoruz.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/08/webapi_memorycache.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Referansımızı ekeldikten sonra projemize &lt;strong&gt;CacheManager&lt;/strong&gt; adında adında bir class ekleyelim. Case ş&amp;ouml;yle olsun, ProductController.cs adında bir controller ve i&amp;ccedil;erisinde &lt;strong&gt;GetAllProducts&lt;/strong&gt; ve &lt;strong&gt;GetProductById&lt;/strong&gt; adında iki metot tanımlayalım. İlk metotda geriye d&amp;ouml;nd&amp;uuml;ğ&amp;uuml;m&amp;uuml;z product listesini &lt;strong&gt;CacheManager&lt;/strong&gt;&amp;nbsp;class'ını kullanarak MemoryCache'e atalım ve GetProductById metoduna Id parametresi ile request'te bulunulduğunda cache'den okuyup geriye product objesini d&amp;ouml;nelim.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;CacheManager.cs&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CacheManager
+    {
+        ObjectCache cache = MemoryCache.Default;
+
+        public void Add&amp;lt;T&amp;gt;(string key, T source)
+        {
+            //60 dakika boyunca cache'de tutacak
+            var policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(60) };
+            cache.Add(key, source, policy);
+        }
+
+        public T Get&amp;lt;T&amp;gt;(string key)
+        {
+            var result = (T)cache.Get(key);
+            return result;
+        }
+
+        public void Remove(string key)
+        {
+            MemoryCache.Default.Remove(key); 
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Product.cs&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public decimal Price { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;ProductController.cs&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class ProductController : ApiController
+    {
+        [HttpGet]
+        public Product[] GetAllProducts()
+        {
+            Product[] products = new Product[] 
+			{ 
+				new Product { Id = 1, Name = "Tomato Soup", Category = "Groceries", Price = 1 }, 
+				new Product { Id = 2, Name = "Yo-yo", Category = "Toys", Price = 3.75M }, 
+				new Product { Id = 3, Name = "Hammer", Category = "Hardware", Price = 16.99M } 
+			};
+
+            //&amp;uuml;r&amp;uuml;nleri cache'e atıyoruz
+            var cm = new CacheManager();
+            cm.Add&amp;lt;Product[]&amp;gt;("products", products);
+
+            return products;
+        }
+
+        [HttpGet]
+        public Product GetProductById(int Id)
+        {
+            var cm = new CacheManager();
+
+            var obj = cm.Get&amp;lt;Product[]&amp;gt;("&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;products&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;").FirstOrDefault(p =&amp;gt; p.Id == Id); return obj; } }&lt;/pre&gt;
+&lt;p&gt;Projemizi run edip browser aracılığıyla &amp;ouml;nce &lt;strong&gt;GetAllProducts&lt;/strong&gt; metoduna request'te bulunuyoruz ve product listesini return etmeden &amp;ouml;nce &lt;strong&gt;CacheManager&lt;/strong&gt;'ın &lt;strong&gt;Add&lt;/strong&gt; metodunu kullanarak geriye product listesini return etmeden&amp;nbsp;&amp;ouml;nce listeyi alıp "&lt;span style="color: #ff0000;"&gt;&lt;strong&gt;products&lt;/strong&gt;&lt;/span&gt;" key'i ile&amp;nbsp;cache'e atıyor ve sonrasında return ediyor.&amp;nbsp;Product listesini&amp;nbsp;aldıktan sonra Id=2 olan &amp;uuml;r&amp;uuml;n i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;GetProductById &lt;/strong&gt;metoduna request'te bulunuyoruz ve ilk olarak &lt;strong&gt;CacheManager&amp;nbsp;&lt;/strong&gt;i&amp;ccedil;erisine gidip "&lt;span style="color: #ff0000;"&gt;&lt;strong&gt;products&lt;/strong&gt;&lt;/span&gt;" key'i ile mcache atılmış olan product listesini bulup alıyor ve sonrasında Id=2 olan product'ı bulup geriye d&amp;ouml;nd&amp;uuml;r&amp;uuml;yor.&lt;/p&gt;
+&lt;p&gt;Manuel olarak MemoryCache entegrasyonu bu şekilde yapabilirsiniz veya ihtiyaca g&amp;ouml;re farklı kullanımlarda uygulayabilirsiniz. Cache &amp;ouml;nemlidir arkadaşlar, doğru yerde kullanıldığında &amp;ccedil;ok can kurtarır :)&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-08-29 21:50:00</pubDate>
+  <lastModified>2016-08-02 10:50:35</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>web-api-memorycache-kullanimi</slug>
+  <tags />
+  <comments />
+  <categories>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

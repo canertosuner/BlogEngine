@@ -1,0 +1,461 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Unit of Work Interceptor, Castle Windsor, NHibernate ve Generic Repository</title>
+  <description>Unit of Work Pattern Martin Fowler'ın 2002 yılında yazdığı Patterns of Enterprise Application Architecture kısaca PoEAA olarak da adlandırılan kitabında bahsetmesiyle hayatımıza girmiş bir pattern dır.</description>
+  <content>&lt;p&gt;Unit of Work Pattern Martin Fowler'ın 2002 yılında yazdığı&amp;nbsp;&lt;strong&gt;Patterns of Enterprise Application Architecture&amp;nbsp;&lt;/strong&gt;kısaca&amp;nbsp;&lt;strong&gt;&lt;a href="https://martinfowler.com/eaaCatalog/unitOfWork.html"&gt;PoEAA&amp;nbsp;&lt;/a&gt;&lt;/strong&gt;olarak da adlandırılan kitabında bahsetmesiyle&amp;nbsp;hayatımıza girmiş bir pattern dır.&lt;/p&gt;
+&lt;p&gt;M.Fowler kitabında UoW'&amp;uuml; şu şekilde tanımlar,&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Maintains a list of objects affected by a business transaction and coordinates the writing out of changes and the resolution of concurrency problems.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Unit of Work; database'de execute etmemiz gereken bir dizi işlemin&amp;nbsp;yani birden fazla transaction'a ihtiya&amp;ccedil; duyarak yapacağımız işlemler (Create, Update, &amp;nbsp;Insert, Delete, Read) dizinini success veya fail olması durumunda tek bir unit yani tek bir birim olarak ele alıp y&amp;ouml;netilmesini sağlayan pattern dir.&lt;/p&gt;
+&lt;p&gt;Diğer bir değişle;&amp;nbsp;ardı ardına &amp;ccedil;alışması gereken 2 sql transaction var ve bunlardan biri insert diğeride update yapsın. İlk olarak insert yaptınız ve hemen sonrasında update sorgusunu &amp;ccedil;alıştırdınız fakat update işlemi bir sorun oluştu ve fail oldu. Unit of work tam da bu sırada araya girerek bu iki işlemi bir birimlik bir işlem olarak ele alır ve normal şartlarda ikisininde success olması durumunda commit edeceği sessino'ı update işlemi fail verdiğinden ilk işlem olan insert'&amp;uuml; rollback yapar ve db de yanlış veya eksik kayıt oluşmasını engeller. Yada ikiside success olduğunda session'ı commit ederek&amp;nbsp;consistency'i sağlar.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek &amp;uuml;zerinden ilerleyecek olursak; bir data-access katmanımız olsun ve ORM olarak da NHibernate'i kullanıyor olalım. Projemizde IoC container olarak da Castle Windsor'ı entegre edelim.&amp;nbsp;İlk olarak Vs'da "UoW_Sample" adında bir&amp;nbsp;Empty Asp.Net Web Api projesi oluşturalım ve sonrasında nugetten Sırasıyla&amp;nbsp;&lt;strong&gt;&lt;a href="https://www.nuget.org/packages/FluentNHibernate/2.0.3"&gt;Fluent-NHibernate&lt;/a&gt;&amp;nbsp;&lt;/strong&gt;ve&amp;nbsp;&lt;strong&gt;&lt;a href="https://www.nuget.org/packages/Castle.Windsor/4.0.0"&gt;Castle Windsor&lt;/a&gt;&lt;/strong&gt;'ı y&amp;uuml;kleyelim.&lt;/p&gt;
+&lt;p&gt;Case'imiz şu şekilde olsun; User ve Address adında tablolarımız var ve AddNewUser adında bir endpoint'ten hem kullanıcı hemde address bilgileri i&amp;ccedil;eren bir model alarak sırasıyla User'ı ve Address'i insert etmeye &amp;ccedil;alışalım. User'ı insert ettikten sonra Address insert sırasında bir sorun oluşsun ve UoW araya girerek&amp;nbsp;kaydedilecek olan user'ı da rollback yapsın.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;ncelikle User ve Address modellerimizi aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class User
+   {
+       public virtual int Id { get; set; }
+       public virtual string Name { get; set; }
+       public virtual string SurName { get; set; }
+   }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Address
+   {
+       public virtual int Id { get; set; }
+       public virtual string CityCode { get; set; }
+       public virtual string DistrictCode { get; set; }
+       public virtual string Description { get; set; }
+       public virtual int UserId { get; set; }
+   }&lt;/pre&gt;
+&lt;p&gt;Bu modellere ait Nhibernate Mapping'lerini de aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class UserMap : ClassMap&amp;lt;User&amp;gt;
+{
+    public UserMap()
+    {
+        Id(x =&amp;gt; x.Id);
+        Map(x =&amp;gt; x.Name);
+        Map(x =&amp;gt; x.SurName);
+        Table("Users");
+    }
+}&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class AddressMap : ClassMap&amp;lt;Address&amp;gt;
+{
+    public AddressMap()
+    {
+        Id(x =&amp;gt; x.Id);
+        Map(x =&amp;gt; x.CityCode);
+        Map(x =&amp;gt; x.DistrictCode);
+        Map(x =&amp;gt; x.Description);
+        Map(x =&amp;gt; x.UserId);
+        Table("Address");
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Repository kullanımı i&amp;ccedil;in aşağıdaki gibi generic repo class'larını oluşturalım. Bu aray&amp;uuml;z &amp;uuml;zerinden db de bulunan tablolarımız i&amp;ccedil;in CRUD işlemlerini yapacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IRepository&amp;lt;T&amp;gt; where T : class
+    {
+        T Get(int id);
+        IQueryable&amp;lt;T&amp;gt; SelectAll();
+        T GetBy(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; expression);
+        IQueryable&amp;lt;T&amp;gt; SelectBy(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; expression);
+        int Insert(T entity);
+        void Update(T entity);
+    }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;  public abstract class BaseRepository&amp;lt;T&amp;gt; : IRepository&amp;lt;T&amp;gt; where T : class
+    {
+        public ISessionFactory SessionFactory { get; private set; }
+
+        public ISession _session
+        {
+            get { return this.SessionFactory.GetCurrentSession(); }
+        }
+
+        public BaseRepository(ISessionFactory sessionFactory)
+        {
+            SessionFactory = sessionFactory;
+        }
+
+        public T Get(int id)
+        {
+            return _session.Get&amp;lt;T&amp;gt;(id);
+        }
+
+        public IQueryable&amp;lt;T&amp;gt; SelectAll()
+        {
+            return _session.Query&amp;lt;T&amp;gt;();
+        }
+
+        public T GetBy(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; expression)
+        {
+            return SelectAll().Where(expression).SingleOrDefault();
+        }
+        public IQueryable&amp;lt;T&amp;gt; SelectBy(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; expression)
+        {
+            return SelectAll().Where(expression).AsQueryable();
+        }
+
+        public int Insert(T entity)
+        {
+            var savedId = (int)_session.Save(entity);
+            _session.Flush();
+            return savedId;
+        }
+
+        public void Update(T entity)
+        {
+            _session.Update(entity);
+            _session.Flush();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Tablolarımıza karşılık UserRepository ve AddressRepository class'larını aray&amp;uuml;zleri ile birlikte aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IUserRepository : IRepository&amp;lt;User&amp;gt;
+    { }
+
+    public class UserRepository : BaseRepository&amp;lt;User&amp;gt;, IUserRepository
+    {
+        public UserRepository(ISessionFactory sessionFactory) : base(sessionFactory)
+        {
+        }
+    }
+&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IAddressRepository : IRepository&amp;lt;Address&amp;gt;
+    { }
+
+    public class AddressRepository : BaseRepository&amp;lt;Address&amp;gt;, IAddressRepository
+    {
+        public AddressRepository(ISessionFactory sessionFactory) : base(sessionFactory)
+        {
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Repository'lerimiz direkt olarak api'ın controller'ları&amp;nbsp;ile haberleşmesini istemediğimizden bir service katmanımızın olduğunu d&amp;uuml;ş&amp;uuml;nerek &lt;strong&gt;UserService&lt;/strong&gt; adında doğrudan Repository'ler ile iletişim kurabilen class'ımızı oluşturalım ve Unit Of Work interceptor'ı da bu service class'ları seviyesinde container'a inject edeceğiz.&lt;/p&gt;
+&lt;p&gt;Projede yer alan service'leri bir &amp;ccedil;eşit flag'lemek adına IApiService adında bir base interface tanımlayalım.Bu interface'i daha sonrasında container'a b&amp;uuml;t&amp;uuml;n service'leri register etmede de kullanacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IApiService
+    {   }
+
+    public interface IUserService : IApiService
+    {
+        void AddNewUser(AddNewUserRequest reqModel);
+    }
+    public class UserService : IUserService
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly IAddressRepository _addressRepository;
+
+        public UserService(IUserRepository userRepository, IAddressRepository addressRepository)
+        {
+            _userRepository = userRepository;
+            _addressRepository = addressRepository;
+        }
+
+        public void AddNewUser(AddNewUserRequest reqModel)
+        {
+            var user = new User { Name = reqModel.User.Name, SurName = reqModel.User.SurName };
+            var userId = _userRepository.Insert(user);
+
+            var address = new Address { UserId = userId, CityCode = reqModel.Address.CityCode, Description = reqModel.Address.Description, DistrictCode = reqModel.Address.DistrictCode };
+            _addressRepository.Insert(address);
+        }
+    }
+
+    public class AddNewUserRequest
+    {
+        public UserDto User { get; set; }
+        public AddressDto Address { get; set; }
+    }
+    public class UserDto
+    {
+        public string Name { get; set; }
+        public string SurName { get; set; }
+    }
+    public class AddressDto
+    {
+        public string CityCode { get; set; }
+        public string DistrictCode { get; set; }
+        public string Description { get; set; }
+    }
+&lt;/pre&gt;
+&lt;p&gt;Yukarıda end-point'imizin alacağı request model ve onun dto class'larını da oluşturduk. Şimdi ise api end-point'imizi tanılayalım. &amp;nbsp;UserController adında client'ların call yapacağı controller'ımız aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class UserController : ApiController
+    {
+        private readonly IUserService _userService;
+
+        public UserController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
+        [HttpPost]
+        public virtual HttpResponseMessage AddNewUser(AddNewUserRequest reqModel)
+        {
+            _userService.AddNewUser(reqModel);
+            return Request.CreateResponse();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Geliştirmemiz gereken 2 yer kaldı&amp;nbsp;Castle Windsor implementasyonu ve UnitOfWork Interceptor oluşturulması. Projemizde her şeyi interface'ler &amp;uuml;zerinden yaptık ve constructor injection'dan faydalandık. Şimdi ise Repository, Service ve Controller'lar i&amp;ccedil;in bağımlılıkları enjekte edelim ve UnitOfWork Interceptor'ı oluşturalım.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İlk olarak&amp;nbsp;&lt;strong&gt;NHibernateInstaller.cs&lt;/strong&gt;'i tanımlayalım. Burda web.config/app.config dosyamızda "&lt;strong&gt;ConnString&lt;/strong&gt;" key'i ile kayıtlı database conenction string'imiz olduğunu varsayalım ve aşağıdaki gibi tanımlamalarımızı yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class NHibernateInstaller : IWindsorInstaller
+    {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            var sessionFactory = Fluently.Configure()
+               .Database(MsSqlConfiguration.MsSql2012.ConnectionString(c =&amp;gt; c.FromConnectionStringWithKey("ConnString")).ShowSql())
+               .Mappings(m =&amp;gt; m.FluentMappings.AddFromAssemblyOf&amp;lt;UserMap&amp;gt;())
+               .ExposeConfiguration(cfg =&amp;gt; new SchemaUpdate(cfg).Execute(false, true))
+                        .ExposeConfiguration(cfg =&amp;gt;
+                        {
+                            cfg.CurrentSessionContext&amp;lt;CallSessionContext&amp;gt;();
+                        })
+               .BuildSessionFactory();
+
+            container.Register(
+                Component.For&amp;lt;ISessionFactory&amp;gt;().UsingFactoryMethod(sessionFactory).LifestyleSingleton());
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;İkinci olarak&amp;nbsp;&lt;strong&gt;RepositoryInstaller.cs&lt;/strong&gt;'i oluşturalım. Bu installer ile projemizde bulunan b&amp;uuml;t&amp;uuml;n repository interfacelerini ve onların implementasyonlarını container'a register etmiş olucaz. Her bir repository'i ayrı ayrı register etmek yerine b&amp;uuml;t&amp;uuml;n repository'lerimiz IRepository interface'in den t&amp;uuml;rediğinden container'a IRepository'i implement eden b&amp;uuml;t&amp;uuml;n class'ları register etmesini belirteceğiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class RepositoryInstaller : IWindsorInstaller
+    {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(
+                Classes.FromThisAssembly()
+                    .Pick()
+                    .WithServiceAllInterfaces()
+                    .LifestylePerWebRequest()
+                    .Configure(x =&amp;gt; x.Named(x.Implementation.Name))
+                          .ConfigureIf(x =&amp;gt; typeof(IRepository&amp;lt;&amp;gt;).IsAssignableFrom(x.Implementation), null));
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;Uuml;&amp;ccedil;&amp;uuml;nc&amp;uuml; olarak&amp;nbsp;&lt;strong&gt;ServiceInstaller.cs&lt;/strong&gt;&amp;nbsp;class'ını tanımlayalım ancak &amp;ouml;ncesinde yukarıda da belirttiğimiz gibi UnitOfWork'&amp;uuml; service seviyesinde container'a register edeceğiz. Sebebi ise repository'e erişimimiz service class'ları &amp;uuml;zerinden olması. UnitOfWork'&amp;uuml; de interceptor olarak yaratacağız ve b&amp;ouml;ylelikle service metoduna girerken session'ı bind edip metot i&amp;ccedil;erisinde herhangi bir exception aldığında rollback yapacağız yada herhangi bir sorun yoksada session'ı commit edip query'leri execute etmesini sağlayacağız. Aşağıda ilk olarak unitofwork manager ve interceptor class'larını oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IUnitOfWorkManager
+    {
+        void BeginTransaction();
+        
+        void Commit();
+        
+        void Rollback();
+    }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class UnitOfWorkManager : IUnitOfWorkManager
+    {
+        public static UnitOfWorkManager Current
+        {
+            get { return _current; }
+            set { _current = value; }
+        }
+        [ThreadStatic]
+        private static UnitOfWorkManager _current;
+        
+        public ISession Session { get; private set; }
+        
+        private readonly ISessionFactory _sessionFactory;
+        
+        private ITransaction _transaction;
+        
+        public UnitOfWorkManager(ISessionFactory sessionFactory)
+        {
+            _sessionFactory = sessionFactory;
+        }
+        
+        public void BeginTransaction()
+        {
+            Session = _sessionFactory.OpenSession();
+            CurrentSessionContext.Bind(Session);
+            _transaction = Session.BeginTransaction();
+        }
+
+        public void Commit()
+        {
+            try
+            {
+                _transaction.Commit();
+            }
+            finally
+            {
+                Session.Close();
+            }
+        }
+
+        public void Rollback()
+        {
+            try
+            {
+                _transaction.Rollback();
+            }
+            finally
+            {
+                Session.Close();
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;Yukarıda oluşturduğumuz manager'ı kullanarak UnitOfWorkInterceptor'ı da aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class UnitOfWorkInterceptor : Castle.DynamicProxy.IInterceptor
+    {
+        private readonly ISessionFactory _sessionFactory;
+
+        public UnitOfWorkInterceptor(ISessionFactory sessionFactory)
+        {
+            _sessionFactory = sessionFactory;
+        }
+
+        public void Intercept(IInvocation invocation)
+        {
+            try
+            {
+                UnitOfWorkManager.Current = new UnitOfWorkManager(_sessionFactory);
+                UnitOfWorkManager.Current.BeginTransaction();
+
+                try
+                {
+                    invocation.Proceed();
+                    UnitOfWorkManager.Current.Commit();
+                }
+                catch
+                {
+                    UnitOfWorkManager.Current.Rollback();
+                    throw new Exception("Db operation failed.");
+                }
+            }
+            finally
+            {
+                UnitOfWorkManager.Current = null;
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda tanımladığımız interceptor'ı aşağıdaki gibi service'leri register ederken bu service class'larına ait metotlar i&amp;ccedil;in UnitOfWorkInterceptor'ı configure etmesini belirteceğiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ServiceInstaller : IWindsorInstaller
+    {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.AddFacility&amp;lt;TypedFactoryFacility&amp;gt;();
+
+            container.Register(
+                Classes.FromAssemblyContaining&amp;lt;UserService&amp;gt;()
+                    .Pick()
+                    .WithServiceAllInterfaces()
+                    .LifestylePerWebRequest()
+                    .Configure(x =&amp;gt; x.Named(x.Implementation.Name))
+                          .ConfigureIf(x =&amp;gt; typeof(IApiService).IsAssignableFrom(x.Implementation),
+                            y =&amp;gt; y.Interceptors&amp;lt;UnitOfWorkInterceptor&amp;gt;()));
+
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Projemiz bir Web Api projesi olduğundan&amp;nbsp;controller'lar ile ilgili container registration işlemleri i&amp;ccedil;in gerekli olan WebApiControllerInstaller.cs class'ı ve ControllerActivator.cs class'ı tanımlamaları da aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ApiControllerActivator : IHttpControllerActivator
+    {
+        private readonly IWindsorContainer _container;
+
+        public ApiControllerActivator(IWindsorContainer container)
+        {
+            _container = container;
+        }
+
+        public IHttpController Create(
+            HttpRequestMessage request,
+            HttpControllerDescriptor controllerDescriptor,
+            Type controllerType)
+        {
+            var controller =
+                (IHttpController)this._container.Resolve(controllerType);
+
+            request.RegisterForDispose(
+                new Release(
+                    () =&amp;gt; this._container.Release(controller)));
+
+            return controller;
+        }
+
+        private class Release : IDisposable
+        {
+            private readonly Action _release;
+
+            public Release(Action release)
+            {
+                _release = release;
+            }
+
+            public void Dispose()
+            {
+                _release();
+            }
+        }
+    }
+&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class WebApiControllerInstaller : IWindsorInstaller
+    {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(Classes.FromThisAssembly()
+                .BasedOn&amp;lt;ApiController&amp;gt;()
+                .LifestylePerWebRequest());
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Geldik son adıma. Yukarıda tanımladığımız b&amp;uuml;t&amp;uuml;n installer class'larını container'a install etmeye. Bunun i&amp;ccedil;in projede yer alan Global.asax.cs i&amp;ccedil;erinde yer alan Application_Start metodu i&amp;ccedil;erisine aşağıdaki gibi installation işlemlerini yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        protected void Application_Start()
+        {
+            var container = new WindsorContainer();
+            container.Register(Component.For&amp;lt;UnitOfWorkInterceptor&amp;gt;().LifestyleSingleton());
+            container.Install(new ServiceInstaller());
+            container.Install(new RepositoryInstaller());
+            container.Install(new NHibernateInstaller());
+            container.Install(new WebApiControllerInstaller());
+            GlobalConfiguration.Configuration.Services.Replace(
+                typeof(IHttpControllerActivator),
+                new ApiControllerActivator(container));
+            GlobalConfiguration.Configure(WebApiConfig.Register);
+        }&lt;/pre&gt;
+&lt;p&gt;Postman &amp;uuml;zerinden aşağıdaki gibi end-point'imize call yapalım ve hem iki insert işlemininde başarılı olduğu case'i hemde user insert başarılı olduktan sonra address insert sırasında bir hata verdirip ilk işleminde rollback olduğu case'i&amp;nbsp;oluşturup g&amp;ouml;zlemleyebiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/uow_int_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Unit of Work pattern g&amp;ouml;zlemlediğim kadarıyla genellikle projede her query execution sırasında o satırları try-catch e alarak değişik logic'ler uygulanarak yapılıyor ancak.&amp;nbsp;Aspect oriented'ın bize sağladıklarından faydalanarak bir interceptor ile projede her yerde kullanabileceğimiz basit bir infrastructure geliştirebiliriz. Bu pattern ile aynı işleve hizmet eden birden fazla k&amp;uuml;&amp;ccedil;&amp;uuml;k k&amp;uuml;&amp;ccedil;&amp;uuml;k db&amp;nbsp;transaction'ını tek bir unit olarak y&amp;ouml;netip&amp;nbsp;dirty data'nın da &amp;ouml;n&amp;uuml;ne ge&amp;ccedil;miş oluyoruz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-09-03 21:54:00</pubDate>
+  <lastModified>2020-01-20 08:22:15</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>unit-of-work-interceptor-castle-windsor-nhibernate-ve-generic-repository</slug>
+  <tags>
+    <tag>Unit of Work</tag>
+    <tag>Unit of Work Interceptor</tag>
+    <tag>UnitOfWorkInterceptor</tag>
+    <tag>Generic Repository</tag>
+    <tag>castle windsor</tag>
+    <tag>nhibernate</tag>
+    <tag>unitofwork pattern nedir</tag>
+    <tag>unit of work nedir</tag>
+    <tag>unitofwork nedir</tag>
+  </tags>
+  <comments>
+    <comment id="aab79f9e-8d14-4d5b-af70-4b2b61f31708" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2018-12-25 14:22:56</date>
+      <author>Güray Mantar</author>
+      <email>guray_mntr@hotmail.com</email>
+      <country />
+      <ip>185.51.39.137</ip>
+      <avatar />
+      <content>Merhabalar caner bey. Sözlerime biz  biz  junior developerlara çok faydalı makaleler paylaştığınız için minnettar olduğumu belirterek başlamak istiyorum. İnternette bir kaç gündür araştırmama rağmen cevabını bir türlü bulamadığım bir soru hakkında,  sizin de soruma paralel bazı paylaşımlar yaptığınızı fark etmem üzerine mail gönderme bölümü çalışmadığı için buradan yazıyorum.Umarım olumlu yada olumsuz cevap verirsiniz. Şimdiden çok teşekkür ederim.
+Youtube&amp;#39;da kurumsal mimari adı altında https://www.youtube.com/watch?v=Q6Rt5bRddQQ&amp;amp;list=PLfusR98SaeH-TccICj0YF9SN4wnBQuDCB    linkli video serisini izledikten sonra videodaki mimarinin aynısını kendi projem için uyguladım. Mimarinin özetini ek&amp;#39;e koyacağım resimde görebilirsiniz. Hoca videoda bu mimaride generic unitofwork kullanılması durumunda çok iyi olacağını söylemiş ama kendisi kullanmamış. Bir kaç gündür bu mimaride generic unitofwork nasıl kullanabilirim diye araştırıyorum ama bir türlü bulamadım. Stack overflow&amp;#39;da  https://stackoverflow.com/questions/53899023/how-to-use-the-same-dbcontext-instance-with-multiple-services-by-injection-or-un linkli soruyu oluşturdum ve içerisinde projemdeki örnek kodları paylaştım ama pek dönüş olmadı. Umarım sizden dönüş alabilirim.
+Projemde, Interfaces katmanında yer alan IUserService gibi servislerdin referanslarını herhangi bir controller&amp;#39;ın constructor metoduna parametre olarak yazıp Ninjecten talep ettiğimde, stackoverflowdaki sorumda da göreceğiniz üzere ninject kensine belirlediğim ayarlarına bakıp, BLL katmanında yer alan UserManager class&amp;#39;ının bir nesne örneğini benim controller&amp;#39;ın constructor&amp;#39;ına yazdığım IUserService türündeki referansa atıyor fakat UserManager classın&amp;#39;ın kendi constructor&amp;#39;ın metodunda da DAL katmanındaki abstract üyelerden IUserDAL türünde bir interface referansı olduğu için ninject tekrar tetikleniyor ve yine ayarlarına bakıp bu constructor metodda yer alan IUserDAL türündeki referansa EFUserRepository classın&amp;#39;ının bir nesne örneğini atıyor. EfUserRepository class&amp;#39;ının  da constructor metodunda paramete olarak  DbContext türünde bir referans olduğu için nin ninject tekrar tetikleniyor ve DbContext nesnesinin bir örneğini oluştuup constructorda yer alan parametreye atıyor.
+Böylelikle Controllerlar içerisinde, WebUI katmanından direk erişime sahip olduğum Interfaces katmanında yer alan Service referansları üzerinden constructorlar&amp;#39;ın da aracılığı ile veritabanı işlerini gerçekleştiren Reposiyory nesnelerine kadar ulaşıp, bu repositorylere ilgili veritabanı işlerini yaptırabiliyorum.
+Burada şöyle bir problemim var. Örneğin ben bir tane action&amp;#39;ın içerisinde User, Product ve Order la ilgili olmak üzere birbirleri ile ilişkili işlemler yaptıracağım ve duruma göre şu işlem olmadıysa şu da olmasın gibi   transaction mantığını kullanmam gerekecek. Kullandığım bu mimaride, bir actiondaki belli işlemleri yapmak üzere controller&amp;#39;ın constructor&amp;#39;ına IProductService, IUserService, IOrderService şeklinde 3 tane farklı referans yazdığımda bu 3 tane servis, ninject tarafından 3 tane farklı dbContext nesnesi ile oluşturuluyor. Dolayısıyla ilgili action içerisinde bir tane servis ile yaptığım işlemi, diğer servis farklı dbcontext nesnesi ile çalıştığı için diğerinde göremiyorum. (Burada transaction mantığını kullanmayacak bile olsam 1-2 saniye içerisinde icra edilecek bir action için 3 tane farklı connection&amp;#39;ın tüketilmesi mantığıma biraz ters geldi).
+Araştırmalarım üzerine bunun generic unitofwork ile çözülebileceği söyleniyor fakat internette bulduğum örneklerde oluşturulan generic unitofworkler benim dal katmanımda bulunan Repositoryleri döndürüyor. Benim mimarime göre controllerlarım sadece Interfaces katmanında yer alan Servicelere erişebilip, bu servisler üzerinden işlemlerini yaptırdığı için benim controllerda herhangi bir yada daha fazla Service&amp;#39; e  ihtiyacım olduğunda generic unitofwork&amp;#39;e ortak dbcontext nesnesini kullanan serviceler ürettirmem gerekecek bunu nasıl yapabilirim ? 
+Şimdiden tekrar çok teşekkür ediyorum. Allah senden razı olsun.</content>
+    </comment>
+    <comment id="8a0c02dc-df59-4818-a2c5-cc718ca1d19d" parentid="aab79f9e-8d14-4d5b-af70-4b2b61f31708" approved="True" spam="False" deleted="True">
+      <date>2018-12-25 14:46:52</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.161.6</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba Güray değerli yorumların için teşekkürler. Sorun unt of workden ziyade 3 farklı servis 3 farklı dbContext nesnesi oluşturuyor dediğin için sanki sorun dbContext&amp;#39;i ninjet registration larına tanımlarken kısmında. Registration&amp;#39;ı ne şekilde yaptın ? Birde dbContext.SaveChanges() dediğinde transaction scop&amp;#39;unu commit edebiliyorsun. Yani service metodunun sonunda bu SaveChanges() metodunu çağırırsan senin için unitofwork kısmını halledecektir ama dediğim gibi sanki sorun dbContext&amp;#39;in perWebRequest gibi bir şekilde çalışması gerekirken perInstance çalışıyor gibi olmasından gibi. Ama dediğim gibi projenin tamamını görmediğim için tam emin değilim bu kısma bi yoğunlaşabilirsin</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>01a365a0-dea4-4805-8375-c19bfa24f287</category>
+  </categories>
+  <notifications>
+    <email>guray_mntr@hotmail.com</email>
+  </notifications>
+</post>

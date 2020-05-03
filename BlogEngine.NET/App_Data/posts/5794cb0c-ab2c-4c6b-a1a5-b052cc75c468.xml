@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Yeni Başlayanlar İçin Docker, Docker File - Docker Commands</title>
+  <description>Docker file özetle; içerisinde uygulamayı run edebilmek için nelerin gerekli olduğunu belirten bir dizi komutların yer aldığı YAML formatında olan dosyadır.Bir önceki docker yazımızdada kullandığımız örnek bir docker file'a bakacak olursak 4 ana bölümde inceleyebiliriz.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki docker yazısında &lt;a href="/post/asp-net-core-uygulamasi-docker-da-nasil-deploy-edilir"&gt;Asp.Net Core Uygulaması Docker'da Nasıl Deploy Edilir&lt;/a&gt;&amp;nbsp;konusuna değinmiştik &amp;ouml;rnek bir proje &amp;uuml;zerinde anlatmıştık. Bu yazımızda ise basit bir şekidle dockerFile ve docker komutları nelerdir bunlara değineceğiz.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;docker file&lt;/strong&gt;; Docker image'inin nasıl build edileceğini tarif eden dosyadır,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;docker build&lt;/strong&gt; komutu; docker file'da tarif edilen image'i build eden komuttur,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;docker run&lt;/strong&gt; komutu,&amp;nbsp;oluşturduğumuz bu image'i&amp;nbsp;başlatan(start) komuttur,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;docker compose&lt;/strong&gt; file; bir veya birden fazla docker container'ını tek seferde komutlar vererek y&amp;ouml;netmemizi sağlayan yaml dosyasıdır.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Docker file &amp;ouml;zetle; i&amp;ccedil;erisinde uygulamayı&amp;nbsp;run edebilmek i&amp;ccedil;in nelerin gerekli olduğunu&amp;nbsp;belirten bir dizi komutların yer aldığı YAML formatında olan dosyadır.&lt;/p&gt;
+&lt;p&gt;Bir &amp;ouml;nceki docker yazımızdada kullandığımız &amp;ouml;rnek bir &lt;a href="https://github.com/canertosuner/asp.net-core-hellodocker/blob/master/Dockerfile"&gt;docker file&lt;/a&gt;'a bakacak olursak&amp;nbsp;4 ana b&amp;ouml;l&amp;uuml;mde inceleyebiliriz.&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false;tab-size:2" contenteditable="false"&gt;FROM microsoft/dotnet:2.2-sdk AS build
+WORKDIR /app
+
+COPY *.csproj ./
+RUN dotnet restore
+
+COPY . ./
+RUN dotnet publish -c Release -o out
+
+FROM microsoft/dotnet:2.2-aspnetcore-runtime AS runtime
+
+WORKDIR /app
+
+COPY --from=build /app/out .
+
+ENTRYPOINT ["dotnet","HelloDocker.dll"]&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;1-) Runtime'ın Belirlenmesi&lt;/h3&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false;tab-size:2" contenteditable="false"&gt;FROM microsoft/dotnet:2.2-sdk AS build
+WORKDIR /app&lt;/pre&gt;
+&lt;p&gt;İlk satır olan &lt;strong&gt;FROM&lt;/strong&gt; syntax'ı uygulamamızı oluştururken kullanılacak base docker image'ini tanımlar. Bu &amp;ouml;rnekte microsoft tarafından oluşturulan dotnet 2.2-sdk docker image'ini kullanacağımızı belirttik.&lt;/p&gt;
+&lt;p&gt;Bir sonraki satır olan &lt;strong&gt;WORKDIR&lt;/strong&gt; komutu ise working directory'i neresi olacak belirttiğimiz yer.&lt;/p&gt;
+&lt;h3&gt;2-)&amp;nbsp;Build&lt;/h3&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false;tab-size:2" contenteditable="false"&gt;COPY *.csproj ./
+RUN dotnet restore&lt;/pre&gt;
+&lt;p&gt;Bu iki satırda Docker&amp;rsquo;a .csproj ile biten herhangi bir dosyayı yukarıda belirttiğimiz &amp;ccedil;alışma dizinine kopyalamasını s&amp;ouml;yl&amp;uuml;yoruz. Sonra dotnet CLI'den restore komutunu &amp;ccedil;alıştırıyoruz.&lt;/p&gt;
+&lt;h3&gt;3-) Publish&lt;/h3&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false;tab-size:2" contenteditable="false"&gt;COPY . ./
+RUN dotnet publish -c Release -o out&lt;/pre&gt;
+&lt;p&gt;Proje dosyaları ve restore&amp;nbsp;sonrası oluşan dosyalarla&amp;nbsp;birlikte&amp;nbsp;kalan dosyalarının kopyalarını &amp;ccedil;ıkarıyoruz ve ardından&amp;nbsp;Release&amp;nbsp;konfigurasyonlarını&amp;nbsp;kullanarak her şeyi oluşturuyoruz. Bu,&amp;nbsp;container'ı start ettiğimizde&amp;nbsp;&amp;ccedil;alıştırdığımız&amp;nbsp;uygulama olacaktır.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;4-)&amp;nbsp;Serve&lt;/h3&gt;
+&lt;p&gt;Şimdi farklı bir base image'e ge&amp;ccedil;iyoruz. Bu sefer Microsoft asp.net core runtime image'ini kullanıyoruz. Bu image ile daha &amp;ouml;cneki adımlarda compile olmuş uygulamayı run edebilmeyi sağlayacağız.&lt;/p&gt;
+&lt;p&gt;Working directory olarak /app set edilir ve birinci adımda compile ettiğimiz uygulama&amp;nbsp;mevcut &amp;ccedil;alışma dizinine kopyalanır.&lt;/p&gt;
+&lt;p&gt;Son olarak ise entrypoint satırıyla .net core runtime kullanarak uygulamanın&amp;nbsp;run edileceği yani &amp;ccedil;alıştırmak i&amp;ccedil;in kullanılacak dll bilgisi belirtilir.&lt;/p&gt;
+&lt;h3&gt;Build The Image&lt;/h3&gt;
+&lt;p&gt;Artık bir docker file'ımız ve i&amp;ccedil;erisinde image'i oluşturmak i&amp;ccedil;in gerekli stepleri i&amp;ccedil;eren kod satırları mevcut. Tek yapmamız gereken docker build komutu ile uygulamamızın image'ini oluşturmasını sağlamak.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;docker build -t hellodocker .&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Komutu &amp;ccedil;alıştırdıktan sonra aşağıdakine benzer bir ekran g&amp;ouml;r&amp;uuml;yor olmanız gerekir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2019/dockrrr_spntcor_img_rn.png" alt="" width="895" height="340" /&gt;&lt;/p&gt;
+&lt;h3&gt;Start The&amp;nbsp;Container&lt;/h3&gt;
+&lt;p&gt;Artık uygulamamıza ait image var ve bu image'i bir container i&amp;ccedil;erisinde host edebiliriz.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;nbsp;docker &lt;span class="hljs-keyword"&gt;run&lt;/span&gt;&lt;span class="bash"&gt; -p 3010:80&amp;nbsp;hellodocker&lt;/span&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Docker'a az &amp;ouml;nce oluşturduğumuz image'i kullanarak yeni bir container oluşturmasını belirttik ve bu konteynerdeki 3010 nolu harici portu 80 nolu i&amp;ccedil; porta bind ettik.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Artık tarayıcınızı a&amp;ccedil;ıp &lt;a href="http://localhost:3010/"&gt;http://localhost:3010/&lt;/a&gt;&amp;nbsp;adresine&amp;nbsp;gidip uygulamanızı g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebilirsiniz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;zetle yazımızda bir docker file neye benzer i&amp;ccedil;erisindeki komutlar en basit haliyle ne işe yarar ve docker file dosyamızı nasıl run edebiliriz konularına a&amp;ccedil;ıklık getirmeye &amp;ccedil;alıştık. Umarım yeni başlayanlar i&amp;ccedil;in hızlıca &amp;ouml;ğrenip uygulayabilmek adına g&amp;uuml;zel bir yazı olmuştur.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2019-12-11 17:28:00</pubDate>
+  <lastModified>2020-01-20 08:22:09</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>yeni-baslayanlar-icin-docker-docker-file-docker-commands</slug>
+  <tags>
+    <tag>Docker</tag>
+    <tag>dockerfile</tag>
+    <tag>docker run</tag>
+    <tag>docker nedir</tag>
+    <tag>docker kullanımı</tag>
+    <tag>docker compose</tag>
+    <tag>docker image</tag>
+  </tags>
+  <comments>
+    <comment id="3a4e1c0a-1427-4844-9b0b-b35ffdac2174" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="True" deleted="True">
+      <date>2019-12-30 10:28:18</date>
+      <author>sylwiaplazy</author>
+      <email>izabelaostryga@e1mail.pl</email>
+      <country />
+      <ip>176.61.140.65</ip>
+      <moderatedby>App_Code.Extensions.StopForumSpam</moderatedby>
+      <avatar />
+      <content>Google jak dla mnie</content>
+    </comment>
+    <comment id="95475700-e569-4670-aeb8-271a12054866" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="True" deleted="True">
+      <date>2019-12-30 12:38:41</date>
+      <author>bogumilaslimak</author>
+      <email>teofilamieczak@e1mail.pl</email>
+      <country />
+      <ip>176.61.140.52</ip>
+      <moderatedby>App_Code.Extensions.StopForumSpam</moderatedby>
+      <avatar />
+      <content>Google Jak Dla Mnie</content>
+    </comment>
+    <comment id="12b638f5-2acc-4663-8bf6-81a2756a14e3" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="True" deleted="True">
+      <date>2019-12-30 15:31:07</date>
+      <author>albinadziob</author>
+      <email>zenonaryby@e1mail.pl</email>
+      <country />
+      <ip>176.61.140.52</ip>
+      <moderatedby>App_Code.Extensions.StopForumSpam</moderatedby>
+      <avatar />
+      <content>Google jak dla mnie</content>
+    </comment>
+    <comment id="30103507-4769-4ad1-84c6-e125f5aa1a25" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="True" deleted="True">
+      <date>2019-12-30 16:04:06</date>
+      <author>hannagady</author>
+      <email>filomenagarb@e1mail.pl</email>
+      <country />
+      <ip>151.237.186.208</ip>
+      <moderatedby>App_Code.Extensions.StopForumSpam</moderatedby>
+      <avatar />
+      <content>Google jak dla mnie</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

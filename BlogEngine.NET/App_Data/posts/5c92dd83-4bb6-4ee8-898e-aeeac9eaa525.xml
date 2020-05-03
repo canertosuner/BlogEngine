@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>.Net Core Kafka Producer Consumer Kullanımı</title>
+  <description>Daha önceki fire-and-forget yapılarını incelerken rabbitmq üzerinde masstransit kullanarak anlatıp örnek projeler ile incelemiştik. Bu yazımızda ise .Net Core uygulamarında apache kafka kullanımına değineceğiz. </description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki fire-and-forget yapılarını incelerken rabbitmq &amp;uuml;zerinde masstransit kullanarak anlatıp &amp;ouml;rnek projeler &amp;uuml;zerinde incelemiştik. Bu yazımızda ise .Net Core uygulamarında apache kafka kullanımına değineceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://kafka.apache.org/"&gt;Apache Kafka&lt;/a&gt; open source olarak geliştirilen distributed, scalable ve high-performance sunabilen bir publish-and-subscribe message broker dır.&amp;nbsp;High volumes of data yani olduk&amp;ccedil;a y&amp;uuml;ksek hacimli verileri işleyebilmek adına kullanabilecğeimiz teknolojilerin başında gelmektedir.&lt;/p&gt;
+&lt;h3&gt;Architecture&lt;/h3&gt;
+&lt;p&gt;Apache Kafka'nın mimarisine ve terminolojide ge&amp;ccedil;en terimlere bakacak olursak;&lt;/p&gt;
+&lt;p&gt;Kafka bir veya birden fazla sunucu &amp;uuml;zerinde bir cluster oluşturarak &amp;ccedil;alışır ve kafka &amp;uuml;zerindeki her bir record&amp;nbsp;key-value ve timestamp bilgileri kullanılarak &lt;strong&gt;topic&lt;/strong&gt; olarak adlandırılan kategoriler i&amp;ccedil;erisinde store edilir.&lt;/p&gt;
+&lt;p&gt;Kafka basic olarak aşağıdaki 4 ana başlıktan oluşur;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Cluster&lt;/strong&gt; : broker olarak adlandırılan bir veya birden fazla server'ların yer aldığı&amp;nbsp;collection.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Producer&lt;/strong&gt; : message'ları publish eden yani kafka'ya message &amp;uuml;reten yapının/uygulamanın adı.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Consumer&lt;/strong&gt; : publish edilmiş message'ları retrieve/consume eden uygulama.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Zookeper&lt;/strong&gt; : distributed olarak multiple instance &amp;ccedil;alışan uygulamaları koordine etmede kullanılan bir uygulamadır.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Yukarıdada bahsettiğimiz gibi&amp;nbsp;kafka'da her bir data =&amp;gt; message olarak adlandırılır. Kafka her bir mesajı byte array'ler şeklinde key-value olarak timestamp bilgisi ile saklar. Her bir kafka server'ı broker olarak adlandırılır.&amp;nbsp; Producer-consumer ve cluster'lar arası iletişim TCP protokol&amp;uuml; ile kurulur ve cluester'a yeni broker'lar ekleyerek kafka'yı horizontal olarak scale edebiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2018/apch_kfk_im1.png" alt="" width="363" height="435" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Producer ilgili message'ları kafkaya push eder ve kafka mesajları partition dediğimiz sıralı mesaj dizinleri olarak dinamik bir şekilde daha &amp;ouml;nceden&amp;nbsp;kendisine subscribe olmuş consumer'lar tarafından alınmak &amp;uuml;zere hazırlar ve sırası geldiğinde consume edilir. Consumer tarafında ilgili business rule'lara g&amp;ouml;re worker'lara devredilir.&lt;/p&gt;
+&lt;h3 style="text-align: left;"&gt;Installlations&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;Kafka'nın&amp;nbsp;java ve zookeper dependency'leri bulunmakta ve bunun i&amp;ccedil;in ilk olarak makinamıza JRE8 ve Zookeper y&amp;uuml;klememiz gerekmekte.&amp;nbsp;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;h4&gt;JRE 8 Installation&lt;/h4&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p style="text-align: left;"&gt;Yine işletim sistemi versiyonunuza g&amp;ouml;re&amp;nbsp;&lt;a href="https://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html"&gt;bu adresten&lt;/a&gt;&amp;nbsp;JRE8'i indirip kuralım.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;h4&gt;Zookeeper&amp;nbsp;Installation&lt;/h4&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p style="text-align: left;"&gt;Kurulumlardan sonra&amp;nbsp;&lt;a href="http://zookeeper.apache.org/releases.html"&gt;bu adresten&lt;/a&gt;&amp;nbsp;zookeeper'ın&amp;nbsp;son stable versiyonunu indirip kuralım.&lt;/p&gt;
+&lt;p&gt;Zookeeper indirdikten sonra C dizinine dosyaları &amp;ccedil;ıkartalım "C:\zookeeper-3.4.13&amp;rdquo;. Daha sonra config klas&amp;ouml;r&amp;uuml; i&amp;ccedil;erisinde&amp;nbsp;bulunan zoo_sample.cfg&amp;nbsp;dosyasının ismini zoo.cfg olarak değiştirelim.&amp;nbsp;Sonrasında bu dosyanın i&amp;ccedil;ine gidip&amp;nbsp;dataDir'e karşılık gelen settings'i&amp;nbsp;dataDir=/data olarak g&amp;uuml;ncelleyelim.&lt;/p&gt;
+&lt;p&gt;Son olarak ise system variable'larına hem JAVA_HOME'u hemde ZOOKEEPER_HOME'u tanımlamak var. Bunun i&amp;ccedil;in makinanızda system variable'larına aşağıdaki gibi&amp;nbsp;JAVA_HOME ve ZOOKEEPER_HOME'u tanımlayıp sonrasındada Path b&amp;ouml;l&amp;uuml;m&amp;uuml;ne de bunların path&amp;nbsp;bilgilerini ge&amp;ccedil;elim.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/zkprss_img1.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="text-decoration: underline;"&gt;JAVA_HOME&amp;nbsp; =&amp;gt;&amp;nbsp;%JAVA_HOME%\bin&lt;/span&gt;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;span style="text-decoration: underline;"&gt;ZOOKEEPER_HOME = &amp;gt;&amp;nbsp;%ZOOKEEPER_HOME%\bin&lt;/span&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&amp;nbsp;Zookeper server'ı run etmek i&amp;ccedil;in command prompt'tan olarak&amp;nbsp;&lt;strong&gt;zkserver&lt;/strong&gt;&amp;nbsp;yazmak yeterli.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2018/zkprss_img2.png" alt="" /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;h4&gt;Kafka Installation&lt;/h4&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p style="text-align: left;"&gt;Kafka i&amp;ccedil;in &lt;a href="https://kafka.apache.org/downloads"&gt;bu adresten&lt;/a&gt; kafkanın binary dosyalarını inderelim ve ilgili dosyaları C:/kafka dizinie exract edelim.&amp;nbsp;Powershell yada cmd&amp;nbsp;kullanarak C:\kafka\kafka_2.12-2.0.0&amp;gt; dizinine giderek şu komutu &amp;ccedil;alıştıralım;&lt;/p&gt;
+&lt;pre class="brush:ps;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;nbsp;.\bin\windows\kafka-server-start.bat ./config/server.properties&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;bu komutla birlikte kafka &amp;ccedil;alışmaya başlayacaktır.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/kfk_rn_kprr_img2.png" alt="" width="984" height="301" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;B&amp;uuml;t&amp;uuml;n kurumlarımızı tamamladık şimdi sırada Producer ve Consumer uygulamalarını oluşturmak var.&lt;/p&gt;
+&lt;h3 style="text-align: left;"&gt;Application&lt;/h3&gt;
+&lt;p&gt;Yazının başında da s&amp;ouml;ylediğimiz gibi bir .Net Core &amp;uuml;zerinde kafka kullanacağızve &amp;ouml;rnek proje olarak, email g&amp;ouml;ndermede kullanılan bir producer-consumer uygulaması geliştirelim. İlk olarak aşağıdaki gibi Kafka message'ını tanımlayalım. Bu message sınıfı hem consumer hemde producer tarafından kullanılacağından solution'da &lt;strong&gt;Kafka.Message&lt;/strong&gt; adında bir .Net Core class-library projesi i&amp;ccedil;erisinde tanımlı olsun.&lt;/p&gt;
+&lt;h3&gt;1) &lt;span style="text-decoration: underline;"&gt;Kafka.Message&lt;/span&gt;&lt;/h3&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class EmailMessage:IMessageBase
+{
+    public string To { get; set; }
+    public string Subject { get; set; }
+    public string Content { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;Bu message sınıfına ait verileri producer tarafından kafka'da bulunan emailmessage-topic adındaki topic'collection'ına bırakılacak. Yine aynı solution'da &lt;strong&gt;Kafka.Producer&lt;/strong&gt; adında bir console application oluşturalım.&lt;/p&gt;
+&lt;h3&gt;2) &lt;span style="text-decoration: underline;"&gt;Kafka.Producer&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Nuget &amp;uuml;zerinde kafka client olarak kullanılabilecek belli başlı bazı k&amp;uuml;t&amp;uuml;phaneler bulunmakta. .Net Core uyumluluğu a&amp;ccedil;ısından biz &amp;ouml;rnek projede &lt;a href="https://github.com/confluentinc/confluent-kafka-dotnet/"&gt;Confluent.Kafka&lt;/a&gt; client'ını kullanacağız. Her ne kadar beta versiyonu olsada githuv-rating'leri bakımından olduk&amp;ccedil;a beğenilen high-performance sağlayabilen bir k&amp;uuml;t&amp;uuml;phanedir.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;pre&gt;&lt;code&gt;Install-Package Confluent.Kafka -Version 1.0-beta&lt;/code&gt;&lt;/pre&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Producer'da belirtilen topic&amp;nbsp;i&amp;ccedil;in kafka ya message push etmede kullanacağımız IMessageProducer interface ve implementasyonunu aşağıdaki gibi tanımlayalım ve kullanım olarakda Program.cs i&amp;ccedil;erisinde Main func'da Produce metodunu call ederek EmailMessage'ını push edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface IMessageProducer
+{
+    void Produce(string topic, IMessageBase message);
+}
+
+public class MessageProducer : IMessageProducer
+{
+    public void Produce(string topic, IMessageBase message)
+    {
+        var config = new ProducerConfig { BootstrapServers = "localhost:9092" };
+
+        using (var producer = new Producer&amp;lt;Null, string&amp;gt;(config))
+        {
+            var textMessage = JsonConvert.SerializeObject(message);
+            for (var i = 0; i &amp;lt; 5; ++i)
+            {
+                producer.BeginProduce(topic, new Message&amp;lt;Null, string&amp;gt; { Value = textMessage }, OnDelivery);
+            }
+
+            // wait for up to 10 seconds for any inflight messages to be delivered.
+            producer.Flush(TimeSpan.FromSeconds(10));
+        }
+    }
+
+    private void OnDelivery(DeliveryReportResult&amp;lt;Null, string&amp;gt; r)
+    {
+        Console.WriteLine(!r.Error.IsError ? $"Delivered message to {r.TopicPartitionOffset}" : $"Delivery Error:{r.Error.Reason}");
+    }
+}
+
+static void Main(string[] args)
+{
+    IMessageProducer messageProducer = new MessageProducer();
+
+    //produce email message
+    var emailMessage = new EmailMessage
+    {
+        Content = "Contoso Retail Daily News Email Content",
+        Subject = "Contoso Retail Daily News",
+        To = "all@contosoretail.com.tr"
+    };
+    messageProducer.Produce("emailmessage-topic", emailMessage);
+    
+    Console.ReadLine();
+}&lt;/pre&gt;
+&lt;p&gt;Dilerseniz topic oluşturma ve message produce işlemlerini&amp;nbsp;command-prompt &amp;uuml;zerinden de yapabilirsiniz, biz&amp;nbsp;&amp;ouml;rnek projede i&amp;ccedil;in kafka client kullanarak topic oluşturduk.&lt;/p&gt;
+&lt;h3&gt;3. &lt;span style="text-decoration: underline;"&gt;Kafka.Consumer&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;Consumer projeside kafka da &lt;strong&gt;emailmessage-topic&lt;/strong&gt;'ine push edilen message'ları consume edip ilgili business'ları process eden uygulamamız olacaktır. Bunun i&amp;ccedil;in solution'da Kafka.Consumer adında bir Console Application oluşturalım ve yine nuget &amp;uuml;zerinden Confluent.Kafka k&amp;uuml;t&amp;uuml;phanesini projemiz referanslarına ekleyelim.&lt;/p&gt;
+&lt;p&gt;Kurulumu tamamladıktan sonra consume işleminde kullanacağımız abstract MessageConsumerBase sınıfını&amp;nbsp;aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public abstract class MessageConsumerBase&amp;lt;IMessage&amp;gt;
+{
+    private readonly string _topic;
+
+    protected MessageConsumerBase(string topic)
+    {
+        this._topic = topic;
+    }
+
+    public void StartConsuming()
+    {
+        var conf = new ConsumerConfig
+        {
+            GroupId = "emailmessage-consumer-group",
+            BootstrapServers = "localhost:9092",
+            AutoOffsetReset = AutoOffsetResetType.Earliest
+        };
+
+        using (var consumer = new Consumer&amp;lt;Ignore, string&amp;gt;(conf))
+        {
+            consumer.Subscribe(_topic);
+
+            var keepConsuming = true;
+            consumer.OnError += (_, e) =&amp;gt; keepConsuming = !e.IsFatal;
+
+            while (keepConsuming)
+            {
+                try
+                {
+                    var consumedTextMessage = consumer.Consume();
+                    Console.WriteLine($"Consumed message '{consumedTextMessage.Value}' Topic: {consumedTextMessage.Topic}'.");
+
+                    var message = JsonConvert.DeserializeObject&amp;lt;IMessage&amp;gt;(consumedTextMessage.Value);
+
+                    OnMessageDelivered(message);
+                }
+                catch (ConsumeException e)
+                {
+                    OnErrorOccured(e.Error);
+                }
+            }
+
+            // Ensure the consumer leaves the group cleanly and final offsets are committed.
+            consumer.Close();
+        }
+    }
+
+    public abstract void OnMessageDelivered(IMessage message);
+
+    public abstract void OnErrorOccured(Error error);
+}&lt;/pre&gt;
+&lt;p&gt;Bu base sınıfı inherit almış EmailMessageConsumer sınıfı StartConsuming() metodunu call ederek consume etmeye başlamasını sağlayan kod bloğunu Program.cs i&amp;ccedil;erisinde&amp;nbsp;aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class EmailMessageConsumer : MessageConsumerBase&amp;lt;EmailMessage&amp;gt;
+{
+    public EmailMessageConsumer() : base("emailmessage-topic") { }
+
+    public override void OnMessageDelivered(EmailMessage message)
+    {
+        Console.WriteLine($"To: {message.To} \nContent: {message.Content} \nSubject: {message.Subject}");
+
+        //todo email send business logic
+    }
+
+    public override void OnErrorOccured(Error error)
+    {
+        Console.WriteLine($"Error: {error}");
+
+        //todo onerror business
+    }
+}
+
+static void Main(string[] args)
+{
+    Console.WriteLine("Consumer Started !");
+
+    var emailMessageConsumer = new EmailMessageConsumer();
+    emailMessageConsumer.StartConsuming();
+    
+    Console.ReadLine();
+}&lt;/pre&gt;
+&lt;p&gt;&amp;Ouml;rnek uygulama geliştirmemiz bitti. &amp;Ouml;nce producer ardında&amp;nbsp;consumer&amp;nbsp;projelerini sırasıyla run edip producer tarafından &amp;uuml;retilen mesajın kafka &amp;uuml;zerinden consumer tarafından consume edilip data-transfer'in sağlandığını g&amp;ouml;rebilirsiniz.&lt;/p&gt;
+&lt;p&gt;Kafka g&amp;uuml;n&amp;uuml;m&amp;uuml;z itibariyle rakiplerine transmission'ı daha&amp;nbsp;hızlı&amp;nbsp;ve performanslı olması a&amp;ccedil;ısından &amp;ouml;zellikle real-time streaming uygulamalar i&amp;ccedil;in en iyi &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak kabul edilmekte. RabbitMQ, MSMQ, IBM MQ ve Kafka gibi messaging yapılarının arasından&amp;nbsp;neden kafka diye&amp;nbsp;sorduğumuzda; kafka &amp;ouml;zellikle huge-amount-of-data transfer s&amp;ouml;z konusu olduğunda (&amp;ouml;rnek olarak: IOT ve Chat yapıları&amp;nbsp;) sekt&amp;ouml;r tarafından en iyi se&amp;ccedil;enek olarak&amp;nbsp;kabul edilmekte. Eğer uygulamanız hızlı ve scalable bir message-broker'a ihtiya&amp;ccedil; duyarsa kafka m&amp;uuml;thiş bir se&amp;ccedil;enek olacaktır.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/kafka-producer-consumer"&gt;Source Code&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;While we have many messaging systems available to choose from&amp;mdash;RabbitMQ, MSMQ, IBM MQ Series, etc.&amp;mdash;Kafka is ahead of the pack for dealing with large streams of data that can originate from many publishers.&lt;/p&gt;
+&lt;p&gt;.Net Core ve&amp;nbsp;Confluent.Kafka k&amp;uuml;t&amp;uuml;phanesiyle Kafka olduk&amp;ccedil;a rahat impl. edilip&amp;nbsp;kullanılabilir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-10-20 14:42:00</pubDate>
+  <lastModified>2018-10-10 15:30:42</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-kafka-produce-consumer-kullanimi</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Netflix Eureka Kullanarak Service Discovery Nasıl Uygulanır ?</title>
+  <description>Eureka; netflix yazlım ekibinin java tabanlı geliştirdiği bir service discovery-management tool'u dur. Çalışma mantığı olarak microservice'ler ayağa kalkarken service registry'e gidip kendi config dosyalarındaki key'lerle register olurlar ve yine herhangi bir microservice networkComm kurmak istediği service'in adresini bilmeksizin registry'e key bilgisi ile query yaparak aldığı value'u kullanarak iletişim kurmaya başlar.</description>
+  <content>&lt;p&gt;Monolithic geliştirilen application'lar dan &amp;ccedil;ıkıp Microservice mimarileriyle uygulamalar geliştirmeye başlayalı epeyce bir zaman oldu. Eskiden &amp;ccedil;okca muhtemel; tek bir solution, IIS'de host edilen tek bir Api ve b&amp;uuml;t&amp;uuml;n business'ın bu uygulamada olduğu yapılar&amp;nbsp;tasarlarken bu uygulamayı consume edecek ekiplere tek bir ip&amp;nbsp;adresi vererek hayatımıza devam ediyorduk.&amp;nbsp; &amp;nbsp;&lt;/p&gt;
+&lt;p&gt;G&amp;uuml;n&amp;uuml;m&amp;uuml;z yazılım d&amp;uuml;nyasına &amp;ccedil;okta uzak olmayan bir s&amp;uuml;re i&amp;ccedil;erisinde zamanla Microservice mimarisiyle uygulamalar tasarlamaya,geliştirmeye başlamış olduk. Ancak bu da beraberinde bir sorun getirdi; o eskiden tek bir adreste host edilen api artık belki 10 farklı&amp;nbsp;projeye b&amp;ouml;l&amp;uuml;nerek 10 farklı adreste farklı business'lar process edilerek&amp;nbsp;host edilmeye başlandı. Bu microservice uygulamalarıda s&amp;uuml;rekli olarak birbirleri arasında httpCall'lar yaparak haberleşmesi&amp;nbsp;ve bunun i&amp;ccedil;inde her bir uygulama call edeceği application'nın host adresini&amp;nbsp;bilip configSource'un da store etmesi gerekmekteydi. Tabi birde environment(test-prod) farklılıklarını yani x2 sayıda host adresi olması &amp;ccedil;ok m&amp;uuml;mk&amp;uuml;n. Bu gibi sorunlara &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak &lt;strong&gt;service discovery&lt;/strong&gt; kavramı karşımıza &amp;ccedil;ıkıyor.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/sdicts_Servic_img1.png" alt="" width="756" height="466" /&gt;&lt;/p&gt;
+&lt;p&gt;Yukarıdaki g&amp;ouml;rsel &lt;a href="https://www.nginx.com/blog/service-discovery-in-a-microservices-architecture/"&gt;nginx'in&lt;/a&gt; service discovery mimarisini anlatırken kullandığı bir g&amp;ouml;rsel ve buna benzer s&amp;uuml;rekli olarak dynamic bir şekilde auto-scale olabilen ve yine aynı şekilde dynamic-ip-assign tanımlanabilen&amp;nbsp;uygulamaları ele alacak olursak bu uygulamaları call eden client'lar s&amp;uuml;rekli olarak&amp;nbsp;ipAddress'lerini bilmek zorundalar. İşte service discovery kavramı uygulamalar arası bu iletişimi host bilgisine gerek kalmaksızın yapabilmesini&amp;nbsp;sağlayabilmektedir.&lt;/p&gt;
+&lt;p&gt;Service discovery; service'ler arası iletişim i&amp;ccedil;in uygulamaların birbirlerinin network adreslerini bulmasını sağlayan bir modeldir. Bu modeli uygulayabilmenin bir &amp;ccedil;ok y&amp;ouml;ntemi bulunmaktadır ancak biz bu yazımızda ServiceRegistry ve ServiceRegistryClient'larından oluşan uygulamaların bulunduğu yapılara odaklanarak ne gibi &amp;ccedil;&amp;ouml;z&amp;uuml;mler getirebiliriz inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;Service registry;&amp;nbsp; b&amp;uuml;t&amp;uuml;n microservice instance'larının mevcutta host edildikleri network lokasyonlarını tutan merkezi bir bileşendir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Service registry client; microservice'ler tarafından registry'e&amp;nbsp;kaydı bulunan ve network communication yapmak istediği service'in&amp;nbsp;adresini&amp;nbsp;registry'den sorgulayarak kullanırlar.&lt;/p&gt;
+&lt;p&gt;Projelerinize service discovery implement etmek i&amp;ccedil;in &amp;ccedil;eşitli tool'lar&amp;nbsp;bulunmakta. &lt;a href="https://github.com/Netflix/eureka"&gt;Netflix Eureka&lt;/a&gt;, &lt;a href="https://www.consul.io/"&gt;HashiCorp Consul&lt;/a&gt;, &lt;a href="https://istio.io/"&gt;Istio&lt;/a&gt;,&amp;nbsp;&lt;a href="https://zookeeper.apache.org/"&gt;Zookeper&lt;/a&gt; etc.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda Netflix Eureka kullanarak .net core uygulamaları i&amp;ccedil;in service discovery nasıl uygulanır inceleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Installing Eureka&lt;/h3&gt;
+&lt;p&gt;Eureka; netflix yazlım ekibinin java tabanlı geliştirdiği bir service discovery-management tool'u dur. &amp;Ccedil;alışma mantığı olarak microservice'ler ayağa kalkarken service registry'e gidip kendi config dosyalarındaki&amp;nbsp;key'lerle register olurlar ve yine herhangi bir microservice&amp;nbsp;networkComm kurmak istediği service'in adresini bilmeksizin registry'e key bilgisi ile query yaparak aldığı value'u kullanarak iletişim kurmaya başlar.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2020/sdicts_Servic_img2.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Kurulum i&amp;ccedil;in &lt;a href="https://steeltoe.io/"&gt;Steeltoe&lt;/a&gt; ekibinin hazırladığı &lt;a href="https://github.com/SteeltoeOSS/Dockerfiles/tree/master/eureka-server"&gt;configurationFile&lt;/a&gt;'ları kullanarak &amp;ccedil;ok basit bir şekilde eureka'yı docker'da ayağa kaldırabiliriz. Git adresinden ilgili dosyaları download ettikten sonra aşağıdaki komut ile birlikte&amp;nbsp;localhost:8761&amp;nbsp;portunda Eureka server ayağa kalkacaktır.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;$ docker run --publish 8761:8761 steeltoeoss/eureka-server&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/sdicts_Servic_img3.png" alt="" width="830" height="359" /&gt;&lt;/p&gt;
+&lt;h3&gt;Service Registry&amp;nbsp;&lt;/h3&gt;
+&lt;p&gt;Eureka Server ayakta olduğuna g&amp;ouml;re artık microservice uygulamalarımızı geliştirebiliriz. &amp;Ouml;ncelikle vs'da bir blank solution a&amp;ccedil;arak i&amp;ccedil;erisine 2 farklı application ekleyelim. Bunlardan biri api olsun ve bir diğeri ise console app olsun. Eureka client iler register ettikten sonra consoleApp'in api uygulaması ile network comm. kurmasını sağlayalım.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2020/sdicts_Servic_img4.png" alt="" width="337" height="265" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Steeltoe'nin nuget'te bulunan ClientCore k&amp;uuml;t&amp;uuml;phanesini her iki projemiz referanslarına da ekleyelim ve bu k&amp;uuml;t&amp;uuml;phaneyi kullanarak api'i eureka'a register edelim.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2020/sdicts_Servic_img5.png" alt="" width="584" height="166" /&gt;&lt;/p&gt;
+&lt;p&gt;Startup.cs i&amp;ccedil;erisinde bulunan ConfigureServices metodu i&amp;ccedil;erisinde&amp;nbsp;&amp;nbsp;&lt;strong&gt;services.AddDiscoveryClient(Configuration);&lt;/strong&gt;&amp;nbsp;diyerek uygulama servislerine ekleyip sonrasında Configure metodu i&amp;ccedil;erisinde&amp;nbsp;&lt;strong&gt;app.UseDiscoveryClient();&lt;/strong&gt;&amp;nbsp;kodunu ekleyerek uygulamamızda eureka client'ı olarak tanımlamış olduk.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Startup
+{
+    public Startup(IConfiguration configuration)
+    {
+        Configuration = configuration;
+    }
+
+    public IConfiguration Configuration { get; }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddDiscoveryClient(Configuration);
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        app.UseDiscoveryClient();
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Ve son olarak&amp;nbsp;k&amp;uuml;t&amp;uuml;phane appsettings.json dosyasından okuduğu bazı conf. değerlerinide aşağıdaki gibi ekleyelim.&lt;/p&gt;
+&lt;pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false"&gt;"spring" : {
+    "application" : {
+      "name" : "WeatherApi"
+    }
+  },
+  "eureka" : {
+    "client" : {
+      "shouldRegisterWithEureka" : true,
+      "serviceUrl" : "http://localhost:8761/eureka",
+      "ValidateCertificates":  false
+    },
+    "instance" : {
+      "appName" : "WeatherApi",
+      "hostName" : "localhost",
+      "port" : "55034",
+      "healthCheckUrl": "/healthcheck"
+    }
+  }&lt;/pre&gt;
+&lt;p&gt;Bu key'lerin ne anlama geldiğine bakacak olursak;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="text-decoration: underline;"&gt;application.name&lt;/span&gt;: service'in ismi,&lt;/li&gt;
+&lt;li&gt;&lt;span style="text-decoration: underline;"&gt;client.shouldRegisterWithEureka&lt;/span&gt;: service'in eureka'ya register olup olmaması gerektiğini belirten key. Eğer service'in diğer client'lar tarafından call edilmesini istiyorsak true set etmemiz gerekmekte,&lt;/li&gt;
+&lt;li&gt;&lt;span style="text-decoration: underline;"&gt;client.serviceUrl&lt;/span&gt;: Eureka service adresi,&lt;/li&gt;
+&lt;li&gt;&lt;span style="text-decoration: underline;"&gt;instance.appName&lt;/span&gt;: Diğer microservice'lerin bu service'imizi hangi isimle sorgulayacağını set ettiğimiz key,&lt;/li&gt;
+&lt;li&gt;&lt;span style="text-decoration: underline;"&gt;instance.hostName&lt;/span&gt;: uygulamamızın host ismi,&lt;/li&gt;
+&lt;li&gt;&lt;span style="text-decoration: underline;"&gt;instance.port&lt;/span&gt;: uygulamamızın host edildiği port b ilgisi.&lt;/li&gt;
+&lt;li&gt;&lt;span style="text-decoration: underline;"&gt;instance.healthcheck&lt;/span&gt;: api i&amp;ccedil;in call edilecek healthcheck adresi&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;İlgili kodları sorunsuz bir şekilde ekledikten sonra api projemizi run edip sonrasında tekrardan&amp;nbsp;&lt;a href="http://localhost:8761/"&gt;eureka sayfasına&lt;/a&gt;&amp;nbsp;giderek weatherApi'nin register olduğunu g&amp;ouml;receksinizdir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2020/sdicts_Servic_img6.png" alt="" width="831" height="132" /&gt;&lt;/p&gt;
+&lt;h3 style="text-align: left;"&gt;Calling Api Using&amp;nbsp;Eureka&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;Artık api uygulamamız eureka'ya register oldu ve consoleApp&amp;nbsp;i&amp;ccedil;erisinden registery'e query atarak weatherApi'ı call etmeye hazırız.&amp;nbsp;Bunun i&amp;ccedil;in ilk olarak consoleApp'de appsettings dosyasına aşağıdaki gibi yine eureka conf değerlerini ekleyelim ve&amp;nbsp;uygulamamız service'lerine de eurekaClient'ı ekleyelim.&lt;/p&gt;
+&lt;pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false"&gt;  "eureka": {
+    "client": {
+      "shouldRegisterWithEureka": false,
+      "serviceUrl": "http://localhost:8761/eureka",
+      "ValidateCertificates": false
+    },
+    "instance": {
+      "appName": "WeatherConsoleApp"
+    }
+  },
+  "WeatherApiUrl": "http://WeatherApi/"&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;serviceCollection.AddDiscoveryClient(_configuration);&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre, weatherApiUrl olarak herhangi bir ipAddress yada port bilgisi vs tanımlamadık sadece eureka'da bulunan service ismini yazdık.Son olarak consoleApp api'ı call edeceğimiz yerde aşağıdaki gibi httpClient tanımını yaparak api'dan d&amp;ouml;nen response'u console'a yazdıralım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    var handler = new DiscoveryHttpClientHandler(discoveryClient);
+    var address = configuration.GetValue&amp;lt;string&amp;gt;("WeatherApiUrl")+"weather";
+    using (var httpResponseMessage = new HttpClient(handler, false).GetAsync(address).Result)
+    {
+        var result = httpResponseMessage.Content.ReadAsStringAsync().Result;
+        Console.WriteLine(result);
+    }&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2020/sdicts_Servic_img7.PNG" alt="" width="779" height="173" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&amp;Ouml;zetleyecek olursak; service discovery microservice geliştiren ekipler i&amp;ccedil;in olduk&amp;ccedil;a &amp;ouml;nemli bir konudur. S&amp;uuml;rekli olarak microservice'ler arası bir iletişim olduğundan ve uygulamalarınızı farklı deployment ortamlar olsun farklı data-center'lar olsun s&amp;uuml;rekli olarak dynamic-ip-assing s&amp;ouml;z konusu olabilmekte ve bu gibi sorunlara &amp;ccedil;&amp;ouml;z&amp;uuml;m olarak Netflix Eureka ve sadece bunlardan bir tanesiydi.&amp;nbsp;Steeltoe'nin sağlamış olduğu&amp;nbsp;installation dosyalarını ve nuget paketlerini kullanarak bir ka&amp;ccedil; dkka i&amp;ccedil;erisinde eureka-server ayağa kaldırıp uygulamalarını geliştirebilmenz m&amp;uuml;mk&amp;uuml;n hale gelebilmekte ancak yazımızın başındada dediğimiz gibi&amp;nbsp;Kubernetes, nginx, Consul veya istio ile alternatif uygulamalarıda deneyebilirsiniz.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/aspnetcore-eureka-sample"&gt;Source&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2020-04-25 14:00:00</pubDate>
+  <lastModified>2020-04-24 16:32:38</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-service-discovery-using-eureka</slug>
+  <tags>
+    <tag>eureka</tag>
+    <tag>service discovery</tag>
+    <tag>netflix eureka</tag>
+    <tag>aspnetcore eureka</tag>
+    <tag>netcore eureka</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

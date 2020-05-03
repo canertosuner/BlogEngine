@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Redis Nedir</title>
+  <description>Daha önceki yazıda Windows üzerinde Redis kurulumunu anlatmıştık ve o yazımızda bahsettiğimiz gibi bu yazımızda StackExchange.Redis kullanarak bir .Net Client projesi geliştireceğiz. Öncelikle pc nizde Redis'in çalıştığından emin olun. Bunun için aşağıdaki gibi bir deneme yapabilirsiniz.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki yazıda&amp;nbsp;&lt;a href="/post/windows-uzerinde-redis-server-kurulumu-ve-kullanimi"&gt;Windows &amp;uuml;zerinde Redis kurulumunu&lt;/a&gt;&amp;nbsp;anlatmıştık ve o yazımızda bahsettiğimiz gibi bu yazımızda StackExchange.Redis kullanarak bir .Net Client projesi&amp;nbsp;geliştireceğiz. &amp;Ouml;ncelikle pc nizde Redis'in &amp;ccedil;alıştığından emin olun. Bunun i&amp;ccedil;in aşağıdaki gibi bir deneme yapabilirsiniz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Redis &amp;ccedil;alışıp &amp;ccedil;alışmadığına dair kontrol i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;redis-cli.exe&lt;/strong&gt;'yi&lt;strong&gt;&amp;nbsp;&lt;/strong&gt;&amp;ccedil;alıştıralım ve aşağıdaki&amp;nbsp;resimde olduğu gibi bir key-value tanımlayalım ve sonrasında&amp;nbsp;&lt;strong&gt;get set&lt;/strong&gt;&amp;nbsp;işlemi yapalım&lt;/p&gt;
+&lt;p&gt;&lt;img alt="" /&gt;&lt;img src="/image.axd?picture=/2017/redis_install_check_client_.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Eğer Redis Server sorunsuz bir şekilde &amp;ccedil;alışıyorsa&amp;nbsp;projemizi oluşturmaya başlayalım. &amp;Ouml;ncelikle VS'da bir adet RedisDotNetClientSample isminde bir ConsoleApplication&amp;nbsp;oluşturalım.&lt;/p&gt;
+&lt;h3&gt;StackExchange.Redis Kurulum&lt;/h3&gt;
+&lt;p&gt;Daha sonra projemize Nuget Package Manager Console &amp;uuml;zerinden&amp;nbsp;&lt;strong&gt;StackExchange.Redis&amp;nbsp;&lt;/strong&gt;package'ı indirip kuralım.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;PM &amp;gt;&amp;nbsp;Install-Package StackExchange.Redis&lt;/strong&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Connection&lt;/strong&gt;&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;StackExchange.Redis ile uğraşıyosanız herhalde en &amp;ccedil;ok dikkat etmeniz gereken class&amp;nbsp;&lt;strong&gt;ConnectionMultiplexer.&amp;nbsp;&lt;/strong&gt;ConnectionMultiplexer&lt;strong&gt;&amp;nbsp;&lt;/strong&gt;Redis Server'a bağlanmanızı sağlayacak olan sınıftır ve instance y&amp;ouml;netimi Singleton olarak yapılması &amp;ouml;nerilir. &amp;Ccedil;&amp;uuml;nk&amp;uuml; ConnectionMultiplexer fully thread-safe dir ve her bir işlem i&amp;ccedil;in tekrar tekrar instance oluşturmamız gerekir. Kurulum işlemi sorunsuz tamamlandıktan sonra aşağıdaki gibi&amp;nbsp;&lt;strong&gt;RedisConnectionFactory&lt;/strong&gt;&amp;nbsp;adında bir class oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class RedisConnectionFactory
+    {
+        static RedisConnectionFactory()
+        {
+            lazyConnection = new Lazy&amp;lt;ConnectionMultiplexer&amp;gt;(() =&amp;gt;
+            {
+                return ConnectionMultiplexer.Connect("localhost:6379");//redis server conn string bilgisi, web config'den almak daha doğru ancak şimdilik buraya yazdık
+            });
+        }
+
+        private static Lazy&amp;lt;ConnectionMultiplexer&amp;gt; lazyConnection;
+
+        public static ConnectionMultiplexer Connection =&amp;gt; lazyConnection.Value;
+
+        public static void DisposeConnection()
+        {
+            if (lazyConnection.Value.IsConnected)
+                lazyConnection.Value.Dispose();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Generic ICache Interface&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Connection kısmını hallettik şimdi ise Cache tarafını yazalım. Bir tane aşağıdaki gibi&amp;nbsp;&lt;strong&gt;ICache&lt;/strong&gt;&amp;nbsp;interface'i tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface ICache : IDisposable
+    {
+        T Get&amp;lt;T&amp;gt;(string key);
+
+        void Set&amp;lt;T&amp;gt;(string key, T obj, DateTime expireDate);
+
+        void Delete(string key);
+
+        bool Exists(string key);
+    }&lt;/pre&gt;
+&lt;h3&gt;RedisCache Class'ı&lt;/h3&gt;
+&lt;p&gt;Şimdi ise ICache interface'ini implement etmiş&amp;nbsp;&lt;strong&gt;RedisCache&lt;/strong&gt;&amp;nbsp;class'ımızı oluşturalım. Bu class i&amp;ccedil;erisinde tanımlı fonksiyonları kullanarak string&amp;nbsp;objelerimizi json formatında string olarak Redis'e atıyor olacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class RedisCache : ICache
+    {
+        private readonly IDatabase _redisDb;
+
+        //Connection bilgisi initialize anında alınıyor
+        public RedisCache()
+        {
+            _redisDb = RedisConnectionFactory.Connection.GetDatabase();
+        }
+
+        //Redis'e json formatında set işlemi yapılan metot
+        public void Set&amp;lt;T&amp;gt;(string key, T objectToCache, DateTime expireDate)
+        {
+            var expireTimeSpan = expireDate.Subtract(DateTime.Now);
+
+            _redisDb.StringSet(key, SerializerHelper.Serialize(objectToCache), expireTimeSpan);
+        }
+
+        //Redis te var olan key'e karşılık gelen value'yu alıp deserialize ettikten sonra return eden metot
+        public T Get&amp;lt;T&amp;gt;(string key)
+        {
+            var redisObject = _redisDb.StringGet(key);
+
+            return redisObject.HasValue ? SerializerHelper.Deserialize&amp;lt;T&amp;gt;(redisObject) : Activator.CreateInstance&amp;lt;T&amp;gt;();
+        }
+
+        //Redis te var olan key-value değerlerini silen metot
+        public void Delete(string key)
+        {
+            _redisDb.KeyDelete(key);
+        }
+
+        //G&amp;ouml;nderilen key parametresine g&amp;ouml;re redis'te bu key var mı yok mu bilgisini return eden metot
+        public bool Exists(string key)
+        {
+            return _redisDb.KeyExists(key);
+        }
+
+        //Redis bağlantısını Dispose eden metot
+        public void Dispose()
+        {
+            RedisConnectionFactory.Connection.Dispose();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Projemizin Redis bağlantı adımları ve set ve get işlemlerini yapan kısımları hazır. Şimdi ise yazdığımız kodları test etme adımı var.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir obje tanımlayıp bu objeyi redis'e atıyor olalım. Bunun i&amp;ccedil;in aşağıdaki gibi User adında bir class'ımız olsun.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class User
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Program.cs&lt;/strong&gt;&amp;nbsp;i&amp;ccedil;erisinde aşağıdaki gibi Redis i&amp;ccedil;erisine bir adet User objesi oluşturup&amp;nbsp;&lt;strong&gt;get&amp;amp;set&lt;/strong&gt;&amp;nbsp;işlemi yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    class Program
+    {
+        static void Main(string[] args)
+        {
+            ICache redisCache = new RedisCache();
+
+            var userToBeCached = new User
+            {
+                Id = 1,
+                Email = "canertosuner@gmail.com",
+                FirstName = "Caner",
+                LastName = "Tosuner"
+            };
+            var key1 = "caner_key1";
+
+            redisCache.Set(key1, userToBeCached, DateTime.Now.AddMinutes(30));//30 dakikalığına objemizi redis'e atıyoruz
+
+            if (redisCache.Exists(key1))
+            {
+                var userRedisResponse = redisCache.Get&amp;lt;User&amp;gt;(key1);
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Projenizi &amp;ccedil;alıştırdıktan sonra aşağıdaki g&amp;ouml;rselde olduğu gibi Redis'e atmış olduğumuz objeyi tekrar get işlemini yaptığımızda&amp;nbsp;&lt;strong&gt;userRedisResponse&amp;nbsp;&lt;/strong&gt;değişkenine atanan değerleri g&amp;ouml;r&amp;uuml;yoruz.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/redis_client_response_screenshot_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu yazı C# ile Redis Cache ve&amp;nbsp;StackExchange.Redis nasıl entegre edilip kullanılır basit&amp;ccedil;e &amp;ouml;zetlemekte. Tabiki Redis ile ilgili konuşulacak &amp;ccedil;ok daha fazla konu var ancak elimden geldiğince basit bir şekilde redis client uygulaması geliştirdik.Bazı &amp;ouml;nemli linkleri aşağıda paylaşıyorum. Redis ile ilgili &amp;ouml;nemli gelişmeleri bu siteler &amp;uuml;zerinden takip edebilirsiniz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://redis.io/"&gt;redis.io&amp;nbsp;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://msopentech.com/opentech-projects/redis/"&gt;MS OpenTech &amp;ndash; Redis&amp;nbsp;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/StackExchange/StackExchange.Redis"&gt;StackExchange.Redis&amp;nbsp;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://redisdesktop.com/"&gt;Redis Desktop&amp;nbsp;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-01-30 21:11:00</pubDate>
+  <lastModified>2020-01-20 08:22:19</lastModified>
+  <raters>1</raters>
+  <rating>4</rating>
+  <slug>redis-nedir</slug>
+  <tags>
+    <tag>redis</tag>
+    <tag>redis nedir</tag>
+    <tag>redis cache</tag>
+    <tag>redis kullanımı</tag>
+    <tag>redis kurulumu</tag>
+  </tags>
+  <comments>
+    <comment id="52eccaed-9920-4768-b64d-4932b13053c4" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-03-19 08:00:16</date>
+      <author>Ender Ariç</author>
+      <email>enoua@windowslive.com</email>
+      <country />
+      <ip>81.214.133.2</ip>
+      <avatar />
+      <content>SerializerHelper isimli bir sınıf olması gerekmiyor mu ? kodu derleyemedim bu yüzden ?</content>
+    </comment>
+    <comment id="d348296a-5a47-4159-b299-7c7528d8df11" parentid="52eccaed-9920-4768-b64d-4932b13053c4" approved="True" spam="False" deleted="False">
+      <date>2018-03-20 10:28:23</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba,
+SerializerHelper.cs sınıfı klasik olarak serialzie işlemlerini yaptığınız herhangi bir kütüphane (newtonsoft yada JavascriptSerializer) implementasyonu içeren sınıf. 
+Örnek olarak şuradan inceleyebilirsin 
+https://msdn.microsoft.com/en-us/library/system.web.script.serialization.javascriptserializer(v=vs.110).aspx</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

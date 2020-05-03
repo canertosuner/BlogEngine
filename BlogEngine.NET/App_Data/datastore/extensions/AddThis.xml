@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ManagedExtension xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="AddThis">
+  <AdminPage />
+  <Author>&lt;a href="http://www.falconwebtech.com" target="_blank"&gt;viperguynaz&lt;/a&gt;</Author>
+  <Description>AddThis.NET, the extensible Social Bookmarking Extension</Description>
+  <Enabled>true</Enabled>
+  <Priority>0</Priority>
+  <SubBlogEnabled>false</SubBlogEnabled>
+  <ShowSettings>true</ShowSettings>
+  <Version>3.0.0.2</Version>
+</ManagedExtension>

@@ -1,0 +1,28 @@
+﻿// I know its ugly, but can you fix it? let me know.
+// who adds xoxo class :| unfortunately we can't change it, it's part of BlogEngine. probably 10 years old class name!
+
+.blogroll {
+    .xoxo {
+        > li {
+            margin-bottom: .5rem;
+
+            > a {
+                color: #000;
+                font-weight: $font-weight-bold;
+
+                &:first-child, img {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    ul {
+        padding: 0 !important;
+    }
+
+    a[title="Download OPML file"],
+    a[title="Download OPML file"] img {
+        display: none !important;
+    }
+}

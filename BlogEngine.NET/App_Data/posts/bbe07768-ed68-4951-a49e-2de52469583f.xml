@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Liskov Substitution Principle</title>
+  <description>LSP'nin tarihine bakacak olursak; bu prensip ilk olarak 1987 yılında Barbara Liskov tarafından tanıtıldı ve daha sonrasında Jeannette Wing ile birlikte 1993 yılında bu prensibi resmi olarak yayınladılar.</description>
+  <content>&lt;p&gt;Geldik Liskov prensibine. Bu yazıda SOLID' in "L" si olan "&lt;strong&gt;Liskov Substitution P&lt;/strong&gt;&lt;strong&gt;rinciple (LSP)&lt;/strong&gt;" prensibinden bahsedicez.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;LSP&lt;/strong&gt;'nin&lt;strong&gt;&amp;nbsp;&lt;/strong&gt;tarihine bakacak olursak; bu prensip ilk olarak 1987 yılında Barbara Liskov tarafından tanıtıldı ve daha sonrasında&amp;nbsp;Jeannette Wing ile birlikte 1993 yılında bu prensibi resmi olarak yayınladılar.&lt;/p&gt;
+&lt;p&gt;Bu prensibin orjinal tanımı "&lt;strong&gt;Let q(x) be a property provable about objects x of type T. Then q(y) should be provable for objects y of type S where S is a subtype of T.&lt;/strong&gt;" dır. Ancak bu tanımdan senin benim gibi hi&amp;ccedil; kimse bir şey anlamadığı i&amp;ccedil;in namı değer bob amca &lt;strong&gt;Robert C. Martin &amp;nbsp;&lt;/strong&gt;"&lt;strong&gt;Agile Principles, Patterns, and Practices in C#&lt;/strong&gt;" kitabında bu prensibi kısaca "&lt;strong&gt;Subtypes must be substitutable for their base types.&lt;/strong&gt;" diye tanımladı ve g&amp;uuml;n&amp;uuml;m&amp;uuml;ze yazılım d&amp;uuml;nyasında da bu tanımıyla kabul g&amp;ouml;rmektedir.&lt;/p&gt;
+&lt;p&gt;Bu kadar tarih ve ingilizce bilgisinden sonra gelelim Liskov'un T&amp;uuml;rk&amp;ccedil;e sine. Bu prensip bize şunu s&amp;ouml;yler ;&amp;nbsp;&lt;strong&gt;Alt sınıflardan oluşturulan nesneler &amp;uuml;st sınıfların nesneleriyle yer değiştirdiklerinde aynı davranışı g&amp;ouml;stermek zorundadırlar.&lt;/strong&gt;. Daha bizim dilden konuşacak olursak ; alt sınıf &amp;uuml;st sınıftan kalıtım alırken property, method vs gibi bazı kullanmayacağı &amp;ouml;zellikler kazanmamalıdır. Eğer b&amp;ouml;yle bir duruma sebep olacak bir inheritance işlemi var ise alt sınıfın kullanmadığı fonksyon, metod vs. i&amp;ccedil;in farklı bir &amp;ccedil;&amp;ouml;z&amp;uuml;m (sadece ihtiyacı olan &amp;ouml;zelliklerin bulunduğu başka bir base class vs. gibi) d&amp;uuml;ş&amp;uuml;n&amp;uuml;lmelidir &amp;ccedil;&amp;uuml;nk&amp;uuml; alt sınıf &amp;uuml;st sınıfın b&amp;uuml;t&amp;uuml;n &amp;ouml;zelliklerini tam anlamıyla kullanamadığından yer değiştirdiklerinde aynı davranışı g&amp;ouml;steremeyeceklerdir ve Liskov'a ters d&amp;uuml;şen bir durumdur.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=%2f2016%2f05%2fliskov_sub_princ.jpg" alt="" width="407" height="326" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek uygulama &amp;uuml;zerinden ilerleyelim, case şu şekilde olsun ; Bir tane Bank isminde bir class ve bu class i&amp;ccedil;ersinde Withdraw adında ara &amp;ccedil;ekm işlemini yapan bir virtual metod olsun, 2 tanede hesap tanımı yapalım. Bank objesini kullanarak bu hesaplardan para &amp;ccedil;ekme işlemini yapalım ve tabi ki bunu LSP kurallarına uyarak yapmaya &amp;ccedil;alışalım. &amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;  public class Bank
+    {
+        public void Withdraw(Account acc, int amount)
+        {
+            acc.Withdraw(acc.Id, amount);
+        }
+    }
+
+    public class Account
+    {
+        public Account(int AccountId)
+        {
+            this.Id = AccountId;
+        }
+
+        public virtual int Id { get; set; }
+
+        public virtual void Withdraw(int accountId, int amount)
+        {
+            Console.WriteLine("In base withdraw");
+        }
+    }
+
+    public class SavingAccount : Account
+    {
+        public SavingAccount(int savingAccountId) : base(savingAccountId)
+        {
+
+        }
+
+        public override void Withdraw(int accountId, int amount)
+        {
+            Console.WriteLine("In SavingAccount withdraw");
+        }
+    }
+
+    public class CurrentAccount : Account
+    {
+        public CurrentAccount (int currentAccountId) : base(currentAccountId)
+        {
+
+        }
+
+        public override void Withdraw(int accountId, int amount)
+        {
+            Console.WriteLine("In CurrentAccount withdraw");
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;Şimdide Main fonksiyonu i&amp;ccedil;erisinde bu yazmış olduğumuz class'ları kullanarak para &amp;ccedil;ekme işini yapalım.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; using System;
+
+    public class Program
+    {
+        static void Main(string[] args)
+        {
+            Bank bank = new Bank();
+            Account acc = new Account(1);
+            bank.Withdraw(acc, 100);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda ki &amp;ouml;rnekte olduğu gibi &lt;strong&gt;Bank&lt;/strong&gt; class'ı i&amp;ccedil;erisinde bulunan&amp;nbsp;&lt;strong&gt;Withdraw &lt;/strong&gt;metodu bir &lt;strong&gt;Account&lt;/strong&gt; objesini parametre olarak alıyordu. İlk kullanımda bir adet &lt;strong&gt;acc&lt;/strong&gt; isminde &lt;strong&gt;Account&lt;/strong&gt; oluşturup Withdraw metoduna verdik ve &lt;strong&gt;acc&lt;/strong&gt; de bulunan &lt;strong&gt;Withdraw&lt;/strong&gt; metodunu kullanarak para &amp;ccedil;ekme işlemini yaptık.&lt;/p&gt;
+&lt;p&gt;Ancak LSP bize ne diyordu ;&amp;nbsp;&lt;strong&gt;Alt sınıflardan oluşturulan nesneler &amp;uuml;st sınıfların nesneleriyle yer değiştirdiklerinde aynı davranışı g&amp;ouml;stermek zorundadırlar.&lt;/strong&gt; Aşağıdaki &amp;ouml;rnekte de LSP ye uygun bi&amp;ccedil;imde kullanımı g&amp;ouml;receğiz&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; using System;
+
+    public class Program
+    {
+        static void Main(string[] args)
+        {
+            Bank bank = new Bank();
+
+            Account saving = new SavingAccount(2); //LSP nin dediği gibi sub class'lar base class'larla yer değiştirdiklerinde aynı davranışı g&amp;ouml;stermeleri beklenir
+            bank.Withdraw(saving, 100);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda ki gibi ise &lt;strong&gt;saving &amp;nbsp;&lt;/strong&gt;isminde bir&amp;nbsp;&lt;strong&gt;SavingAccount&amp;nbsp;&lt;/strong&gt;oluşturduk ve bu objede &lt;strong&gt;Account&lt;/strong&gt;'ın bir alt class'ı olduğu i&amp;ccedil;in onun yerine kullanılabilir durumda &lt;strong&gt;Account saving = new SavingAccount(2);&amp;nbsp;&lt;/strong&gt;dedik ve &lt;strong&gt;Bank&lt;/strong&gt; class'ında bulunan&amp;nbsp;&lt;strong&gt;Withdraw&lt;/strong&gt; metoduna parametre olarak ge&amp;ccedil;tik ve aynı ilk kullanımda yaptığımız gibi &lt;strong&gt;saving&lt;/strong&gt; objesininde&amp;nbsp;Withdraw metodunu &amp;ccedil;ağırıp para &amp;ccedil;ekme işlemini tamamladık.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İnternette Liskov i&amp;ccedil;in &amp;ccedil;oğunlukla &lt;strong&gt;Rectangle&amp;nbsp;&lt;/strong&gt;&amp;ouml;rneğini g&amp;ouml;rmek m&amp;uuml;mk&amp;uuml;n, bende herkes onu yazmışken biraz daha farklı bir &amp;ouml;rnek ile ele alim istedim ve bu &amp;ouml;rnek &amp;uuml;zerinden gittim umarım anlaşılır olmuştur :)&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-05-28 11:43:00</pubDate>
+  <lastModified>2020-01-20 08:22:24</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>SOLID-Prensipleri-Liskov-Substitution</slug>
+  <tags>
+    <tag>LSP</tag>
+    <tag>Liskov</tag>
+    <tag>solid</tag>
+    <tag>principles</tag>
+    <tag>oop</tag>
+    <tag>s.o.l.i.d</tag>
+    <tag>SoftwareDesign</tag>
+    <tag>SystemArchitecture</tag>
+    <tag>object oriented</tag>
+  </tags>
+  <comments>
+    <comment id="2d952cd2-a393-45bc-aa97-6fb1eb8a5560" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-06-28 22:36:21</date>
+      <author>elengineer</author>
+      <email>suzanongulu@gmail.com</email>
+      <country />
+      <ip>85.110.63.96</ip>
+      <avatar />
+      <content>SOLID ile ilgili yazı serisini büyük bir keyifle okuyorum.Her zaman bu şekilde düzgün açıklayan kaynak (özellikle Türkçe) çok az bulunuyor.Paylaşımlarınız için bilginize sağlık :)</content>
+    </comment>
+    <comment id="679c7dbc-d176-4327-a4f9-a66dbb95f260" parentid="2d952cd2-a393-45bc-aa97-6fb1eb8a5560" approved="True" spam="False" deleted="False">
+      <date>2018-07-04 15:06:28</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değeleri yorumun içni teşekkürler :)</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+  </categories>
+  <notifications />
+</post>

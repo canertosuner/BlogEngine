@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Castle Windsor Kullanarak Logging Interceptor Oluşturma</title>
+  <description>Daha önceki Aspect Oriented yazılarında interceptor'lardan bahsetmiştik ve biz developer'lar için bulunmaz bir nimet olduğunu söylemiştik. Server-Side bir projede olmazsa olmaz özelliklerin başında gelen Logging, Exception Handling, Caching vs gibi özellikleri</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki Aspect Oriented yazılarında interceptor'lardan bahsetmiştik ve biz developer'lar i&amp;ccedil;in bulunmaz bir nimet olduğunu s&amp;ouml;ylemiştik. Server-Side bir projede olmazsa olmaz &amp;ouml;zelliklerin başında gelen Logging, Exception Handling, Caching vs gibi &amp;ouml;zellikleri &amp;ccedil;ok basit k&amp;uuml;&amp;ccedil;&amp;uuml;k interceptor'lar yazarak uygulamamıza bu &amp;ouml;zellikleri kazandırabiliriz. Daha &amp;ouml;nceki yazılarımızda bu ihtiya&amp;ccedil;ları karşılayabilmek i&amp;ccedil;in .Net tarafında olduk&amp;ccedil;a entegrasyonu basit olan&amp;nbsp;Postsharp k&amp;uuml;t&amp;uuml;phanesinden faydalanmıştık. Bug&amp;uuml;n ki yazımızda ise IoC container'lardan Castle Windsor'ı kullanarak uygulamamız i&amp;ccedil;in bir Logging intercepter'ı geliştireceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rneğimiz şu şekilde; Email g&amp;ouml;ndermek i&amp;ccedil;in kullanılan basit bir&amp;nbsp;Service&amp;nbsp;projemiz olsun ve&amp;nbsp;parametre olarak Address ve html olarak Content alsın. İlk olarak VS de EmailSender adında bir Api projesi oluşturalım ve projemizin referanslarına Nuget &amp;uuml;zerinden Castle Windsor'ın paketlerini indirip kuralım.&lt;/p&gt;
+&lt;p&gt;Sonrasında SendEmailRequest adında request modelimizi tanımlayalım&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class SendEmailRequest
+    {
+        public string Address { get; set; }
+        public string Content { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Email g&amp;ouml;nderme işlemini yapacak olan service interface'imiz ve onun impl. class'ını&amp;nbsp;aşağıdaki gibi oluşturalım&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IEmailService
+    {
+        bool Send(SendEmailRequest reqModel);
+    }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class EmailService : IEmailService
+    {
+        public bool Send(SendEmailRequest reqModel)
+        {
+            //todo return true dedik ancak bu kısımda email g&amp;ouml;ndermek i&amp;ccedil;in kullandığınız kodları yazmalıyız. 
+            return true;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Email g&amp;ouml;nderme servisimiz&amp;nbsp;artık kullanıma hazır. Artık bu service'i Api ile dışarıya a&amp;ccedil;ma zamanı. Projemize CommunicationController adında bir controller ve bu controller i&amp;ccedil;erisinde HttpPost kabul eden &lt;strong&gt;SendEmail&lt;/strong&gt; adında bir endpoint tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CommunicationController : ApiController
+    {
+        private readonly IEmailService _emailService;
+
+        public CommunicationController(IEmailService emailService)
+        {
+            _emailService = emailService;
+        }
+
+        [HttpPost]
+        public HttpResponseMessage SendEmail(SendEmailRequest reqModel)
+        {
+            var result = _emailService.Send(reqModel);
+            if (!result)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+            return Request.CreateResponse(result);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre kullanacağımız IEmailService'ini Castle kullanarak EmailService'ine inject edeceğiz ve controller seviyesinde bu service interface'ini kullanarak email g&amp;ouml;nderme işlemini yapacağız.&lt;/p&gt;
+&lt;p&gt;Şimdi sırada &lt;strong&gt;LoggingInterceptor&lt;/strong&gt;'ımızı oluşturma var.&amp;nbsp;Bu interceptor ile log kayıtlarına MethodName, request ise aldığı parametreler ve response i&amp;ccedil;in return edilen değer bilgilerini atacağız.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class LoggingInterceptor : IInterceptor
+    {
+        public void Intercept(IInvocation invocation)
+        {
+            var serializer = new JavaScriptSerializer();
+            var parametersJson = serializer.Serialize(invocation.Arguments);
+
+            System.Diagnostics.Debug.WriteLine("Request of " + invocation.Method.Name + " is " + parametersJson);
+
+            invocation.Proceed();
+
+            var returnValueJson = serializer.Serialize(invocation.ReturnValue);
+
+            System.Diagnostics.Debug.WriteLine("Response of " + invocation.Method.Name + " is: " + invocation.ReturnValue);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Logları şimdilik sadece Output Window'a&amp;nbsp;yazdırdım ancak ger&amp;ccedil;ek hayatta tabikide NLog vs gibi bir k&amp;uuml;t&amp;uuml;phane kullanıyor olmamızda fayda var.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Interceptor'ımızda hazır olduğuna g&amp;ouml;re artık IoC Initialize tarafına ge&amp;ccedil;ip gerekli register işlemlerimizi yapabiliriz. ServiceInstaller adında aşağıdaki gibi bir class oluşturalım ve i&amp;ccedil;erisinde service'imizi ve interceptor'ımızı register edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ServiceInstaller : IWindsorInstaller
+    {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(Component.For(typeof(IEmailService))
+                     .ImplementedBy(typeof(EmailService))
+                     .Interceptors(typeof(LoggingInterceptor)));
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;EmailSender servisini ve interceptor'ı register eden installer'ı tanımladık. Şimdi ise Web Api projemizin&amp;nbsp;controller'ını register eden installer'ı oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class WebApiControllerInstaller : IWindsorInstaller
+    {
+        public void Install(IWindsorContainer container, IConfigurationStore store)
+        {
+            container.Register(Classes.FromThisAssembly()
+                .BasedOn&amp;lt;ApiController&amp;gt;()
+                .LifestylePerWebRequest());
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ApiControllerActivator : IHttpControllerActivator
+    {
+        private readonly IWindsorContainer _container;
+
+        public ApiControllerActivator(IWindsorContainer container)
+        {
+            _container = container;
+        }
+
+        public IHttpController Create(
+            HttpRequestMessage request,
+            HttpControllerDescriptor controllerDescriptor,
+            Type controllerType)
+        {
+            var controller =
+                (IHttpController)this._container.Resolve(controllerType);
+
+            request.RegisterForDispose(
+                new Release(
+                    () =&amp;gt; this._container.Release(controller)));
+
+            return controller;
+        }
+
+        private class Release : IDisposable
+        {
+            private readonly Action _release;
+
+            public Release(Action release)
+            {
+                _release = release;
+            }
+
+            public void Dispose()
+            {
+                _release();
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Son adım olarak ise oluşturduğumuz bu installer'ları container'a Install edeceğiz. Bunun i&amp;ccedil;in projemizde bulunan Global.asax i&amp;ccedil;erisinde bulunan Application_Start metodu aşağıdaki gibi olacak.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        protected void Application_Start()
+        {
+            var container = new WindsorContainer();
+            container.Install(new ServiceInstaller());
+            container.Install(new WebApiControllerInstaller());
+            GlobalConfiguration.Configuration.Services.Replace(
+                typeof(IHttpControllerActivator),
+                new ApiControllerActivator(container));
+            GlobalConfiguration.Configure(WebApiConfig.Register);
+        }&lt;/pre&gt;
+&lt;p&gt;Hepsi bu kadardı :)&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi yazdığımız kodları test edelim. Postman kullanarak controller'da bulunan endpoint'e aşağıdaki gibi bir istek g&amp;ouml;nderip Output Window dan neler yazdırdığına bir bakalım.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/castle_interceptor_logging_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Request sonrasında Interceptor araya girerek loglama işlemini aşağıdaki g&amp;ouml;rselde olduğu gibi yapmakta.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/castle_interceptor_logging__output_window_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rneğimiz şimdilik burada bitiyor, sizlerde projeleriniz i&amp;ccedil;in bir &amp;ccedil;ile haline gelebilme potansiyeli olan Loglama konusunu interceptor kullanarak son derece basit ve reusable hale getirebilirsiniz.&lt;/p&gt;
+&lt;p&gt;Sonraki yazılarımızda Interceptor kullanarak daha başka neler yapabiliriz fırsat bulduk&amp;ccedil;a inceleyeceğiz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-04-20 21:50:00</pubDate>
+  <lastModified>2020-01-20 08:22:18</lastModified>
+  <raters>1</raters>
+  <rating>3</rating>
+  <slug>castle-windsor-interceptor-kullanarak-loglama-islemi</slug>
+  <tags>
+    <tag>Castle Windsor
+Ninject
+StructureMap
+Autofac
+Unity</tag>
+    <tag>interceptor</tag>
+    <tag>logging</tag>
+    <tag>Aspect-Oriented Programming</tag>
+    <tag>Logging ASpect</tag>
+    <tag>Logging Interceptor</tag>
+    <tag>castle windsor logging interceptor</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>01a365a0-dea4-4805-8375-c19bfa24f287</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>OptimisticLock using Fluent NHibernate</title>
+  <description>OptimisticLock using Fluent NHibernate</description>
+  <content>&lt;p&gt;OptimisticLock ve PessimisticLock konuları hakkında&amp;nbsp;&lt;strong&gt;&lt;a href="/post/optimistic-lock-nedir-pessimistic-lock-nedir-data-concurrency"&gt;Optimistic Lock Nedir ? Pessimistic Lock Nedir ? Data concurrency&lt;/a&gt;&amp;nbsp;&lt;/strong&gt;yazımızda bahsetmiştik. Kısaca hatırlatmak gerekirse;farklı thread'ler de aynı row &amp;uuml;zerinde işlem yapılırken herhangi bir lock işlemi olmadan update edilmek istenen verinin bayat olup olmadığını o verinin kayıtlı olduğu tabloda yer alan versiyon numarası olarak da adlandırılan bir column'da bulunan değeri kontrol eder ve eğer versiyon eşleşmiyorsa yani veri bayat ise işlem geri &amp;ccedil;ekilir.&lt;/p&gt;
+&lt;p&gt;Bu yazıda ise Nhibernate&amp;nbsp;kullanarak optimistic lock nasıl yapılır bunu inceleyeceğiz. Daha &amp;ouml;nceki &lt;strong&gt;&lt;a href="/post/unit-of-work-interceptor-castle-windsor-nhibernate-ve-generic-repository"&gt;Unit of Work Interceptor, Castle Windsor, NHibernate ve Generic Repository&lt;/a&gt;&amp;nbsp;&lt;/strong&gt;yazısında geliştirdiğimiz proje&amp;nbsp;&amp;uuml;zerinden ilerleyelim. Bir web api projesi&amp;nbsp;oluşturmuştuk ve nuget &amp;uuml;zerinden Fluent Nhibernate'i y&amp;uuml;klemiştik. İ&amp;ccedil;erisinde User ve Address adında iki tane tablomuz bulunuyordu. Nhibernate i&amp;ccedil;in optimistic lock konfigurasyonu mapping işlemi yapılırken belirtiliyor. Bizde &amp;ouml;ncelikle versiyonlamak veya optimistic lock uygulamak istediğimiz entity'ler i&amp;ccedil;in bir base model oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public abstract class VersionedEntity
+    {
+        public virtual int EntityVersion { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;User modelimiz ise yukarıda tanımladığımız modelden inherit olsun ve aşağıdaki gibi UserMapping.cs i&amp;ccedil;erisinde konfigurasyonlarımızı yapalım.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class User : VersionedEntity
+    {
+        public virtual int Id { get; set; }
+        public virtual string Name { get; set; }
+        public virtual string SurName { get; set; }
+    }
+
+    public class UserMap : ClassMap&amp;lt;User&amp;gt;
+    {
+        public UserMap()
+        {
+            Table("Users");
+            Id(x =&amp;gt; x.Id);
+            Map(x =&amp;gt; x.Name);
+            Map(x =&amp;gt; x.SurName);
+
+            // versiyon işlemi i&amp;ccedil;in kullanılacak column
+            Version(X =&amp;gt; X.EntityVersion);
+            
+            // optimistic lock'ı versiyonlama &amp;uuml;zerinden aktif hale getiriyoruz
+            OptimisticLock.Version();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Database de Users tablomuzda &lt;strong&gt;EntityVersion&amp;nbsp;&lt;/strong&gt;adında bir column&amp;nbsp;yaratılacak ve bu column o row i&amp;ccedil;in yapılan her bir update işleminde 1 artacaktır.&lt;/p&gt;
+&lt;p&gt;Konfigurasyon&amp;nbsp;işlemi bu kadar şimdi test yapalım. Aşağıdaki gibi AddnewUser metoduna postman &amp;uuml;zerinden sırayla 2 request atalım ve ilk request update olmadan ikinci gelen request get işlemi yapıp stale yani bayat veriyi db den &amp;ccedil;ekip update etmeye &amp;ccedil;alıştığımızda aşağıdaki gibi bir exception throw edilir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/optms_lock_throw_Exp_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Hata mesajı bize o row'un bize başkabir transaction tarafından update veya delete edildiğini belirtmekte.&lt;/p&gt;
+&lt;p&gt;Optimistic Lock i&amp;ccedil;in&amp;nbsp;yazımız buraya kadar. Yukarıda da belirttiğim gibi &amp;ouml;rnek kodlar&amp;nbsp;&lt;strong&gt;&lt;a href="/post/unit-of-work-interceptor-castle-windsor-nhibernate-ve-generic-repository"&gt;Unit of Work Interceptor, Castle Windsor, NHibernate ve Generic Repository&lt;/a&gt;&amp;nbsp;&lt;/strong&gt;yazısında&amp;nbsp;bulunmakta. Eksik kalan yerler i&amp;ccedil;in ordan devam edebilirsiniz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;nbsp;&lt;/pre&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-09-15 21:24:00</pubDate>
+  <lastModified>2017-08-11 09:33:42</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>optimisticlock-using-fluent-nhibernate</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

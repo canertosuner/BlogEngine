@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Dependency Inversion Principle</title>
+  <description>SOLID prensipleri yazı serisinde son prensip olan SOLID'in "D" si Dependency Inversion prensibine gelmiş bulunuyoruz. Türkçe anlamını her ne kadar beğenmiyor olsam da atalarımız "Bağlılığı Tersine Çevirme Prensibi" olarak çevirmişler.</description>
+  <content>&lt;p&gt;SOLID prensipleri yazı serisinde son prensip olan SOLID'in "D" si&amp;nbsp;&lt;strong&gt;Dependency Inversion&lt;/strong&gt; prensibine gelmiş bulunuyoruz. T&amp;uuml;rk&amp;ccedil;e anlamını her ne kadar beğenmiyor olsam da atalarımız "&lt;strong&gt;Bağlılığı Tersine &amp;Ccedil;evirme Prensibi&lt;/strong&gt;" olarak &amp;ccedil;evirmişler.&lt;/p&gt;
+&lt;p&gt;Bu prensip&amp;nbsp;bizlere OOP yaparken şu 2 kurala uymamız gerektiğini s&amp;ouml;yl&amp;uuml;yor;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&amp;Uuml;st seviye (High-Level) sınıflar alt seviye (Low-Level) sınıflara bağlı olmamalıdır, aralarındaki ilişki abstraction veya interface kullanarak&amp;nbsp;sağlanmalıdır,&lt;/li&gt;
+&lt;li&gt;Abstraction detaylara bağlı olmamalıdır, aksine detaylar abstraction'lara bağlı olmalıdır.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Bir&amp;ccedil;ok projede malesef &amp;uuml;st seviye sınıflar alt seviye sınıflara bağlıdır ve bu sınıflarda bir değişiklik yapmak istediğimizde başımıza onlarca iş a&amp;ccedil;abilmektedir &amp;ccedil;&amp;uuml;nk&amp;uuml; alt sınıfta yapılan bu değişiklik &amp;uuml;st&amp;uuml; sınıfıda etkileyebilir ve &amp;uuml;st sınıfların&amp;nbsp;etkilenmesi de&amp;nbsp;projenizdeki&amp;nbsp;b&amp;uuml;t&amp;uuml;n yapının etkilenmesi neden olabilir. Bu durum aynı zamanda&amp;nbsp;&lt;strong&gt;reusability &lt;/strong&gt;yani&amp;nbsp;tekrar kullanılabilirlik durumuna engeller.&amp;nbsp;İşte bu karmaşayı ortadan kaldırmak i&amp;ccedil;in&amp;nbsp;Dependency Inversion prensibi ortaya &amp;ccedil;ıkmıştır ve &amp;uuml;sttede belirttiğim gibi&amp;nbsp;modulleri birbirinden soyutlamamız gerekir. &lt;a href="/post/solid-prensipleri"&gt;SOLID Nedir&lt;/a&gt;&amp;nbsp;makalesinde verdiğim &amp;ouml;rnekte olduğu gibi g&amp;ouml;zl&amp;uuml;ğ&amp;uuml;n&amp;uuml;z var ve camlarını değiştirmek istediniz gittiniz g&amp;ouml;zl&amp;uuml;k&amp;ccedil;&amp;uuml;ye adam dediki "Bu camların değişmesi i&amp;ccedil;in g&amp;ouml;zl&amp;uuml;ğ&amp;uuml;nde değişmesi gerek..." sa&amp;ccedil;ma dimi :) işte bazen bu prensibe uymazsak g&amp;ouml;zl&amp;uuml;k &amp;ouml;rneğinde olduğu gibi enteresan sorunlar başımıza gelebilir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir case &amp;uuml;zerinden ilerleyelim. LogManager&amp;nbsp;adında bir class'ımız olsun ve bu class'ın Log()&amp;nbsp;isminde&amp;nbsp;bir metodu ve bu metod &amp;ccedil;ağrıldığında FileLogger() objesine ait olan Log() metodu &amp;ccedil;ağrılsın ve FileLog işlemini yapsın.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;	public class FileLogger  
+	{
+		public string Message { get; set; }
+		public void Log()
+		{
+			//File Log
+		}
+	}
+
+	public class DBLogger  
+	{
+		public string Message { get; set; }		
+		public void Log()
+		{
+			//Database Log
+		}
+	}
+
+	public class LogManager  
+	{
+		private FileLogger _file;
+		private DBLogger _db;
+		
+		public LogManager()
+		{
+			_file = new FileLogger();
+			_db = new DBLogger();
+		}
+	
+		public void Log()
+		{
+			_file.Log();
+			_db.Log();
+		}
+	}&lt;/pre&gt;
+&lt;p&gt;Yukarıda&amp;nbsp;g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi &lt;strong&gt;LogManager&lt;/strong&gt; &amp;uuml;st seviye class'ımız ve tam da&amp;nbsp;&lt;strong&gt;Dependency Inversion&lt;/strong&gt; prensibine ters olarak &lt;strong&gt;FileLogger&lt;/strong&gt; ve &lt;strong&gt;DBLogger&lt;/strong&gt; class'larına yani alt seviye class'lara bağlı. DIP bize bu gibi alt-&amp;uuml;st seviye sınıf&amp;nbsp;ilişkilerini&amp;nbsp;abstraction veya interface'ler kullanarak kurmamızı s&amp;ouml;yl&amp;uuml;yor ancak durum şuan bunun tam tersi ve yarın bir g&amp;uuml;n y&amp;ouml;neticiniz&amp;nbsp;geldi dedi&amp;nbsp;ki "&lt;strong&gt;bundan sonra&amp;nbsp;uygulama Log'ları EventLog'a da yazdırılacak&lt;/strong&gt;". Bunun i&amp;ccedil;in&amp;nbsp;gidip aynen File-DB Logger class'larında olduğu gibi &lt;strong&gt;EventLogger&lt;/strong&gt; adında bir class tanımlayıp LogManager() i&amp;ccedil;erisinde aynı işlemleri yapmak heralde istediğimiz bir &amp;ccedil;&amp;ouml;z&amp;uuml;m değildir ki bu LogManger class'ına extra bir nesneye daha bağlı hale getirir. Hedefimiz LogManager class'ını olabildiğince nesne bağımsız hale getirmek.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bunun i&amp;ccedil;in ilk olarak ILogger adında bir interface tanımlayalım ve FileLogger &amp;amp; DBLogger class'larını bu interface'den implement edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;	public interface ILogger  
+	{
+		void Log();
+	}
+
+	public class FileLogger : ILogger
+	{
+		public string Message { get; set; }
+		public void Log()
+		{
+			//File Log
+		}
+	}
+
+	public class DBLogger : ILogger
+	{
+		public string Message { get; set; }
+		
+		public void Log()
+		{
+			//Database Log
+		}
+	}&lt;/pre&gt;
+&lt;p&gt;Ve son olarak da &lt;strong&gt;LogManager&lt;/strong&gt; class'ını sadece ILogger interface'ine bağlı hale getirmek kalıyor. B&amp;ouml;ylelikle ILogger'den implement olmuş b&amp;uuml;t&amp;uuml;n class'lar LogManager tarafından kullanılabilecektir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;	public class LogManager 
+	{
+		private ILogger _logger;
+		public LogManager(ILogger logger)
+		{
+			_logger = logger;
+		}
+	
+		public void Log()
+		{
+			_logger.Log();
+		}
+	}&lt;/pre&gt;
+&lt;p&gt;Bu refactoring işlemlerini yaptıktan sonra artık &lt;strong&gt;LogManager&lt;/strong&gt; class'ı&amp;nbsp;Dependency Inversion prensibine uygun hale gelmiştir yani alt seviye sınıflara bağlı değildir aradaki ilişki interface kullanarak sağlanmıştır.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;LogManager&lt;/strong&gt; class'ının kullanım şekli ise aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;	public static void Main()
+	{
+		var dbLogger = new DBLogger();
+		dbLogger.Message = "Test 123";
+		
+		var manager = new LogManager(dbLogger);
+		manager.Log();
+	}&lt;/pre&gt;
+&lt;p&gt;&amp;Ouml;zetle; yaptığımız refactoring işlemiyle birlikte DIP'nin s&amp;ouml;ylediği gibi high-level ve low-level sınıfları abstraction'lara bağlı hale getirdik.&lt;/p&gt;
+&lt;p&gt;Bu yazımızla beraber SOLID&amp;nbsp;prensiplerinin sonuna gelmiş bulunuyoruz. Umarım faydalı bir yazı serisi olmuştur, soru, yorum veya eleştirilere a&amp;ccedil;ığımdır :) hope to keep in touch&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-07-29 21:05:00</pubDate>
+  <lastModified>2020-04-06 08:33:14</lastModified>
+  <raters>3</raters>
+  <rating>5</rating>
+  <slug>solid-prensipleri-dependency-inversion</slug>
+  <tags>
+    <tag>solid</tag>
+    <tag>principles</tag>
+    <tag>Dependency Inversion </tag>
+    <tag>DIP</tag>
+    <tag>s.o.l.i.d</tag>
+    <tag>oop</tag>
+    <tag>SoftwareDesign</tag>
+    <tag>design principles</tag>
+  </tags>
+  <comments>
+    <comment id="086ea76d-042b-48c7-9c7d-f931ba591a30" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-10-14 20:48:26</date>
+      <author>murat </author>
+      <email>muratsayin06@gmail.com </email>
+      <country />
+      <ip>91.93.233.178</ip>
+      <avatar />
+      <content>hocam emeğinize sağlık solid hakkında güzel bir yazı dizisi olmuş. </content>
+    </comment>
+    <comment id="9436cf13-058a-4bf2-9785-868a898b55dd" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2020-04-06 08:32:38</date>
+      <author>tuna</author>
+      <email>tunayorumoglu1@gmail.com</email>
+      <country />
+      <ip>159.146.10.74</ip>
+      <avatar />
+      <content>güzel ve açıklayıcı olmuş, teşekkürler.</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+  </categories>
+  <notifications />
+</post>

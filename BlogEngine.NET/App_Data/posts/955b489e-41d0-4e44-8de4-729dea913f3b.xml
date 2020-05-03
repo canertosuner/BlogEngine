@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Castle Windsor ile Exception Handling Interceptor (Dynamic Proxy)</title>
+  <description>Daha önceki IoC ve AOP yazılarında  çeşitli konulara değinerek örnek projeler üzerinde anlatımlarda bulunduk. Bu yazımızda da Castle Windsor'dan yararlanarak projelerimizde sıklıkla kullanacağımız bir ExceptionAspect veya Interceptor oluşturacağız.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki IoC&amp;nbsp;ve AOP yazılarında &amp;nbsp;&amp;ccedil;eşitli konulara değinerek &amp;ouml;rnek projeler &amp;uuml;zerinde anlatımlarda bulunduk. Bu yazımızda da &lt;a href="/search?q=castle"&gt;Castle Windsor&lt;/a&gt;'dan yararlanarak projelerimizde sıklıkla kullanacağımız bir ExceptionAspect veya Interceptor&amp;nbsp;oluşturacağız.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Interceptor'lar veya Dynamic Proxies Aspect Oriented Programming'in bir implementasyonudur. Bu bize oluşturduğu proxy ile metodu intercept ederek kendi kodlarımızın arasına inject etmemizi sağlar.&lt;/p&gt;
+&lt;p&gt;IL kodlarına baktığımızda aşağıdaki resimde olduğu gibi&amp;nbsp;geliştirmiş olduğumuz kodları try catch finally blokları arasına alınır.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img style="float: left;" src="/image.axd?picture=/2017/interceptor_il_codes.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Daha &amp;ouml;nceki &lt;a href="/post/castle-windsor-kullanarak-cache-interceptor-olusturma1"&gt;Castle Windsor Kullanarak Cache Interceptor Oluşturma&lt;/a&gt;&amp;nbsp;yazısındaki &amp;ouml;rneğimiz &amp;uuml;zerinden ilerleyelim. O yazıda&amp;nbsp;il kodu alarak geriye il&amp;ccedil;eleri d&amp;ouml;nen bir case &amp;uuml;zerinden caching işlemi yapan aspect geliştirmiştik. Bu&amp;nbsp;yazımızda da aynı &amp;ouml;rnek &amp;uuml;zerinden ilerleyerek projemiz i&amp;ccedil;in bir &lt;strong&gt;ExceptionHandling&lt;/strong&gt; aspect oluşturalım.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İlk olarak ExceptionHandlingInterceptor adında aspect'imizi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class ExceptionHandlingInterceptor : IInterceptor
+{
+    public void Intercept(IInvocation invocation)
+    {
+        try
+        {
+            invocation.Proceed();      
+        }
+        catch (Exception ex)
+        {
+            LogManager.Log("Exception in : " + invocation.Method.Name + " method." + ex);
+
+            invocation.ReturnValue = new BaseResponse { IsSuccess = false };
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki kodu incelediğimizde &amp;ouml;zetle şunu s&amp;ouml;yl&amp;uuml;yor ;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Invoke edilecek metodu try-catch-finally bloğu arasına al&lt;/li&gt;
+&lt;li&gt;Invoke edilen&amp;nbsp;metot i&amp;ccedil;erisinde hata alırsan catch bloğuna gir ve &amp;ouml;nce alınan hatayı log'a yaz&lt;/li&gt;
+&lt;li&gt;Sonrasında BaseResponse modelini initialize ederek client'a clear bir response model d&amp;ouml;n.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Tabi ki de &amp;ccedil;ok daha farklı ayrıntıları log'a yazmanız&amp;nbsp;gerekir ancak sample olduğundan şimdilik bunları yazalım.&lt;/p&gt;
+&lt;p&gt;İkinci adım olarak yazmış olduğumuz Exception aspect'ini container'a register&amp;nbsp;etmek var.&lt;/p&gt;
+&lt;p&gt;&lt;a href="/post/castle-windsor-kullanarak-cache-interceptor-olusturma1"&gt;Castle Windsor Kullanarak Cache Interceptor Oluşturma&lt;/a&gt;&amp;nbsp;&amp;ouml;rneğinde ServiceInstaller class'ını olduğu gibi alıp ExceptionHandlingInterceptor'ını register işlemimizi yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class ServiceInstaller : IWindsorInstaller
+{
+    public void Install(IWindsorContainer container, IConfigurationStore store)
+    {
+        container.Register(Component.For&amp;lt;CacheInterceptor&amp;gt;().LifestyleSingleton());
+        container.Register(Component.For&amp;lt;ExceptionHandlingInterceptor&amp;gt;().LifestyleSingleton());
+
+        container.Register(Component.For(typeof(ILocationService))
+                 .ImplementedBy(typeof(LocationService))
+                 .Interceptors(typeof(CacheInterceptor)
+                 .Interceptors(typeof(ExceptionHandlingInterceptor))));
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda ki register işlemi şunu s&amp;ouml;yl&amp;uuml;yor; "ILocationService interface'inin implementasyonu LocationService class'ı dır. Bu implementasyona ait 2 adet Interceptor var "CacheInterceptor" ve "ExceptionHandlingInterceptor" adında&amp;nbsp;ve bu interceptor'lar LifeStyleSingleton olarak container'a register edilmişlerdir."&lt;/p&gt;
+&lt;p&gt;Uygulamamız hazır diyebiliriz. LocationService i&amp;ccedil;erisinde bulunan&amp;nbsp;GetDistrictsByCityCode adlı metodumuzda test etmek i&amp;ccedil;in aşağıdaki gibi kendimiz bir exception throw edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class LocationService : ILocationService
+{
+    public GetDistrictsByCityCodeResponse GetDistrictsByCityCode(int cityCode)
+    {
+        throw new NullReferenceException();
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Projemizi run edip ilgili endpoint'e istekte bulunduğumuzda exception fırlatılıp Interceptor i&amp;ccedil;erisinde bulunan catch bloğuna d&amp;uuml;şecektir ve loglama işlemini yaptıktan sonra client'a BaseResponse modelini d&amp;ouml;necektir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Peki bunları yaparak ne sağladık ?&amp;nbsp;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Exception Handling işini eski us&amp;uuml;l projede y&amp;uuml;zlerce try-catch bloğu oluşturmak yerine AOP'in faydalarından yararlanarak tek bir yerden y&amp;ouml;netebilir duruma getirdik.&lt;/li&gt;
+&lt;li&gt;&amp;Ccedil;ok daha reusable olan ve başka yerlerde de kullanabileceğimiz bir yapı tasarladık.&lt;/li&gt;
+&lt;li&gt;Uygulama exception&amp;nbsp;fırlattığında client'a sa&amp;ccedil;ma sapan StackTrace mesajı yerine her response da aldığı BaseResponse modelini d&amp;ouml;nerek response'larımızı daha tutarlı bir hale getirdik.&lt;/li&gt;
+&lt;/ol&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-06-18 21:44:00</pubDate>
+  <lastModified>2020-01-20 08:22:16</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>castle-windsor-ile-exception-handling-interceptor</slug>
+  <tags>
+    <tag>castle windsor exception handling</tag>
+    <tag>castle windsor cache interceptor</tag>
+    <tag>ExceptionHandlingInterceptor</tag>
+    <tag>Dynamic Proxy</tag>
+    <tag>Aspect-Oriented Programming</tag>
+    <tag>interceptor</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>01a365a0-dea4-4805-8375-c19bfa24f287</category>
+  </categories>
+  <notifications />
+</post>

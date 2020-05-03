@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Quartz .Net Nedir Nasıl Kullanılır ?</title>
+  <description>Quartz.Net, geliştirdiğiniz web tabanlı projelerde scheduled task yani zamana dayalı planlı görevler çalıştırmak istediğinizde çok kolay bir şekilde implement edip kullanabileceğiniz open source bir kütüphanedir. Aslında bir çok kişi bu tarz işlemleri yapmak için bir console</description>
+  <content>&lt;p&gt;Quartz.Net,&amp;nbsp;geliştirdiğiniz web tabanlı&amp;nbsp;projelerde&amp;nbsp;&lt;strong&gt;scheduled task&lt;/strong&gt; yani zamana dayalı planlı g&amp;ouml;revler &amp;ccedil;alıştırmak istediğinizde &amp;ccedil;ok kolay bir şekilde implement edip kullanabileceğiniz open source bir k&amp;uuml;t&amp;uuml;phanedir. Aslında bir &amp;ccedil;ok kişi bu tarz işlemleri yapmak i&amp;ccedil;in bir console uygulaması geliştirir ve windows server'da task schedular'a bu uygulamayı ne zaman &amp;ccedil;alıştıracağını s&amp;ouml;yler ve iş biter. Ancak gerek sunucuya erişimin kısıtlı olduğu durumlarda, gerekse ikinci bir uygulama geliştirmenin yol a&amp;ccedil;tığı efor d&amp;uuml;ş&amp;uuml;nd&amp;uuml;ğ&amp;uuml;nde quartz.net daha avantajlı gibi g&amp;ouml;r&amp;uuml;n&amp;uuml;yor.&lt;/p&gt;
+&lt;p&gt;Kullanım olarak iki aşamadan oluşuyor diyebiliriz,&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&amp;Ccedil;alışacak olan Job'ı belirleme,&lt;/li&gt;
+&lt;li&gt;Hangi zaman aralıklarında &amp;ccedil;alışacağı bilgisi set edilir.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Quartz 3 ana bileşenden oluşur, &lt;strong&gt;job&lt;/strong&gt;, &lt;strong&gt;trigger&lt;/strong&gt;, &lt;strong&gt;schedular&lt;/strong&gt;. &lt;strong&gt;Job&lt;/strong&gt; yapılacak olan iştir. &lt;strong&gt;Trigger &lt;/strong&gt;job'ın ne zaman, ne şekilde tetikleneceği emrini veren &amp;amp; tetikleyen yapıdır. Job ve Trigger ikisi birlikte &lt;strong&gt;schedular&lt;/strong&gt;'a register olurlar ve kısaca &amp;ccedil;alışma şekli olarak; job schedular &amp;uuml;zerinden trigger tarafından &amp;ccedil;alıştırılır diyebiliriz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir case &amp;uuml;zerinden ilerleyelim; bir banka web service projemiz olsun ve m&amp;uuml;şterilere her g&amp;uuml;n&amp;nbsp;saat 13:30 da push notification yollayan bir kampanyalar job'ı geliştirelim.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;1. Quartz.Net Kurulumu&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Kurulum i&amp;ccedil;in projenize&amp;nbsp;sağ tıklayıp Manage Nuget Packages dedikten sonra&amp;nbsp;aşağıdaki gibi nuget'ten projeyi install edebiliriz.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/08/quartznet_img1.png" alt="" width="586" height="390" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;2. Job'ı Oluşturma&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Bunun i&amp;ccedil;in ilk olarak IJob interface'inden implement olan &lt;strong&gt;CampaignPushJob &lt;/strong&gt;adında bir class oluşturalım. IJob ile birlikte class'ımız &lt;strong&gt;Execute&lt;/strong&gt;&amp;nbsp;adında bir metoda sahip olur ve job &amp;ccedil;alışırken aslında bu metot i&amp;ccedil;erisindeki akış &amp;ccedil;alışır diyebiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CampaignPushJob : IJob
+    {
+        public void Execute(IJobExecutionContext context)
+        {
+            var userRepository = new UserRepository();
+            var userList = userRepository.GetPNUserList();
+
+            var pushNotText = "Size &amp;ouml;zel konut kredisi teklifleri.";
+
+            var pnService = new PnService();
+            pnService.SendPush(pushNotText, userList);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;Ouml;rnekte PnService adında bir service'imiz olduğunu varsayalım ve SendPush metodu ile kullanıcılara notification g&amp;ouml;nderiliyor olsun.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;3. Schedular Oluşturma&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Bu adımda &lt;strong&gt;CampaignPushJobScheduler&lt;/strong&gt; adında i&amp;ccedil;erisinde ne zaman ve neyi &amp;ccedil;alıştıracağı bilgisini verdiğimiz schedular'ımızı yazıyoruz. &lt;strong&gt;JobBuilder.Create&amp;lt;CampaignPushJob&amp;gt;().Build()&lt;/strong&gt; satırında da g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi bizden bir adet &lt;strong&gt;IJob&lt;/strong&gt; interface'ini implement etmiş class&amp;nbsp;istemekte. Bizde bir &amp;uuml;stte yazdığımız &lt;strong&gt;CampaignPushJob&lt;/strong&gt;'ını buraya set ediyoruz. Ne zaman &amp;ccedil;alıştıracağı bilgisini ise TriggerBuilder'ı initialize ederken set edeceğiz. &amp;Ouml;rneğimizde her g&amp;uuml;n saat 13:30 da &amp;ccedil;alışmasını istediğimiz bir job &amp;ccedil;alıştırmak istediğimiz i&amp;ccedil;in TriggerBuilder i&amp;ccedil;erisinde aşağıdaki gibi bir tanımlama yaptık.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CampaignPushJobScheduler
+    {
+        public static void Start()
+        {
+            IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler();
+            scheduler.Start();
+
+            IJobDetail job = JobBuilder.Create&amp;lt;CampaignPushJob&amp;gt;().Build();
+
+            ITrigger trigger = TriggerBuilder.Create()
+                .WithDailyTimeIntervalSchedule
+                  (s =&amp;gt;
+                     s
+                    .OnEveryDay() //herg&amp;uuml;n &amp;ccedil;alışacağı bilgisi
+                    .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(13, 30)) //herg&amp;uuml;n hangi saatte &amp;ccedil;alışacağı bilgisi
+                  )
+                .Build();
+
+            scheduler.ScheduleJob(job, trigger);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;4. Schedular&amp;nbsp;Start Etme&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Bu adıma kadar job, schedular ve trigger bilgilerimizi oluşturduk ve artık uygulama ayağa kalktıktan sonra schedular'ı start etmemiz gerekiyor. Geliştirmekte olduğumuz proje bir Asp.Net projesi olduğundan bu işlemi kolayca &lt;strong&gt;Global.asax&lt;/strong&gt; dosyası i&amp;ccedil;erisinde bulunan Application_Start metodunda yapabiliriz. Tek yapmamız gereken&amp;nbsp;&lt;strong&gt;CampaignPushJobScheduler&lt;/strong&gt;'ın i&amp;ccedil;erisinde bulunan &lt;strong&gt;Start&lt;/strong&gt; metodunu &amp;ccedil;ağırmak.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class Global : HttpApplication
+    {
+        void Application_Start(object sender, EventArgs e)
+        {
+            CampaignPushJobScheduler.Start();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Quartz.Net implement etme işlemimiz bu kadar. Artık web projemiz bir kere ayağa kalktıktan sonra set ettiğimiz değerler doğrultusunda &amp;ccedil;alışacaktır.&lt;/p&gt;
+&lt;p&gt;Quartz schedular işlemler i&amp;ccedil;in .Net tarafında kullanılabilecek en yaygın k&amp;uuml;t&amp;uuml;phanelerden bir tanesidir. &amp;Ouml;rnekte her ne kadar az kullanmış olsak da trigger time &amp;ouml;zelliğiyle ilgili kullanıcılara bir &amp;ccedil;ok se&amp;ccedil;enek sunmakta. Bunlarla ilgili ayrıntılı bilgiyi &lt;a href="http://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/index.html"&gt;bu linkte&lt;/a&gt; bulabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-10-03 21:38:00</pubDate>
+  <lastModified>2020-01-20 08:22:21</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>quartz-net-nedir-nasil-kullanilir1</slug>
+  <tags>
+    <tag>quartz</tag>
+    <tag>quartz.net</tag>
+    <tag>schedular</tag>
+    <tag>task</tag>
+    <tag>job</tag>
+    <tag>ijob</tag>
+    <tag>trigger</tag>
+    <tag>schedular task</tag>
+    <tag>quartz.net nedir</tag>
+    <tag>quartz net nedir</tag>
+  </tags>
+  <comments>
+    <comment id="57510ac0-06e2-4af8-ac96-2418d3c6d4f5" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-10-05 19:04:54</date>
+      <author>hasan güllü</author>
+      <email>hasangullu07@gmail.com</email>
+      <country />
+      <ip>195.142.237.216:21615</ip>
+      <avatar />
+      <content>Sade ve anlaşılır bir yazı olmuş emeğinize sağlık :)</content>
+    </comment>
+    <comment id="6ef42707-3eaa-4b68-beef-d358fbb81f9f" parentid="57510ac0-06e2-4af8-ac96-2418d3c6d4f5" approved="True" spam="False" deleted="False">
+      <date>2017-10-08 18:02:05</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>31.223.35.210:37071</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Teşekkür ederim :)</content>
+    </comment>
+    <comment id="3bfe1b59-fa00-4a73-abea-b85892ee4be4" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-11-20 20:22:27</date>
+      <author>Arif Saglamturk</author>
+      <email>arifsaglamturk@gmail.com</email>
+      <country />
+      <ip>91.93.73.226</ip>
+      <moderatedby>App_Code.Extensions.StopForumSpam</moderatedby>
+      <avatar />
+      <content>Merhabalar; konu hakkında bir şey danışacağım. Job içerisinde yapılması gereken işlemleri yazdım, Job çalışmaya başladığında 3 saniyede bir json datayı alıp bir liste tipinde class&amp;#39;ın içerisine dolduruyor. Scheduler 24 saatte bir çalışsın istiyorum, Scheduler durduğunda liste tipindeki classı boşalmak için gerekli kodu nereye yazsam doğru olur ?</content>
+    </comment>
+    <comment id="447d0f55-1187-4bad-a0a2-365d1a0902c0" parentid="3bfe1b59-fa00-4a73-abea-b85892ee4be4" approved="True" spam="False" deleted="False">
+      <date>2017-11-22 08:37:08</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.139</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba, biraz daha ayrıntılı anlatabilir misiniz ? Kod parçası vs. de paylaşabilirsiniz .</content>
+    </comment>
+    <comment id="0f12d90e-a758-445b-af88-3b97965d3d71" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-03-03 11:42:58</date>
+      <author>ümit</author>
+      <email>umitclik@gmail.com</email>
+      <country />
+      <ip>85.109.254.115</ip>
+      <avatar />
+      <content>Merhabalar,
+Kodu yazdım hiç problem almadan derleyebildim. Kodu test etmek için kendi IIS ime api projesini ekledim. Job 1 dakika sonra çalışacak şekilde gerekli düzenlemeleri yaptım. Ancak IIS te tanımlamalar yaptıktan sonra api yi tarayıcı da açtıktan 1 dakika sonra program güvenlik izinleri olmadan başlatıldı gibi bir hata alıyorum. Bunu kendi localimde test edebilir miyim? Edebilirsem IIS üzerinde veya config dosyasında tanımlamam gereken herhangi bir ayar var mıdır? Teşekkürler</content>
+    </comment>
+    <comment id="0478e3ed-0637-4862-8c5b-49ecfcc76de3" parentid="0f12d90e-a758-445b-af88-3b97965d3d71" approved="True" spam="False" deleted="False">
+      <date>2018-03-05 11:23:51</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba, localinde IIS&amp;#39;i aktifleştirmiş miydin ? Detayla şekilde bu linkten bakabilirsin =&gt; https://blogs.msdn.microsoft.com/vijaysk/2012/10/11/iis-8-whats-new-website-settings/</content>
+    </comment>
+    <comment id="5ad4833d-faff-4775-ad59-99ef89b17214" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-05-25 09:38:32</date>
+      <author>ahmet</author>
+      <email>ViolenTornado@gmail.co</email>
+      <country />
+      <ip>88.240.87.11</ip>
+      <avatar />
+      <content>Merhaba,
+
+Bu ürün siteye birisi girmese bile tetikleme yapıyor mu? Yoksa çalışması için birisinin mutlaka web sitesine girmesi gerekiyor mu ? Bu konuda bilgi verebilir misiniz?</content>
+    </comment>
+    <comment id="a0c170cf-1dbe-4c43-b549-c0660f2f330c" parentid="5ad4833d-faff-4775-ad59-99ef89b17214" approved="True" spam="False" deleted="False">
+      <date>2019-05-25 21:49:46</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.161.154</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba, job&amp;#39;ları olusturduktan sonra uygulama ilk defa ayaga kalkarken senın belirttiğin time&amp;#39;a göre otomatik schedule olur. Yani her gün saat 01:00 da çalışacak bir job yazdın diyelim uygulamayı deploy edip ilk startup&amp;#39;ta schedule olacaktır ve her gün saat 01:00 da otomatik tetiklenecektir tekrar tekrar siteye girip manuel olarak schedule etmeye gerek yok.</content>
+    </comment>
+    <comment id="2d4b67e0-5f1c-4f72-bdfe-be81c132154e" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-07-31 21:24:17</date>
+      <author>cigdemc</author>
+      <email>cigdem.coban63@gmail.com</email>
+      <country />
+      <ip>193.140.254.64</ip>
+      <avatar />
+      <content>Merhaba, Global.asax da çalıştırdığım kodda Bir Application[&amp;quot;x&amp;quot;] oluşturuyorum ve bu listenin günde iki defa belirlediğim saatlerde güncellenmesi gerekiyor.  Quartz ilk defa kullanıyorum. Normalde direkt   Application[&amp;quot;x&amp;quot;]  atayabiliyorsun ama Quartz olduğunda nasıl atanacağını çözemedim. Yardımcı olursanız sevinirim.</content>
+    </comment>
+    <comment id="81b2a55f-dbbc-4b2b-938f-8be4b76e576f" parentid="2d4b67e0-5f1c-4f72-bdfe-be81c132154e" approved="True" spam="False" deleted="False">
+      <date>2019-08-16 11:49:49</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba, Application[&amp;quot;x&amp;quot;]&amp;#39;den kastın tam olarak nedir ?</content>
+    </comment>
+    <comment id="a2adb4a6-4071-4ca0-a0cb-5ecdde49ecec" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-12-16 08:20:25</date>
+      <author>Burak</author>
+      <email>brk.karadag94@gmail.com</email>
+      <country />
+      <ip>176.236.77.201</ip>
+      <avatar />
+      <content>Merhaba, Herşey tamam sorunsuz çalışıyor 10 dakikada çalışması için cron yazdım ve localim de deniyorum herşey sorunsuz 10 dakika da bir çalışıyor. Yalnız IIS e yükledim ve gerekli ayarkları yaptım. boşta kalma süresi ve autostart enable gibi ancak IIS i ilk başlattıgım da scheduler çalışıyor. 10 dakika sonra çalışması gerekirken çalışmıyor. Acaba neden olabilir. Bu konu da bana yardım olabilir misiniz? Şimdiden teşekkürler. </content>
+    </comment>
+  </comments>
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+  </categories>
+  <notifications>
+    <email>arifsaglamturk@gmail.com</email>
+    <email>umitclik@gmail.com</email>
+    <email>ViolenTornado@gmail.co</email>
+    <email>cigdem.coban63@gmail.com</email>
+    <email>brk.karadag94@gmail.com</email>
+  </notifications>
+</post>

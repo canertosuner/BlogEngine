@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Log4Net delete last N days files</title>
+  <description>Daha önceki yazımızda projemize nasıl Log4Net implemente edilir burada ki yazıda incelemiştik. Log4Net te bahsettiğimiz gibi bizim verdiğimiz kritere uygun boyutlarda belirttiğimiz klasör altında log dosyalarını saklıyordu. Peki ya o klasör altında aylarca yıllarca çok fazla log dosyası oluşur ve</description>
+  <content>&lt;p&gt;&lt;span style="font-size: small;"&gt;Daha &amp;ouml;nceki yazımızda projemize nasıl Log4Net implemente edilir &lt;a href="/post/Log4Net-Entegrasyonu.aspx"&gt;burada &lt;/a&gt;ki yazıda incelemiştik. Log4Net te bahsettiğimiz gibi bizim verdiğimiz kritere uygun boyutlarda belirttiğimiz klas&amp;ouml;r altında log dosyalarını saklıyordu. Peki ya o klas&amp;ouml;r altında aylarca yıllarca &amp;ccedil;ok fazla log dosyası oluşur ve GB boyutunda yer kapladığı d&amp;uuml;ş&amp;uuml;n&amp;uuml;l&amp;uuml;rse ne olacak??? "Hadi be sende GB boyutunda log nerde biriksin.." falan diyebilirsiniz ancak projenizin b&amp;uuml;y&amp;uuml;kl&amp;uuml;ğ&amp;uuml;ne g&amp;ouml;re bunun olma olasılığı oldukta b&amp;uuml;y&amp;uuml;k bir ihtimal.&lt;/span&gt;&lt;br /&gt;&lt;span style="font-size: small;"&gt;İşte bu gibi durumlardan kurtulmak i&amp;ccedil;in bir File Clear t&amp;uuml;r&amp;uuml;nde bir manager yazmamız gerekmekte. &lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;Akış şu şekilde olacak; Log4Net kendi işini yapıp loglarını dosyalara atmaya devam ederken uygulamanın her Application_Start adımında file clear manager &amp;ccedil;alışıp Log klas&amp;ouml;r&amp;uuml;ne gidip bakıcak. İ&amp;ccedil;erisindeki dosyalardan son 2 haftadan daha eski tarihte oluşmuş dosyalar var ise gidip bu dosyaları silecek.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;ilk olarak aşağıda oludğu gibi &lt;strong&gt;Log4NetFileCleanUpManager&lt;/strong&gt; adında bir class oluşturuyoruz&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class Log4NetFileCleanUpManager
+    {
+        private DateTime _lastDateToKeepStoring;
+        public Log4NetFileCleanUpManager()
+        {
+            _lastDateToKeepStoring = DateTime.Today.AddDays(-14);
+        }
+
+        public void CleanUp()
+        {
+            var repo = LogManager.GetAllRepositories().FirstOrDefault();
+
+            if (repo == null)
+                throw new NotSupportedException("Log4Net has not been configured yet !");
+
+            var app = repo.GetAppenders().FirstOrDefault(x =&amp;gt; x.GetType() == typeof(RollingFileAppender));
+            if (app != null)
+            {
+                var appender = app as RollingFileAppender;
+                string directory = Path.GetDirectoryName(appender.File);
+                 CleanUp(directory);
+           }
+        }
+
+        public void CleanUp(string logDirectory)
+        {
+            if (string.IsNullOrEmpty(logDirectory))
+                throw new ArgumentException("logDirectory is missing");
+
+            var dirInfo = new DirectoryInfo(logDirectory);
+            if (!dirInfo.Exists)
+                return;
+ 
+            var fileInfos = dirInfo.GetFiles();
+            if (fileInfos.Length == 0)
+                return;
+ 
+            foreach (var info in fileInfos)
+            {
+                if (info.CreationTime &amp;lt; _lastDateToKeepStoring)
+                {
+                    info.Delete();
+                }
+            }
+        }
+    }&lt;/pre&gt;
+&lt;address class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&lt;span style="font-size: small;"&gt;Kod şu şekilde &amp;ccedil;alışıyor.&amp;nbsp;Constructor da hangi tarihten sonraki kayıtları silineceği bilgisi veriliyor (Son 14) g&amp;uuml;n.&amp;nbsp;&lt;span style="font-size: small;"&gt;CleanUp &lt;/span&gt;fonksiyonunda Log4Net i&amp;ccedil;in webconfigde tanımlı&amp;nbsp;&lt;/span&gt;&lt;span style="font-size: small;"&gt;RollingFileAppender bulunuyor ve bunun i&amp;ccedil;in tanımlı log klas&amp;ouml;r&amp;uuml;n&amp;uuml;n directory si bulunup&amp;nbsp;&lt;/span&gt;&lt;span style="font-size: small;"&gt;CleanUp(string logDirectory) metduna yollanıyor. Burada o klas&amp;ouml;r&amp;uuml;n i&amp;ccedil;erisindeki dosyalarda teker teker gezinip oluşturulma tarihlerine bakıyor. Oluşturulma tarihi bizim belirttiğimiz tarihten &amp;ouml;nce ise o dosyayı siliyor.&lt;/span&gt;&lt;/address&gt;&lt;address class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;nbsp;&lt;/address&gt;&lt;address class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;nbsp;&lt;/address&gt;&lt;address class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&lt;span style="font-size: small;"&gt;Son olarak Application_Start metodunda aşağıdaki configurasyonu yapmamız gerekmekte.&lt;/span&gt;&lt;/address&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;XmlConfigurator.Configure();
+var task = new Log4NetFileCleanUpManager(); &lt;br /&gt;task.CleanUp();&lt;/pre&gt;
+&lt;address class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;nbsp;&lt;/address&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;&lt;span style="font-size: small;"&gt;&lt;span style="font-size: small;"&gt;Log tutmak ne kadar &amp;ouml;nemli ise tuttuğumuz log'un y&amp;ouml;netimi ve başa bela olmaması da o kadar &amp;ouml;nemlidir. &amp;Uuml;stte de s&amp;ouml;ylediğim gibi projenin b&amp;uuml;y&amp;uuml;kl&amp;uuml;ğ&amp;uuml;ne g&amp;ouml;re onlarca GB boyutunda .txt dosyaları ansızın oluşabilir ve sonrasında down !&lt;/span&gt;&lt;br /&gt;&lt;/span&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-02-25 23:02:00</pubDate>
+  <lastModified>2020-01-20 08:22:25</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Log4Net-delete-last-N-days-files</slug>
+  <tags>
+    <tag>log4net</tag>
+    <tag>log</tag>
+    <tag>removefiles</tag>
+    <tag>lastndays</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+  </categories>
+  <notifications />
+</post>

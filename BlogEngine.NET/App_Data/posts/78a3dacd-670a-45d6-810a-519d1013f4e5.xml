@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Windows Phone HyperlinkButton without Underline</title>
+  <description>Windows Phone'da en çok kullanılan kontrollerden birisi hiç şüphesiz HyperlinkButton'dur. Sayfaya 1 adet HyperlinkButton ekleyip Content'ine text verip uygulamayı çalıştırdığımızda text'in</description>
+  <content>&lt;p&gt;&lt;span style="font-size: medium;"&gt;Windows Phone'da en &amp;ccedil;ok kullanılan kontrollerden birisi hi&amp;ccedil; ş&amp;uuml;phesiz HyperlinkButton'dur. Sayfaya 1 adet HyperlinkButton ekleyip Content'ine text verip uygulamayı &amp;ccedil;alıştırdığımızda text'in altı &amp;ccedil;izili olarak geldiğini g&amp;ouml;receksiniz. Bu durum WinPhone projelerinde pekte tercih edilen birşey değildir zira g&amp;ouml;zede hoş gelmemektedir. Altı &amp;ccedil;izgisiz HyperlinkButton kullanmak istediğimizde ise &amp;ccedil;ok basit bir şekilde App.xaml i&amp;ccedil;erisine Application.Resources'a style ekleyerek HyperlinkButton'un altındaki &amp;ccedil;zgiyi yok edebilirsiniz. &amp;Ouml;rnek kullanım aşağıdaki gibidir;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: .0001pt; mso-line-height-alt: 9.9pt;"&gt;&lt;span style="font-size: 10.0pt; font-family: 'Courier New'; mso-fareast-font-family: 'Times New Roman'; color: #333333; mso-fareast-language: TR;"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;App.xaml&lt;/strong&gt; sayfası&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: .0001pt; mso-line-height-alt: 9.9pt;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;Application.Resources&amp;gt;
+        &amp;lt;Style x:Key="hlbutton_Style" TargetType="HyperlinkButton"&amp;gt;
+            &amp;lt;Setter Property="Foreground" Value="White"/&amp;gt;
+            &amp;lt;Setter Property="Background" Value="Transparent"/&amp;gt;
+            &amp;lt;Setter Property="FontSize" Value="16"/&amp;gt;
+            &amp;lt;Setter Property="Padding" Value="0"/&amp;gt;
+            &amp;lt;Setter Property="Template"&amp;gt;
+                &amp;lt;Setter.Value&amp;gt;
+                    &amp;lt;ControlTemplate TargetType="HyperlinkButton"&amp;gt;
+                        &amp;lt;Border Background="Transparent"&amp;gt;
+                            &amp;lt;VisualStateManager.VisualStateGroups&amp;gt;
+                                &amp;lt;VisualStateGroup x:Name="CommonStates"&amp;gt;
+                                    &amp;lt;VisualState x:Name="Normal"/&amp;gt;
+                                    &amp;lt;VisualState x:Name="MouseOver"/&amp;gt;
+                                    &amp;lt;VisualState x:Name="Pressed"&amp;gt;
+                                        &amp;lt;Storyboard&amp;gt;
+                                            &amp;lt;DoubleAnimation Duration="0"
+Storyboard.TargetName="TextElement" Storyboard.TargetProperty="Opacity" To="0.5"/&amp;gt;
+                                        &amp;lt;/Storyboard&amp;gt;
+                                        &amp;lt;/VisualState&amp;gt;
+                                        &amp;lt;VisualState x:Name="Disabled"&amp;gt;
+                                            &amp;lt;Storyboard&amp;gt;
+                                                &amp;lt;ObjectAnimationUsingKeyFrames
+Storyboard.TargetName="TextElement" Storyboard.TargetProperty="Foreground"&amp;gt;
+                                                    &amp;lt;DiscreteObjectKeyFrame KeyTime="0"
+Value="{StaticResource PhoneDisabledBrush}"/&amp;gt;
+                                                &amp;lt;/ObjectAnimationUsingKeyFrames&amp;gt;
+                                            &amp;lt;/Storyboard&amp;gt;
+                                            &amp;lt;/VisualState&amp;gt;
+                                            &amp;lt;/VisualStateGroup&amp;gt;
+                            &amp;lt;/VisualStateManager.VisualStateGroups&amp;gt;
+                            &amp;lt;Border Background="{TemplateBinding Background}"
+Margin="{StaticResource PhoneHorizontalMargin}" Padding="{TemplateBinding Padding}"&amp;gt;
+                                &amp;lt;TextBlock x:Name="TextElement" Text="{TemplateBinding Content}"
+HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+VerticalAlignment="{TemplateBinding VerticalContentAlignment}" TextWrapping="Wrap" TextDecorations="none"/&amp;gt;
+                                &amp;lt;/Border&amp;gt;
+                                &amp;lt;/Border&amp;gt;
+                                &amp;lt;/ControlTemplate&amp;gt;
+                &amp;lt;/Setter.Value&amp;gt;
+                &amp;lt;/Setter&amp;gt;
+                &amp;lt;/Style&amp;gt;
+&amp;lt;/Application.Resources&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;App.xaml i&amp;ccedil;erisine yukarıdaki eklemeleri yaptıktan sonra tek yapmanız gereken sayfaya eklediğiniz HyperlinkButton kontol&amp;uuml;ne Style olarak yukarıda oluşturduğumuz style'ı vermek,&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;HyperlinkButton Style="{StaticResource hlbutton_Style}"/&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: .0001pt; mso-line-height-alt: 9.9pt;"&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-08-17 14:50:00</pubDate>
+  <lastModified>2020-01-20 08:22:31</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Windows-Phone-HyperlinkButton-without-Underline</slug>
+  <tags>
+    <tag>HyperlinkButton</tag>
+    <tag>Underline</tag>
+    <tag>NoUnderline</tag>
+    <tag>Control</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

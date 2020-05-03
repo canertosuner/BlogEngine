@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>OraOledb Not enough storage is available to complete this operation.</title>
+  <description>There are like 100 questions and answers about this problem but none of them did solve my problem.
+W</description>
+  <content>&lt;p&gt;There are like 100 questions and answers about this problem but none of them did solve my problem.&lt;/p&gt;
+&lt;p&gt;What I was was trying to do is getting blob data from oracle database using ado.net just like below code,&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;OleDbParameter returnValue = new OleDbParameter("v_PictureBlodData", OleDbType.LongVarBinary);&lt;/pre&gt;
+&lt;p&gt;&lt;br /&gt;and when I try to execute the store procedure &amp;amp; query I was getting an error which sais "Not enough storage is available to complete this operation."&lt;/p&gt;
+&lt;p&gt;Most of the comments for this problem is about, server Ram capacity or Storage capacity. But I was really sure that my server had enough Ram and Storage capacity.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;So, what solved my problem is just giving a size value for OleDbParameter which is 4000000&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;OleDbParameter returnValue = new OleDbParameter("v_PictureBlodData", OleDbType.LongVarBinary, 4000000);&lt;/pre&gt;
+&lt;p&gt;&lt;br /&gt;If you guys are sure about your server capacity, you can check it by trying to give a size value for the parameter.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-02-19 22:16:00</pubDate>
+  <lastModified>2020-01-20 08:22:25</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>oraoledb-not-enough-storage-is-available-to-complete-this-operation</slug>
+  <tags>
+    <tag>oledb</tag>
+    <tag>Not enough storage is available to complete this operation. </tag>
+    <tag>blob</tag>
+    <tag>stored procedure</tag>
+    <tag>OleDbParameter</tag>
+    <tag>storage</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>33191729-e344-4de6-8ecf-6400c88b07e7</category>
+  </categories>
+  <notifications />
+</post>

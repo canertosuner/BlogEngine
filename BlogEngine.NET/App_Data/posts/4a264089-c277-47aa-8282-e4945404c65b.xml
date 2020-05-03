@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Code Review Nedir, Neden Önemlidir</title>
+  <description>Kod kalitesini artırmak için bir çok yol izlenebilir; unit test, continuous integration, continuous deployment, agile methodology etc. ancak en önemli yollardan biri code review dır. Bazen kaliteli diyebileceğimiz kodlar yazmaya çalışsak bile öyle anlar geliyor ki proje müdürünüz bir anda gelip bu feature'u bugün</description>
+  <content>&lt;p&gt;Kod kalitesini artırmak i&amp;ccedil;in bir &amp;ccedil;ok yol izlenebilir; unit test, continuous integration, continuous deployment, agile methodology etc. ancak en &amp;ouml;nemli yollardan biri&amp;nbsp;code review dır. Bazen kaliteli diyebileceğimiz kodlar yazmaya &amp;ccedil;alışsak bile &amp;ouml;yle anlar geliyor ki proje m&amp;uuml;d&amp;uuml;r&amp;uuml;n&amp;uuml;z bir anda gelip bu feature'u bug&amp;uuml;n yetiştirmemiz gerekiyor deyip &lt;strong&gt;spaghetti code&amp;nbsp;&lt;/strong&gt;yazma s&amp;uuml;reciniz başlıyor. Bu gibi durumlar hep olacak ancak daha sonrasında geriye d&amp;ouml;n&amp;uuml;p yazmış olduğunuz kodu review-refactoring etmemiz gerekmekte. Yada normal akışında geliştirme yapıyor olsak bile teknik olarak bilgili birisi (genelde takım liderleri) yapmış olduğumuz geliştirmelere bir g&amp;ouml;z atıp ondan sonra &lt;strong&gt;master&lt;/strong&gt;&amp;nbsp;branch'ine commit/checkin yapıyor olmamız gerekir.&lt;/p&gt;
+&lt;p&gt;Code Review yapmanın bir &amp;ccedil;ok avantajı var;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Kod kalitesini arttırır,&lt;/li&gt;
+&lt;li&gt;Bug bulmamızı kolaylaştırır,&lt;/li&gt;
+&lt;li&gt;Developer kendisi olmasa bile bir başkası review işlemi yapacağından geliştirme yaparken daha dikkatli olmasını sağlar,&lt;/li&gt;
+&lt;li&gt;Review işlemi yapan kişi daha &amp;ouml;nce hi&amp;ccedil; karşılaşmadı şekilde olumlu geliştirmelerle karşılaşabilir ve onun gelişimine de katkısı olur,&lt;/li&gt;
+&lt;li&gt;Yazılım standartlarına bağlı kalmaya y&amp;ouml;nlendirir.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Gibi gibi bir&amp;ccedil;ok faydasından bahsedebiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Başlangı&amp;ccedil;ta biraz garip gelebilir ancak iyi bir flow bulduğumuzda hem yazılım kalitesi, hem ekip &amp;ccedil;alışması ve ekibin moral-motivasyonu a&amp;ccedil;ısından ne kadar b&amp;uuml;y&amp;uuml;k bir değişim olduğunu fark edeceksiniz dir.&lt;/p&gt;
+&lt;h2&gt;Code Review&amp;nbsp;İ&amp;ccedil;in İzlenebilecek Yollar/Kurallar&lt;/h2&gt;
+&lt;p&gt;Code Review i&amp;ccedil;in belli başlı kabul edilen bazı kurallar mevcut. Bazı software tool'lar kullanarak başlanabilir ancak developer olarak bizlerin uyması gereken bazı kurallar sıralayabiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/06/Basic-Code-Reviewer-Code-Review-Checklist.png" alt="" width="514" height="407" /&gt;&lt;/p&gt;
+&lt;h3&gt;Kısa Commit'ler ve Anlaşılır Commit Mesajları&lt;/h3&gt;
+&lt;p&gt;İlgili branch'e commit yaparken bir seferde b&amp;uuml;t&amp;uuml;n her şeyi commit'lemekten ziyade kısa kısa paketler halinde yaptığınız geliştirmeleri commit edin ve anlaşılır commit mesajları kullanmaya &amp;ccedil;alışın. B&amp;ouml;yle yaparak her şeyi step-by-step a&amp;ccedil;ıklamış olacaksınız ve hem review yapacak kişi i&amp;ccedil;in kolay anlaşılabilir olacak hemde kendiniz i&amp;ccedil;in geriye d&amp;ouml;n&amp;uuml;p baktığınızda yaptığınız geliştirmeyi hatırlaması daha kolay olacaktır.&lt;/p&gt;
+&lt;h3&gt;Kodları Review Edin Developer'ı Değil&lt;/h3&gt;
+&lt;p&gt;Review yaparken başkalarının yapmış olduğu işleri incelediğinizden eleştiri yaparken bazen yapılan işe değilde kişinin kendisine eleştirilerde bulunulabiliyor. Ancak bu devloper'la &amp;uuml;zerinde olumsuz tepebilir. Yanlış yaptıkları bir şeyi g&amp;ouml;rd&amp;uuml;ğ&amp;uuml;n&amp;uuml;zde onları s&amp;uuml;rekli eleştirmek yerine nasıl daha doğru yapabilirlerdi o y&amp;ouml;nde tavsiyelerde bulunmak daha &amp;ccedil;ok &amp;ouml;nemlidir. Tabi bunları s&amp;ouml;ylerken kullandığınız ses tonu da olduk&amp;ccedil;a &amp;ouml;nemlidir. &amp;nbsp;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Developer olarak, review eden kişi commit'inize yorumlarda bulunduğunda bunu kişisel algılamamaya &amp;ccedil;alışın tabi doğrudan kişisel bir s&amp;ouml;ylemde bulunulmuyorsa. &amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Muhakkak Checklist'iniz Olsun&lt;/h3&gt;
+&lt;p&gt;Hem review edecek olan kişi hemde developer i&amp;ccedil;in checklist'inizin olması &amp;ouml;nemli&amp;nbsp;daha sistematik bir review s&amp;uuml;reci i&amp;ccedil;in olduk&amp;ccedil;a &amp;ouml;nemlidir.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Bugs,&lt;/li&gt;
+&lt;li&gt;Duplicate Code,&lt;/li&gt;
+&lt;li&gt;Login Pages,&lt;/li&gt;
+&lt;li&gt;Code Style and Formatting&lt;/li&gt;
+&lt;li&gt;etc..&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Bu gibi checklist'ler yaparak s&amp;uuml;reci daha kolay hale getirebiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Multiple Reviewers&lt;/h3&gt;
+&lt;p&gt;Genelde bir kişi bulmak bile &amp;ccedil;ok zor oluyor ancak eğer m&amp;uuml;mk&amp;uuml;nse kodunuzu birden fazla kişiye review ettirin. Eğer kodla ilgili bir anlaşmazlık var ise &amp;ouml;rneğin; a kişisi burda factory design pattern kullanman doğru olmuş dedi, B-C kişileri hayır burda abstract factory kullanmalısın dedi. Hemen bu gibi durumlarda oylama yapılıp &amp;ccedil;oğunluğa g&amp;ouml;re karar verilebilir.&lt;/p&gt;
+&lt;h3&gt;Ne Zaman Review Yapılmalı ?&lt;/h3&gt;
+&lt;p&gt;Aslında bu b&amp;uuml;y&amp;uuml;k oranda development ekibine bağlı.Size bir geliştirme atandı ve 4 g&amp;uuml;n i&amp;ccedil;inde &lt;strong&gt;dev&lt;/strong&gt; branch'inde geliştirme yaptınız ve test'e g&amp;ouml;nderdiniz, testlerden herhangi bir bug vs. &amp;ccedil;ıkmayıp "Ok production'a alabiliriz.." dedikten sonra yapmış olduğunuz geliştirmeleri &lt;strong&gt;master &lt;/strong&gt;branch'ine merge işleminden &amp;ouml;nce review edecek olan kişiye g&amp;ouml;nderilmesi en doğru olan zamandır diyebiliriz. Review edilmeyen kodları &lt;strong&gt;master&lt;/strong&gt;'a merge etmemek gerekir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Review İşleminden Sonra..&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Dev&lt;/strong&gt; ortamda yaptığınız geliştirmeleri review eden kişi eğer herhangi bir sorun g&amp;ouml;rmez "OK" verir ise &lt;strong&gt;master&lt;/strong&gt; branch'ine merge işlemini yapabilirsiniz. &amp;nbsp;Eğer yaptığınız geliştirmeler review eden kişiden onay almaz ise tekrardan dev branch'de istenilen refactoring işlemlerini yapıp projenin son halini tekrardan review eden kişiye assign etmek gerekir. Bu sefer reviewer'dan "OK" aldıysanız &amp;uuml;stte de belirttiğim gibi master branch'ine geliştirmelerinizi merge edebilirsiniz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;zetle Code Review yazılım kalitesini artırmak i&amp;ccedil;in yapılabileceklerin en başında gelir. Eğer Development ekibinin başında olan kişi iseniz b&amp;uuml;y&amp;uuml;k ihtimalle review işlemini yapan kişi siz olacaksınızdır ve takımınıza belli başlı kabul g&amp;ouml;rm&amp;uuml;ş yazılım geliştirme standartlarına uymalarını sağlarsanız review s&amp;uuml;reciniz daha rahat ve keyifli ge&amp;ccedil;ecektir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-07-16 21:01:00</pubDate>
+  <lastModified>2020-01-20 08:22:23</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Code-Review</slug>
+  <tags>
+    <tag>Code Review</tag>
+    <tag>code</tag>
+    <tag>review</tag>
+    <tag>standart</tag>
+    <tag>rules</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,72 @@
+.page-global {
+    div#admin {
+        font-size: 0;
+
+        a {
+            color: #fff;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            text-align: center;
+            text-transform: uppercase;
+            background-color: #ddd;
+
+            &:first-child {
+                background-color: #000;
+            }
+
+            &:last-child {
+                background-color: #000;
+            }
+        }
+    }
+}
+
+.page-global {
+    margin-bottom: 2rem;
+
+    .page-global-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -1px;
+        margin: 0;
+        margin-bottom: 2rem;
+    }
+
+    @media screen and (max-width:64rem - .0625rem) {
+        .page-global-title {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+    }
+}
+
+.well-global {
+    margin-bottom: 4rem;
+
+    .well-global-title {
+        margin: 0;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #000;
+        line-height: 1;
+
+        &::after {
+          margin-top: 1rem;
+          margin-bottom: 1rem;
+          content: "";
+          width: 10%;
+          height: 1px;
+          background-color: $color-theme-primary;
+          display: block;
+
+        }
+    }
+}
+
+#trackbacks {
+    display: none;
+}

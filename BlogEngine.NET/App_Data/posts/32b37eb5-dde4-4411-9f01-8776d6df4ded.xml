@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>C# Boxing ve Unboxing</title>
+  <description>Net Framework i&amp;ccedil;erisinde 2 t&amp;uuml;r veri tipi vardır; &amp;nbsp;value type ve referance type&amp;nbsp</description>
+  <content>&lt;p&gt;Net Framework i&amp;ccedil;erisinde 2 t&amp;uuml;r veri tipi vardır; &amp;nbsp;&lt;strong&gt;value type&lt;/strong&gt; ve &lt;strong&gt;referance type&lt;/strong&gt;&amp;nbsp;.&lt;/p&gt;
+&lt;p&gt;Kısaca bahsetmek gerekirse ;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Value type &lt;/strong&gt;i&amp;ccedil;in =&amp;gt; object, string diyebiliriz ve Value type'lar RAM'de ki stack b&amp;ouml;l&amp;uuml;m&amp;uuml;nde tutulurlar.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Reference type&lt;/strong&gt;'lar =&amp;gt; RAM de kapyacakları alanları belli olan tiplerdir ve&amp;nbsp;&amp;nbsp;Heap &amp;rsquo;de tutulmaktadır. &amp;Ouml;rnek olarak; &amp;nbsp;int , float , double, char etc..&lt;/p&gt;
+&lt;p&gt;Bunlara baktığımızda b&amp;uuml;t&amp;uuml;n tipler'in en base'inde "&lt;strong&gt;object&lt;/strong&gt;" bulunmaktadır ve bu da aslında beraberinde tipler arasında cast işlemi yapılabilnesini sağlamaktadır. Bu cast işlemlerini boxing ve unboxing adı altında inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;&lt;strong&gt;Boxing&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;Boxing, stack&amp;rsquo;den heap&amp;rsquo;e yapılan kopyalama veya Value Type olan bir&amp;nbsp;değişkenin, object t&amp;uuml;r&amp;uuml;ne bilin&amp;ccedil;siz şekilde d&amp;ouml;n&amp;uuml;şt&amp;uuml;r&amp;uuml;lmesidir diyebiliriz. &amp;Ouml;rnek olarak ;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;int valueType = 41;
+object obj = (object)valueType;&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Unboxing&lt;/h2&gt;
+&lt;p&gt;Unboxing, heap&amp;rsquo;den stack&amp;rsquo;e yapılan kopyalama veya boxing işleminin tersidir diyebiliriz. Obje t&amp;uuml;r&amp;uuml;nden bir değişkenin Value Type'a &amp;nbsp;bilin&amp;ccedil;li d&amp;ouml;n&amp;uuml;st&amp;uuml;r&amp;uuml;lmesi diyebiliriz.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;object obj = 41;
+int valueType = (int)obj;&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bilin&amp;ccedil;siz bir şekilde derken ; b&amp;uuml;t&amp;uuml;n tipler object'ten t&amp;uuml;rediğinden dolayı herhangi bir değişkeni object olan &amp;nbsp;başka bir değişkene cast ederken (Boxing işlemi) hi&amp;ccedil;bir hata almayız ancak her şeyi object'e cast ederek işlemler yapmak &amp;ccedil;okta tavsiye edilen bir y&amp;ouml;ntem değildir bunu da unutmamak gerek.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bilin&amp;ccedil;li bir şekilde derken ise unboxing'de yukarıda ki &amp;ouml;rnekte aslında int olan ancak object olarak tanımlanan bir değişkeni int'e cast ederken bu işlemi bilin&amp;ccedil;li bir şekilde yaptığımızdan eminiz &amp;ccedil;&amp;uuml;nk&amp;uuml; int değilde başka bir tipe cast etmeye &amp;ccedil;alıştığımızda&amp;nbsp;&lt;strong&gt;InvalidCastException&amp;nbsp;&lt;/strong&gt;hatasını alırız. Yani Unboxing yaparken ilgili değişkenin ger&amp;ccedil;ek tipinin ne olduğunu saptayıp ona cast etmeliyiz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&amp;Ouml;rnek olarak;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;int valueType = 41
+
+//boxing işlemi
+object obj = valueType ;  
+
+//unboxingişlemi
+int sayi1 = (bool)obj ; // InvalidCastException hatasını verecektir
+
+//olması gereken
+int sayi1 = (int)obj;&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Not&lt;/strong&gt;&lt;/span&gt;&lt;strong&gt; :&amp;nbsp;&lt;/strong&gt;&amp;Ccedil;ok gerekli olmadığı s&amp;uuml;rece boxing ve unboxing yapılmaması tavsiye edilir zira &amp;ccedil;ok kullanıldığında uygulamamızda performans sorunlarına sebep verebilir.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-02-25 17:42:00</pubDate>
+  <lastModified>2016-05-18 21:14:40</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>C-Boxing-Unboxing</slug>
+  <tags>
+    <tag>boxing</tag>
+    <tag>unboxing</tag>
+    <tag>c#</tag>
+    <tag>stack</tag>
+    <tag>heap</tag>
+    <tag>valuetype</tag>
+    <tag>referencetype</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

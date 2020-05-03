@@ -1,0 +1,293 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>C# Ref ve Out Kullanımı</title>
+  <description>Object-Oriented programramming ile birlikte günümüz PC'lerinin de geçmişe göre bir hayli performanslı olması biz developer'ları git gide programlama dili &amp; RAM ilişkisinden uzaklaştırıyor.</description>
+  <content>&lt;p&gt;Object-Oriented programramming ile birlikte g&amp;uuml;n&amp;uuml;m&amp;uuml;z PC'lerinin de ge&amp;ccedil;mişe g&amp;ouml;re bir hayli performanslı olması biz developer'ları git gide programlama dili &amp;amp; RAM ilişkisinden uzaklaştırıyor. &amp;Ccedil;ok iyi hatırlıyorum &amp;uuml;niversite 1. sınıfta C++ dersi almıştım ve dersi anlatan hoca ilk derste yanılmıyorsam ş&amp;ouml;yle bir c&amp;uuml;mle kurmuştu "Muhtemelen bir&amp;ccedil;oğunuz ilk ve son defa bu derste Programlama ve RAM ilişkisini bu kadar yakından &amp;ouml;ğrenme şansınız olacak..". Tabi hoca bunu s&amp;ouml;ylerken ne yazık ki bizde &amp;ouml;yle &amp;ccedil;okta anlıyormuş gibi dinlememiştik. C# programlama dilinde kullanılan veri tiplerini 2 başlıkta tanımlayabiliriz. Değer tipleri ve Referans tipleri.&lt;/p&gt;
+&lt;p&gt;Kısaca tanımlamak gerekirse, değer tipler; ram de kaplayacağı alanı belli olan int,double,byte vs gibi struct olan tiplerdir ve stack'de bulunurlar. Referans tipler; string,object, kendi yazdığımız custom objeler bunlar ram'de kaplayacakları alan belli olmadığından heap'de tutulurlar.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Gelelim konumuzun başlığında bulunan "ref" ve "out" parametrelerimize. C# da kullanıma sunulan ref ve out isminde iki tane parametre tanımlama &amp;ccedil;eşidi bulunmakta. Bu kullanımlarla birlikte ref ve out parametreleriyle yazmış olduğumuz metodlara değişkenleri g&amp;ouml;ndermeden &amp;ouml;nceki değerleri ile metoddan &amp;ccedil;ıktıktan sonraki değerleri kullanıma g&amp;ouml;re farklılıklar g&amp;ouml;stermektedir. Aslında ref veya out ile tanımlandığında RAM'de ne oluyor tanımlanmadığında ne oluyor, aralarında ne gibi farklar var bunları incelicez.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Geliştirme yaparken tanımlamış olduğumuz parametre alan metodları kullanmak istediğimizde ilgili metoda parametre ge&amp;ccedil;me işlemi 2 yolla yapılır "&lt;strong&gt;pass by value&lt;/strong&gt;" ve "&lt;strong&gt;pass by reference&lt;/strong&gt;". Kısaca tanımlamak &amp;nbsp;gerekirse ;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pass by value fonksiyona parametre g&amp;ouml;nderirken o parametrenin bir kopyasının oluşturulup g&amp;ouml;nderilmesi ve metod i&amp;ccedil;erisinde yapılan değişikliklerden metod i&amp;ccedil;erisinde ki yeni değerin etkilenmesi,&lt;/li&gt;
+&lt;li&gt;Pass by reference fonksiyona parametre g&amp;ouml;nderirken o parametrenin ram'de adresinin g&amp;ouml;nderilip metod i&amp;ccedil;erisindeki yapılan değişiklerden orjinal değerin etkilenmesi.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Ref - Out Nedir den &amp;ouml;nce aşağıdaki &amp;ouml;rneği bir inceleyelim; C# da geriye herhangi bir değer d&amp;ouml;nmeyen bir metod yazalım ve i&amp;ccedil;erisine int tipinde 3 değişken alsın sonrasında bu değerlerden birini metod i&amp;ccedil;erisinde değiştirsin ve değişkenin metoddan &amp;ouml;nceki ve sonraki değerlerine bir bakalım&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class RefOutExample
+{
+    static void Main()
+    {
+        int originalValue = 43;
+ 
+        Console.WriteLine("ChangeMethod'dan &amp;ouml;nce: " + originalValue);//Output 43
+ 
+        ChangeMethod(1,3,originalValue);
+ 
+        Console.WriteLine("ChangeMethod'dan sonra: " + originalValue); //Output 43
+    }
+    static void ChangeMethod(int x, int y, int i)
+    {
+        i = i+x+y;//47
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yukarıda ki &amp;ouml;rnekte&amp;nbsp;ChangeMethod'isimli metoda parametreyi ge&amp;ccedil;ereken değişkenin orjinal halini değilde bir &amp;ouml;rneğini ge&amp;ccedil;tiğimizden metod i&amp;ccedil;erisinde ki değişiklik orjinal değeri etkilemedi.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;C# Ref Kullanımı&lt;/h2&gt;
+&lt;p&gt;Value Type'lar metodlara birebir kopyası oluşturularak ge&amp;ccedil;irilirler ve metod i&amp;ccedil;erisinde o değişkenle ilgili yapılan değişikliklerden orjinal değer etkilenmez. Ancak bazen değer tiplerini de referansları ile metodlara parametre olarak vermek isteyebiliriz. Referans yolu ile metoda parametre olarak ge&amp;ccedil;tiğimiz değişken &amp;uuml;zerinde yapılacak b&amp;uuml;t&amp;uuml;n değişiklikler orjinal değeri etkileyecektir &amp;ccedil;&amp;uuml;nk&amp;uuml; artık o metod i&amp;ccedil;erisinde değişkenin bir kopyası değilde RAM'de ki adresi bulunmaktadır. &amp;Ouml;rnek kullanımı aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+					
+public class RefOutExample
+{
+   public static void Main()
+    {
+        int originalValue = 43;
+
+        Console.WriteLine("ChangeMethod'dan &amp;ouml;nce: " + originalValue);//Output 43
+
+        ChangeMethod(1,3,ref originalValue);
+
+        Console.WriteLine("ChangeMethod'dan sonra: " + originalValue); //Output 47
+    }
+
+    static void ChangeMethod(int x,int y, ref int i)
+    {
+        i = i+x+y;//47
+    }
+}&lt;/pre&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;nbsp;&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi ChangeMethod'una bu sefer parametreyi &lt;strong&gt;ref&amp;nbsp;&lt;/strong&gt;keyword'&amp;uuml; kullanarak ge&amp;ccedil;tik ve bu metoda o değişkenin &amp;ouml;rneğini değilde RAM'de bulunan adresini ge&amp;ccedil;tiğinden "&lt;strong&gt;i&lt;/strong&gt;" parametresi metodu &amp;ccedil;ağırırken kullandığımız "&lt;strong&gt;originalValue&lt;/strong&gt;" değerine refer ettiğinden yapılan bir değişiklik "&lt;strong&gt;originalValue&lt;/strong&gt;" parametresinin kendisine yapılmıştır.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Ref'in &amp;Ouml;zellikleri&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Metodu tanımlarken referans yolu ile iletilmek istenen değişkenin &amp;ouml;n&amp;uuml;ne "&lt;strong&gt;ref&lt;/strong&gt;" yazılmalıdır.&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;originalValue&lt;/strong&gt; değişkeni metoda parametre olarak ge&amp;ccedil;ilmeden &amp;ouml;nce bir başlangı&amp;ccedil; değeri almak zorundadır,&lt;/li&gt;
+&lt;li&gt;"&lt;strong&gt;i&lt;/strong&gt;" değişkeni metod i&amp;ccedil;erisinde herhangi bir değişiklik yapmadan da kullanılabilir.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp; &amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;C# Out Kullanımı&lt;/h2&gt;
+&lt;p&gt;Out aslında ref ile hemen hemen aynı amaca hizmet ediyor diyebiliriz. Ancak ref ile aralarında temel 2 farklılık var bunları aşağıda ki Ref-Out Farklılıkları başlığında yazıyor olacağım&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Out'un &amp;Ouml;zellikleri&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Metodu tanımlarken ge&amp;ccedil;ilmek istenen değişkenin &amp;ouml;n&amp;uuml;ne "&lt;strong&gt;out&lt;/strong&gt;" yazılmalıdır.&amp;nbsp;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;originalValue&lt;/strong&gt;&amp;nbsp;değişkeni metoda parametre olarak ge&amp;ccedil;ilmeden &amp;ouml;nce bir başlangı&amp;ccedil; değeri almak zorunda değildir.&lt;/li&gt;
+&lt;li&gt;"&lt;strong&gt;i&lt;/strong&gt;" değişkeni metod i&amp;ccedil;erisinde herhangi bir değişiklik yapmadan kullanılamaz.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yukarıda Ref i&amp;ccedil;in yazdığımız metodun aynısını Out i&amp;ccedil;inde yazalım&lt;/p&gt;
+&lt;pre class="brush:c-sharp;toolbar:false" contenteditable="false"&gt;using System;
+					
+public class RefOutExample
+{
+  public static void Main()
+    {
+        int originalValue=43;
+ 
+        ChangeMethod(1,3,ref originalValue);
+ 
+        Console.WriteLine("ChangeMethod'dan sonra: " + originalValue); //Output 47
+    }
+ 
+    static void ChangeMethod(int x,int y, ref int i)
+    {
+        i = i+x+y;//47
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Ref-Out Farklılıkları&lt;/h2&gt;
+&lt;table style="height: 146px; width: 777px;" border="0" align="left"&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;span style="font-size: medium; color: #ff0000;" data-mce-mark="1"&gt;&lt;strong&gt;Ref&lt;/strong&gt;&lt;/span&gt;&lt;/td&gt;
+&lt;td&gt;&lt;span style="font-size: medium; color: #3366ff;" data-mce-mark="1"&gt;&lt;strong&gt;Out&lt;/strong&gt;&lt;/span&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Metodu tanımlarken ge&amp;ccedil;ilmek istenen değişkenin &amp;ouml;n&amp;uuml;ne "&lt;strong&gt;ref&lt;/strong&gt;" yazılmalıdır.&lt;/td&gt;
+&lt;td&gt;Metodu tanımlarken ge&amp;ccedil;ilmek istenen değişkenin &amp;ouml;n&amp;uuml;ne "&lt;strong&gt;out&lt;/strong&gt;" yazılmalıdır.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;originalValue&lt;/strong&gt;&amp;nbsp;değişkeni metoda parametre olarak ge&amp;ccedil;ilmeden &amp;ouml;nce bir başlangı&amp;ccedil; değeri almak zorundadır.&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;originalValue&lt;/strong&gt;&amp;nbsp;değişkeni metoda parametre olarak ge&amp;ccedil;ilmeden &amp;ouml;nce bir başlangı&amp;ccedil; değeri almak zorunda değildir.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;"&lt;strong&gt;i&lt;/strong&gt;" değişkeni metod i&amp;ccedil;erisinde herhangi bir değişiklik yapmadan da kullanılabilir.&lt;/td&gt;
+&lt;td&gt;"&lt;strong&gt;i&lt;/strong&gt;" değişkeni metod i&amp;ccedil;erisinde herhangi bir değişiklik yapmadan kullanılamaz.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&amp;nbsp; &amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Aynı metodda hem "ref" hem "out" kullanımı&lt;/h2&gt;
+&lt;p&gt;Gelin birde hem ref hem out tanımlı parametreleri olan bir metod kullanalım&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+					
+public class RefOutExample
+{
+   public static void Main()
+    {
+        int refValue=5;//başlangı&amp;ccedil; değeri atanması zorunludur.
+        int outValue;//başlangı&amp;ccedil; değeri atanması zorunlu değildir.
+
+        ChangeMethod(out outValue, ref refValue);
+
+        Console.WriteLine("ChangeMethod'dan sonra refValue : " + refValue); //Output 7
+        Console.WriteLine("ChangeMethod'dan sonra outValue: " + outValue); //Output 8
+    }
+
+    static void ChangeMethod(out int i,ref int j)
+    {
+          i = 8; // i arg&amp;uuml;manına bir değer atamak zorunludur
+          j = j + 2; // j i&amp;ccedil;in b&amp;ouml;yle bir zorunluluk yoktur
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Daha &amp;ccedil;ok C - C++ dillerinde etkin bir şekilde kullanılan pass by reference C# dilinde de developer'ların kullanımına sunulmuş. Birden fazla parametre d&amp;ouml;nmesini istediğimiz metodlar da veya orjinal veri &amp;uuml;zerinde method i&amp;ccedil;erisinde işlem yapmak istediğimizde ref ve out keywordlerinden kolayca faydalanabiliriz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2014-12-25 16:26:00</pubDate>
+  <lastModified>2020-01-20 08:22:29</lastModified>
+  <raters>6</raters>
+  <rating>4.333333</rating>
+  <slug>C-Ref-Out-Kullanımı</slug>
+  <tags>
+    <tag>ref</tag>
+    <tag>out</tag>
+    <tag>pass by value</tag>
+    <tag>pass by reference</tag>
+  </tags>
+  <comments>
+    <comment id="c7dda8b5-b776-4fc3-8a0f-68a9422fe508" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-05-29 10:20:19</date>
+      <author>tuba</author>
+      <email>tubayuzgul@gmail.com</email>
+      <country />
+      <ip>217.169.193.30</ip>
+      <avatar />
+      <content>C# Out Kullanımı altındaki örnekte Output nasıl 47 oluyor.? x=1, y=3 , i &amp;#39; de boş değil mi ?</content>
+    </comment>
+    <comment id="a08e93e7-635f-4817-a41f-ddacde64219e" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-06-27 08:07:01</date>
+      <author>f</author>
+      <email>f</email>
+      <country />
+      <ip>78.180.60.40</ip>
+      <avatar />
+      <content>f</content>
+    </comment>
+    <comment id="c2477a1a-c0bc-4107-bc14-0747a4a247fe" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-08-22 12:24:17</date>
+      <author>serbay</author>
+      <email>sarbaysarikaya@gmail.com</email>
+      <country />
+      <ip>85.105.129.62</ip>
+      <avatar />
+      <content>using System;
+                     
+public class RefOutExample
+{
+   public static void Main()
+    {
+        int originalValue;
+ 
+        ChangeMethod(1,3,ref originalValue);
+ 
+        Console.WriteLine(&amp;quot;ChangeMethod&amp;#39;dan sonra: &amp;quot; + originalValue); //Output 47
+    }
+ 
+    static void ChangeMethod(int x,int y, out int i)
+    {
+        i = i+x+y;//47
+    }
+}
+Tamam outda deger atamasanda olur faka 
+i+x+y; diye bir işlem yaptığın içi değer atam gerekiyor. 
+yoksa hata verir
+
+
+</content>
+    </comment>
+    <comment id="50235d69-da0e-4f97-87e0-0cb64ff8d7a2" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-08-22 12:32:23</date>
+      <author>serbay</author>
+      <email>sarbaysarikaya@gmail.com</email>
+      <country />
+      <ip>85.105.129.62</ip>
+      <avatar />
+      <content>43 ü  nerden alıyor son iki örnekte :D</content>
+    </comment>
+    <comment id="7e3eba53-a613-4b5a-aab2-72210a7d67cf" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-12-31 18:43:29</date>
+      <author>misafir</author>
+      <email>virsvirs@mynet.com</email>
+      <country />
+      <ip>176.217.136.249</ip>
+      <avatar />
+      <content>Detaylı anlatım için teşekkürler. 
+
+&amp;quot;...Out içinde yazalım&amp;quot; kısmındaki kod ref e göre yazılmış, bilginize (:</content>
+    </comment>
+    <comment id="e5d1c2ee-1825-4f47-ba06-118bc9e439d5" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2020-01-14 05:26:42</date>
+      <author>7</author>
+      <email>7</email>
+      <country />
+      <ip>213.14.4.178</ip>
+      <avatar />
+      <content>7</content>
+    </comment>
+    <comment id="f0a10936-8b8b-48f0-8e8b-c8d8fa6b6b77" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2020-01-14 05:26:55</date>
+      <author>28</author>
+      <email>28</email>
+      <country />
+      <ip>213.14.4.178</ip>
+      <avatar />
+      <content>28</content>
+    </comment>
+    <comment id="a6e9c26c-faf7-4fef-baf6-1b4e1ab438e6" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2020-01-14 05:27:00</date>
+      <author>28</author>
+      <email>28</email>
+      <country />
+      <ip>213.14.4.178</ip>
+      <avatar />
+      <content>28</content>
+    </comment>
+    <comment id="f9977ce4-d687-4ee6-9da1-52b4234d37c3" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2020-01-14 05:27:04</date>
+      <author>28</author>
+      <email>28</email>
+      <country />
+      <ip>213.14.4.178</ip>
+      <avatar />
+      <content>28</content>
+    </comment>
+    <comment id="4b73440c-6e39-4ad8-b0b3-bf769669f7c4" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2020-01-14 05:27:10</date>
+      <author>28</author>
+      <email>28</email>
+      <country />
+      <ip>213.14.4.178</ip>
+      <avatar />
+      <content>28</content>
+    </comment>
+    <comment id="b05f5cd2-87e1-4381-8f9b-4c13a39b656b" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2020-01-14 05:28:16</date>
+      <author>28</author>
+      <email>28</email>
+      <country />
+      <ip>213.14.4.178</ip>
+      <avatar />
+      <content>&amp;lt;div&gt;28&amp;lt;/div&gt;</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications>
+    <email>tubayuzgul@gmail.com</email>
+  </notifications>
+</post>

@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Api Projesine Cache Ekleme - OutPutCache</title>
+  <description>Server-side tarafında geliştirme yapan arkadaşlar bilirler ki request-response time ları çok büyük önem sarf etmektedir. Örnek olarak, bir muhasebe DB niz var ve her gün gece 23:59 da günlük raporlar giriliyor veya 3 dkka yeni kayıt girilen bir yapıda olabilir.</description>
+  <content>&lt;p&gt;Server-side tarafında geliştirme yapan arkadaşlar bilirler ki request-response time ları &amp;ccedil;ok b&amp;uuml;y&amp;uuml;k &amp;ouml;nem sarf etmektedir. &amp;Ouml;rnek olarak, bir muhasebe DB niz var ve her g&amp;uuml;n gece 23:59 da g&amp;uuml;nl&amp;uuml;k raporlar giriliyor veya 3 dkka yeni kayıt girilen bir yapıda olabilir. İlgili tabloda şuana kadar 200 bin kayıt girilmiş diyelim. select * from Raporlar dediniz ve size 200 bin kayıtı ortalama 15 sn de getirdi (DB nin serve edildiği Pc nin &amp;ouml;zellikleri ve network hızı gibi &amp;ccedil;eşitli etkenlere g&amp;ouml;re değişir). Aslında bu gibi yapılarda ilgili &amp;nbsp;StoraProcedure e paging parametreleri vererek daha performanslı ve hızlı bir sorgu yazabiliriz ancak bu durum i&amp;ccedil;in bile Cache yapısını uygulamamıza entegre edebiliriz. Şimdi bu raporları feed eden bir mobil uygulamamız, Web Sayfanız veya bir masa&amp;uuml;st&amp;uuml; uygulamanız olabilir ve iş ilgili uygulamanın kullanım oranına g&amp;ouml;re dakikada 100-200 request te bulunuyor olabilirsiniz. Bu uygulamalara db ile connection'ı sağlayan bir&amp;nbsp;Web Api uygulamamız olsun. Şimdi yukarıda ki case de uygulamada bulunan RaporlarController 'ına dakikada 100-200 arası istek bulunmakta. Ne yapacağız peki s&amp;uuml;rekli olarak DB ye git select * from Raporlar deyip 200 bin kayıtı almak i&amp;ccedil;in 15 sn s&amp;uuml;rs&amp;uuml;n network vs işlemlerinden dolayı 2 sn de ordan olsun artı birde kullanıcının internet hızı kotalımı dersin :) ttnet sağolsun hızı d&amp;uuml;ş&amp;uuml;rm&amp;uuml;ş 2 mb'e ve oda yaklaşık olarak 5 sn s&amp;uuml;rs&amp;uuml;n diyelim (değerler tamamiyle dummy dir). Şimdi k&amp;uuml;&amp;ccedil;&amp;uuml;k bir matematik işlemiyle ortalama ka&amp;ccedil; sn de veriyi getiriyoruz;&lt;/p&gt;
+&lt;p&gt;DB QueryResult : 15 sn&lt;/p&gt;
+&lt;p&gt;WebApi projesinin Download S&amp;uuml;resi : 2 sn&lt;/p&gt;
+&lt;p&gt;Client uygulamasının Download S&amp;uuml;resi : 5 sn&lt;/p&gt;
+&lt;p&gt;Client uygulamasının bu veriyi ekrana &amp;ccedil;izmeside yaklaşık 2 sn diyelim (Performanslı cihazlarda)&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;int[] arr = { 15 , 2, 5, 2 };
+ 
+int sumResult = arr.Sum();
+Console.WriteLine(sumResult); &lt;/pre&gt;
+&lt;pre style="font-stretch: normal; font-size: 16px; line-height: 19px; font-family: monospace; padding: 2px 0px;"&gt;&lt;strong&gt;24 saniye &lt;/strong&gt;&lt;br /&gt;&lt;br /&gt;&lt;/pre&gt;
+&lt;p&gt;Adama "Oh My God" dediğinde "Yes your god" diye cevap verirler.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Tamı tamına 24 saniye &amp;nbsp;(biraz abartmışta olabiliriz ). G&amp;uuml;nde ortalama 100 kişinin kullandığını d&amp;uuml;ş&amp;uuml;nd&amp;uuml;ğ&amp;uuml;m&amp;uuml;zde her gelen 24 sn beklicek. B&amp;ouml;yle bir projeyi al &amp;ccedil;&amp;ouml;pe at derler adama. Benzer bir olay daha &amp;ouml;nce &amp;ccedil;alıştığım bir şirkette başıma geldi ve page_load da db ye gidip 4.600.000 kayıt i&amp;ccedil;in sorgu atılıyordu ve bazı işlemler yapılmaya &amp;ccedil;alışılıyordu. Projeyi bana assign edip m&amp;uuml;şteri sayfayı a&amp;ccedil;amıyormuş bi bakarmısın dediler ve sorunu anladığımda yazılımdan soğmuştum diyebilirim.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Her neyse gelelim konumuza. Projeyi bu halde bırakmayalım ama &amp;ccedil;&amp;ouml;pede atmayalım. Projemize sağ tıklayıp nugetten WebApi OutPutCache.Core ve OutPutCache.v2 dll lerini ekleyelim.&lt;/p&gt;
+&lt;p&gt;Senaryomuz şu şekilde olacak;&lt;/p&gt;
+&lt;p&gt;1-Controller bazında hem server side i&amp;ccedil;in hemde client i&amp;ccedil;in iki tarafta da cache sağlayacak bir yapı yapıyoruz. Kullanacağımız k&amp;uuml;t&amp;uuml;phaneye 2 parametre vericez &amp;nbsp;ServerTimeSpan &amp;nbsp;ve&amp;nbsp;ClientTimeSpan . &amp;nbsp;Biri ServerSide i&amp;ccedil;in cache'i sağlicak yani kendine gelen ilk request'in response'ını alıp set edilen s&amp;uuml;re boyunca aynı requestle başka bir kullanıcı geldiğinde cache den alıp o yeni gelen kullanıcıya verecek. Diğeri ise ClientSide i&amp;ccedil;in clienta d&amp;ouml;nen response'un header'ına&amp;nbsp;&lt;strong&gt;Cache-Control&amp;nbsp;&amp;rarr;max-age=60&amp;nbsp;&lt;/strong&gt;eklicek. Bu şu anlama geliyor; Client'a diyor ki arkadaş ben bu respons'u 60 sn&amp;nbsp;cache ledim ve sende istersen gelen response'u biyerde tutup bana 60 sn boyunca gelmeyebilirsin. 60 &amp;nbsp;sn sonra tekrardan gel. Şimdi gelelim code tarafına ilk olarak&amp;nbsp;WebApiCacheAttribute&amp;nbsp;adında&amp;nbsp;CacheOutputAttribute&amp;nbsp;inherıt olan bir attribute tanımlıyoruz. Alında direkt olarak&amp;nbsp;CacheOutputAttribute &amp;nbsp;controllerımızın i&amp;ccedil;erisindeki metodların başına ekleyebilirdik ancak y&amp;ouml;netimi daha kolay olur d&amp;uuml;ş&amp;uuml;ncesiyle araya işimi daha kolaylaştıran&amp;nbsp;WebApiCacheAttribute &amp;nbsp;adında CustomAttribute &amp;uuml;n&amp;uuml; yazdım.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class WebApiCacheAttribute : CacheOutputAttribute
+    {
+        public ApiCacheAttribute()
+            : this(WebConfigApiClientCacheDuration,WEebConfigApiServerCacheDuration){ }
+
+          public ApiCacheAttribute(int clientCacheDuration = 0,
+                                 int serverCacheDuration = 0)
+        {
+            base.ServerTimeSpan = serverCacheDuration;
+            base.ClientTimeSpan = clientCacheDuration;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;Uuml;stte g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi bu Cache attribute'&amp;uuml; 2 parametre alıyor. Bu parametreleri attribute implementasyon sırasında aşağıda olduğu gibi biz değer atamaz isek WebConfig dosyasında tanımlı olan değerli alarak Cache s&amp;uuml;relerini set ediyor.&lt;/p&gt;
+&lt;p&gt;WebConfig de appsettings de kayıtlı olan değerleri okuyarak cache işlemini yapar&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;[WebApiCacheAttribute]
+public IHttpActionResult GetItems()
+{
+      var products= new IkiYuzBinKayit(); //db den 200 bin kayit getirmişiz varsayalım
+      return Ok(product);
+}&lt;/pre&gt;
+&lt;p&gt;Ama istersek aşağıda olduğu gibi bizde bu değerleri set edebiliriz&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;[WebApiCacheAttribute(ApiServerCacheDuration=120,ClientCacheDuration=120)]
+public IHttpActionResult GetItems()
+{
+     var products= new IkiYuzBinKayit(); //db den 200 bin kayit getirmişiz varsayalım
+     return Ok(product);
+}&lt;/pre&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;nbsp;&lt;/pre&gt;
+&lt;p&gt;Sonu&amp;ccedil; olarak web api projemizde cache attribute eklediğimiz metoda yapılan sorgular set edilen s&amp;uuml;relere g&amp;ouml;re cache lenir ve o s&amp;uuml;re boyunca aynı parametrelerle gelen b&amp;uuml;t&amp;uuml;n kullanıcılara cachelenmiş olan response d&amp;ouml;ner. S&amp;uuml;re&amp;ccedil; server cache s&amp;uuml;resi bittiğinde sonlanır ve yeniden gelecek olan ilk sorgu beklenir ve d&amp;ouml;ng&amp;uuml; şeklinde devam eder.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Not !&lt;/strong&gt; Cache Cache'dir ancak hangi datanın cachelenip cachelenmemesi konusu &amp;ccedil;ok ama &amp;ccedil;ok &amp;ouml;nemlidir !! İyice d&amp;uuml;ş&amp;uuml;n&amp;uuml;p karar verilmesi gereken bir konudur.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-01-16 22:37:00</pubDate>
+  <lastModified>2020-01-20 08:22:26</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>Web-Api-Cache</slug>
+  <tags>
+    <tag>cacheoutput</tag>
+    <tag>webapi</tag>
+    <tag>web api</tag>
+    <tag>cache</tag>
+    <tag>webapicache</tag>
+    <tag>outputcache</tag>
+  </tags>
+  <comments>
+    <comment id="21607c05-8caf-4468-9ae8-ec01f54a99fc" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2016-06-03 15:52:10</date>
+      <author>Caner Tosuner</author>
+      <email>trackback</email>
+      <country />
+      <ip>94.102.8.48</ip>
+      <website>http://canertosuner.com/post/Web-Api-Nedir</website>
+      <moderatedby>Rule:white list</moderatedby>
+      <content>Asp .Net Web Api Nedir 
+
+Asp .Net Web Api Nedir </content>
+    </comment>
+    <comment id="12fb2f4b-d356-467b-9d5a-b80a20fc4ee4" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-01-21 07:19:38</date>
+      <author>Caner Tosuner</author>
+      <email>trackback</email>
+      <country />
+      <ip>191.235.220.16:5258</ip>
+      <website>http://www.canertosuner.com/post/Web-Api-Nedir</website>
+      <content>Asp .Net Web Api Nedir 
+
+Asp .Net Web Api Nedir </content>
+    </comment>
+    <comment id="8cde9f7f-4b47-43b8-8495-df40e0d02049" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-09-18 07:30:25</date>
+      <author>d</author>
+      <email>d</email>
+      <country />
+      <ip>88.255.103.50</ip>
+      <avatar />
+      <content>d</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications>
+    <email>d</email>
+  </notifications>
+</post>

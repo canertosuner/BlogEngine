@@ -1,0 +1,407 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>ElasticSearch Client Using Nest, ElasticSearch Net, GenericRepository, Nancy</title>
+  <description>Daha önceki elasticsearch ile ilgili yazımızda ElasticSearch Nedir ? Windows Üzerinde Kurulumu konularına değinmiştik. Bu yazımızda ise bir elastic search client uygulaması geliştireceğiz ve bu uygulamayı geliştirirken ElasticSearch.Net-Nest ve Nancy kütüphanelerinden faydalanacağız.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki elasticsearch ile ilgili yazımızda&amp;nbsp;&lt;a href="/post/elasticsearch-nedir-windows-uzerinde-kurulumu"&gt;ElasticSearch Nedir ? Windows &amp;Uuml;zerinde Kurulumu&lt;/a&gt;&amp;nbsp;konularına değinmiştik. Bu yazımızda ise bir elastic search client uygulaması geliştireceğiz ve bu uygulamayı geliştirirken ElasticSearch.Net-Nest ve Nancy k&amp;uuml;t&amp;uuml;phanelerinden faydalanacağız.&lt;/p&gt;
+&lt;p&gt;Elasticsearch&amp;nbsp;java dilinde open-source olarak geliştirilen, dağıtık mimariye uygun, kolay &amp;ouml;l&amp;ccedil;eklenebilir, enterprise d&amp;uuml;zeyde bir big-data arama motorudur bizlere sahip olduğu. Sahip olduğu API ile rest-call yaparak bir&amp;ccedil;ok crud ve &amp;ccedil;eşitli query-filter işlemlerini yapabilmemizi sağlamaktadır. .Net uygulamalarında bu api&amp;nbsp;yi doğrudan kullanabilmemizi sağlayan nuget &amp;uuml;zerinden indirilip kullanılabilen&amp;nbsp;&lt;a href="https://github.com/elastic/elasticsearch-net"&gt;ElasticSearch.Net&lt;/a&gt;&amp;nbsp;ve&amp;nbsp;&lt;a href="https://github.com/elastic/elasticsearch-net"&gt;Nest&amp;nbsp;&lt;/a&gt;adında 2 k&amp;uuml;t&amp;uuml;phane mevcut. Client uygulamamızı geliştirirken bu 2 k&amp;uuml;t&amp;uuml;phaneyi kullanacağız.&lt;/p&gt;
+&lt;p&gt;Geliştirmiş olduğumuz bu uygulamayı da host ederken daha &amp;ouml;nceki&amp;nbsp;&lt;a href="/post/nancy-nedir-nancyfx"&gt;Nancy Nedir (NancyFx)&lt;/a&gt;&amp;nbsp;yazısında detaylıca bahsettiğimiz Nancy framework kullanacağız.&lt;/p&gt;
+&lt;p&gt;Projemiz şu şekilde olsun yukarıda bahsettiğimiz gibi bir elasticsearch client uygulaması oluşturalım ve bu uygulama &amp;uuml;zerinden&amp;nbsp;&lt;strong&gt;product_index&lt;/strong&gt;&amp;nbsp;adında bir index oluşturarak bu index'e Product modellerimizi document olarak insert edelim sonrasında bu index &amp;uuml;zerinde select update delete gibi işlemler yapalım.&lt;/p&gt;
+&lt;p&gt;İlk olarak vs da&amp;nbsp;ElasticSearchClient adında bir console app. oluşturalım. Sonrasında proje referanslarına sağ tıklayarak nuget &amp;uuml;zerinden sırasıyla aşağıdaki k&amp;uuml;t&amp;uuml;phaneleri indirip kuralım.&lt;/p&gt;
+&lt;p&gt;1-Nest&amp;nbsp;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Install-Package NEST&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;2-ElasticSearch.Net&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Install-Package Elasticsearch.Net&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;3-Nancy&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Install-Package Nancy&amp;nbsp;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;4-Nancy.Hosting.Self&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Install-Package Nancy.Hosting.Self&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Yukarıdaki bu 4 paketi kurduktan sonra projede y&amp;uuml;kl&amp;uuml; olan nuget paketleri listesi aşağıdaki gibi listelenecektir. Ek olarak Nest paketi Newtonsoft paketine depended olduğundan listede Newtonsoft.Json paketide bulunacaktır.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/nancy_elasticsearch_nuget_dll.png" alt="" width="532" height="455" /&gt;&lt;/p&gt;
+&lt;p&gt;İlgili paketleri projemize kurduktan sonra Product&amp;nbsp;entity'sini&amp;nbsp;ve projemizde yer alacak b&amp;uuml;t&amp;uuml;n entity'ler de bulunması gereken Id bilgisini i&amp;ccedil;eren BaseEntity ve Product sınıflarını aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public abstract class BaseEntity
+    {
+        public Guid Id { get; set; }
+    }
+
+    public class Product : BaseEntity
+    {
+        public string Name { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Projede kullanılanılacak bazı appSettings değerleri ise aşağıdaki gibidir. Bunları&amp;nbsp;config dosyamıza ekleyelim yada kod i&amp;ccedil;inde doğrudan da yazabilirsiniz. Geliştirmeyi local de yaptığımızdan es'e ait url localhost&amp;nbsp;şeklinde tanımlı ancak bambaşka bir server'da da elasticsearch'&amp;uuml; host edebilirsiniz.&lt;/p&gt;
+&lt;pre class="brush:xml;auto-links:false;toolbar:false" contenteditable="false"&gt;  &amp;lt;appSettings&amp;gt;
+    &amp;lt;add key="NancyAddress" value="http://localhost:7880" /&amp;gt;
+    &amp;lt;add key="ElasticSearchApiAddress" value="http://localhost:9200" /&amp;gt;
+    &amp;lt;add key="ProductIndexName" value="product_index" /&amp;gt;
+  &amp;lt;/appSettings&amp;gt;&lt;/pre&gt;
+&lt;p&gt;&amp;Ouml;rneğin data katmanı i&amp;ccedil;in tıpkı bir db ile veri alış verişi yapıyormuş gibi bir GenericRepository katmanı oluşturarak tasarlayalım ve elasticsearch'e yapacağımız CRUD metotlarını bu class i&amp;ccedil;erisine tanımlayalım.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IGenericRepository&amp;lt;T&amp;gt; where T : class
+    {
+        Guid Save(T entity);
+        T Get(Guid id);
+        void Update(T entity);
+        bool Delete(Guid id);
+        IEnumerable&amp;lt;T&amp;gt; All();
+        IEnumerable&amp;lt;T&amp;gt; Search(BaseSearchModel search);
+    }
+
+    public abstract class GenericRepository&amp;lt;T&amp;gt; : IGenericRepository&amp;lt;T&amp;gt; where T : BaseEntity
+    {
+        private readonly ElasticClient _elasticClient;
+        private readonly string _indexName;
+
+        protected GenericRepository(string indexName)
+        {
+            _elasticClient = ElasticSearchClientHelper.CreateElasticClient();
+            _indexName = indexName;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda tanımladığımız GenericRepository contructor inj. parameter olarak ilgili tipe ait index adı bilgisini almaktadır ve nuget'ten kurduğumuz ElasticSearchClient nesnesini initialize etme işini&amp;nbsp;ElasticSearchClientHelper adındaki class'ta bulunan metoda verdik.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public static class ElasticSearchClientHelper
+    {
+        public static ElasticClient CreateElasticClient()
+        {
+            var node = new SingleNodeConnectionPool(new Uri("http://localhost:9200"));
+            var settings = new ConnectionSettings(node);
+            return new ElasticClient(settings);
+        }
+
+        public static void CheckIndex&amp;lt;T&amp;gt;(ElasticClient client, string indexName) where T : class
+        {
+            var response = client.IndexExists(indexName);
+            if (!response.Exists)
+            {
+                client.CreateIndex(indexName, index =&amp;gt;
+                   index.Mappings(ms =&amp;gt;
+                       ms.Map&amp;lt;T&amp;gt;(x =&amp;gt; x.AutoMap())));
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi sırasıyla interface i&amp;ccedil;erisinde bulunan metotlara ait elasticsearch geliştirmelerini baserepository'miz i&amp;ccedil;erisinde yapalım.&lt;/p&gt;
+&lt;p&gt;İlk olarak&amp;nbsp;&lt;strong&gt;All()&lt;/strong&gt;&amp;nbsp;metodu ile başlayalım. Bu metot isminden de anlaşılacağı &amp;uuml;zre elasticsearch belirtmiş olduğumuz indexde ilgili tipimize ait bulunan b&amp;uuml;t&amp;uuml;n kayıtları return edecektir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public IEnumerable&amp;lt;T&amp;gt; All()
+        {
+            return _elasticClient.Search&amp;lt;T&amp;gt;(search =&amp;gt;
+                search.MatchAll().Index(_indexName)).Documents;
+        }&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Get(Guid id)&lt;/strong&gt;&amp;nbsp;metodu ise index'de bulunan kaydı aldığı id parametresi ile bulup return eder bulamadığı durumda&amp;nbsp;exception throw eder.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public T Get(Guid id)
+        {
+            var result = _elasticClient.Get&amp;lt;T&amp;gt;(id.ToString(), idx =&amp;gt; idx.Index(_indexName));
+            if (!result.IsValid)
+            {
+                throw new Exception(result.OriginalException.Message);
+            }
+            return result.Source;
+        }&lt;/pre&gt;
+&lt;p&gt;&amp;Uuml;&amp;ccedil;&amp;uuml;nc&amp;uuml; olarak&amp;nbsp;&lt;strong&gt;Delete(Guid id)&lt;/strong&gt;&amp;nbsp;metodunu yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public bool Delete(Guid id)
+        {
+            var result = _elasticClient.Delete&amp;lt;T&amp;gt;(id.ToString(), idx =&amp;gt; idx.Index(_indexName));
+            if (!result.IsValid)
+            {
+                throw new Exception(result.OriginalException.Message);
+            }
+            return result.Found;
+        }&lt;/pre&gt;
+&lt;p&gt;Generic&lt;strong&gt;&amp;nbsp;Save(T entity)&lt;/strong&gt;&amp;nbsp;metodu aldığı nesne i&amp;ccedil;in ilk olarak&amp;nbsp;o index'de o tip i&amp;ccedil;in bir tanımlama yapılmışmı kontrol eder sonrasında ise Save işlemini yapar.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public Guid Save(T entity)
+        {
+            ElasticSearchClientHelper.CheckIndex&amp;lt;T&amp;gt;(_elasticClient, _indexName);
+
+            entity.Id = Guid.NewGuid();
+            var result = _elasticClient.Index(entity, idx =&amp;gt; idx.Index(_indexName));
+            if (!result.IsValid)
+            {
+                throw new Exception(result.OriginalException.Message);
+            }
+            return entity.Id;
+        }&lt;/pre&gt;
+&lt;p&gt;Update(T entity) metodunu da aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public void Update(T entity)
+        {
+            var result = _elasticClient.Update(
+                    new DocumentPath&amp;lt;T&amp;gt;(entity), u =&amp;gt;
+                        u.Doc(entity).Index(_indexName));
+            if (!result.IsValid)
+            {
+                throw new Exception(result.OriginalException.Message);
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Son olarak ise Search metodunu oluşturalım.&amp;nbsp;Elasticsearch'&amp;uuml;n bize sunduğu en b&amp;uuml;y&amp;uuml;k avantajlardan biride &amp;ccedil;ok farklı şekillerde search/query işlemleri yapabilmemizdir. Es. &amp;uuml;zerinde Query DSL adı verilen bir search language ile json formatında farklı farklı filtrelere sahip query'ler yazabiliriz. Bu konu başlı başına ayrı bir yazı konusu olduğundan daha sonraki yazılarda değineceğiz. Şimdilik&amp;nbsp;&lt;a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html"&gt;buradan&amp;nbsp;&lt;/a&gt;bilgi alabilirsiniz. Biz projemzide search işlemi yaparken Match Query'den faydalanacağız. Search metodu&amp;nbsp;&lt;strong&gt;BaseSearchModel&lt;/strong&gt;&amp;nbsp;adında i&amp;ccedil;erisinde aşağıdaki property'leri i&amp;ccedil;eren bir parametre almaktadır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class BaseSearchModel
+    {
+        public int Size { get; set; }
+        public int From { get; set; }
+        public Dictionary&amp;lt;string, string&amp;gt; Fields { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Bu class i&amp;ccedil;erisinde bulunan "&lt;strong&gt;Fields&lt;/strong&gt;" bizim o &amp;uuml;r&amp;uuml;n ile ilgili hangi alanları hangi değerlerle search edeceğimiz bilgisini tutacak olan bir &amp;ccedil;eşit dynamic search property'si. "&lt;strong&gt;Size&lt;/strong&gt;" request başına ka&amp;ccedil; document return edecek bilgisi i&amp;ccedil;in. "&lt;strong&gt;From&lt;/strong&gt;" property'si ise pageIndex olarak kullanacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public IEnumerable&amp;lt;T&amp;gt; Search(BaseSearchModel request)
+        {
+            var dynamicQuery = new List&amp;lt;QueryContainer&amp;gt;();
+            foreach (var item in request.Fields)
+            {
+                dynamicQuery.Add(Query&amp;lt;T&amp;gt;.Match(m =&amp;gt; m.Field(new Field(item.Key.ToLower())).Query(item.Value)));
+            }
+
+            var result = _elasticClient.Search&amp;lt;T&amp;gt;(s =&amp;gt; s
+                                       .From(request.From)
+                                       .Size(request.Size)
+                                       .Index(_indexName)
+                                        .Query(q =&amp;gt; q.Bool(b =&amp;gt; b.Must(dynamicQuery.ToArray()))));
+
+            if (!result.IsValid)
+            {
+                throw new Exception(result.OriginalException.Message);
+            }
+
+            return result.Documents;
+        }&lt;/pre&gt;
+&lt;p&gt;Yukarıda yazmış olduğumuz sorgu g&amp;ouml;nderilen request filed'larında bulunan key'i index de bulunan mapping'e&amp;nbsp;de bulunan tipin field'ı value'su ise bu değere karşılık aranan değer.&lt;/p&gt;
+&lt;p&gt;Repository katmanı i&amp;ccedil;in base'de bulunan işlemleri i&amp;ccedil;eren geliştirmeyi tamamladık. Şimdi ise sırada ProductRepository sınıfını&amp;nbsp;oluşturmak var.&lt;/p&gt;
+&lt;p&gt;İlk olarak&amp;nbsp;IBaseRepository&amp;lt;Product&amp;gt; interface'ini implement eden&amp;nbsp;IProductRepository adındaki interface'i ve sonrasında&amp;nbsp;BaseRepository&amp;lt;Product&amp;gt; abstract class'ını inherit alan ve IProductRepository interface'ini implement eden&amp;nbsp;ProductRepository adındaki implementation sınıfını oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   public interface IProductRepository: IBaseRepository&amp;lt;Product&amp;gt;
+    { }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ProductRepository : BaseRepository&amp;lt;Product&amp;gt;, IProductRepository
+    {
+        public ProductRepository() : base("product_index")
+        { }
+    }&lt;/pre&gt;
+&lt;p&gt;ProductRepository sınıfı BaseRepository sınıfının constructor'ını product tipine ait index ismini parametre ge&amp;ccedil;erek &amp;ccedil;ağırmaktadır.&lt;br /&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;Repository katmanı ile ilgili geliştirmelerimiz bitti. Şimdi ise araya bir Service layer yazalım. ProductService adındaki sınıf tanımlayacağımız end-point'ler ile doğrudan iletişim kurarak repository i&amp;ccedil;in gerekli crud işlemlerini call etmeden sorumlu olacak kısaca repository'i doğrudan dışarıya a&amp;ccedil;mak yerine araya bir service layer geliştiriyoruz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IProductService
+    {
+        List&amp;lt;Product&amp;gt; Search(SearchProductRequest reqModel);
+        SaveProductResponse Save(SaveProductRequest reqModel);
+        UpdateProductResponse Update(UpdateProductRequest reqModel);
+        List&amp;lt;Product&amp;gt; GetAll();
+        bool Delete(Guid productId);
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda metotlara ait olan request ve response sınıflarını aşağıdaki gibi oluşturabilirsiniz yada ihtiyacınıza g&amp;ouml;re farklı şekilde de tanımlayabilirsiniz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class SearchProductRequest : BaseSearchModel
+    {   }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class SaveProductRequest
+    {
+        public Product Product{ get; set; }
+    }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class UpdateProductRequest
+    {
+        public Product Product{ get; set; }
+    }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class SaveProductResponse
+    {
+        public Product Product { get; set; }
+    }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class UpdateProductResponse
+    {
+        public Product Product { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;IProductService interface'ine ait implementasyonu da aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ProductService : IProductService
+    {
+        private readonly IProductRepository _productRepository;
+
+        public ProductService()
+        {
+            _productRepository = new ProductRepository();
+        }
+
+        public List&amp;lt;Product&amp;gt; Search(SearchProductRequest reqModel)
+        {
+            return _productRepository.Search(reqModel).ToList();
+        }
+
+        public SaveProductResponse Save(SaveProductRequest reqModel)
+        {
+            var entityId = _productRepository.Save(reqModel.Product);
+            return new SaveProductResponse { Product = _productRepository.Get(entityId) };
+        }
+
+        public UpdateProductResponse Update(UpdateProductRequest reqModel)
+        {
+            _productRepository.Update(reqModel.Product);
+            return new UpdateProductResponse { Product = _productRepository.Get(reqModel.Product.Id) };
+        }
+
+        public List&amp;lt;Product&amp;gt; GetAll()
+        {
+            return _productRepository.All().ToList();
+        }
+
+        public bool Delete(Guid productId)
+        {
+            return _productRepository.Delete(productId);
+        }
+    }
+&lt;/pre&gt;
+&lt;p&gt;Projemiz hazır gibi tek eksik kalan şey end-point'leri tanımlayarak NancyHost'u ayağa kaldırmak. Bunun i&amp;ccedil;in ilk olarak ProductModule.cs sınıfını oluşturalım. Nancyfx projelerinde end-point tanımlanırken ilgili sınıf&amp;nbsp;NancyModule sınıfından inherit olur ve tanımlanan bu sınıflara&amp;nbsp;yaygın olarak sonuna _Module eki getirilir. Bizde Product nesnesi i&amp;ccedil;in gerekli olan service adreslerini tanımlayacağımız sınıfa&amp;nbsp;&lt;strong&gt;ProductModule&lt;/strong&gt;&amp;nbsp;adını verelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ProductModule : NancyModule
+    {
+        public ProductModule()
+        {
+            IProductService productService = new ProductService();
+            
+            Post["/product/save"] = parameters =&amp;gt;
+            {
+                var request = this.Bind&amp;lt;SaveProductRequest&amp;gt;();
+
+                return productService.Save(request);
+            };
+
+            Put["/product/update"] = parameters =&amp;gt;
+            {
+                var request = this.Bind&amp;lt;UpdateProductRequest&amp;gt;();
+
+                return productService.Update(request);
+            };
+
+            Delete["/product/delete/{productId}"] = parameters =&amp;gt;
+            {
+                var productId = parameters.productId;
+                return productService.Delete(productId);
+            };
+
+            Post["/product/search"] = parameters =&amp;gt;
+            {
+                var request = this.Bind&amp;lt;SearchProductRequest&amp;gt;();
+
+                return productService.Search(request);
+            };
+
+            Get["/product/all"] = parameters =&amp;gt;
+            {
+                return productService.GetAll();
+            };
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre save-update-delete-search ve all metotlarını tanımladık. Post metodunda g&amp;ouml;nderilen request'i almak i&amp;ccedil;in&lt;strong&gt;&amp;nbsp;this.Bind&amp;lt;RequestModel&amp;gt;()&amp;nbsp;&lt;/strong&gt;yazarak g&amp;ouml;nderilen json request'i model'imize bind edebiliriz. Delete metodunda da query-string kuıllanım &amp;ouml;rneği bulunmakta. Query string de g&amp;ouml;nderilen productId değerini almak i&amp;ccedil;in Delete["&lt;strong&gt;/product/delete/{productId}&lt;/strong&gt;"] şeklinde kullanabiliriz.&lt;/p&gt;
+&lt;p&gt;İkinci olarak&amp;nbsp;NancyHost'u ayağa kaldırmak var. Program.cs i&amp;ccedil;erisinde aşağıdaki gibi&amp;nbsp;gerekli konfigurasyonları yapalım ve&amp;nbsp;uygulamamızı&amp;nbsp;&lt;a href="http://localhost:7880"&gt;http://localhost:7880&lt;/a&gt;&amp;nbsp;adresinde network'e a&amp;ccedil;alım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    class Program
+    {
+        private readonly NancyHost _nancy;
+
+        public Program()
+        {
+            var uri = new Uri("http://localhost:7880");
+            var hostConfigs = new HostConfiguration { UrlReservations = { CreateAutomatically = true } };
+            _nancy = new NancyHost(uri, new DefaultNancyBootstrapper(), hostConfigs);
+        }
+
+        private void Start()
+        {
+            _nancy.Start();
+            Console.WriteLine($"Started listennig address {"http://localhost:7880"}");
+            Console.ReadKey();
+            _nancy.Stop();
+        }
+
+        static void Main(string[] args)
+        {
+            var p = new Program();
+            p.Start();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;İlk olarak Program const. metodu i&amp;ccedil;erisinde configde yazılı olan nancyHostUrl'ini alıp Nancy'den bize bu&amp;nbsp; url'i&amp;nbsp;reserve etmesini istiyoruz.&amp;nbsp;Sonrasında ise&amp;nbsp;NancyHost sınıfını initialize ediyoruz. Sonrasında Main function i&amp;ccedil;erisinde start metodunu &amp;ccedil;ağırarak projemizi run ediyoruz ve uygulamamız&amp;nbsp;&lt;a href="http://localhost:7880"&gt;http://localhost:7880&lt;/a&gt;&amp;nbsp;adresinde host ediliyor olacak.&lt;/p&gt;
+&lt;p&gt;Şimdi postman&amp;nbsp;veya herhangi bir rest-call app. kullanarak yazmış olduğumuz&amp;nbsp;end-point'lere request atalım.&lt;br /&gt;&lt;br /&gt;İlk olarak&amp;nbsp;&lt;strong&gt;Save&lt;/strong&gt;&amp;nbsp;işlemiyle başlayalım;&amp;nbsp;&lt;a href="http://localhost:7880/product/save"&gt;http://localhost:7880/product/save&lt;/a&gt;&amp;nbsp;adresine aşağıdaki gibi bir Post&amp;nbsp;işlemi yapalım.&lt;/p&gt;
+&lt;p&gt;Request;&lt;/p&gt;
+&lt;pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false"&gt;{
+	"Product":{
+		"Name":"Tomato Soup",
+		"Quantity":13,
+		"Price":5.29
+	}
+}&lt;/pre&gt;
+&lt;p&gt;Response olarak ise bize save işlemi yapılan nesneyi return edecektir.&lt;/p&gt;
+&lt;pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false"&gt;{
+    "product": {
+        "name": "Tomato Soup",
+        "quantity": 13,
+        "price": 5.29,
+        "id": "a55841a4-3817-475c-bc68-aafcbd452bf8"
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/pstmn_elastic_save_img.png" alt="" width="552" height="432" /&gt;&lt;/p&gt;
+&lt;p&gt;İkinci olarak kaydettiğimiz bu nesneyi&amp;nbsp;&lt;a href="http://localhost:7880/product/update"&gt;http://localhost:7880/product/update&lt;/a&gt;&amp;nbsp;adresine httpPut request'i g&amp;ouml;ndererek Quntity bilgisi 18 olarak&amp;nbsp;&lt;strong&gt;Update&amp;nbsp;&lt;/strong&gt;edelim.&lt;/p&gt;
+&lt;pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false"&gt;{
+	"Product":{
+		"Name":"Tomato Soup",
+		"Quantity":18,
+		"Price":5.29,
+		"Id":"a55841a4-3817-475c-bc68-aafcbd452bf8"
+	}
+}
+&lt;/pre&gt;
+&lt;p&gt;Response olarak ise yine save işleminde olduğu gibi update edilen nesneyi bize return edecektir.&lt;/p&gt;
+&lt;p&gt;İki &amp;uuml;r&amp;uuml;n daha Save edelim sonrasında ilk kaydettiğimiz &amp;uuml;r&amp;uuml;n&amp;uuml; silelim.&lt;/p&gt;
+&lt;pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false"&gt;{
+	"Product":{
+		"Name":"Cheese",
+		"Quantity":20,
+		"Price":11.49
+	}
+}
+{
+	"Product":{
+		"Name":"Tomato",
+		"Quantity":30,
+		"Price":0.49
+	}
+}&lt;/pre&gt;
+&lt;p&gt;Silme işlemi i&amp;ccedil;in ise delete metodunun ProductModule i&amp;ccedil;erisinde Http Delete request'i kabul ettiğini belirtmiştik.&amp;nbsp;&lt;a href="http://localhost:7880/product/delete/a55841a4-3817-475c-bc68-aafcbd452bf8"&gt;http://localhost:7880/product/delete/a55841a4-3817-475c-bc68-aafcbd452bf8&lt;/a&gt;&amp;nbsp;adresine sonuna Id bilgisini ekleyerek httpDelete request'i atıyoruz ve cevap olarak bize true string değerini d&amp;ouml;n&amp;uuml;yor.&lt;/p&gt;
+&lt;p&gt;Son olarak ise Search işlemi yapalım. Name değeri Cheese olan &amp;uuml;r&amp;uuml;n&amp;uuml; search edelim. Bunun i&amp;ccedil;in aşağıdaki gibi bir request'i mizi hazırlayalım.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2017/pstmn_elk_search_img.png" alt="" width="505" height="396" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Search işlemi i&amp;ccedil;in tam olmasa da bir &amp;ccedil;eşit dynamic query yazabileceğimiz bir key-value dictionary parameteresi istedik request te.&amp;nbsp;Bu işimizi g&amp;ouml;r&amp;uuml;yor olsada aslında pekte g&amp;uuml;venilir&amp;nbsp;sayılmaz veya tamda ihtiyacımızı karşılamayabilir. ElasticSearch bize multi-field query yazabileceğimiz bir api sağlıyor ancak repsoitory katmanınızı dışarı a&amp;ccedil;tığınızı d&amp;uuml;ş&amp;uuml;nd&amp;uuml;ğ&amp;uuml;n&amp;uuml;zde işin i&amp;ccedil;ine g&amp;uuml;venlik girdiğinde tercih etmememiz gereken bir yapı haline geliyor yada kullandığınız taktirde bu dictionary i&amp;ccedil;erisinde bulunan field'lara bir &amp;ccedil;eşit filtering uygulayarak&amp;nbsp;daha g&amp;uuml;venli hale getirmemiz gerekmekte.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Diğer bir se&amp;ccedil;enek ise Search kısmını&amp;nbsp;generic değilde her repository'e ait model i&amp;ccedil;in yazılmasını sağlamak. Bunun i&amp;ccedil;in ISearchableRepository adında bir&amp;nbsp;interface tanımlayarak i&amp;ccedil;erisine&amp;nbsp;IEnumerable&amp;lt;T&amp;gt; Search(T search) gibi bir metot eleyerek kullanmak isteyen repository bu interface'i implement eder ve kendi query'sini yazabilir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface ISearchableRepository&amp;lt;T&amp;gt;
+    {
+        IEnumerable&amp;lt;T&amp;gt; Search(T search);
+    }&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;IProductRepository interface'i ve&amp;nbsp;ProductRepository class'ının ise son olarak aşağıdaki gibi&amp;nbsp;olacaktır.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IProductRepository: IBaseRepository&amp;lt;Product&amp;gt;, ISearchableRepository&amp;lt;Product&amp;gt;
+    { }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class ProductRepository : BaseRepository&amp;lt;Product&amp;gt;, IProductRepository
+    {
+        public ProductRepository() : base("product_index")
+        { }
+
+        public IEnumerable&amp;lt;Product&amp;gt; Search(Product search)
+        {
+            throw new System.NotImplementedException();
+        }
+    }&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;İhitya&amp;ccedil; duyduğunuz gibi yukarıdaki Search metodunun i&amp;ccedil;erisini&amp;nbsp;doldurarak daha secure bir şekilde data-layer'ı dışarıya a&amp;ccedil;abiliriz.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Elasticsearch client uygulamamız ile ilgili geliştirme şimdilik bu kadar. Yazının başında da belirttiğim gibi E.S son derece esnek query'ler&amp;nbsp;yazabileceğimiz şahane bir api diline sahip. İhtiyaca g&amp;ouml;re &amp;ccedil;ok daha farklı t&amp;uuml;rlerde filtering ve&amp;nbsp;searching işlemleri yapabiliriz. Daha detaylı bilgi i&amp;ccedil;in&amp;nbsp;&lt;a href="https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/introduction.html"&gt;elastic.co&lt;/a&gt;&amp;nbsp;adresine g&amp;ouml;z atabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-11-15 21:42:00</pubDate>
+  <lastModified>2020-01-20 08:22:14</lastModified>
+  <raters>4</raters>
+  <rating>4.5</rating>
+  <slug>elasticsearch-client-using-nest-elasticsearch-net-genericrepository-nancy</slug>
+  <tags>
+    <tag>elastic search nedir</tag>
+    <tag>nest</tag>
+    <tag>nancyfx nedir</tag>
+    <tag>elasticsearch genericrepository</tag>
+    <tag>Generic Repository</tag>
+    <tag>nancy host</tag>
+    <tag>elastic search client</tag>
+    <tag>elasticsearch client</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>a0313877-509c-481a-954b-6e000b44433d</category>
+  </categories>
+  <notifications />
+</post>

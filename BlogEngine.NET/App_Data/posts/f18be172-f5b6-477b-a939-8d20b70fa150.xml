@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>IComparable Interface'ini Kullanarak Sıralama İşlemi</title>
+  <description>Primitive type'lar için sıralama işlemini bir şekilde list.Sort() vs gibi metotlar kullanarak yapabiliyoruz. Peki kendi yazdığımız objeler için bunu nasıl yaparız ? .Net tarafında iki objeyi belli field&amp;property'lere göre sıralamamızı veya compare etmemizi sağlayan IComparable&lt;T&gt; interface'i bulunmakta.</description>
+  <content>&lt;p&gt;Primitive type'lar i&amp;ccedil;in sıralama işlemini bir şekilde list.Sort() vs gibi metotlar kullanarak yapabiliyoruz. Peki kendi yazdığımız objeler i&amp;ccedil;in bunu nasıl yaparız ? .Net tarafında iki objeyi belli field&amp;amp;property'lere g&amp;ouml;re sıralamamızı veya compare etmemizi sağlayan &lt;strong&gt;IComparable&amp;lt;T&amp;gt; &lt;/strong&gt;interface'i bulunmakta. Bu interface ile List&amp;lt;T&amp;gt; tipidne tanımladığımız değişkenimize bizim belirttiğimiz kritere g&amp;ouml;re sıralama &amp;ouml;zelliği kazandırmış oluyoruz.&amp;nbsp;&amp;Ouml;rnek bir case &amp;uuml;zerinden gidelim; Rectangle adında bir objemiz olsun&amp;nbsp;i&amp;ccedil;erisinde Rectangle objeleri bulunan bir array'imiz olsun bu arrayde bulunan objeleri alanı en k&amp;uuml;&amp;ccedil;&amp;uuml;k olandan b&amp;uuml;y&amp;uuml;k olana doğru sıralayalım. İlk olarak Rectangle objemizi aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class Rectangle 
+    {
+        public double Length { get; set; }
+        public double Breadth { get; set; }
+
+        public double Area
+        {
+            get
+            {
+                return Length * Breadth;
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi ise &amp;uuml;sttede belirtiğimiz gibi dikd&amp;ouml;rtgen objelerini&amp;nbsp;k&amp;uuml;&amp;ccedil;&amp;uuml;k olandan b&amp;uuml;y&amp;uuml;k olana doğru array'de sıralayalım. Bu işlem yapabilmenin bir yolu&amp;nbsp;&lt;strong&gt;IComparable &lt;/strong&gt;interface'ini kullanmak. Rectangle objemizi bu interface'den implement etmek. Implementasyon sonucunda Rectangle class'ı&amp;nbsp;&lt;strong&gt;CompareTo&lt;/strong&gt;&amp;nbsp;adında bir metota&amp;nbsp;sahip olur. Bu metot aracılığıyla compare işlemi yaparak array'imizi sıralayabiliriz. Rectangle class'ımızın implementasyon sonrasındaki g&amp;ouml;r&amp;uuml;n&amp;uuml;m&amp;uuml; aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class Rectangle : IComparable&amp;lt;Rectangle&amp;gt;
+    {
+        public double Length { get; set; }
+        public double Breadth { get; set; }
+
+        public double Area
+        {
+            get
+            {
+                return Length * Breadth;
+            }
+        }
+
+        public int CompareTo(Rectangle other)
+        {
+            if (this.Area == other.Area)
+            {
+                return this.Area.CompareTo(other.Area);
+            }
+            return other.Area.CompareTo(this.Area);
+        }
+        public override string ToString()
+        {
+            return this.Area.ToString();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;Şimdi ise sırada yazdığımız bu kodu test etme işlemi var.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public static void Main()
+        {
+            var list = new List&amp;lt;Rectangle&amp;gt;
+            {
+                new Rectangle() {Length = 7, Breadth = 3},
+                new Rectangle() {Length = 5, Breadth = 1},
+                new Rectangle() {Length = 9, Breadth = 4},
+                new Rectangle() {Length = 2, Breadth = 7},
+                new Rectangle() {Length = 3, Breadth = 5}
+            };
+
+            list.Sort();//Sort metodu ile array'i belirtmiş olduğumuz kritere g&amp;ouml;re sıralıyoruz
+
+            foreach (var element in list)
+            {
+                Console.WriteLine(element);
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Projeyi &amp;ccedil;alıştırdığımızda aşağıdaki gibi bir ekran elde etmiş olacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;36
+21
+15
+14
+5&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-12-19 22:18:00</pubDate>
+  <lastModified>2020-01-20 08:22:20</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>icomparable-interface-ini-kullanarak-siralama-islemi</slug>
+  <tags>
+    <tag>IComparable</tag>
+    <tag>Sort()</tag>
+    <tag>IComparable  nedir</tag>
+  </tags>
+  <comments>
+    <comment id="7a75c6ab-76fb-4837-afd8-42e627ca9a59" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2017-03-02 13:02:35</date>
+      <author>q</author>
+      <email>q</email>
+      <country />
+      <ip>85.99.251.156:6123</ip>
+      <avatar />
+      <content>q</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

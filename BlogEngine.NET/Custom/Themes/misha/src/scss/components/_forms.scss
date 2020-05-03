@@ -1,0 +1,9 @@
+.form-control {
+    border-radius: .125rem;
+
+    box-shadow: none !important;
+    border-width: 2px;
+    &:focus {
+      border-color:$color-theme-primary;
+    }
+}

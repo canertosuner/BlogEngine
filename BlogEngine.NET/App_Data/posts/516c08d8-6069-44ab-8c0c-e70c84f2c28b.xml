@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>gRPC Client .Net Core'da Nasıl Oluşturulur ? Unary RPC Tipinde Client Uygulaması Oluşturma</title>
+  <description>Bu yazımızda ise bir önceki yazımızda yapmış olduğumuz RefundService uygulamasının Refund metodu için bir client projesi oluşturup Unary RPC tipinde iki uygulamanın birbirleri arasında nasıl iletişim kurduklarını gözlemleyeceğiz. 
+Unary RPC kısaca; client'ın tek bir request atıp karşılığında bir response aldığı server-client arası iletişim türlerinden biridir.</description>
+  <content>&lt;p&gt;Bir &amp;ouml;nceki yazımızda genel hatlarıyla &lt;a href="/post/grpc-nedir-net-core-grpc-service-olusturma"&gt;gRPC nedir&lt;/a&gt;, nerelerde kullanılır bir microservice mimarilerinde nasıl implement edilir gibi konulara değinerek &amp;ouml;rnek bir case tasarlayıp bu case'e ait olan gRPC Service projemizi oluşturmuştuk. Kısaca gRPC'yi tekrar tanımlayacak olursak;gRPC&amp;nbsp;open source olarak google tarafından geliştirlen ve ilk olarak 2015 yılında tanıtılan bir remote-procedure-call(RPC) k&amp;uuml;t&amp;uuml;phanesidir.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda ise bir &amp;ouml;nceki yazımızda yapmış olduğumuz RefundService uygulamasının Refund metodu i&amp;ccedil;in bir client projesi oluşturup Unary RPC tipinde iki uygulamanın birbirleri arasında nasıl iletişim kurduklarını g&amp;ouml;zlemleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Unary RPC kısaca; client'ın tek bir request atıp karşılığında bir response aldığı server-client arası iletişim&amp;nbsp;t&amp;uuml;rlerinden biridir.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/ntcr_grp_c_img8.PNG" alt="" width="987" height="281" /&gt;&lt;/p&gt;
+&lt;h2&gt;Creating gRPC Refund Client&amp;nbsp;&lt;/h2&gt;
+&lt;p&gt;RefundService'te bulunan Refund metodunu call edecek olan client'ı oluşturmaya başlayalım. Bunun i&amp;ccedil;in aynı solution'da RefundClient adında bir ConsoleApp oluşturalım ve proje referanslarına&amp;nbsp;&lt;strong&gt;Grpc.Tools, Grpc.Net.Client, Google.Protobuf&lt;/strong&gt; k&amp;uuml;t&amp;uuml;phanelerini nuget &amp;uuml;zerinden eklemiş olalım. Sonrasında RefundService projesinde bulunan &lt;strong&gt;refund.proto&lt;/strong&gt; dosyasını client projesinde Protos adında folder oluşturduktan sonra buraya kopyalayalım. Bu client sadece Refund metodunu call edeceğinden notify ile ilgili tanımlamaları bu yeni .proto dosyasından silelim. Kopyaladıktan sonra client projesi csprj dosyasında refund.proto&amp;nbsp;dosyasının refere edildiği GrpcServices&amp;nbsp;değerini&amp;nbsp;Client olarak değiştirelim.&amp;nbsp; Alabileceği değerler;&amp;nbsp;Both, Client, Default, None, Server.&lt;/p&gt;
+&lt;pre class="brush:xml;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;lt;Project Sdk="Microsoft.NET.Sdk"&amp;gt;
+
+  &amp;lt;PropertyGroup&amp;gt;
+    &amp;lt;OutputType&amp;gt;Exe&amp;lt;/OutputType&amp;gt;
+    &amp;lt;TargetFramework&amp;gt;netcoreapp3.1&amp;lt;/TargetFramework&amp;gt;
+  &amp;lt;/PropertyGroup&amp;gt;
+
+  &amp;lt;ItemGroup&amp;gt;
+    &amp;lt;None Remove="Protos\refund.proto" /&amp;gt;
+  &amp;lt;/ItemGroup&amp;gt;
+
+  &amp;lt;ItemGroup&amp;gt;
+    &amp;lt;PackageReference Include="Google.Protobuf" Version="3.11.4" /&amp;gt;
+    &amp;lt;PackageReference Include="Grpc.Net.Client" Version="2.28.0" /&amp;gt;
+    &amp;lt;PackageReference Include="Grpc.Tools" Version="2.28.1"&amp;gt;
+      &amp;lt;PrivateAssets&amp;gt;all&amp;lt;/PrivateAssets&amp;gt;
+      &amp;lt;IncludeAssets&amp;gt;runtime; build; native; contentfiles; analyzers; buildtransitive&amp;lt;/IncludeAssets&amp;gt;
+    &amp;lt;/PackageReference&amp;gt;
+  &amp;lt;/ItemGroup&amp;gt;
+
+  &amp;lt;ItemGroup&amp;gt;
+    &amp;lt;Protobuf Include="Protos\refund.proto" GrpcServices="Client" /&amp;gt;
+  &amp;lt;/ItemGroup&amp;gt;
+
+&amp;lt;/Project&amp;gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2020/ntcr_grp_c_img5.PNG" alt="" width="344" height="231" /&gt;&lt;/p&gt;
+&lt;p&gt;Sonrasında service ile iletişimi sağlayacak olan channel-client initialize ve Refund metodunu call ettiğimiz kod&amp;nbsp;bloğunu aşağıdaki gibi program.cs i&amp;ccedil;erisinde yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;static async Task Main(string[] args)
+{
+    //define a channel
+    var channel = GrpcChannel.ForAddress("https://localhost:5001");
+
+    //initialize the client 
+    var refundClient = new RefundService.RefundService.RefundServiceClient(channel);
+
+    Console.WriteLine("gRPC client is up !");
+
+    //loop for dummy data creation
+    for (int i = 5; i &amp;lt; 8; i++)
+    {
+        var orderid = i + "43243546";
+
+        Console.WriteLine("Request started for orderid: " + orderid);
+        var reply = await refundClient.RefundAsync(new RefundRequest
+        {
+            OrderId = orderid,
+            Amount = 54.98,
+            Customerid = new Random().Next(10, 100).ToString()
+        });
+        Console.WriteLine(reply.Message);
+
+        await Task.Delay(1000);//delay for debug mode observation 
+    }
+}&lt;/pre&gt;
+&lt;p&gt;İlk olarak url bilgisi vererek bir channel tanımlayıp RefundServiceClient'ı initialize ederken bu channel bilgisini parametre olarak ge&amp;ccedil;erek conn kurmuş bulunuyoruz. Sonrasında ise Refund metodunu call ederek iade isteğini service'e iletiyoruz.&lt;/p&gt;
+&lt;p&gt;Refund işlemi i&amp;ccedil;in hem Service hemde Client geliştirmemiz hazır. Artık tek yapmamız gereken iki uygulamayıda run edip doğru &amp;ccedil;alıştığını g&amp;ouml;zlemlemek.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2020/ntcr_grp_c_img6.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre refundClient ve refundService uygulamaları 43243546 numaralı order i&amp;ccedil;in iade işlemini&amp;nbsp;tamamladı ve her iki uygulamanında console'larına ilgili bilgileri yazdırmış olduklarını g&amp;ouml;rm&amp;uuml;ş olduk. Bir &amp;ouml;nceki yazımızda &amp;ccedil;izmiş olduğumuz&amp;nbsp;architecture'a bakacak olursak, tam olarak karşılık geldiği nokta aşağıdaki kısım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2020/ntcr_grp_c_img9.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;gRPC serisinin bu yazısınında sonuna gelmiş olduk. &amp;Ouml;zetleyecek olursak; Unary RPC y&amp;ouml;ntemiyle one-to-one call işlemi olan case'lerini i&amp;ccedil;in kolaylıkla geliştirmeler yapabilir, projeleriniz i&amp;ccedil;in tıpkı bir Api endpoint hizmeti verir gibi yapılar tasarlayabilmeniz m&amp;uuml;mk&amp;uuml;n. Bir sonraki yazımızda NotifyCustomerClient service&amp;nbsp;method'u i&amp;ccedil;in bir client&amp;nbsp;uygulaması geliştirip serimize devam edeceğiz.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/gRPC-service-and-client-net-core"&gt;Source&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;&amp;nbsp;&lt;/h2&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2020-05-07 07:00:00</pubDate>
+  <lastModified>2020-05-03 10:35:07</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>grpc-client-net-core-da-nasil-olusturulur-unary-rpc-tipinde-client-olusturma</slug>
+  <tags>
+    <tag>gRPC Implementation</tag>
+    <tag>gRPC nedir</tag>
+    <tag>Unary RPC</tag>
+    <tag>gRPC Client</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>cbc2ab0e-9b45-49ec-a014-6278eb7cfdc5</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

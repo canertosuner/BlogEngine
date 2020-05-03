@@ -1,0 +1,281 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Repository Pattern için Reusable Mocking Yapısı</title>
+  <description>Repository Pattern i&amp;ccedil;in Reusable Mocking &amp;Ouml;rneği
+&amp;nbsp;
+&amp;nbsp;
+http://abelperezmartinez.b</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki Unit Test yazılarımızda &lt;a href="/post/unit-test-nedir"&gt;Unit Test Nedir Nasıl Yazılır&lt;/a&gt;&amp;nbsp;ve &lt;a href="/post/moq-kullanarak-unittest-yazma"&gt;Moq Library Kullanarak Unit Test Yazma&lt;/a&gt;&amp;nbsp;konularına değinmiştik.&amp;nbsp;Bu yazımızda ise &amp;ccedil;ok&amp;ccedil;a kullandığımız Repository Pattern CRUD işlemlerinin yapıldığı metotlar i&amp;ccedil;in reusable bir mocking&amp;nbsp;yapısı&amp;nbsp;oluşturacağız.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;ncelikle VS'da &lt;strong&gt;RepositoryMocking&lt;/strong&gt; adında bir proje oluşturalım ve sonrasında projemize&amp;nbsp;Generic Repository ile ilgili tanımlamalarımızı yapalım. İlk olarak&amp;nbsp;&lt;strong&gt;IRepository&lt;/strong&gt; adında bir interface ve database de bulunan tablolardaki unique Id-primary key&amp;nbsp;alanına karşılık gelen generic&amp;nbsp;&lt;strong&gt;IIdentityKey&lt;/strong&gt; interface'ini oluşturalaım. Bu interface'i oluşturmamızdaki ama&amp;ccedil; her tabloda Id alanı farklı tiplerde olabilir bu nedenle objelerimizi&amp;nbsp;oluştururken IIdentityKey interface'inden implement ederek Id alanı i&amp;ccedil;in veri tipini belirteceğiz. Bu bize test metotlarımızı tanımlarken ilgili linq sorgularını&amp;nbsp;oluşturmada yarar sağlayacak.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface IIdentityKey&amp;lt;Tkey&amp;gt;
+{
+    TKey Id { get; set; }
+}
+ 
+public interface IRepository&amp;lt;Tkey,TEntity&amp;gt; where TEntity : IIdentityKey&amp;lt;Tkey&amp;gt;
+{
+    IQueryable&amp;lt;TEntity&amp;gt; All();
+    TEntity Get(TKey Id);
+    TEntity Add(TEntity entity);
+    void Update(TEntity entity);
+    void Delete(TEntity entity);
+}&lt;/pre&gt;
+&lt;p&gt;Şimdi ise abstract olan ve IRepository den inherit olan &lt;strong&gt;BaseRepository&lt;/strong&gt; class'ını oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public abstract class BaseRepository&amp;lt;TKey, TEntity&amp;gt; : IRepository&amp;lt;TKey, TEntity&amp;gt; where TEntity : IDentityKey&amp;lt;TKey&amp;gt;
+    {
+        public IQueryable&amp;lt;TEntity&amp;gt; All()
+        {
+            throw new NotImplementedException();
+        }
+
+        public TEntity Get(TKey id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TEntity Add(TEntity entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(TEntity entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Delete(TEntity entity)
+        {
+            throw new NotImplementedException();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Mocking işlemi yapacağımızdan metot i&amp;ccedil;lerini doldurmadım ancak tabikide ilgili&amp;nbsp;linq sorgularının yazılmasını gerekir.&lt;/p&gt;
+&lt;p&gt;BaseRepository tanımlamasını da yaptıktan sonra&amp;nbsp;database de bulunan &lt;strong&gt;User&lt;/strong&gt; tablosu i&amp;ccedil;in bir object ve bu tabloya ait &lt;strong&gt;UserRepository&lt;/strong&gt; class'ını oluşturalım.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class User : IIdentityKey&amp;lt;int&amp;gt;
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+    }&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class UserRepository : BaseRepository&amp;lt;int, User&amp;gt;
+    {
+
+    }&lt;/pre&gt;
+&lt;p&gt;Buraya kadar olan kısımda Repository katmanı i&amp;ccedil;in gerekli olan her şey hazır. Artık Test projemizi oluşturabiliriz. Solution'a &lt;strong&gt;RepositoryMocking.UnitTest&lt;/strong&gt; adında yeni bir test projesi oluşturalım ve i&amp;ccedil;erisine &lt;strong&gt;RepositoryBaseTest&lt;/strong&gt; adında bir class ekleyelim. Bu class reusable mocking setup işlemlerini yapacağımız class olacak.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; public abstract class RepositoryBaseTest
+    {
+        public void SetupRepositoryMock&amp;lt;TK, TE&amp;gt;(Mock mockRepo, List&amp;lt;TE&amp;gt; data) where TE : class, IIdentityKey&amp;lt;TK&amp;gt;
+        {
+            var mock = mockRepo.As&amp;lt;IRepository&amp;lt;TK, TE&amp;gt;&amp;gt;();
+
+            // setup All method
+            mock.Setup(x =&amp;gt; x.All()).Returns(data.AsQueryable());
+
+            // setup Add method
+            mock.Setup(x =&amp;gt; x.Add(It.IsAny&amp;lt;TE&amp;gt;()))
+                .Returns(new Func&amp;lt;TE, TE&amp;gt;(x =&amp;gt;
+                {
+                    dynamic lastId = data.Last().Id;
+                    dynamic nextId = lastId + 1;
+                    x.Id = nextId;
+                    data.Add(x);
+                    return data.Last();
+                }));
+
+            // setup Update method
+            mock.Setup(x =&amp;gt; x.Update(It.IsAny&amp;lt;TE&amp;gt;()))
+                .Callback(new Action&amp;lt;TE&amp;gt;(x =&amp;gt;
+                {
+                    var i = data.FindIndex(q =&amp;gt; q.Id.Equals(x.Id));
+                    data[i] = x;
+                }));
+
+            // setup Get method
+            mock.Setup(x =&amp;gt; x.Get(It.IsAny&amp;lt;TK&amp;gt;()))
+                .Returns(new Func&amp;lt;TK, TE&amp;gt;(
+                    x =&amp;gt; data.Find(q =&amp;gt; q.Id.Equals(x))
+                ));
+
+            // setup Delete
+            mock.Setup(x =&amp;gt; x.Delete(It.IsAny&amp;lt;TE&amp;gt;()))
+                .Callback(new Action&amp;lt;TE&amp;gt;(x =&amp;gt;
+                {
+                    var i = data.FindIndex(q =&amp;gt; q.Id.Equals(x.Id));
+                    data.RemoveAt(i);
+                }));
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;Uuml;stte bulunan kodlarda BaseRepository de bulunan db i&amp;ccedil;in &lt;strong&gt;All, Get, Insert, Update&lt;/strong&gt; ve &lt;strong&gt;Delete&lt;/strong&gt; işlemlerini yapacak olan metotlar i&amp;ccedil;in ortak bir setup yapısı oluşturduk ve UserRepository gibi diğer oluşturacağınız repository ler i&amp;ccedil;inde&amp;nbsp;&lt;strong&gt;RepositoryBaseTest&lt;/strong&gt; class'ını kullanabileceğiz. Buda bizi her bir repository i&amp;ccedil;in ayrı ayrı setup işlemleri yapmaktan kurtarıyor. IRepository interface'ine yeni bir metot eklemek istediğinizde tekrardan yukarıda yazdığımız SetupRepositoryMock i&amp;ccedil;erisine bu metot i&amp;ccedil;in gerekli setup işlemini tanımlayabiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi ise UserRepository i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;UserRepositoryTest&lt;/strong&gt; adında bir sınıf oluşturalım ve RepositoryBaseTest class'ını kullanarak mock işlemleri yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    [TestClass]
+    public class UserRepositoryTest: RepositoryBaseTest
+    {
+        //db de bulunan tablo yerine ge&amp;ccedil;ecek fake tablomuz
+        private List&amp;lt;User&amp;gt; _userList;
+
+        //mock user repository
+        private Mock&amp;lt;IRepository&amp;lt;int, User&amp;gt;&amp;gt; _mockRepo;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            //tablomuzun i&amp;ccedil;erisini dolduralım
+            _userList = new List&amp;lt;User&amp;gt;();
+            var user1 = new User
+            {
+                Id = 1,
+                Email = "canertosuner@gmail.com",
+                FirstName = "Caner",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user1);
+
+            var user2 = new User
+            {
+                Id = 2,
+                Email = "tanertosuner@gmail.com",
+                FirstName = "Taner",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user2);
+
+            var user3 = new User
+            {
+                Id = 3,
+                Email = "janertosuner@gmail.com",
+                FirstName = "Janer",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user3);
+
+            var user4 = new User
+            {
+                Id = 4,
+                Email = "yenertosuner@gmail.com",
+                FirstName = "Yeneer",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user4);
+             
+            //mock respository değerini initialize edelim
+            _mockRepo = new Mock&amp;lt;IRepository&amp;lt;int, User&amp;gt;&amp;gt;();
+
+            //repositorybasetest class'ını kullarak crud metotlarını i&amp;ccedil;in setup işlemlerini yapalım
+            SetupRepositoryMock&amp;lt;int, User&amp;gt;(_mockRepo, _userList);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;UserRepository i&amp;ccedil;in setup işlemlerimizi tamamladık. Yukarıdaki işlemler sonrasında elimizde db de bulunan User tablosu yerine ge&amp;ccedil;en bir &lt;strong&gt;_userList&lt;/strong&gt; array'imiz ve bu array &amp;uuml;zerinden repository metotlarını setup ettik. Şimdi bir ka&amp;ccedil; test&amp;nbsp;metodu yazıp kodlarımızı test edelim. UserRepositoryTest class'ının son hali aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    [TestClass]
+    public class UserRepositoryTest: RepositoryBaseTest
+    {
+        private List&amp;lt;User&amp;gt; _userList;
+        private Mock&amp;lt;IRepository&amp;lt;int, User&amp;gt;&amp;gt; _mockRepo;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _userList = new List&amp;lt;User&amp;gt;();
+            var user1 = new User
+            {
+                Id = 1,
+                Email = "canertosuner@gmail.com",
+                FirstName = "Caner",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user1);
+
+            var user2 = new User
+            {
+                Id = 2,
+                Email = "tanertosuner@gmail.com",
+                FirstName = "Taner",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user2);
+
+            var user3 = new User
+            {
+                Id = 3,
+                Email = "janertosuner@gmail.com",
+                FirstName = "Janer",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user3);
+
+            var user4 = new User
+            {
+                Id = 4,
+                Email = "yenertosuner@gmail.com",
+                FirstName = "Yeneer",
+                LastName = "Tosuner"
+            };
+            _userList.Add(user4);
+
+            _mockRepo = new Mock&amp;lt;IRepository&amp;lt;int, User&amp;gt;&amp;gt;();
+
+            SetupRepositoryMock&amp;lt;int, User&amp;gt;(_mockRepo, _userList);
+        }
+
+        [TestMethod]
+        public void Get_All_Count()
+        {
+            Assert.AreEqual(_userList.Count, _mockRepo.Object.All().Count());
+        }
+
+        [TestMethod]
+        public void Get_By_Id_Then_Check_Name()
+        {
+            var item = _mockRepo.Object.FindBy(4);
+            Assert.AreEqual("Yeneer", item.FirstName);
+        }
+
+        [TestMethod]
+        public void Remove_User_Then_Check_Count()
+        {
+            var user4 = new User
+            {
+                Id = 4,
+                Email = "yenertosuner@gmail.com",
+                FirstName = "Yeneer",
+                LastName = "Tosuner"
+            };
+            _mockRepo.Object.Delete(user4);
+            Assert.AreEqual(3, _mockRepo.Object.All().Count());
+        }
+
+        [TestMethod]
+        public void Add_New_User_Then_Check_Count()
+        {
+            var tempCount = _userList.Count;
+
+            var user5 = new User
+            {
+                Email = "yenertosuner@gmail.com",
+                FirstName = "Yeneer",
+                LastName = "Tosuner"
+            };
+            _mockRepo.Object.Add(user5);
+
+            Assert.AreEqual(tempCount + 1, _mockRepo.Object.All().Count());
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;RepositoryPattern i&amp;ccedil;in reusable mocking işlemi i&amp;ccedil;in hepsi bu kadar.&amp;nbsp;UserRepository dışında bulunan diğer repository'ler i&amp;ccedil;inde aynı UserRepository de olduğu gibi generic oluşturduğumuz RepositoryBaseTest'i kullanarak setup işlemini yapabiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Soru :&lt;/strong&gt;&lt;/span&gt; Crud metotları dışında sadece o repository'e &amp;ouml;zel bir metot tanımlarsak ne olacak ?&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rneğin DepartmentRepository diye bir repository var ve bu repository i&amp;ccedil;in yukarıda tanımladığımız All, Get, Insert, Update, Delete metotlarının dışında bir de GetByGroupName() adında bir metot gerekli. Bu metot i&amp;ccedil;in gidip RepositoryBaseTest i&amp;ccedil;erisine setup tanımlaması yapsak pekte doğru olmaz &amp;ccedil;&amp;uuml;nk&amp;uuml; orası ortak olan metotlar i&amp;ccedil;in tanımlamalar yaptığımız bir yer.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-03-01 22:59:00</pubDate>
+  <lastModified>2017-01-15 08:14:00</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>repository-pattern-icin-reusable-mocking-ornegi</slug>
+  <tags />
+  <comments />
+  <categories>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>018aedb2-84ba-46ad-89f2-2d551bf7c063</category>
+  </categories>
+  <notifications />
+</post>

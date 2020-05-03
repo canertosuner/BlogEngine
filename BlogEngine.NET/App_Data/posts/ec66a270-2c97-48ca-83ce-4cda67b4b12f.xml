@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>StructureMap Nedir WebApi ile Kullanımı - IoC</title>
+  <description>StructureMap ilk release'i .Net framework 1.1 için 2004 yılında çıkmış ve 12 yıldır hayatımızda olan en eski IoC/DI tool'u dur. Uygulama genelindeki instance yönetiminden sorumlu olup bağımlılıkları enjecte edebilmemizi sağlar.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki&amp;nbsp;IoC container yazılarında Ninject ve Windsor 'dan bahsetmiştik. Bu yazımızda ise&amp;nbsp;2016 benchmark'larına g&amp;ouml;re en hızlı IoC container olduğu s&amp;ouml;ylenen StructureMap'i WebApi &amp;uuml;zerinde &amp;ouml;rnek proje ile inceleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;StructureMap ilk release'i .Net framework 1.1 i&amp;ccedil;in 2004 yılında &amp;ccedil;ıkmış ve 12 yıldır hayatımızda olan en eski IoC/DI tool'u dur. Uygulama genelindeki instance y&amp;ouml;netiminden sorumlu olup bağımlılıkları enjecte&amp;nbsp;edebilmemizi sağlar ve global anlamda bir&amp;ccedil;ok developer tarafından en pop&amp;uuml;ler DI tool'u olarak kabul edilir.&lt;/p&gt;
+&lt;p&gt;Yazımızda StructureMap kullanarak basit bir&amp;nbsp;infrastructure tasarlamaya &amp;ccedil;alışacağız.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İlk olarak Vs'da bir Web Api projesi oluşturalım.&lt;/p&gt;
+&lt;p&gt;Sonrasında projemize nuget &amp;uuml;zerinden &lt;a href="https://www.nuget.org/packages/StructureMap.WebApi2/"&gt;StructureMap.WebApi2&lt;/a&gt;&amp;nbsp;paketini install edelim.&lt;img src="/image.axd?picture=/2017/structure_map_sample_install.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Kurulum işlemi tamamlandıktan sonra solution'da &lt;strong&gt;DependencyResolution&lt;/strong&gt; adında auto generate olan bir klas&amp;ouml;r ve hem bu klas&amp;ouml;r i&amp;ccedil;erisinde hemde &lt;strong&gt;App_Start&lt;/strong&gt;&amp;nbsp;klas&amp;ouml;r&amp;uuml; i&amp;ccedil;erisinde StructureMap konfigurasyonlarını yapabilmemizi sağlayacak olan class'ları g&amp;ouml;receğiz. Şimdilik bu klas&amp;ouml;r&amp;uuml; es ge&amp;ccedil;elim projemizi hazır hale getirdikten sonra gerekli register işlemlerini yaparız.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/structure_map_sample_solution_img.png" alt="" width="241" height="350" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek case'imiz şu şekilde olsun;&amp;nbsp;&lt;strong&gt;UserController&lt;/strong&gt; adında bir controller oluşturalım ve bu controller i&amp;ccedil;erisinde tanımlı IUserService intercase'ini contructor injection y&amp;ouml;ntemi ile inject edelim. GetUserFullNames adında end-point ile geriye List of string d&amp;ouml;nelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class UserController : ApiController
+    {
+        private readonly IUserService _userService;
+        public UserController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
+        [HttpGet]
+        public HttpResponseMessage GetUserFullNames()
+        {
+            var response = _userService.GetUserFullNames();
+
+            return Request.CreateResponse(response);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Controller i&amp;ccedil;erisinde kullandığımız IUserService interface'i ve onun&amp;nbsp;implemantasyonunu aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface IUserService
+{
+    List&amp;lt;string&amp;gt; GetUserFullNames();
+}
+ 
+public class UserService : IUserService
+{
+    public List&amp;lt;string&amp;gt; GetUserFullNames()
+    {
+        return new List&amp;lt;string&amp;gt;
+                              { "Olcay Şahan",
+                                "Anderson Talisca",
+                                "Oğuzhan &amp;Ouml;zyakup",
+                                "Ricardo Quaresma",
+                                "Cenk Tosun" };
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda da s&amp;ouml;ylediğimiz gibi UserController i&amp;ccedil;erisindeki&amp;nbsp;GetUserFullNames metodu HttpGet isteği alarak geriye UserService i&amp;ccedil;erisinde bulunan&amp;nbsp;GetUserFullNames metodunun return ettiği List of string'i d&amp;ouml;necektir.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rneğimiz hazır. Şimdi ise geriye son 2 adım kaldı.&lt;/p&gt;
+&lt;p&gt;1-) StructureMap ile ilgili container konfigurasyonlarını yapmak.&amp;nbsp;DependencyResolution klas&amp;ouml;r&amp;uuml; i&amp;ccedil;erisinde bulunan&amp;nbsp;DefaultRegistry adlı class'a gidip aşağıdaki gibi UserService'i container'a register edeceğiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class DefaultRegistry : Registry {
+        #region Constructors and Destructors
+
+        public DefaultRegistry() {
+            Scan(
+                scan =&amp;gt; {
+                    scan.TheCallingAssembly();
+                    scan.WithDefaultConventions();
+                });
+            For&amp;lt;IUserService&amp;gt;().Use&amp;lt;UserService&amp;gt;();
+        }
+
+        #endregion
+    }&lt;/pre&gt;
+&lt;p&gt;2-) Son olarak App_Start/WebApiConfig.cs class'ına gidip&amp;nbsp;DI container'ı start etmemiz gerekiyor.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public static class WebApiConfig
+    {
+        public static void Register(HttpConfiguration config)
+        {
+            // Web API configuration and services
+
+            // Web API routes
+            config.MapHttpAttributeRoutes();
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi",
+                routeTemplate: "api/{controller}/{id}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+            
+            //structureMap start
+            StructuremapWebApi.Start();
+        }
+    }&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Hem &amp;ouml;rneğimiz hemde container ile ilgili konfigurasyonlarımız hazır. Artık projemizi run edip yazdığımız kodları test yapabiliriz. Bunun i&amp;ccedil;in&amp;nbsp;projemizi run edelim ve yazmış olduğumuz end-point'i browser da &amp;ccedil;ağıralım.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;&lt;img src="/image.axd?picture=/2017/structure_map_sample_result__iimg.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi UserController da bulunan end-point'e call yaptık ve bize&amp;nbsp;container'da bulunan IUserService'ine ait olan implementasyonu resolve edip UserService i&amp;ccedil;erisinde bulunan GetUserFullNames metodunu execute edip geriye user listesini return etti&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;StructureMap&amp;nbsp;yazımız şimdilik bu kadar. İlerleyen g&amp;uuml;nlerde daha&amp;nbsp;farklı DI Container yazılarına devam edeceğiz.&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-07-16 21:03:00</pubDate>
+  <lastModified>2017-05-27 07:07:11</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>structuremap-nedir-webapi-ile-kullanimi-ioc</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

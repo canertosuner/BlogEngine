@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Middleware Nedir Nasıl Kullanılır</title>
+  <description>.Net Core Microsoft tarafından open-source olarak geliştirilmiş modüler bir .net framework'dür. Asp.Net Core ise klasik bildiğimiz Asp.Net kütüphanesinin open-source olarak microsoft tarafından release edilmiş halidir.</description>
+  <content>&lt;p&gt;.Net Core Microsoft tarafından open-source olarak geliştirilmiş mod&amp;uuml;ler bir .net framework'd&amp;uuml;r. Asp.Net Core ise klasik bildiğimiz Asp.Net k&amp;uuml;t&amp;uuml;phanesinin open-source olarak microsoft tarafından release edilmiş halidir.&lt;/p&gt;
+&lt;p&gt;Daha &amp;ouml;nceki yazılarda da bahsettiğimiz &amp;uuml;zre asp.net core'da bir &amp;ccedil;ok feature yada &amp;ouml;zellik ayrı bir mod&amp;uuml;l olarak kolayca entegre edilebilecek şekilde geliştirilmiştir. Middleware'de yine bunlardan biri.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Middleware nedir diye soracak olursak; Middleware asp.net core i&amp;ccedil;erisinde request-response pipeline'ını handle etmemizi sağlayan bir &amp;ccedil;eşit interceptor g&amp;ouml;revi g&amp;ouml;ren sınıflardır. Bu sınıfları kullanarak controller metodunuza gelen request'leri veya response'ları modify edebilir, header check yapabilir yada&amp;nbsp;authorization kontrollerini kolayca entegre edebiliriz.&lt;/p&gt;
+&lt;p&gt;Middleware asp.net core cycle'ın da ki konumunu anlamak i&amp;ccedil;in aşağıdaki&amp;nbsp;resime bamak yeterli.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/aspcoremiddleware_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Uygulama i&amp;ccedil;erisinde tanımlı olan middleware'ler register edilme sırasıyla birlikte yukarıdaki resimde olduğu gibi birbirlerini call ederek pipeline'ı tamamlarlar.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;Middleware Imp.&lt;/h3&gt;
+&lt;p&gt;&amp;Ouml;rneğimiz şu&amp;nbsp;şekilde olsun; bir api projemiz var ve bu projede middleware kullanarak client'dan request header da beklediğimiz&amp;nbsp;Client-Key, Device-Id key-value parametrelerini g&amp;ouml;nderip g&amp;ouml;ndermediğini kontrol edelim. G&amp;ouml;ndermediği durumda http400 ile geriye hata d&amp;ouml;nelim.&lt;/p&gt;
+&lt;p&gt;Middleware tanımlamanın birka&amp;ccedil; farklı yolu var ancak en basit olanını inceleyeceğiz. İlk olarak vs.'da MiddlewareSample adında bir asp.net core projesi oluşturalım. Sonrasında&amp;nbsp;projemize&amp;nbsp;HeaderCheckMiddleware adında bir sınıf ekleyelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class HeaderCheckMiddleware
+    {
+        private readonly RequestDelegate _next;
+        public HeaderCheckMiddleware(RequestDelegate next)
+        {
+            _next = next;
+        }
+
+        public async Task Invoke(HttpContext httpContext)
+        {
+            var key1 = httpContext.Request.Headers.Keys.Contains("Client-Key");
+            var key2 = httpContext.Request.Headers.Keys.Contains("Device-Id");
+
+            if (!key1 || !key2)
+            {
+                httpContext.Response.StatusCode = 400;
+                await httpContext.Response.WriteAsync("Missing requeired keys !");
+                return;
+            }
+            else
+            {
+                //todo
+            }
+            await _next.Invoke(httpContext);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre, Invoke metodu middleware call edildiğinde execute&amp;nbsp;edilecek olan metottur. Bu metot; end-poit'e gelen request'i ve end-point'in return ettiği response'a m&amp;uuml;dahale edebilmemizi sağlar. Bizde yapılan her httpRequest'inde header de beklediğimiz&amp;nbsp;Client-Key, Device-Id vs. gibi bilgileri kontrol etme işini yukarıda olduğu gibi bu metodun i&amp;ccedil;erisinde yaptık. Eğer bu 3 header key'in den birisi dahi header'da yok ise htpp400 olarak geriye hata mesajı return ettik.&lt;/p&gt;
+&lt;p&gt;Middleware'imizi tanımladıktan sonra geriye bunu asp.net core projemize register etmek kalıyor. Bunun i&amp;ccedil;inde aşağıdaki gibi bir extension metot yazalım ve register etme işlemini asp.net core ile birlikte gelen Startup.cs de bulunan&amp;nbsp;Configure metodu i&amp;ccedil;erisinde tıpkı projede ayağa kaldırabileceğimiz bir servismiş gibi enable edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public static class MiddlewareExtension
+    {
+        public static IApplicationBuilder UseHeaderCheckMiddleware(this IApplicationBuilder builder)
+        {
+            return builder.UseMiddleware&amp;lt;HeaderCheckMiddleware&amp;gt;();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Son adım olarak ise&amp;nbsp;Configure metodu i&amp;ccedil;erisinde middleware'i aktifleştirelim .&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+ {
+     app.UseHeaderCheckMiddleware();
+ }&lt;/pre&gt;
+&lt;p&gt;Aşağıdaki gibi postman veya herhangi bir rest-call tool'u kullanarak projenizde bulunan herhangi bir end-point'e call yaptığınızda header da beklenen parametreleri g&amp;ouml;ndermezsek hata almış olacağız.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/aspnetcore_middleware_bad_req_img.png" alt="" width="742" height="341" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Parametreleri doğru bir şekilde g&amp;ouml;nderdiğimiz&amp;nbsp;durumda ise sorunsuz şekilde endpoint'e ulaşıp success response alabiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/aspnetcore_middleware_succ_req_img.png" alt="" width="742" height="341" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Middleware asp.net core projelerinde aop &amp;ouml;zelliklerini uygulayabilmemizi sağlar ve bununla birlikte bizlere&amp;nbsp;projemiz i&amp;ccedil;in mod&amp;uuml;ler&amp;nbsp;&amp;ouml;zellikleri olan k&amp;uuml;&amp;ccedil;&amp;uuml;k feature'lar&amp;nbsp;ekleterek kod tekrarından ve&amp;nbsp;spaghetti code bloklarından bizleri kurtarabilir. &amp;Ouml;rnekte sadece&amp;nbsp;k&amp;uuml;&amp;ccedil;&amp;uuml;k bir header check işlemi yaptık ancak middleware kullanarak bunu gibi daha bir &amp;ccedil;ok geliştirmede yapabiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-02-27 21:44:00</pubDate>
+  <lastModified>2020-01-20 08:22:13</lastModified>
+  <raters>3</raters>
+  <rating>5</rating>
+  <slug>asp-net-core-middleware-nedir-nasil-kullanilir</slug>
+  <tags>
+    <tag>asp.net core</tag>
+    <tag>asp.net core middleware nedir</tag>
+    <tag>asp.net core middleware</tag>
+    <tag>middleware nedir</tag>
+    <tag>.net core middleware</tag>
+  </tags>
+  <comments>
+    <comment id="931f0a68-09c6-426e-a7a6-bb3f4c638a9a" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-03-14 06:05:58</date>
+      <author>ÜMİT</author>
+      <email>ukaraogul@gmail.com</email>
+      <country />
+      <ip>193.192.97.2</ip>
+      <avatar />
+      <content>Teşekkürler.
+Faydalı bir makale olmuş.</content>
+    </comment>
+    <comment id="de7c3939-9561-4bca-803d-26d7773af4b7" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-07-25 22:56:49</date>
+      <author>HARUN</author>
+      <email>harunkaraca19@yandex.com.tr</email>
+      <country />
+      <ip>78.173.37.247</ip>
+      <avatar />
+      <content>Eyvallah sagolasin kardesim...</content>
+    </comment>
+    <comment id="9ad4a537-5526-47ba-9b0a-0512602944d7" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-08-03 17:31:45</date>
+      <author>Erdem</author>
+      <email>erdem_trll1@hotmail.com</email>
+      <country />
+      <ip>95.70.163.48</ip>
+      <avatar />
+      <content>Çok faydalı bir yazı olmuş.</content>
+    </comment>
+    <comment id="e9416ca8-7fa9-4ad6-8b22-2110e2cce5e9" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-08-22 10:26:05</date>
+      <author>Metin</author>
+      <email>metin@mailinator.com</email>
+      <country />
+      <ip>46.196.176.5</ip>
+      <avatar />
+      <content>Kısa, öz ve net. Elinize sağlık.</content>
+    </comment>
+    <comment id="b9ded60b-680d-4187-be6b-3a701f5d7dfb" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-10-08 13:28:58</date>
+      <author>Bünyamin</author>
+      <email>bnymnbgz@gmail.com</email>
+      <country />
+      <ip>176.227.48.51</ip>
+      <avatar />
+      <content>Güzel ve çok faydalı bir paylaşım. Teşekkürler.</content>
+    </comment>
+    <comment id="bef65982-ea2f-4799-bb1c-0bf3f5741493" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-11-26 07:15:40</date>
+      <author>Selim</author>
+      <email>gecnakptan_8865@hotmail.com</email>
+      <country />
+      <ip>93.94.199.69</ip>
+      <avatar />
+      <content>Çok başarılı bir anlatım olmuş. Sade ve anlaşılır. Teşekkürler.</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

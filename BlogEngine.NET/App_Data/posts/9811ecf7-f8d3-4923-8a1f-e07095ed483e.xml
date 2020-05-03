@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>TextBox InputScope only Letters</title>
+  <description>&amp;nbsp;
+        private void TextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    </description>
+  <content>&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;        private void TextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key &amp;gt;= Key.A &amp;amp;&amp;amp; e.Key &amp;lt;= Key.Z)
+            {
+                e.Handled = false;
+            }
+            else if (e.Key == Key.Space)
+                e.Handled = false;
+            else
+                e.Handled = true;
+        }&lt;/pre&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2014-01-26 15:30:00</pubDate>
+  <lastModified>2020-01-20 08:22:30</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>E</slug>
+  <tags>
+    <tag>inputscope</tag>
+    <tag>letters</tag>
+    <tag>string</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

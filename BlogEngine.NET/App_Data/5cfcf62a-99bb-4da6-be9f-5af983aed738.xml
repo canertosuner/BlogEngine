@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>ConcurrentStack ve ConcurrentQueue</title>
+  <description>Thread-safe collection ilk olarak .Net framework 4.0 ile System.Collections.Concurrent namespace'i altında hayatımıza girdi. System.Collections.Concurrent namespace'i altında thread-safe geliştirmeler yapmada kullanabilmek için ConcurrentStack ve ConcurrentQueue adında 2 tane tip bulunmaktadır.</description>
+  <content>&lt;p&gt;Thread-safe collection ilk olarak .Net framework 4.0 ile System.Collections.Concurrent namespace'i altında hayatımıza girdi.&amp;nbsp;System.Collections.Concurrent namespace'i altında thread-safe geliştirmeler yapmada kullanabilmek i&amp;ccedil;in &lt;strong&gt;ConcurrentStack&lt;/strong&gt; ve &lt;strong&gt;ConcurrentQueue&lt;/strong&gt; adında 2 tane tip&amp;nbsp;bulunmaktadır.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;ConcurrentStack&lt;/strong&gt; &lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;ConcurrentStack LIFO (last in first out) prensibine g&amp;ouml;re &amp;ccedil;alışan bir data stracture dır. Generic&lt;strong&gt;&amp;nbsp;ConcurrentStack&amp;lt;T&amp;gt;&lt;/strong&gt; thread safe olan Stack&amp;lt;T&amp;gt;'nin karşılığı olarak d&amp;uuml;ş&amp;uuml;nebiliriz ve .Net Framework 4.0 ile hayatımıza girmiştir.&lt;/p&gt;
+&lt;p&gt;Bu class ile kullanılabilecek metotlar&amp;nbsp;;&amp;nbsp;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Push(T element)&lt;/strong&gt;&amp;nbsp;T tipindeki objeyi stack'e eklemek i&amp;ccedil;in kullanılır,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PushRange&lt;/strong&gt;&amp;nbsp;T tipinde ki array'leri stack'e eklemek i&amp;ccedil;in kullanılır,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TryPop(out T)&lt;/strong&gt;&amp;nbsp;stack'te bulunan ilk item'i d&amp;ouml;ner, başarılı ise true değilse false d&amp;ouml;ner&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TryPeek(out T)&lt;/strong&gt;&amp;nbsp;stack'te bulunan bir sonraki item'ı almak i&amp;ccedil;in kullanılır ancak bu item'ı stack'ten silmez,&amp;nbsp;başarılı ise true değilse false d&amp;ouml;ner,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TryPopRange&amp;nbsp;&lt;/strong&gt;TryPop metodu ile aynı &amp;ccedil;alışır sadece geriye tek bir obje&amp;nbsp;değilde bir array d&amp;ouml;ner.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&amp;nbsp;ConcurrentStack&amp;lt;T&amp;gt;'nin instance oluşturma ve &lt;strong&gt;Push&lt;/strong&gt; metodu kullanımı&amp;nbsp;aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;            var concurrentStack = new ConcurrentStack&amp;lt;int&amp;gt;();
+
+            for (var i = 0; i &amp;lt; 10; i++)
+            {
+                concurrentStack.Push(i);
+            }&lt;/pre&gt;
+&lt;p&gt;Concurrent stack'te bulunan bir obje&amp;nbsp;i&amp;ccedil;in get&amp;nbsp;işlemi yapmak istediğimizde ise &lt;strong&gt;TryPop(out T)&lt;/strong&gt; metodunu kullanıyoruz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;            int outData;
+            bool isSuccess = concurrentStack.TryPop(out outData);&lt;/pre&gt;
+&lt;p&gt;Full kullanım &amp;ouml;rneği olarak aşağıda bulunan &amp;nbsp;metot 1'den başlayıp 100'e kadar olan sayıları Concurrent stack'e atıp sonrasında&amp;nbsp;stack'ten okuma işlemini yapıp ekrana sayıları display etmektedir..&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public static void Main()
+        {
+            var concurrentStack = new ConcurrentStack&amp;lt;int&amp;gt;();
+
+            for (var i = 1; i &amp;lt; 100; i++)
+            {
+                concurrentStack.Push(i);
+            }
+
+            while (concurrentStack.Count &amp;gt; 0)
+            {
+                int stackData;
+
+                bool success = concurrentStack.TryPop(out stackData);
+
+                if (success)
+                {
+                    Console.WriteLine(stackData);
+                }
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Projeyi &amp;ccedil;alıştırdığınızda 99'dan başlayıp 0'a kadar olan&amp;nbsp;sayıları display edecektir.&lt;/p&gt;
+&lt;p&gt;ConcurrentStack aynı zamanda &lt;strong&gt;ToArray()&lt;/strong&gt; property'sini destekler ve stack'i array'a convert etmemize olanak sağlar.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;var integerArray = concurrentStack.ToArray();&lt;/pre&gt;
+&lt;p&gt;Stack'in&amp;nbsp;i&amp;ccedil;erisinde item var mı yok mu&amp;nbsp;diye kontrol etmek istediğimizde ise&amp;nbsp;&lt;strong&gt;IsEmpty&lt;/strong&gt; property'sini kullanarabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;if(!concurrentQueue.IsEmpty)
+{
+    ;//todo
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;ConcurrentQueue&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;ConcurrentQueue FIFO&amp;nbsp;(first&amp;nbsp;in first out) prensibine g&amp;ouml;re &amp;ccedil;alışan bir data stracture dır. Generic&lt;strong&gt; ConcurrentQueue&amp;lt;T&amp;gt;&lt;/strong&gt; thread safe olan Queue&amp;lt;T&amp;gt;'nin karşılığı olarak d&amp;uuml;ş&amp;uuml;nebiliriz ve yinde ConcurrentQueue de ConcurrentStack gibi .Net Framework 4.0 ile hayatımıza girmiştir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;ConcurrentQueue&amp;lt;T&amp;gt;'nin bazı &amp;ouml;nemli metotlarını aşağıdakiler olarak sıralayabiliriz.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Enqueue(T element)&amp;nbsp;&lt;/strong&gt; T tipindeki objeyi queue'ye&amp;nbsp;eklemek i&amp;ccedil;in kullanılır,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TryPeek(out T) &lt;/strong&gt;queue'da yada kuyrukta&amp;nbsp;bulunan bir sonraki item'ı almak i&amp;ccedil;in kullanılır ancak bu item'ı queue'dan silmez,&amp;nbsp;başarılı ise true değilse false d&amp;ouml;ner,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;TryDequeue(out T) &lt;/strong&gt;bu metot&amp;nbsp;kuyruktaki ilk objeyi almak i&amp;ccedil;in kullanılır.&amp;nbsp;TryPeek(out T) metodunun tersine objeyi aldıktan sonra kuyruktan siler,&amp;nbsp;başarılı ise true değilse false d&amp;ouml;ner,&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Aşağıda bulunan code-snippet'ı nasıl integer değerler saklamak i&amp;ccedil;in ConcurrentQueue instance&amp;nbsp;oluşturulur g&amp;ouml;stermektedir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;var concurrentQueue = new ConcurrentQueue&amp;lt;int&amp;gt;();&lt;/pre&gt;
+&lt;p&gt;Kuyruğa integer değer atmak i&amp;ccedil;in ise aşağıdaki gibi Enqueue metodu kullanılabilir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;concurrentQueue.Enqueue(100);&lt;/pre&gt;
+&lt;p&gt;Full kulalnıma bakacak olursak&amp;nbsp;aşağıda bulunan &amp;nbsp;metot 1'den başlayıp 100'e kadar olan sayıları ConcurrentQueue'ye atıp sonrasında ConcurrentQueue'den okuma işlemini yapıp ekrana sayıları display etmektedir..&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;	public static void Main()
+	{
+		    var concurrentQueue = new ConcurrentQueue&amp;lt;int&amp;gt;();
+
+            for (var i = 1; i &amp;lt; 100; i++)
+            {
+                concurrentQueue.Enqueue(i);
+            }
+
+            int queueData;
+
+            while (concurrentQueue.TryDequeue(out queueData))
+            {
+                Console.WriteLine(queueData);
+            }
+	}&lt;/pre&gt;
+&lt;p&gt;Projeyi &amp;ccedil;alıştırdığınızda&amp;nbsp;1'den başlayıp 100'e kadar olan sayıları ekrana display edecektir.&lt;/p&gt;
+&lt;p&gt;Hem&amp;nbsp;ConcurrentStack hem de&amp;nbsp;ConcurrentQueue class'ları&amp;nbsp;thread safe'dirler ve internal olarak locking ve&amp;nbsp;synchronization konularını y&amp;ouml;netebilirler.&lt;/p&gt;
+&lt;p&gt;ConcurrentQueue aynı zamanda &lt;strong&gt;ToArray()&lt;/strong&gt; property'sini destekler ve&amp;nbsp;queue'yu array'a convert etmemize olanak sağlar.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;var integerArray = concurrentQueue.ToArray();&lt;/pre&gt;
+&lt;p&gt;Queue'nun i&amp;ccedil;erisi boş mu dolu mu diye kontrol etmek istediğimizde ise&amp;nbsp;&lt;strong&gt;IsEmpty&lt;/strong&gt; property'sini kullanarabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;while(!concurrentQueue.IsEmpty)
+{
+     int result;
+
+     concurrentQueue.TryDequeue(out result);
+
+     Console.WriteLine(result);
+}&lt;/pre&gt;
+&lt;p&gt;Thread safe programlama ile uğraşıyorsanız ConcurrentStack ve ConcurrentQueue olduk&amp;ccedil;a faydalı sınıflardır. &amp;Ouml;zellikle mesajlaşma yapıları &amp;amp; web service vs. gibi geliştirmeler gerektiren yerlerde biz developer'lara olduk&amp;ccedil;a kolaylıklar sunmaktadır, unutmamakta fayda var :)&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-11-07 22:48:00</pubDate>
+  <lastModified>2016-10-05 06:12:49</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>concurrentstack-ve-concurrentqueue-nedir</slug>
+  <tags>
+    <tag>ConcurrentStack</tag>
+    <tag>ConcurrentQueue </tag>
+    <tag>Concurrent </tag>
+    <tag>Push</tag>
+    <tag>TryPop</tag>
+    <tag>Enqueue</tag>
+    <tag>TryPeek</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+  </categories>
+  <notifications />
+</post>

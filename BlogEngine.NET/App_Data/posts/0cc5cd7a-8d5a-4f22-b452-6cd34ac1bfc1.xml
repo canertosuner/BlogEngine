@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>SOLID Prensipleri</title>
+  <description>SOLID'in geçmişine baktığımızda çokta uzağa gitmemize gerek yok. İlk olarak 2000'li yılların başında Michael Feathers tarafından ortaya atıldı ve sonrasında Robert C. Martin tarfından "first five principles of object-oriented programming and design" olarak "SOLID" adını aldı.</description>
+  <content>&lt;h2&gt;SOLID Candır !&lt;/h2&gt;
+&lt;p&gt;SOLID'in ge&amp;ccedil;mişine baktığımızda &amp;ccedil;okta uzağa gitmemize gerek yok. İlk olarak 2000'li yılların başında&lt;strong&gt; Michael Feathers&lt;/strong&gt; tarafından ortaya atıldı ve sonrasında &lt;strong&gt;Robert C. Martin&amp;nbsp;&lt;/strong&gt;tarfından "&lt;strong&gt;first five principles of object-oriented programming and design&lt;/strong&gt;" olarak "&lt;strong&gt;SOLID&lt;/strong&gt;" adını aldı.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Neden SOLID'e ihtiya&amp;ccedil; duyuldu ?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;"Bir kere yazılan kod asla ilelebet aynı kalamaz..!" aslında SOLID'in ortaya &amp;ccedil;ıkış sebebi bu c&amp;uuml;mlede gizlidir. Aylar-yıllar ge&amp;ccedil;tikten sonra yazmış olduğumuz kodlara bir değişiklik yapmak istediğimizde bu değişikliği ne kadar efor sarf ederek ve ne kadar s&amp;uuml;rede yapacağız..? SOLID projeyi yazdıktan sonraki s&amp;uuml;re&amp;ccedil;te bu soruya en iyi şekilde cevap verebilmemizi sağlamak i&amp;ccedil;in var.&lt;/p&gt;
+&lt;p&gt;Şu ger&amp;ccedil;ektir ki bazen 7 ay gibi bir efor harcanıp production'a alınmış bir proje i&amp;ccedil;in &amp;ccedil;ok değil 6 ay sonra ki s&amp;uuml;re&amp;ccedil;te m&amp;uuml;şteri bir değişiklik veya extra mod&amp;uuml;l istediğinde o mod&amp;uuml;l&amp;uuml;n projeye eklenmesi neredeyse projeyi production'a almak i&amp;ccedil;in harcanan s&amp;uuml;re kadar s&amp;uuml;rebiliyor.&lt;/p&gt;
+&lt;p&gt;7 ay gibi bir s&amp;uuml;rede projeyi bitir canlıya al, canlıya alındıktan 6 ay sonra m&amp;uuml;şteri gelsin yeni bir feature istesin sonra m&amp;uuml;şteriye "benim bunun geliştirmesini yapmak i&amp;ccedil;in 6 aya daha ihtiyacım var.." dediğinizde m&amp;uuml;şteri heralde ufaktan ş&amp;ouml;yle olur "WTF...man ?"&lt;/p&gt;
+&lt;p&gt;SOLID prensiplerinin amacı aslında bizlerin daha iyi programlar yazmamızdan &amp;ccedil;ok ileride istenecek değişimlere a&amp;ccedil;ık olup bu değişimlere en az eforla ayak uydurabilecek kodlar yazmamızı sağlamaktır. Nesne y&amp;ouml;nelimli programla yapıyorsak d&amp;uuml;nyada standart kabul edilen bu 5 prensibe uygun kodlar yazıyor olmamız gerekir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;strong&gt;Peki nedir bu ilk 5 prensip ?&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;S&amp;nbsp;&lt;/strong&gt; &amp;ndash; Single-Responsibility Principle&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;O&amp;nbsp;&lt;/strong&gt; &amp;ndash; Open-Closed Principle&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;L&lt;/strong&gt;&amp;nbsp; &amp;ndash; Liskov Substitution Principle&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;I&lt;/strong&gt;&amp;nbsp; &amp;ndash; Interface Segregation Principle&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;D&lt;/strong&gt; &amp;nbsp;&amp;ndash; Dependency Inversion Principle&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Her bir prensip i&amp;ccedil;in sonrasında ayrı ayrı blog'lar yazacağım ancak kısaca bir ka&amp;ccedil; kelimeyle şu şekilde &amp;ouml;zetleyebiliriz;&lt;/p&gt;
+&lt;h2&gt;Single-Responsibility Principle&lt;/h2&gt;
+&lt;p&gt;Bir class'ın sadece tek bir işi olmalı ve sadece o işten sorumlu olmalıdır. &amp;Ouml;rneğin Log tutmak i&amp;ccedil;in yaptığınız bir Logger class'ı sadece Log işlemlerinden sorumlu olmalıdır.&lt;/p&gt;
+&lt;h2&gt;&amp;nbsp;&lt;/h2&gt;
+&lt;h2&gt;Open-Closed Principle&lt;/h2&gt;
+&lt;p&gt;Uygulamada yazdığımız objeler yada entity'ler gelişime a&amp;ccedil;ık değişime kapalı olmalıdır. &amp;Ouml;rnek olarak &amp;ccedil;ok if-else yazmaktan ka&amp;ccedil;ının demek desek yanlış olmaz. Bir şekilde daha &amp;ouml;cnesinde yazmış olduğunuz metodunuzu genişletmek istediğinizde interface yada abstract class'lardan faydalanarak daha y&amp;ouml;netilebilir ve ihtiya&amp;ccedil; duyulduğunda genişletilebilir kodlar yazmak gerekmektedir.&lt;/p&gt;
+&lt;h2&gt;&amp;nbsp;&lt;/h2&gt;
+&lt;h2&gt;Liskov Substitution Principle&lt;/h2&gt;
+&lt;p&gt;Liskov prensibi i&amp;ccedil;in kısaca yerine ge&amp;ccedil;me prensibi diyebiliriz. Bir base class'tan t&amp;uuml;retilen class'ların yeri geldiğinde ihtiya&amp;ccedil; halinde &amp;uuml;st class'ların yerine de kullanabileceğini s&amp;ouml;ylemekte.&lt;/p&gt;
+&lt;h2&gt;&amp;nbsp;&lt;/h2&gt;
+&lt;h2&gt;Interface Segregation Principle&lt;/h2&gt;
+&lt;p&gt;Client'lar ihtiya&amp;ccedil; duymadıkları bir interface'i kullanmaya zorlanmamalı veya ihtiya&amp;ccedil; duyduğu interface'e ait tek bir metod i&amp;ccedil;in b&amp;uuml;t&amp;uuml;n interface'in metodları implemente etmemelidir. Interface Segregation prensibi bu gibi durumlar i&amp;ccedil;in interface'lerinizi ayırın ve bir interface'e gerektiğinden fazla g&amp;ouml;rev y&amp;uuml;klemeyin der. B&amp;ouml;ylelikle client geliştirmesini yaparken ihtiya&amp;ccedil; duymadığı hi&amp;ccedil; bir metodu implemente etmek zorunda kalmicaktır.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;Dependency Inversion Principle&lt;/h2&gt;
+&lt;p&gt;Bağımlılığı tersine &amp;ccedil;evirme prensibine g&amp;ouml;re base class'lar veya metodlar vs. alt seviyeli sınıflara veya metodlara bağımlı olmamalıdır ve alt class'larda yapılan bir değişiklik base class'ları etkilememelidir. &amp;Ouml;rnek olarak kısa bir s&amp;uuml;re &amp;ouml;nce g&amp;ouml;zl&amp;uuml;klerimin camını değiştirmiştim ve nedendir bilinmez tam o sırada aklıma bu prensip gelmişti :)&lt;/p&gt;
+&lt;p&gt;Alt mod&amp;uuml;l ; g&amp;ouml;zl&amp;uuml;k camı,&lt;/p&gt;
+&lt;p&gt;&amp;Uuml;st mod&amp;uuml;l ; g&amp;ouml;zl&amp;uuml;k&lt;/p&gt;
+&lt;p&gt;olsun. G&amp;ouml;zl&amp;uuml;k&amp;ccedil;&amp;uuml;ye gittiniz ve camları değiştireceksiniz adam dedi ki "Camlar g&amp;ouml;zl&amp;uuml;ğe bağlı olduğundan camları değiştirmek i&amp;ccedil;in komple g&amp;ouml;zl&amp;uuml;ğ&amp;uuml; değiştirmeniz gerekmekte.." &amp;nbsp;. En iyi ihtimal adama "manyak mısın sen arkadaş.. " dersiniz. İşte bu prensip bu gibi durumlar i&amp;ccedil;in var. Alt mod&amp;uuml;l &amp;uuml;st mod&amp;uuml;le bağımlı olsun ama bağımlılık başımızın belası da olmasın tabi ki :)&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yazımız burada bitiyor ancak her bir prensip i&amp;ccedil;in ayrı ayrı blog yazıları yazıyor olacağım..just follow :)&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-04-30 16:15:00</pubDate>
+  <lastModified>2020-01-20 08:22:25</lastModified>
+  <raters>5</raters>
+  <rating>4.2</rating>
+  <slug>solid-prensipleri</slug>
+  <tags>
+    <tag>solid</tag>
+    <tag>principles</tag>
+    <tag>oop</tag>
+    <tag>s.o.l.i.d</tag>
+    <tag>SoftwareDesign</tag>
+    <tag>SystemArchitecture</tag>
+    <tag>object oriented</tag>
+  </tags>
+  <comments>
+    <comment id="c9cf2900-5ef8-4202-aebd-ffd9006c13e5" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="True">
+      <date>2016-05-06 09:08:50</date>
+      <author>Caner Tosuner</author>
+      <email>trackback</email>
+      <country />
+      <ip>94.102.8.48</ip>
+      <website>http://canertosuner.com/post/SOLID-prensipleri-Single-Responsibility</website>
+      <content>SOLID prensipleri - Single Responsibility 
+
+SOLID prensipleri - Single Responsibility </content>
+    </comment>
+    <comment id="62ba1b8d-c929-491e-98cb-c0966129944b" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-12-24 20:36:23</date>
+      <author>Coxels</author>
+      <email>cox@cox.cox</email>
+      <country />
+      <ip>212.252.81.90</ip>
+      <avatar />
+      <content>Kısa ve net bir şekilde anlatılmış. Derinlemesine araştırmadan önce net olarak bilgilendirilme yapılmış. Elinize sağlık</content>
+    </comment>
+    <comment id="3275ac0c-d98e-4b76-90db-1d8f8cac5ddf" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-08-03 17:32:58</date>
+      <author>Caner Tosuner</author>
+      <email>trackback</email>
+      <country />
+      <ip>94.73.147.115</ip>
+      <website>http://canertosuner.com/post/SOLID-prensipleri-Single-Responsibility</website>
+      <moderatedby>Rule:white list</moderatedby>
+      <content>Single Responsibility Principle
+
+Single Responsibility Principle</content>
+    </comment>
+    <comment id="3a073bfe-660b-4d8e-9d67-be54a2271bf6" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-03-11 06:55:32</date>
+      <author>Oguz</author>
+      <email>berkayyerdelen@gmail.com</email>
+      <country />
+      <ip>10.230.100.85</ip>
+      <avatar />
+      <content>anlaşılan arşivi baştan sona okuyacağım ))</content>
+    </comment>
+    <comment id="79d3f585-d97a-401b-90c0-552db1e7a934" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-07-12 10:07:03</date>
+      <author>Ahmet Gençözlü</author>
+      <email>gencozlu.ahmet@gmail.com</email>
+      <country />
+      <ip>176.30.224.247</ip>
+      <avatar />
+      <content>Hocam kısa öz ve net anlatmışsın eline sağlık</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+  </categories>
+  <notifications>
+    <email>gencozlu.ahmet@gmail.com</email>
+  </notifications>
+</post>

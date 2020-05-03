@@ -1,0 +1,463 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>C# 6.0 ile Gelen Yenilikler</title>
+  <description>Microsoft C# 6.0 'ı daha önce release ettiği sürümlere istinaden çok büyük major feature'lar ile kullanıma sunmadı desek çokta yanlış olmaz herhalde. Ancak 6.0 ile major feature'ların dışında geliştirici için</description>
+  <content>&lt;p&gt;Microsoft C# 6.0 'ı daha &amp;ouml;nce release ettiği s&amp;uuml;r&amp;uuml;mlere istinaden &amp;ccedil;ok b&amp;uuml;y&amp;uuml;k major feature'lar ile kullanıma sunmadı desek &amp;ccedil;okta yanlış olmaz herhalde. Ancak 6.0 ile major feature'ların dışında geliştirici i&amp;ccedil;in development yapmasını &amp;ccedil;ok daha kolaylaştıracak diyebileceğimiz bir takım &amp;ouml;nemli değişiklikler sundu. Daha &amp;ouml;ncesinde aynı işlemleri yapabilmek i&amp;ccedil;in satırlarca kod yazdığımız işlemler artık birka&amp;ccedil; satırda yapılabilecek duruma gelmiş.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;6.o ile gelen feature listesi aşağıda ki gibidir.&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://canertosuner.com/MyImage_Folder/Csharp6_features.png" alt="" width="767" height="575" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;&lt;strong&gt;1) Auto-Property Initializer&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;Daha &amp;ouml;nceki C# s&amp;uuml;r&amp;uuml;mlerinde field'lar i&amp;ccedil;in kullanılabilir olan initializer artık auto-property'ler i&amp;ccedil;in de kullanılabilecek.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;&amp;Ouml;ncesinde&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Customer cust = new Customer();
+            Console.WriteLine(cust.customerID);
+            Console.ReadLine();
+        }
+    }
+
+    public class Customer
+    {
+        public Customer()
+        {
+            customerID = Guid.NewGuid();
+        }
+        public Guid customerID { get; set; }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&amp;nbsp;&lt;strong&gt;C# 6.0 ile&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+using static System.Console;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Customer cust = new Customer();
+            WriteLine(cust.customerID);
+            ReadLine();
+        }
+    }
+
+    public class Customer
+    {
+        public Guid customerID { get; set; } = Guid.NewGuid();
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;&lt;strong&gt;2) Using Static&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;Daha &amp;ouml;nceleri projede ilgili class'ta herhangi bir yerde static sınıfları kullanmak istediğimizde sınıfın adıyla birlikte o sınıfın fonksiyonlarını &amp;ccedil;ağıra bilmekteydik.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;&amp;Ouml;ncesinde&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;class Program
+{
+    static void Main()
+    {
+        Console.WriteLine(Math.Sqrt(5*2 + 4*3)); 
+        Console.WriteLine(System.DayOfWeek.Friday - System.DayOfWeek.Monday); 
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Artık C# 6.0 ile birlikte bu statik sınıfları using ile tanımlayıp sonrasında o sınıfa ait metotları kullanabileceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;C# 6.0 ile&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using static System.Console;
+using static System.Math;
+using static System.DayOfWeek;
+class Program
+{
+    static void Main()
+    {
+        WriteLine(Sqrt(5*2 + 4*3)); 
+        WriteLine(Friday - Monday); 
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;3)&amp;nbsp;&lt;strong&gt;Expression-bodied methods&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;Lambda expresiion C# 3.5 ile gelen en b&amp;uuml;y&amp;uuml;k değişiklikti ve lambda sayesinde uzuuunnn mu uzun delegate kodları yazmaktansa o satırlara karşılık gelen lambda tanımlamalarını yazabilmekteyiz. Eğer yazılan metod geriye tek satırlık bir işlem yapıp değeri return ediyorsa bu işlem lambda expression ile de yazılabilecektir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;&amp;Ouml;ncesinde&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;namespace CSharpSix
+{
+    class Program
+    {
+        private static double MultiplyNumbers(double num1, double num2) 
+        { 
+           return num1 * num2;
+        }
+
+        static void Main(string[] args)
+        {
+            double num1 = 3;
+            double num2 = 6;
+
+            Console.WriteLine(MultiplyNumbers(num1, num2));
+            Console.ReadLine();
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;C# 6.0 ile&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using static System.Console;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        private static double MultiplyNumbers(double num1, double num2) =&amp;gt; num1 * num2;
+
+        static void Main(string[] args)
+        {
+            double num1 = 3;
+            double num2 = 6;
+
+            WriteLine(MultiplyNumbers(num1, num2));
+            ReadLine();
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;4)&amp;nbsp;Null Conditional Operator&lt;/h2&gt;
+&lt;p&gt;Developerlar i&amp;ccedil;in ka&amp;ccedil;ınılmazdır ki bir objenin veya tanımlanmış olan bir değerin "null" mı değil mi diye s&amp;uuml;rekli kontrol etme durumunda kalmışızdır ve bu kontrol i&amp;ccedil;in genelde min 2 satır kod yazmak zorundayızdır. if(obj!=null) ... şeklinde. C# 6.0 ile birlikte null check yapma işlemleri biraz daha kolay hale getirilmiş.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;&amp;Ouml;ncesinde&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Person person = new Person();
+            if (person.Name == String.Empty)
+            {
+                person = null;
+            }
+
+            Console.WriteLine(person != null ? person.Name : "Field is null.");
+            Console.ReadLine();
+        }
+    }
+
+    public class Person
+    {
+        public string Name { get; set; }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;C# 6.0 ile&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+using static System.Console;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Person person = new Person();
+            if (person.Name == String.Empty)
+            {
+                person = null;
+            }
+
+            WriteLine(person?.Name ?? "Field is null.");
+
+            ReadLine();
+        }
+    }
+
+    public class Person
+    {
+        public string Name { get; set; } = "";
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;5)&amp;nbsp;String Interpolation&lt;/h2&gt;
+&lt;p&gt;String bir ifadeyi formatlayıp farklı şekilde bir string birleştirme işlemi vs yaparak g&amp;ouml;stermek itediğimizde string.format("{0} {1}","Caner", "Tosuner"); vs şeklinde tanımlıyorduk. 6.0 il birlikte bu formatları ve ifadeleri yapmak biraz daha kısa hale getirilmiş diyebiliriz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;&amp;Ouml;ncesinde&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string firstName = "Caner";
+            string lastName = "Tosuner";
+
+            Console.WriteLine("Name : " + firstName + " " + lastName);
+            Console.WriteLine("Name : {0} {1}", firstName, lastName);
+
+            Console.ReadLine();
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;C# 6.0 ile&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using static System.Console;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string firstName = "Caner";
+            string lastName = "Tosuner";
+
+            WriteLine($"{firstName} {lastName} is my name!");
+
+            ReadLine();
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Bu yazım şekliyle birlikte string format yazımının karmaşasından da kurtulmuş oluyoruz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;6)&amp;nbsp;Exception Filters&lt;/h2&gt;
+&lt;p&gt;try i&amp;ccedil;erisinde bir exception alınıp carch'e d&amp;uuml;şt&amp;uuml;ğ&amp;uuml;nde exceptiona neden olan şeyle ilgili bir spesification yapmak istediğimizde genelde catch bloğu i&amp;ccedil;erisinde if(ex.Message.Equals("bişey bişey")) şeklidne yazarız. 6.0 ile catch bloğu yanına bu if condition'ları yazabilir hale geliyoruz ve her condition'nın kendi catch'i oluyor.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;&amp;Ouml;ncesinde&lt;/strong&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            try
+            {
+                throw new Exception(404);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Equals("500"))
+                    Console.Write("Bad Request");
+                else if (ex.Message.Equals("401"))
+                    Console.Write("Unauthorized");
+                else if (ex.Message.Equals("402"))
+                    Console.Write("Payment Required");
+                else if (ex.Message.Equals("403"))
+                    Console.Write("Forbidden");
+                else if (ex.Message.Equals("404"))
+                    Console.Write("Not Found");
+            }
+           Console.ReadLine();
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;C# 6.0 ile&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+using static System.Console;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            try
+            {
+               throw new Exception(404);
+            }
+            catch (Exception ex) if (ex.Message.Equals("400"))
+            {
+                Write("Bad Request");
+            }
+            catch (Exception ex) if (ex.Message.Equals("401"))
+            {
+                Write("Unauthorized");
+            }
+            catch (Exception ex) if  (ex.Message.Equals("402"))
+            {
+                Write("Payment Required");
+            }
+            catch (Exception ex) if (ex.Message.Equals("403"))
+            {
+                Write("Forbidden");
+            }
+            catch (Exception ex) if (ex.Message.Equals("404"))
+            {
+                Write("Not Found");
+            }
+            ReadLine();
+        }
+    }
+}&lt;/pre&gt;
+&lt;h2&gt;&amp;nbsp;&lt;/h2&gt;
+&lt;h2&gt;7)&amp;nbsp;Await in a Catch and Finally Block&lt;/h2&gt;
+&lt;p&gt;C# 6. ile birlikte artık Catch ve Finally blockları arasında await keyword'&amp;uuml;n&amp;uuml; kullanıp asynchronous &amp;ccedil;alışan kodlar yazabiliyoruz. Daha &amp;ouml;nce bunu yapabilmemiz m&amp;uuml;mk&amp;uuml;n değildi ve ihtiya&amp;ccedil; halinde (logging etc.) &amp;ccedil;eşitli kontroller yapıp catch bloğundan &amp;ccedil;ıktıktan sonra async yapmak istediğimiz işlemi yapardık.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;&amp;Ouml;ncesinde&lt;/strong&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            bool isException=false;
+            try
+            {
+                throw new notimplementedexception();
+            }
+            catch (Exception exception)
+            {
+                isException = true;
+            }
+             if(isException)
+                 var result = await LogManager.Log("Hata oluştu !" + exception.Message);
+            Console.ReadLine();
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;C# 6.0 ile&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using static System.Console;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            try
+            {
+                throw new notimplementedexception();
+            }
+            catch (Exception exception)
+            {
+                var result = await LogManager.Log("Catch =&amp;gt; Hata oluştu !" + exception.Message);
+            }
+            finally
+            {
+                var result = await LogManager.Log("Finally =&amp;gt; Hata oluştu !" + exception.Message);
+            }            
+           ReadLine();
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;8)&amp;nbsp;Index initializers&lt;/h2&gt;
+&lt;p&gt;&amp;Ouml;nceden bir List'e veya Dictionary'ye belirli bir index'ine item atamak istediğimizde &amp;ouml;nce initialize eder sonra nokta operat&amp;ouml;r&amp;uuml;yle değerleri atardır. 6.0 ile birlikte initialize sırasında bu bu atam işlemlerini yapabilmekteyiz.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;&amp;Ouml;ncesinde&lt;/strong&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+           var dic = new Dictionary&amp;lt;int, string&amp;gt;
+                        {
+                            { 1, "one" },
+                            { 4, "four" },
+                            { 10, "ten" }
+                        };
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;C# 6.0 ile&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+           var dic = new Dictionary&amp;lt;int, string&amp;gt;
+                          {
+                             [1] = "one",
+                             [4] = "four",
+                             [10] = "ten"
+                          };
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda 2 syntax'a baktığımızda ne fark var ki ikisi de aynı diyebiliriz ancak ş&amp;ouml;yle bir ayrım var. 6.0'dan &amp;ouml;nceki yazımda&lt;strong&gt; .Add()&lt;/strong&gt; metodu kullanılarak initialize işlemi yapılıyor. Yeni syntax'da ise direkt olarak index assignments kullanılmakta ve bu da performans olarak daha verimli bir hale gelmekte.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h2&gt;9) nameof Operat&amp;ouml;r&amp;uuml;&lt;/h2&gt;
+&lt;p&gt;Tanımlamış olduğumuz değişkenin veya objenin string olarak adına ulaşmak istediğimizde 6.0 ile birlikte gelen nameof operat&amp;ouml;r&amp;uuml;n&amp;uuml; kullanabiliriz.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;&amp;Ouml;ncesinde&lt;/strong&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            DoSomething("Selam");
+            Console.ReadLine();
+        }
+
+        public static void DoSomething(string name)
+        {
+            if (name == null) throw new Exception("Name is null");
+        }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;C# 6.0 ile&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;using System;
+using static System.Console;
+
+namespace CSharpSix
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            DoSomething("Selam");
+            ReadLine();
+        }
+
+        public static void DoSomething(string newName)
+        {
+            if (newName == null) throw new Exception(nameof(newName) + " is null");
+        }
+    }
+}&lt;/pre&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-04-21 22:11:00</pubDate>
+  <lastModified>2020-01-20 08:22:28</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>C-6-ile-Gelen-Yenilikler</slug>
+  <tags>
+    <tag>C#6</tag>
+    <tag>C#</tag>
+    <tag>6.0</tag>
+    <tag>yenilikler</tag>
+  </tags>
+  <comments>
+    <comment id="67514bfd-592b-4dca-8be8-658ca8920abc" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2018-08-03 17:32:57</date>
+      <author>Caner Tosuner</author>
+      <email>trackback</email>
+      <country />
+      <ip>94.73.147.115</ip>
+      <website>http://canertosuner.com/post/C-7-Yenilikleri</website>
+      <content>C# 7.0 Yenilikleri
+
+C# 7.0 Yenilikleri</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

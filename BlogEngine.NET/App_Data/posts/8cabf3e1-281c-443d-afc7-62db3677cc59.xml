@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>NInject Nedir ? NInject Kullanarak Web Api İçin Dependency İnjection</title>
+  <description>Daha önceki IoC yazılarımızda Castle Windsor dan bahsedip örnekler üzerinden kütüphaneyi incelemiştik. Bu yazımızda ise çokça yaygın olarak kullanılan IoC container'lar dan biri olan NInject'i Web APi üzerinde inceleyeceğiz.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki &lt;a href="/search?q=ioc"&gt;IoC &lt;/a&gt;yazılarımızda Castle Windsor dan bahsedip &amp;ouml;rnekler &amp;uuml;zerinden k&amp;uuml;t&amp;uuml;phaneyi incelemiştik. Bu yazımızda ise &amp;ccedil;ok&amp;ccedil;a yaygın olarak kullanılan IoC container'lar dan biri olan NInject'i Web APi &amp;uuml;zerinde inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;Ninject olduk&amp;ccedil;a pop&amp;uuml;ler IoC container'lar dan biri olup bağımlılıkları&amp;nbsp;enjekte etmede kullanılan open source bir k&amp;uuml;t&amp;uuml;phanedir.&amp;nbsp;Dependency injection bizlere&amp;nbsp;loosely coupled dediğimiz birbirlerine gevşek bağlı ve daha kolay test edilebilir&amp;nbsp;geliştirmeler yapmamızı sağlayan bir design pattern dir. IoC ise belli &amp;ouml;zelliklere sahip ve birbirlerine bağımlı nesnelerin işlevlerini ger&amp;ccedil;ekleştirmek i&amp;ccedil;in ihtiyacı olan instance'ları kendilerinin değilde bir IoC container tarafından y&amp;ouml;netilmesini s&amp;ouml;yler.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda ise Web Api &amp;uuml;zerinde Ninject implementasyonu&amp;nbsp;nasıl yapılır bunu inceliyor olacağız.&lt;/p&gt;
+&lt;p&gt;İlk olarak&amp;nbsp;VS'da bir tane Web Api projesi oluşturalım ve proje referanslarına nuget &amp;uuml;zerinden &lt;strong&gt;Ninject.Web.WebApi.WebHost&lt;/strong&gt;'u aşağıdaki gibi bulup install edelim.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/ninjeect_vs_kurulum.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Kurulum bittikten sonra projede bulunan &lt;strong&gt;App_Start&lt;/strong&gt;&amp;nbsp;klas&amp;ouml;r&amp;uuml; i&amp;ccedil;erisinde&amp;nbsp;&lt;strong&gt;NinjectWebCommon&lt;/strong&gt; adında otomatik olarak bir class oluşturulduğunu g&amp;ouml;receksiniz. Bu class i&amp;ccedil;erisinde ilgili install ve register işlemlerini yapacağız. Class i&amp;ccedil;erisinde baktığınızda oto-generated olan bir &amp;ccedil;ok kod bloğu var ancak biz şimdilik sadece&amp;nbsp;&amp;nbsp; &lt;strong&gt;RegisterServices()&amp;nbsp;&lt;/strong&gt;metodu ile haşır neşir olacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        /// &amp;lt;summary&amp;gt;
+        /// Load your modules or register your services here!
+        /// &amp;lt;/summary&amp;gt;
+        /// &amp;lt;param name="kernel"&amp;gt;The kernel.&amp;lt;/param&amp;gt;
+        private static void RegisterServices(IKernel kernel)
+        {
+
+        }  &lt;/pre&gt;
+&lt;p&gt;Register etmek istediğimiz bağımlılıkları bu metot i&amp;ccedil;erisine tanımlayacağız.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;ncelikle &lt;strong&gt;UserController&lt;/strong&gt; adında &amp;ouml;rnek bir controller oluşturalım ve bu controller i&amp;ccedil;erisinde tanımlı IUserService intercase'ini contructor injection y&amp;ouml;ntemi ile inject edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class UserController : ApiController
+    {
+        private readonly IUserService _userService;
+        public UserController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
+        [HttpGet]
+        public HttpResponseMessage GetUserFullNames()
+        {
+            var response = _userService.GetUserFullNames();
+
+            return Request.CreateResponse(response);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Controller i&amp;ccedil;erisinde kullandığımız IUserService interface'i ve onun&amp;nbsp;implemantasyonunu aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IUserService
+    {
+        List&amp;lt;string&amp;gt; GetUserFullNames();
+    }
+
+    public class UserService : IUserService
+    {
+        public List&amp;lt;string&amp;gt; GetUserFullNames()
+        {
+            return new List&amp;lt;string&amp;gt;
+                                  { "Olcay Şahan",
+                                    "Anderson Talisca",
+                                    "Oğuzhan &amp;Ouml;zyakup",
+                                    "Ricardo Quaresma",
+                                    "Cenk Tosun" };
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;UserController i&amp;ccedil;erisindeki&amp;nbsp;GetUserFullNames metodu HttpGet isteği alarak geriye UserService i&amp;ccedil;erisinde bulunan&amp;nbsp;GetUserFullNames metodunun return ettiği List of string'i d&amp;ouml;necektir.&lt;/p&gt;
+&lt;p&gt;Şimdi sırada bağımlılıkları inject etmek var. Yukarıda&amp;nbsp;NinjectWebCommon class'ı i&amp;ccedil;erisinde bulunan&amp;nbsp;RegisterServices metodunda IUserService'i&amp;nbsp;register edeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        private static void RegisterServices(IKernel kernel)
+        {
+            kernel.Bind&amp;lt;IUserService&amp;gt;().To&amp;lt;UserService&amp;gt;();
+        }&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre implementasyon olduk&amp;ccedil;a basit ve projemiz hazır durumda. UserController i&amp;ccedil;erisindeki metoda Postman kullanarak aşağıdaki gibi request atıp&amp;nbsp;sonucu g&amp;ouml;relim.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/ninjeect_vs_postman_sample.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre Ninject controller'ın&amp;nbsp;constructor'ında IUserService'i i&amp;ccedil;in bize UserService'ini resolve etti ve herhangi bir yeni instance&amp;nbsp;oluşturmadan kolayca controller'ı kullanabildik.&lt;/p&gt;
+&lt;p&gt;Ninject implementasyonu diğer container'lara g&amp;ouml;re daha basittir. Sonraki yazılarımızda Ninject ile ilgili &amp;ouml;rneklerimize devam edeceğiz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-04-29 21:28:00</pubDate>
+  <lastModified>2020-01-20 08:22:18</lastModified>
+  <raters>2</raters>
+  <rating>3</rating>
+  <slug>ninject-nedir-ninject-kullanarak-web-api-ici-dependency-injection</slug>
+  <tags>
+    <tag>Ninject nedir</tag>
+    <tag>IoC nedir</tag>
+    <tag>Ninject Web Api</tag>
+    <tag>Ninject IoC</tag>
+    <tag>dependency injection</tag>
+  </tags>
+  <comments>
+    <comment id="8fa40445-50cd-4a6f-9410-ffee3dcedcad" parentid="00000000-0000-0000-0000-000000000000" approved="False" spam="False" deleted="True">
+      <date>2019-03-19 19:15:01</date>
+      <author>r</author>
+      <email>r</email>
+      <country />
+      <ip>78.190.97.252</ip>
+      <avatar />
+      <content>r</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+    <category>01a365a0-dea4-4805-8375-c19bfa24f287</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

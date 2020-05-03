@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Kısaca Agile Nedir Neler Gerektirir</title>
+  <description>Agile aşağı Agile yukarı... Herkes bir agile'dır gidiyor ama malesef çoğu kişi için agile bir kaç cümle veya kelimeden ibaret.</description>
+  <content>&lt;p&gt;Agile aşağı Agile yukarı... Herkes bir agile'dır gidiyor ama malesef &amp;ccedil;oğu kişi i&amp;ccedil;in agile bir ka&amp;ccedil; c&amp;uuml;mle veya kelimeden ibaret.&lt;/p&gt;
+&lt;p&gt;Bir &amp;ccedil;ok Y&amp;ouml;netici &amp;amp; Patron i&amp;ccedil;in &amp;ccedil;abucak at koşturur gibi işi yapıp bitirme,&lt;/p&gt;
+&lt;p&gt;Bir &amp;ccedil;ok &amp;ccedil;alışan i&amp;ccedil;in ise agile jira'da bulunan bug'ları &amp;ccedil;&amp;ouml;zmekten ve scrum yapmaktan ibaret..&lt;/p&gt;
+&lt;p&gt;Malesef T&amp;uuml;rkiye'de biraz&amp;nbsp;gerilerde ancak g&amp;uuml;zel haberlerde gelmiyor değil, &amp;ouml;yle ki bazı kurumsal bankalar dahi yazılım departmanı olmadığı halde&amp;nbsp;kendi i&amp;ccedil; birimlerinde agile'ı test etmeye başladığı s&amp;ouml;yleniyor ve T&amp;uuml;rkiye'de bulunan &amp;ccedil;ok b&amp;uuml;y&amp;uuml;k bir bankanın da b&amp;uuml;t&amp;uuml;n birimleriyle agile'a %100 ge&amp;ccedil;tiğiyle ilgili ge&amp;ccedil;enlerde&amp;nbsp;bir haber okumuştum. Tabi bunlar agile doğru anlaşıldığı zaman g&amp;uuml;zel haberler oluyor.&lt;/p&gt;
+&lt;p&gt;Sekt&amp;ouml;rde bulunan yazılım firmalarında ki bir &amp;ccedil;ok development takımı kendi i&amp;ccedil;lerinde agile yaptıklarını s&amp;ouml;yl&amp;uuml;yorlar&amp;nbsp;ancak işin aslını konuşmaya &amp;ccedil;alıştığınızda anlıyorsunuz ki sadece agile'a ait bir ka&amp;ccedil; işi yaptıkları ortaya &amp;ccedil;ıkıyor.&lt;/p&gt;
+&lt;p&gt;Scrum i&amp;ccedil;in ise aslında yapılan şey iş&amp;nbsp;yoğunluğa g&amp;ouml;re bazı sabahlar proje m&amp;uuml;d&amp;uuml;r&amp;uuml;n&amp;uuml;n ekibi toplayıp sadece kendisinin&amp;nbsp;konuşması...&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Peki&amp;nbsp;Agile olmak neleri gerektirir ?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Daha &amp;ouml;nce okuduğum ve bir &amp;ccedil;ok kişininde referans alarak uygulamaya &amp;ccedil;alıştığı "What Do We Know About Scientific Software Development&amp;rsquo;s Agile Practices ?"&amp;nbsp;makalesinde belirtilen &lt;strong&gt;35 Agile Best Practice&lt;/strong&gt;'i baz alarak takım olarak ne yapıp ne yapmıyorsunuz, ne kadar agile'sınız yorumlayabilirsiniz.&amp;nbsp;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&amp;Ouml;nceliklendirmeler projede en yetkili kişi olan&amp;nbsp;&lt;strong&gt;product owner&lt;/strong&gt; tarafından (ekibin fikrini alarak) yapılmalı,&lt;/li&gt;
+&lt;li&gt;Development s&amp;uuml;recindeki sorunlar&lt;strong&gt; scrum master&lt;/strong&gt; tarafından scrum'larda &amp;ccedil;&amp;ouml;z&amp;uuml;m aranmalı,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Spring backlog&lt;/strong&gt; oluşturmak i&amp;ccedil;in Spring planlama toplantıları yapılmalı,&lt;/li&gt;
+&lt;li&gt;Efor verirken &lt;strong&gt;Planning Poker&lt;/strong&gt; oyunu gibi eğlenceli bir se&amp;ccedil;iminiz olmalı,&lt;/li&gt;
+&lt;li&gt;Kısa ve Orta vadede koşan &lt;strong&gt;sprint&lt;/strong&gt;'leriniz olmalı,&lt;/li&gt;
+&lt;li&gt;Product owner ve ekip arasında s&amp;uuml;rekli bir &lt;strong&gt;communication&lt;/strong&gt; olmalı,&lt;/li&gt;
+&lt;li&gt;Mevcut konuları konuşmak i&amp;ccedil;in kısa &lt;strong&gt;daily&amp;nbsp;meeting&lt;/strong&gt;'ler d&amp;uuml;zenlenmeli,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Self-organization&lt;/strong&gt; yani kendiliğinden organize olabilen bir ekip uluşturulabilmeli,&lt;/li&gt;
+&lt;li&gt;Grafikler ile sprint&amp;nbsp;s&amp;uuml;reci g&amp;ouml;zlemlenmeli,&lt;/li&gt;
+&lt;li&gt;Sprint sonlarında &lt;strong&gt;review&amp;nbsp;&lt;/strong&gt;toplantıları d&amp;uuml;zenlenmeli,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Retrospective&lt;/strong&gt; yaparak ge&amp;ccedil;miş sprintle ilgili değerlendirmelerde bulunulmalı,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Short &amp;amp; Fast product release&lt;/strong&gt;'ler &amp;ccedil;ıkılmalı,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;User storie&lt;/strong&gt;'ler yazılmalı,&lt;/li&gt;
+&lt;li&gt;Takıma dedike bir şekilde &amp;ccedil;alışabileceği &lt;strong&gt;a&amp;ccedil;ık &amp;ccedil;alışma alanları&lt;/strong&gt;&amp;nbsp;yaratılmalı,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;S&amp;uuml;rd&amp;uuml;r&amp;uuml;lebilir&lt;/strong&gt; bir &amp;ccedil;alışma ortamı sunulmalı,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Proje ivmesi&lt;/strong&gt; &amp;ouml;l&amp;ccedil;&amp;uuml;lebilmeli,&lt;/li&gt;
+&lt;li&gt;Ekipte bulunanlar her konuda fikrini s&amp;ouml;yleyebilmeli,&lt;/li&gt;
+&lt;li&gt;M&amp;uuml;şteriye ihtiya&amp;ccedil; duyulduğunda hemen &lt;strong&gt;ulaşılabiliyor&lt;/strong&gt; olmalı,&lt;/li&gt;
+&lt;li&gt;Ekip olarak &lt;strong&gt;kod standartları&lt;/strong&gt; belirlenmeli,&lt;/li&gt;
+&lt;li&gt;İlk &amp;ouml;nce&amp;nbsp;&lt;strong&gt;unit-test&lt;/strong&gt;'ler yazılmalı,&lt;/li&gt;
+&lt;li&gt;Prod'a alınan kod'un bir&amp;nbsp;&lt;strong&gt;pair-programming&lt;/strong&gt; &amp;uuml;r&amp;uuml;n&amp;uuml; olduğu unutulmamalı,&lt;/li&gt;
+&lt;li&gt;Geliştirmeler &lt;strong&gt;branch&lt;/strong&gt;'lere ayrılarak yapılmalı ve test sonu&amp;ccedil;larına g&amp;ouml;re &lt;strong&gt;merge&lt;/strong&gt; işlemi yapılmalı,&lt;/li&gt;
+&lt;li&gt;S&amp;uuml;rekli olarak yeni şeyler &lt;strong&gt;entegre&lt;/strong&gt; edilebilecek altyapıya sahip bir altyapı,&lt;/li&gt;
+&lt;li&gt;Repository y&amp;ouml;netimini iyi yapıp release g&amp;uuml;n&amp;uuml; geldiğinde sorunsuz bir şekilde release &amp;ccedil;ıkılabilmeli,&lt;/li&gt;
+&lt;li&gt;Collective bir bi&amp;ccedil;imde developer'lar atayın bir sorumluluğu tek bir kişiye y&amp;uuml;klemekten ka&amp;ccedil;ının,&lt;/li&gt;
+&lt;li&gt;Basit&amp;nbsp;bir tasarıma desenine sahip olmalı,&lt;/li&gt;
+&lt;li&gt;Bir sistem metforu se&amp;ccedil;ilmeli,&lt;/li&gt;
+&lt;li&gt;Design&amp;amp;Development i&amp;ccedil;in &lt;strong&gt;Class-responsibility-collaboration&lt;/strong&gt; kartlarını kullanmaya &amp;ccedil;alışın,&lt;/li&gt;
+&lt;li&gt;Riski azaltmak i&amp;ccedil;in &amp;ccedil;&amp;ouml;z&amp;uuml;mler &amp;uuml;retilmeli,&lt;/li&gt;
+&lt;li&gt;İhtiya&amp;ccedil; duyulmayan hi&amp;ccedil; bir fonksiyonalite &amp;ouml;nceden entegre edilmemeli,&lt;/li&gt;
+&lt;li&gt;Ne zaman-Nerde olduğuna bakılmaksızın &lt;strong&gt;refactor&lt;/strong&gt; edilebilmeli,&lt;/li&gt;
+&lt;li&gt;B&amp;uuml;t&amp;uuml;n kod'un &lt;strong&gt;unit-test&lt;/strong&gt;'i yazılmış olmalı,&lt;/li&gt;
+&lt;li&gt;Proje&amp;nbsp;prod'a alınmadan &amp;ouml;nce b&amp;uuml;t&amp;uuml;n &lt;strong&gt;unit-test&lt;/strong&gt;'lerden ge&amp;ccedil;meli,&lt;/li&gt;
+&lt;li&gt;Yeni bir bug bulunduğunda testler anında oluşturulmalı,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Acceptence-test&lt;/strong&gt;'ler sıklıkla&amp;nbsp;uygulanmalı ve skor&amp;nbsp;yayınlanmalı.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Agile hakkında s&amp;ouml;ylenecek oldukca fazla şey bulunuyor ancak kısa bir &amp;ouml;zetle yukarıda ki rule'ları sıralamış olduk. İyi bir agile-team oluştururken bu kurallardan faydalanmak &amp;ccedil;&amp;ouml;ğunlukla iyi olacaktır ama belirttiğim gibi&amp;nbsp;liste genişletilebilir de.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-10-30 22:08:00</pubDate>
+  <lastModified>2020-01-20 08:22:21</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>kisaca-agile-nedir-neler-gerektirir</slug>
+  <tags>
+    <tag>agile</tag>
+    <tag>agile development</tag>
+    <tag>best practices</tag>
+    <tag>agile nedir</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

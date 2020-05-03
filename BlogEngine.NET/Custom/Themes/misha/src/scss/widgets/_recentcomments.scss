@@ -1,0 +1,14 @@
+﻿.recentcomments {
+    li {
+        border-bottom: 1px dotted #ccc;
+        padding-bottom: .5rem;
+        margin-bottom: .5rem;
+
+        a {
+        }
+
+        &:last-child {
+            display: none;
+        }
+    }
+}

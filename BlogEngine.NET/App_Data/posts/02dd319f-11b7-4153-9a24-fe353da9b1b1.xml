@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Uygulaması Docker'da Nasıl Deploy Edilir - Dockerize an Asp.Net Core Application</title>
+  <description>Docker container'lar virtual machine'lere göre daha lightweight ve portable alternatifler sağlamak için kullanılan yapılardır. Sanal makinelerin aksine container'lar uygulama bazlı olup istenilen teknolojiye göre gerekli bağımlılıkların bulunduğu o uygulamaya özel environment'lar ayağa kaldırabilirler.</description>
+  <content>&lt;p&gt;Docker container'lar virtual machine'lere&amp;nbsp;g&amp;ouml;re daha lightweight ve portable alternatifler sağlamak i&amp;ccedil;in kullanılan yapılardır. Sanal makinelerin aksine container'lar uygulama bazlı olup istenilen teknolojiye g&amp;ouml;re gerekli bağımlılıkların bulunduğu o uygulamaya &amp;ouml;zel environment'lar ayağa kaldırabilirler.&lt;/p&gt;
+&lt;p&gt;Docker container, uygulamanızı ihtiyaca g&amp;ouml;re farklı makinelerde horizontal bir şekilde &amp;ccedil;oğaltmanızı olduk&amp;ccedil;a kolaylaştırır.&amp;nbsp;&amp;Ouml;rneğin, Linux&amp;rsquo;ta geliştirmeyi&amp;nbsp;tamamladık ve&amp;nbsp;mac makinama gittim ve uygulamanın ordada &amp;ccedil;alışmasını istiyoruz repoyu klonladım ve &amp;ldquo;docker-compose-up&amp;rdquo; yapmam o makinada uygulamayı ve bağımlılıklarını kurup tekrar browserdan kolayca erişebilmeme olanak sağladı, bu olduk&amp;ccedil;a ciddi bir kolaylık.&lt;/p&gt;
+&lt;p&gt;Container'lar aynı zamanda izolasyonu sağlarlar. Container'larda kullanılan bağımlılıklar ve ayarlar, makinenizde &amp;ccedil;alışan diğer uygulamaları etkilemez. Bu, dependecny-conflict'lerle karşılaşmamıza engel olur.&lt;/p&gt;
+&lt;p&gt;Deployment s&amp;uuml;re&amp;ccedil;leri docker ile birlikte olduk&amp;ccedil;a hızlı bir hale gelir. Oluşturulan image'ler bir merkezi docker-registry'e atılır ve ihtiya&amp;ccedil; duyulduğunda tekrar tekrar rebuild işlemi olmadan registry'den pull edilerek kullanılabilir.&lt;/p&gt;
+&lt;p&gt;Docker, uygulamaları bir container i&amp;ccedil;erisinde build, deploy ve manage etmeye yarayan open-source olarak geliştirilen bir toolkit dir. Container; hem uygulama kodunu hemde gerekli bağımlılıkları i&amp;ccedil;eren bir yazılım birimi olarak tanımlanabilir ve her bir container birbirinden izole bir şekilde aynı operating system'ı paylaşarak host edilirler. Tek şart bu host operating system Windows yada Linux olsun Docker runtime kurulu olması gerekmektedir.&lt;/p&gt;
+&lt;p&gt;Bu yazıda en basit haliyle bir asp.net core uygulaması docker kullanarak nasıl host edilir inceleyeceğiz.&lt;/p&gt;
+&lt;h3&gt;1-&amp;nbsp;Installing Docker&lt;/h3&gt;
+&lt;p&gt;İlgili işletim sisteminize g&amp;ouml;re makinamıza docker kurmamız gerekmekte. Bunun i&amp;ccedil;i aşağıdaki adreslerden faydalanabilirsiniz.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/docker-for-mac/install/"&gt;Docker on Mac&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/docker-for-windows/install/"&gt;Docker on Windows&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/engine/getstarted/linux_install_help/"&gt;Docker on Linux&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;İlgili instruction'ları takip edip kurulum işlemini tamamladıktan sonra docker işletim sisteminiz &amp;uuml;zerinde &amp;ccedil;alışmaya başlayacaktır. Ben windows &amp;uuml;zerinde &amp;ccedil;alıştığımdan docker for windows s&amp;uuml;r&amp;uuml;m&amp;uuml;n&amp;uuml; kurdum. Version kontrol&amp;uuml; i&amp;ccedil;in cmd'de docker --version komutunu &amp;ccedil;alıştırdığınızda aşağıdaki gibi kurulu olan versiyon bilgisini g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebilirsiniz.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/dckr-vrssino_v1.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;h3&gt;2-&amp;nbsp;Creating Asp.Net Core App.&lt;/h3&gt;
+&lt;p&gt;.Net Core uygulaması oluşturmanın 2 farklı yolu bulunmakta;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;İlk olarak&lt;/strong&gt;; vs'da HelloDocker adında bir Asp.Net Core web api uygulaması oluşturalım ve enable-docker support &amp;ouml;zelliğini aktif edelim.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2018/dckr-crt_prj_1.PNG" alt="" width="614" height="282" /&gt;&lt;img src="/image.axd?picture=/2018/dckr-crt_prj_2.PNG" alt="" width="393" height="312" /&gt;&lt;/p&gt;
+&lt;p&gt;Projeyi oluşturduğumuzda enable-docker support &amp;ouml;zelliğini aktif ettiğimizden solution'da farklı olarak, d&lt;strong&gt;ockerfile&lt;/strong&gt; ve &lt;strong&gt;docker-compose&lt;/strong&gt; dosyaları karşımıza &amp;ccedil;ıkmakta.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/dckr-crt_prj_3.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Dockerfile&lt;/strong&gt;&lt;/span&gt;&amp;nbsp;kısaca, docker uygulamayı build ederken&amp;nbsp;neler yapılacağı ne gibi bağımlılıklar install edileceği gibi her bir image i&amp;ccedil;in oluşturulan configuration dosyalarıdır. Image oluşturulduktan sonra bu image'in bulunduğu container başlatılabilir.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Docker-compose.yml&lt;/strong&gt;&lt;/span&gt; ise; multi-container &amp;ccedil;alışan uygulamalar i&amp;ccedil;in gerekli tanımlamaların yapıldığı developing ve testing sırasında kullanılan bir command-line dosyasıdır.&lt;/p&gt;
+&lt;p&gt;Uygulamalarınıza docker support eklemek g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre&amp;nbsp;VS-2017 ile birlikte olduk&amp;ccedil;a basit bir hal almaktadır.&lt;/p&gt;
+&lt;p&gt;Uygulama oluşturmanın &lt;strong&gt;ikinci&lt;/strong&gt; yolu ise komut satırlarını kullanmak. Dilersek vs &amp;uuml;zerinden değilde aşağıdaki gibi&amp;nbsp;komut satırlarını kullanarak da projemizi oluşturabiliriz. İlk olarak netcore-docker adında bir folder yaratalım ve aşağıdaki komut satırlarını bu folder i&amp;ccedil;erisinde a&amp;ccedil;tığımız command-prompt'ta &amp;ccedil;alıştıralım.&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;mkdir HelloDocker
+cd HelloDocker
+
+dotnet new webapi
+dotnet restore&lt;/pre&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2019/netcore-docker_img1.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Komutları &amp;ccedil;alıştırdıktan sonra yukarıda belirttiğimiz klas&amp;ouml;r i&amp;ccedil;erisinde HelloDocker projemiz yaratılmış olacaktır. HelloDocker projesini run ettiğinizde default olarak localhost:5000 de &amp;ccedil;alışan bir uygulama olarak host edildiğini g&amp;ouml;receksiniz.&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;nbsp;dotnet run&lt;/pre&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2019/docker-smlpl_rnbt_rnu.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Default uygulama ayarlarında https redirection olduğundan browser'dan&amp;nbsp;&lt;a href="https://localhost:5001/api/Values"&gt;https://localhost:5001/api/Values&lt;/a&gt;&amp;nbsp;adresine gittiğinizde uygulamanın &amp;ccedil;alıştığını g&amp;ouml;rebilirsiniz.&lt;/p&gt;
+&lt;h3&gt;3- Creating an Image&lt;/h3&gt;
+&lt;p&gt;Sırada Dockerfile oluşturmak var. Proje dizinine Dockerfile adında bir dosya a&amp;ccedil;ıp image'i oluştururken kullanılacak komutları aşağıdaki gibi yazalım ve bu komutların ne işe yaradıklarına bir g&amp;ouml;z atalım.&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;FROM microsoft/dotnet:2.2-sdk AS build
+WORKDIR /app
+
+COPY *.csproj ./
+RUN dotnet restore
+
+COPY . ./
+RUN dotnet publish -c Release -o out
+
+FROM microsoft/dotnet:2.2-aspnetcore-runtime AS runtime
+
+WORKDIR /app
+
+COPY --from=build /app/out .
+
+ENTRYPOINT ["dotnet","HelloDocker.dll"]&lt;/pre&gt;
+&lt;p&gt;Dockerfile &amp;ouml;zetle 2 ana b&amp;ouml;l&amp;uuml;mden oluşur. Birincisi uygulamayı build etme ikincisi ise uygulamayı run etme b&amp;ouml;l&amp;uuml;mleridir. Dosya i&amp;ccedil;erisindeki komutların ne olduğuna bakacak olursak;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;FROM&lt;/strong&gt; hangi docker image'i kullanılacağını belirttiğimiz komut. Bu projemiz build etmek i&amp;ccedil;in dotnetcore 2.2 SDK image'ini kullanacağız.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;WORKDIR&lt;/strong&gt; image i&amp;ccedil;erisinde working directory olarak kullanacağımız yeri belirttiğimiz komut. Bu projemizde working directory olarak /app kullanacağız.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;COPY&lt;/strong&gt; proje dosyalarını local file system'dan image'e kopyalamak i&amp;ccedil;in kullanılan komuttur. Bizde projemizde ilk olarak csproj dosyasını kopyalayıp restore edeceğiz, sonra b&amp;uuml;t&amp;uuml;n bu oluşan dosyaları yeniden kopyalayıp dotnet publish komutu &amp;ccedil;alıştırarak uygulamamızı oluşturacağız.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ENTRYPOINT&amp;nbsp;&lt;/strong&gt;container ayağa kaldırılırken ilk olarak &amp;ccedil;alışacak olan komut ve parametreleri belirttiğimiz komuttur.&amp;nbsp;Container run edilirken dotnet komutuyla HelloDocker.dll'i execute edilecektir.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Image'i oluşturmak i&amp;ccedil;in ise aşağıdaki kod satırını run etmemiz yeterli.&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;docker build -t hellodocker .&lt;/pre&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2019/dockrrr_spntcor_img_rn.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Bu işlem internet hızınıza bağlı olarak biraz zaman alacaktır. İşlem sonunda image'i oluşturabilmesi i&amp;ccedil;in gerekli olan dependency'leri&amp;nbsp;download edip image'i yaratacaktır.&lt;/p&gt;
+&lt;p&gt;Download işlemi bittikten sonra docker image ls komutunu &amp;ccedil;alıştırdığınızda image'in listelendiğini g&amp;ouml;rebilirsiniz.&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;docker image ls&amp;nbsp;&lt;/pre&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2019/dckr_imgss_lss_img1.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;h3&gt;4- Deploying a Container&lt;/h3&gt;
+&lt;p&gt;Image'imizde hazır olduğuna g&amp;ouml;re son adım olarak bu image'i bir container i&amp;ccedil;erisinde host edip kullanmaya başlayalım. Bunun i&amp;ccedil;in kullanmamız gereken en basit şekli aşağıdaki kod satırını &amp;ccedil;alıştırmak.&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;docker run hellodocker:latest&lt;/pre&gt;
+&lt;pre id="97c3" class="graf graf--pre graf-after--p"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2019/dckrr_cntrr_run_img1.PNG" alt="" /&gt;&lt;/pre&gt;
+&lt;p&gt;Uygulamayı localhost:80 portunda host ettiğini ekranı yazdırdı. İlk olarak gidip Container oluştumu, oluştuysa &amp;ccedil;alışıyormu diye kontrol etmek i&amp;ccedil;in,&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;docker container ls&lt;/pre&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2019/dckkr_cntrr_img2_ps.PNG" alt="" /&gt;&lt;br /&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre container up ve &amp;ccedil;alışır durumda ancak container'a bir isim vermedik ve bu durumda docker kendisi random bir isim atadı. Bu aslında &amp;ouml;zellikle birden fazla image ile uğraşılan projelerde pekte tavsiye edilen bir durum değil ve browser'dan&amp;nbsp;&lt;a href="http://localhost/api/Values"&gt;http://localhost/api/Values&lt;/a&gt;&amp;nbsp;adresine gittiğinizde ekranda json response yerine hata yazdığını g&amp;ouml;receksiniz.&amp;nbsp; Sorunları &amp;ccedil;&amp;ouml;zmek i&amp;ccedil;in container'ı stop edip silelim.&lt;/p&gt;
+&lt;pre class="brush:html;auto-links:false;toolbar:false" contenteditable="false"&gt;docker container stop amazing_banach
+docker container rm amazing_banach&lt;/pre&gt;
+&lt;p&gt;Daha &amp;ouml;nce &amp;ccedil;alıştırdığımız docker run komutunu aşağıdaki gibi revize edip tekrardan &amp;ccedil;alıştıralım.&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;docker run --name hellodocker --env ASPNETCORE_ENVIRONMENT=Development -p 80:80 hellodocker:latest&lt;/pre&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2019/dckkr_cntrr_img2_ps_2.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;3 parametre ekledik. Container adı, aspnetcore environment değeri ve hangi port &amp;uuml;zerinden hizmet vereceği. Şimdi tekrardan browser &amp;uuml;zerinden&amp;nbsp;&lt;a href="http://localhost/api/Values"&gt;http://localhost/api/Values&lt;/a&gt;&amp;nbsp;adresine gittiğimizde response alabildiğimizi g&amp;ouml;receksinizdir.&lt;/p&gt;
+&lt;h3&gt;Bazı Faydalı Docker Komutları&lt;/h3&gt;
+&lt;p&gt;Y&amp;uuml;kl&amp;uuml; olan docker image'lerini listelemeyi sağlayan komut&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;docker image ls&lt;/pre&gt;
+&lt;p&gt;Image'i silmek i&amp;ccedil;in kullanılan komut&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;docker rmi image_id&lt;/pre&gt;
+&lt;p&gt;Container'ları listelemek i&amp;ccedil;in kullanılan komut&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;docker container ls&lt;/pre&gt;
+&lt;p&gt;&amp;Ccedil;alışmakta olan bir container'ı stop etmek i&amp;ccedil;in kullanılan komut&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;docker stop container_name&lt;/pre&gt;
+&lt;p&gt;Durmakta olan bir container'ı silmek i&amp;ccedil;in kullanılan komut&lt;/p&gt;
+&lt;pre class="brush:bash;auto-links:false;toolbar:false" contenteditable="false"&gt;docker rm container_name
+
+&lt;/pre&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/asp.net-core-hellodocker"&gt;Source&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2019-02-26 20:18:00</pubDate>
+  <lastModified>2020-01-20 08:24:52</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>asp-net-core-uygulamasi-docker-da-nasil-deploy-edilir</slug>
+  <tags>
+    <tag>Docker</tag>
+    <tag>asp.net core docker</tag>
+    <tag>docker nedir</tag>
+    <tag>.net core docker</tag>
+    <tag>.net core docker kullanimi</tag>
+  </tags>
+  <comments>
+    <comment id="eaba4b92-d227-4ce2-af98-9b20cb863592" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2020-01-06 12:32:36</date>
+      <author>Burak</author>
+      <email>bkarakaya01@gmail.com</email>
+      <country />
+      <ip>176.88.44.42</ip>
+      <avatar />
+      <content>Merhaba Caner Bey, 
+docker build -t hellodocker komutunu kullandıktan sonra indirme işlemi başlıyor fakat son 2 tanesini indirmiyor bir türlü. Genelde son 4mb kaldığında duruyor öyle ve bir daha indirmeye devam etmiyor. Dün yaklaşık 3 saat kadar bekledim fakat sorunun internet hızımdan kaynaklanmadığını düşünüyorum. Baya bir takılmış durumdayım yardımcı olursanız sevinirim.</content>
+    </comment>
+    <comment id="f11efb57-2d09-4da2-a52a-cb51d3571a5f" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2020-01-13 14:39:32</date>
+      <author>osman sönmez</author>
+      <email>sonmezosman@gmail.com</email>
+      <country />
+      <ip>193.108.213.144</ip>
+      <avatar />
+      <content>Teşekkürler Caner.  Garip bir şekilde container adını vermeyince dışarı açamamıştım. Verince açabildim. teşekkürler</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>8ba67740-30c1-4afe-b3ac-a1ed7655ae81</category>
+  </categories>
+  <notifications>
+    <email>bkarakaya01@gmail.com</email>
+  </notifications>
+</post>

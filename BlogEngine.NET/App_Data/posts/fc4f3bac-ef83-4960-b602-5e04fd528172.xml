@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Repository Design Pattern</title>
+  <description>Çoğu yazılım uygulamasının belli mimari kurallar çerçevisinde farklı katmanlara ayrılarak geliştirilmesi beklenir ve buna n-tier architecture denir. N-tier architecture presentation tier, middle tier yada data tier gibi çeşitli katmanlardan oluşabilir. Presentation katmanında uygulamanızın UI tarafını ilgilendiren arayüzler bulunur</description>
+  <content>&lt;p&gt;&amp;Ccedil;oğu yazılım uygulamasının belli mimari kurallar &amp;ccedil;er&amp;ccedil;evisinde farklı katmanlara ayrılarak geliştirilmesi beklenir&amp;nbsp;ve buna&amp;nbsp;n-tier architecture denir. N-tier architecture&amp;nbsp;presentation tier, middle tier yada&amp;nbsp;data tier gibi &amp;ccedil;eşitli katmanlardan oluşabilir. Presentation katmanında uygulamanızın UI tarafını ilgilendiren aray&amp;uuml;zler bulunur, Middle katmanda business logic'i ilgilendiren geliştirmeler yapılır&amp;nbsp;ve aynı zamanda database ile etkileşimde bu katmanda bulunur. Data katmanı ise uygulamanızdaki SQL Server, Oracle gibi database context'lerini i&amp;ccedil;eren katmandır. Bu katman belkide uygulamadaki en &amp;ouml;nemli katmandır sebebi ise database. Data bizim i&amp;ccedil;in en &amp;ouml;nemli şey ve database'ler ile olan veri alış verişi işin en g&amp;uuml;venlikli ve generic olması gereken yerlerin başında gelir.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/07/repository_design _pattern.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Database varsa CRUD işlemi&amp;nbsp;(Create, Read, Update, Delete) heralde olmazsa olmazdır ve data katmanı ile doğrudan business logic'in bulunduğu middle katman haberleşsin istenilmez ve bu durum bazen&amp;nbsp;uygulamanızın b&amp;uuml;y&amp;uuml;kl&amp;uuml;ğ&amp;uuml;ne g&amp;ouml;re &amp;ccedil;eşitli sorunlarda &amp;ccedil;ıkartabilir. Repository pattern&amp;nbsp;bu ihtiyacı karşılayan pattern olarak karşımıza &amp;ccedil;ıkıyor ve temelde yaptığı iş&amp;nbsp;ise business logic ile data access arasında arabulucu g&amp;ouml;revi g&amp;ouml;rme.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;Repository Pattern Faydaları&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Maintainability (sonradan bakım kolaylılığı) arttırır,&lt;/li&gt;
+&lt;li&gt;Unit-test yapabilmemizi kolaylaştırır,&lt;/li&gt;
+&lt;li&gt;Esnek bir mimari uygulamamızı sağlar,&lt;/li&gt;
+&lt;li&gt;Yeni gelecek mod&amp;uuml;ller veya istenilen değişiklikleri kolayca entegre edebilmeyi sağlar,&lt;/li&gt;
+&lt;li&gt;Domain driven development'ın &amp;ouml;n&amp;uuml;n&amp;uuml; a&amp;ccedil;ar.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;Repository Pattern&amp;nbsp;Uygulaması&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Şimdi &amp;ouml;rnek bir proje &amp;uuml;zerinden Repository Pattern nasıl uygulanır g&amp;ouml;relim. Projeyi geliştirirken projenizde EntityFramework kurulu ve SampleDbContext adında bir database context'inizin olduğunu varsayarak ilerliyor olacağız.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;1.Adım&lt;/strong&gt;&lt;/span&gt; - IRepository adında CRUD işlemleri yapabilmemizi&amp;nbsp;sağlayacak Generic bir interface metodlarını tanımlama.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface IRepository&amp;lt;T&amp;gt;  where T : class
+    {
+        IEnumerable&amp;lt;t&amp;gt; SelectAll();
+        T SelectByID(object id);
+        void Insert(T obj);
+        void Update(T obj);
+        void Delete(object id);
+        void Save();
+    }&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;2.Adım&lt;/strong&gt;&lt;/span&gt; -&amp;nbsp;BaseRepository adında Generic IRepository interface'inden implement olan class'ı oluşturma.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public abstract class BaseRepository&amp;lt;T&amp;gt; : IRepository&amp;lt;T&amp;gt; where T : class
+    {
+        private SampleDbContext db = null;
+        private DbSet&amp;lt;t&amp;gt; table = null;
+        public BaseRepository()
+        {
+            this.db = new SampleDbContext();
+            table = db.Set&amp;lt;T&amp;gt;();
+        }
+        public BaseRepository(SampleDbContext db)
+        {
+            this.db = db;
+            table = db.Set&amp;lt;T&amp;gt;();
+        }
+        public IEnumerable&amp;lt;T&amp;gt; SelectAll()
+        {
+            return table.ToList();
+        }
+        public T SelectByID(object id)
+        {
+            return table.Find(id);
+        }
+        public void Insert(T obj)
+        {
+            table.Add(obj);
+        }
+        public void Update(T obj)
+        {
+            table.Attach(obj);
+            db.Entry(obj).State = EntityState.Modified;
+        }
+        public void Delete(object id)
+        {
+            T existing = table.Find(id);
+            table.Remove(existing);
+        }
+        public void Save()
+        {
+            db.SaveChanges();
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;3.Adım&lt;/strong&gt;&lt;/span&gt; - Employee adında &amp;ouml;rnek bir Entity tanımlama&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Employee
+{
+    public int ID { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;4.Adım&lt;/strong&gt;&lt;/span&gt; - BaseRepository den inherit olan &lt;strong&gt;Employee&lt;/strong&gt; entity si i&amp;ccedil;in&amp;nbsp;&lt;strong&gt;EmployeeRepository&lt;/strong&gt; class'ını&amp;nbsp;tanımlama&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;  public class EmployeeRepository : BaseRepository&amp;lt;Employee&amp;gt;
+    {
+
+    }&lt;/pre&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;5.Adım&lt;/strong&gt;&lt;/span&gt; - Yazmış olduğumuz &lt;strong&gt;EmployeeRepository&lt;/strong&gt;'yi kullanmak&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;  void Main(string[] args)
+        {
+            var empRepository = new EmployeeRepository();
+            empRepository.SelectAll();
+        }&lt;/pre&gt;
+&lt;p&gt;Projemiz hazır. Bundan sonra tanımlayacağınız entity'ler i&amp;ccedil;in &lt;strong&gt;EmployeeRepository&lt;/strong&gt; de olduğu gibi Generic olarak yazmış olduğumuz&amp;nbsp;&lt;strong&gt;BaseRepository&lt;/strong&gt;'den t&amp;uuml;reyen Repository'ler tanımlayarak projeyi geliştirmeye devam edebiliriz.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;Not :&lt;/span&gt; Bir rivayete g&amp;ouml;re Repository Design Pattern, Design Pattern ailesi i&amp;ccedil;erisinde en &amp;ccedil;ok kullanılan pattern olduğu s&amp;ouml;ylenir.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-08-16 21:34:00</pubDate>
+  <lastModified>2020-01-20 08:22:22</lastModified>
+  <raters>2</raters>
+  <rating>5</rating>
+  <slug>design-patterns-repository-design-pattern</slug>
+  <tags>
+    <tag>Software Design Pattern</tag>
+    <tag>Repository Design Pattern</tag>
+    <tag>Repository</tag>
+    <tag>Software Architecture</tag>
+    <tag>Repository Design Pattern nedir</tag>
+  </tags>
+  <comments>
+    <comment id="5b18e173-0f16-4cf5-b17f-d625bb5de89d" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-04-07 11:14:08</date>
+      <author>Ahmet</author>
+      <email>serix5@gmail.com</email>
+      <country />
+      <ip>213.74.50.180:58894</ip>
+      <avatar />
+      <content>Yazı için teşekkürler gayet sade ve anlaşılır dil ile anlatmışsınız.  
+</content>
+    </comment>
+    <comment id="80535afd-debf-4195-91c9-6df979d4827e" parentid="5b18e173-0f16-4cf5-b17f-d625bb5de89d" approved="True" spam="False" deleted="False">
+      <date>2017-04-25 12:45:03</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>31.223.39.215:58891</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba, yorumlarınız için teşekkürler. Fırsat buldukça yazmaya devam edeceğim :)</content>
+    </comment>
+    <comment id="84f50d67-1be4-47f1-a734-11946bf0ac07" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2019-12-19 08:54:46</date>
+      <author>nevzat</author>
+      <email>nyavuzcan@windowslive.com</email>
+      <country />
+      <ip>212.156.131.82</ip>
+      <avatar />
+      <content>Hocam yazı için teşekkürler. 
+Küçük bir sorum var.
+İçinde bulunduğum bir projede her entity class&amp;#39;ı için bir repository interface&amp;#39;i çağırılarak kullanılıyor. Anlamadığım olay neden her entity için interface oluşturduğumuz. Zaten her bir entity&amp;#39;e class üzerinden erişebiliyoruz. Ve her repo interface&amp;#39;i zaten 1 tane class implement ediyor aynı interface&amp;#39;i birden fazla entity implement etse mantığı oturacak ama her birinin kendi entity&amp;#39;si implement ediyor.  Direk interface yazmadan entity üzerinden işlemleri yapsak ne gibi problemler oluyor?</content>
+    </comment>
+    <comment id="7400abfd-50c9-4b79-bf8e-9b59afd98de3" parentid="84f50d67-1be4-47f1-a734-11946bf0ac07" approved="True" spam="False" deleted="False">
+      <date>2019-12-20 12:25:34</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>213.74.218.131</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Selam Nevzat, tam olarak anlayamadım sorduğunu ? Örnek kod göndermen mümkün mü ? 
+Eğer bahsettiğin şey; her bir entity&amp;#39;nin neden repository&amp;#39;si olduğu ise ?
+Repository pattern özünde db operasyonlarını tablo bazlı birbirinden ayırmak adına büyük öneme sahip. Hatta bir tablo ms-sql&amp;#39;de bulunuyorken diğer bir tabloyu postgre-sql&amp;#39;den kullanman gerekn durumlar olabilir veya bambaşka bir entity için dbContext yerine dapper gibi orm&amp;#39;ler kullanacağın bir durumda olabilir. Bu gibi durumlara karşı hep söylenen şey &amp;quot;separation of concerns&amp;quot; den yola çıkarak db de bulunan her bir tabloya karşı bir entity ve bu entity içinde bir repository katmanı gündelik hayatını oldukça kolaylaştıracaktır. 
+
+Eğer sorduğun soru ; neden her bir entity için repository interface olduğu ise; neden dependency injection; her bir entity için ayrı ayrı interface&amp;#39;ler oluşturduğunda autofac, unity yada nhibernate gibi dependency injection tool&amp;#39;ları kullanarak bağımlılıkarı kolayca inject edebilirsin ve akabinde projende unit test yazarken kolaylık sağlayacaktır. Mock işlemi yaparken ilgili entity için kendi repository&amp;#39;sine ait kullanılan get,delete,getAll vs gibi metotlar için rahatca mocking işlemi yapmanı sağlayacaktır.</content>
+    </comment>
+    <comment id="342c7ef4-fb47-4152-9ea5-537fb7295895" parentid="7400abfd-50c9-4b79-bf8e-9b59afd98de3" approved="False" spam="False" deleted="True">
+      <date>2019-12-23 12:50:27</date>
+      <author>Nevzat</author>
+      <email>nyavuzcan@windowslive.com</email>
+      <country />
+      <ip>212.156.131.82</ip>
+      <avatar />
+      <content>Caner Bey çok teşekkür ederim cevabı aldım aslında ama. Örnek olmak açısından 
+
+@Entity
+@Table(name = &amp;quot;issue&amp;quot;)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@EqualsAndHashCode
+public class Issue extends BaseEntity  {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Column(name = &amp;quot;decription&amp;quot;, length = 1000)
+    private String description;
+
+    @Column(name = &amp;quot;details&amp;quot;, length = 4000)
+    private String details;
+
+    @Column(name = &amp;quot;date&amp;quot;)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date date;
+
+bu şekilde bir entitymiz mevcut ve bunun bir repositorysini oulşturuyoruz :
+public interface IssueRepository extends JpaRepository&amp;lt;Issue,Long&gt; {
+}
+
+bunun yerine direk olarak 
+
+ class Issue extends BaseEntity implements JpaRepository  yapsak ne gibi problem oluşur diye sormak istemiştim çünkü zaten her bir entity için bir repo interfacı oluşturuyoruz . direk entity üzerinden JPAREPOSITORY özelliklerini kullansak ?</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications>
+    <email>nyavuzcan@windowslive.com</email>
+  </notifications>
+</post>

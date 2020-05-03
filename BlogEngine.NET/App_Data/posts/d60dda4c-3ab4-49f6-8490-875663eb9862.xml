@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Redis .Net Örnek Proje</title>
+  <description>http://patrickdesjardins.com/blog/integrating-redis-in-your-asp-net-mvc-project
+&amp;nbsp;
+http://ozaksu</description>
+  <content>&lt;p&gt;http://patrickdesjardins.com/blog/integrating-redis-in-your-asp-net-mvc-project&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-01-21 22:05:00</pubDate>
+  <lastModified>2017-01-02 13:11:43</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>net-c-ile-redis-kullanimi-ve-ornek-proje</slug>
+  <tags>
+    <tag>redis nedir</tag>
+    <tag>redis</tag>
+    <tag>.net</tag>
+    <tag>windows</tag>
+    <tag>redis kurulumu</tag>
+    <tag>redis kullanımı</tag>
+    <tag>cache</tag>
+    <tag>redis cache</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>27e5276b-0227-42f3-a037-9d3992022f96</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>ADO.Net Entity Framework Hız Testi</title>
+  <description>Bu makalede local'de bulunan northwind database'ine bağlanarak Customers tablosunda bulunan müşterileri hem ADO.Net hem de Entity Framework kullanarak alıp array</description>
+  <content>&lt;p&gt;&lt;span style="font-size: medium;"&gt;Bu makalede local'de bulunan northwind database'ine bağlanarak Customers tablosunda bulunan m&amp;uuml;şterileri hem&amp;nbsp;ADO.Net hem de Entity Framework kullanarak&amp;nbsp;alıp array i&amp;ccedil;erisine atacağız ve iki işlem arasındaki hız farkını &amp;ouml;l&amp;ccedil;meye &amp;ccedil;alışacağız.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;Entity Framwork'&amp;uuml;n developerlara ne derece kolaylık sağladığını biliyorsunuzdur.Normal şartlarda ADO.Net kullanarak ortalama 20 satır kodla yaptığınız işlemleri Entity Framework ile %60 daha az kod yazarak yapabiliyoruz. D&amp;uuml;ş&amp;uuml;n&amp;uuml;ld&amp;uuml;ğ&amp;uuml; zaman inanılmaz bir durum ve zamandan kazan&amp;ccedil; sağlamak i&amp;ccedil;in muhteşem bir mimari. Bende aynen b&amp;ouml;yle d&amp;uuml;ş&amp;uuml;n&amp;uuml;yordum taki aradaki hız farkının en k&amp;ouml;t&amp;uuml; şartlarda bile 3 kattan daha fazla olduğunu &amp;ouml;ğrenen kadar. Gelin aşağıda &amp;ouml;rneğimizi inceleyerek devam edelim.&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;&amp;Ouml;ncelikle Northwind database'inde bulunan Customers tablosunun colonlarını aşağıda olduğu gibi classlaştırıyoruz&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public classCustomer
+    {
+        public int CustomerID { get; set; }
+        public string CompanyName { get; set; }
+        public string ContactName { get; set; }
+        public string ContactTitle { get; set; }
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
+        public string Phone { get; set; }
+    }&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Sonrasında ADO.Net ile database'de kayıtlı bulunan m&amp;uuml;şterilerin bilgilerini alıp Customer objesinden bir List array'in i&amp;ccedil;erisine dolduruyoruz,&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public List&amp;lt;Customer&amp;gt; GetCustomers_By_ADO()
+{
+List&amp;lt;Customer&amp;gt; AllCustomers = newList&amp;lt;Customer&amp;gt;();
+ 
+SqlConnection conn = newSqlConnection("Server=CT;database=Northwind;trusted_connection=True");
+SqlCommand cmd = newSqlCommand("select * from Customers", conn);
+conn.Open();
+SqlDataReader dr = cmd.ExecuteReader();
+while (dr.Read())
+{
+AllCustomers.Add(newCustomer()
+{
+CustomerID = dr.GetString(0),
+CompanyName = dr.GetString(1),
+ContactName = dr.GetString(2),
+ContactTitle = dr.GetString(3),
+Address = dr.GetString(4),
+City = dr.GetString(5),
+Country = dr.GetString(8),
+Phone = dr.GetString(9),
+});
+}
+return AllCustomers;
+ }&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Şimdi ise aynı işlemi Entity Framework kullanarak yapıyoruz,&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;NorthwindEntities db = newNorthwindEntities();
+public List&amp;lt;Customers&amp;gt; GetCustomersBy_EF()
+{
+List&amp;lt;Customers&amp;gt; AllCustomers = newList&amp;lt;Customers&amp;gt;();
+AllCustomers = db.Customers.ToList();
+return AllCustomers;
+ }&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Bakıldığı zaman ADO.Net ile yaklaşık 25 satırda yaptığımız işlemi Entity Framework ile 7 satırda hallediyoruz. Şimdi gelelim Hız testimize. Bir adet WebForm ekliyoruz ve i&amp;ccedil;erisine aşağıdaki kodları yazarak testimizi yapıyoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;İlk olarak ADO.Net hızını test ediyoruz,&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;Stopwatch sw2 = newStopwatch();
+sw2.Start();
+Customer c1 = newCustomer();
+c1.GetCustomers_By_ADO();
+sw2.Stop();
+string result2 = sw2.ElapsedMilliseconds.ToString();
+Response.Write(result2 + " ms.");&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;span style="font-size: medium;"&gt;Şimdi Entity Framework kullanarak testimizi yapalım,&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;Stopwatch sw1 = newStopwatch();
+sw1.Start();
+Customer c = newCustomer();
+c.GetCustomersBy_EF();
+sw1.Stop();
+string result = sw1.ElapsedMilliseconds.ToString();
+Response.Write(result);&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Sonu&amp;ccedil;lar Nasıl Mı ?&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Ado.Net ile yapılan işlem;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;img src="/MyImage_Folder/spedd_Test_Ado.png" alt="" width="121" height="69" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Entity Framework ile yapılan işlem;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;img src="/MyImage_Folder/spedd_Test_EF.png" alt="" width="102" height="59" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;span style="font-size: medium;"&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre aradaki fark neredeyse 7 kattan daha fazla.Bunun nedenine gelecek olursak, ADO.Net ile yapılan her bir sorguda istenilen t&amp;uuml;rdeki obje 1 defa generate edilirken Entity Framework ile yapılan her bir sorgu i&amp;ccedil;in entity'niz s&amp;uuml;rekli generate edilir ve bu projeniz i&amp;ccedil;in &amp;ccedil;ok y&amp;uuml;ksek oranda bir performans kaybına neden olur. Bu fark k&amp;uuml;&amp;ccedil;&amp;uuml;k &amp;ccedil;aplı projelerde belki g&amp;ouml;z ardı edilebilir ancak eğer ki proje gayet kapsamlı ve b&amp;uuml;y&amp;uuml;k bir projeyse inanılmaz derecede bir hız farkı ortaya &amp;ccedil;ıkarmaktadır.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Son s&amp;ouml;z olarak ; &lt;strong&gt;ADO&lt;/strong&gt; Candır !!&lt;/span&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-07-14 21:37:00</pubDate>
+  <lastModified>2020-01-20 08:22:31</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>ado-net-entity-framework-hiz-testi</slug>
+  <tags>
+    <tag>ADO</tag>
+    <tag>EntityFramework</tag>
+    <tag>speedtest</tag>
+    <tag>hiz testi</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

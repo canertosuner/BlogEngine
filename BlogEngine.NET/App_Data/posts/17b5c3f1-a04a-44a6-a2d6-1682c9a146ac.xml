@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Windows Phone PasswordBox with numeric Input Scope</title>
+  <description>First, define below&amp;nbsp;variables at class level
+string_enteredPasscode="";
+string_passwordChar="*"</description>
+  <content>&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: 12pt; font-family: Consolas; color: #000000;"&gt;&lt;span style="font-size: 12pt; font-family: Consolas; color: #000000;"&gt;First, define below&lt;/span&gt;&amp;nbsp;variables at class level&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;string_enteredPasscode="";
+string_passwordChar="*";&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-family: Consolas; font-size: 12pt;"&gt;Second, trigger TextBox KeyUp event that you use in xaml,&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; privatevoidTextBox_KeyUp(objectsender, System.Windows.Input.KeyEventArgse)
+        {
+            if (tbCvv.Text.Length==3) return;
+            _enteredPasscode=GetNewPasscode(_enteredPasscode, e);
+            tbCvv.Text=Regex.Replace(_enteredPasscode, @".", _passwordChar);
+ 
+            tbCvv.SelectionStart=tbCvv.Text.Length;
+        }
+ 
+        privatestringGetNewPasscode(stringoldPasscode, KeyEventArgskeyEventArgs)
+        {
+            stringnewPasscode=string.Empty;
+            switch (keyEventArgs.Key)
+            {
+                caseKey.D0:
+                caseKey.D1:
+                caseKey.D2:
+                caseKey.D3:
+                caseKey.D4:
+                caseKey.D5:
+                caseKey.D6:
+                caseKey.D7:
+                caseKey.D8:
+                caseKey.D9:
+                    newPasscode=oldPasscode+ (keyEventArgs.PlatformKeyCode-48);
+                    break;
+                caseKey.Back:
+                    if (oldPasscode.Length&amp;gt;0)
+                        newPasscode=oldPasscode.Substring(0, oldPasscode.Length-1);
+                    break;
+                default:
+                    //others
+                    newPasscode=oldPasscode;
+                    break;
+            }
+            returnnewPasscode;
+        }&lt;/pre&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-12-11 11:13:00</pubDate>
+  <lastModified>2020-01-20 08:22:30</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Windows-Phone-PasswordBox-with-numeric-Input-Scope</slug>
+  <tags>
+    <tag>keyup</tag>
+    <tag>inputscope</tag>
+    <tag>numeric</tag>
+    <tag>passwordbox</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

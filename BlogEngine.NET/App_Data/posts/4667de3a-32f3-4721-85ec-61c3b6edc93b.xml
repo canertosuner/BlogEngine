@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Hangfire ile Birlikte Background Task İşlemleri</title>
+  <description>https://samueleresca.net/2017/12/background-tasks-in-asp-net-core/</description>
+  <content>&lt;p&gt;Projelerimizde olağan akışında ilerlerken veya bir business rule &amp;ccedil;alışırken&amp;nbsp;mevcut akışı durdurmadan asenkron bir şekilde &amp;ccedil;alışmasını istediğimiz process'ler olmuştur. Bu gibi ihtiya&amp;ccedil;ları karşılaması i&amp;ccedil;in Azure, Amazon ayda Google-Cloud olsun kendi cloud &amp;ccedil;&amp;ouml;z&amp;uuml;mlerini &amp;uuml;reterek kullanmamıza olanak sağlamaktadırlar.&lt;/p&gt;
+&lt;p&gt;Peki ya on-premise dediğimiz kurum i&amp;ccedil;i&amp;nbsp;&amp;ccedil;&amp;ouml;z&amp;uuml;m olarak ne yapabiliriz ? Fire-and-forget (messaging queue) yapılarından birini kullanabilir veya&amp;nbsp;mevcut uygulamada background job'lar &amp;uuml;retebiliriz.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda Asp.net Core uygulamalarında&amp;nbsp;Hangfire kullanarak background-task'lar&amp;nbsp;nasıl oluşturulur inceleyeceğiz.&lt;/p&gt;
+&lt;h3&gt;Hangfire&amp;nbsp;&lt;/h3&gt;
+&lt;p&gt;&amp;Ouml;zetle; &lt;a href="https://github.com/HangfireIO/Hangfire"&gt;open-source&lt;/a&gt; olarak&amp;nbsp;geliştirilmiş schedule edilebilen&amp;nbsp;process'lerin kolay bir şekilde y&amp;ouml;netimini sağlayan bir k&amp;uuml;t&amp;uuml;phanedir. Sahip olduğu dashboard ile&amp;nbsp;job'larınızı historical olarak g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebili,&amp;nbsp;start-stop ve restart gibi işlemler yapabilirsiniz.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;An easy way to perform background processing in .NET and .NET Core applications. No Windows Service or separate process required.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Hangfire job'ları y&amp;ouml;netirken storage alanı olarak hemen hemen b&amp;uuml;t&amp;uuml;n database t&amp;uuml;rleri i&amp;ccedil;in ek k&amp;uuml;t&amp;uuml;phanesi bulunmakta.&amp;nbsp;SQL Server, Redis, PostgreSQL, MongoDB etc.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/hngfr_wrkflwww.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Distributed bir şekilde handle edilen task'lar i&amp;ccedil;in bir exception throw edildiğinde hangfire job'ı re-create ederek onu tekrardan process'e sokar.&lt;/p&gt;
+&lt;p&gt;İlk olarak uygulamamızda kullanmak &amp;uuml;zere local Sql Server &amp;uuml;zerinde&amp;nbsp;Hangfire adında bir databse oluşturalım.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/hngfr_db_crte_img.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Sonrasında Vs.'da&amp;nbsp;BackgroundTaskWithHangfire&amp;nbsp;adında bir Api projesi oluşturalım ve nuget &amp;uuml;zerinden Hangfire v1.6.20 paketini projemize ekleyelim.&amp;nbsp;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;PM&amp;gt; Install-Package Hangfire&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/hngfr_db_crte_nuget_pckg.PNG" alt="" width="787" height="177" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;İlk&amp;nbsp;başta oluşturduğumuz database conn string bilgilerini appSettings.json dosyasına ekleyelim.&lt;/p&gt;
+&lt;pre class="brush:java;auto-links:false;toolbar:false" contenteditable="false"&gt;  "HangfireDbConn": "Server=.;Initial Catalog=Hangfire;Persist Security Info=False;User ID=HangfireUser;Password=qwerty135*;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
+&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Sırada hangfire configuration var. Bunun i&amp;ccedil;in Startup.cs de bulunan ConfigureServices metodu i&amp;ccedil;erisinde Hangfire'ı service olarak ekleyelim ve sonrasında Configure metodu i&amp;ccedil;erisinde bu service'i kullanacağımızı belirten kod bloğunu yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddHangfire(_ =&amp;gt; _.UseSqlServerStorage(Configuration.GetValue&amp;lt;string&amp;gt;("HangfireDbConn")));
+}
+
+// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+    app.UseHangfireDashboard();
+    app.UseHangfireServer();
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Yukarıdaki kod bloğunda hangfire storeage bilgisini vererek uygulamamız service'lerine register ettik ve devamındada hangfire'ın server ve dashboard service'lerini kullanacağımızı belirttik.&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Hangfire dashboard default olarak uygulamanın &amp;ccedil;alıştığı portta' &lt;a href="http://&amp;lt;application&amp;gt;/hangfire"&gt;http://&amp;lt;application&amp;gt;/hangfire&lt;/a&gt;&amp;nbsp;adresinde host edilir. Bizde&amp;nbsp;localhostta &amp;ccedil;alıştığımızdan uygulamayı run edip browser &amp;uuml;zerinden&amp;nbsp;&lt;a href="http://localhost/hangfire"&gt;http://localhost/hangfire&lt;/a&gt;&amp;nbsp;adresine gittiğimizde aşağıdaki gibi hangfire dashboard'u g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/hngfr_db_dflt_img_1.PNG" alt="" width="638" height="338" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Dashboard'la birlikte Hangfire'ın sql client'ının database de ki gerekli tabloları oluşturduğunuda sql server management studio &amp;uuml;zerinden g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebilirsiniz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2018/hngfr_db_tbls_ig2.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p style="text-align: left;"&gt;Hangfire konfigurasyonunu tamamladık şimdi sırasıyla BackgroundJob kullanarak oluşturabileceğimiz job t&amp;uuml;rlerine bakacak olursak;&lt;/p&gt;
+&lt;h3 style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;1- Fire-and-Forget Jobs&lt;/span&gt;&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Job create edildikten sonra &amp;ccedil;alışır ve process olur.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class FireAndForgetJob
+{
+    public FireAndForgetJob()
+    {
+        //Fire and forget
+        var jobId = BackgroundJob.Enqueue(() =&amp;gt; ProcessFireAndForgetJob());
+    }
+
+    public void ProcessFireAndForgetJob()
+    {
+        Console.WriteLine("I am a Fire and Forget Job !!");
+    }
+}&lt;/pre&gt;
+&lt;h3 style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;2-&amp;nbsp;Delayed Jobs&lt;/span&gt;&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;Belli bir zaman bilgisi set edilerek sadece bir kez &amp;ccedil;alışmasını istediğimiz task'lar i&amp;ccedil;in kullanabileceğimiz job t&amp;uuml;r&amp;uuml;. Aşağıdaki gibi Job register olduktan 4 dkka sonra &amp;ccedil;alışacaktır.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class DelayedJob
+{
+    public DelayedJob()
+    {
+        //Delayed job
+        var jobId = BackgroundJob.Schedule(() =&amp;gt; ProcessDelayedJob(), TimeSpan.FromMinutes(4));
+    }
+
+    public void ProcessDelayedJob()
+    {
+        Console.WriteLine("I am a Delayed Job !!");
+    }
+}&lt;/pre&gt;
+&lt;h3 style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;3- Recurring Jobs&lt;/span&gt;&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;Recurring yani tekrar eden&amp;nbsp;task'lar i&amp;ccedil;in&amp;nbsp;kullanılan job t&amp;uuml;r&amp;uuml;. &amp;Ouml;rneğin; her saat başı &amp;ccedil;alışmasını istediğiniz bir job'a ihtiyacınız olduğunda aşağıdaki gibi tanımlayabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Recurring_Job
+{
+    public Recurring_Job()
+    {
+        //Recurring job
+        RecurringJob.AddOrUpdate(() =&amp;gt; ProcessRecurringJob(), Cron.Hourly);
+    }
+
+    public void ProcessRecurringJob()
+    {
+        Console.WriteLine("I am a Recurring Job !!");
+    }
+}&lt;/pre&gt;
+&lt;h3 style="text-align: left;"&gt;&lt;span style="text-decoration: underline;"&gt;4- Continuations Jobs&lt;/span&gt;&lt;/h3&gt;
+&lt;p style="text-align: left;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;Parent-child ilişkisinin olduğu yani bir job'ın &amp;ccedil;alışması i&amp;ccedil;in başka bir job'ın tamamlanmasını bekleyip o Cmplete olduktan sonra &amp;ccedil;alışmasını istediğimiz işler i&amp;ccedil;in kullanabileceğimiz job t&amp;uuml;r&amp;uuml;.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class ContinuationsJob
+{
+    public ContinuationsJob()
+    {
+        //Delayed job
+        var parentJobId = BackgroundJob.Schedule(() =&amp;gt; Console.WriteLine("I am a Delayed Job !!"), TimeSpan.FromMinutes(4));
+
+
+        //Continuations job
+        BackgroundJob.ContinueWith(parentJobId, () =&amp;gt; ProcessContinuationsJob());
+    }
+
+    public void ProcessContinuationsJob()
+    {
+        Console.WriteLine("I am a Recurring Job !!");
+    }
+}&lt;/pre&gt;
+&lt;p style="text-align: left;"&gt;Projeyi run edip tekrardan&amp;nbsp;&amp;nbsp;&lt;a href="http://localhost/hangfire"&gt;http://localhost/hangfire&lt;/a&gt;&amp;nbsp;adresine gittiğimizde ilgili job t&amp;uuml;rlerine ait bilgileri dashboard'da g&amp;ouml;r&amp;uuml;nt&amp;uuml;leyebiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/hngfrie_dshbrdd.PNG" alt="" width="441" height="247" /&gt;&lt;img src="/image.axd?picture=/2018/hngfrie_rcurrng.PNG" alt="" width="506" height="211" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;zetlemek gerekirse; uygulamanızda &amp;ccedil;alıştırmanız gereken background-task'lar Hangfire impl. hızlı bir şekilde yapıp dashboard'u ile birlikte kolayca kullanabilirsiniz. Eğer .net core'un kendi background task sınıfını kullanarak ilerlemek isterseniz hangfire'a g&amp;ouml;re daha zorlu bir s&amp;uuml;re&amp;ccedil; sizi bekliyor olacaktır. Hem y&amp;ouml;netilebilirlik a&amp;ccedil;ısından hemde visualize olarak hangfire kesinlikle sizin i&amp;ccedil;in daha sorunsuz bir &amp;ccedil;&amp;ouml;z&amp;uuml;m olacaktır. Hangfire'ın muadili olan Quartz.net veya bir queue &amp;ccedil;&amp;ouml;z&amp;uuml;m&amp;uuml; de kullanarak işlemlerinizi yapabilirsiniz.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/asp.net-core-hangfire-for-background-tasks"&gt;Source Code&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-09-03 10:22:00</pubDate>
+  <lastModified>2018-09-11 10:42:02</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-background-task-kullanimi</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

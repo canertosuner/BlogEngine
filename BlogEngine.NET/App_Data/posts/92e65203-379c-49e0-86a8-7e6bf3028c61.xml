@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>RabbitMQ MassTransit Kullanarak Publisher Consumer Yapısı</title>
+  <description>&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+http://looselycoupledlabs.com/2014/06/masstransit-publish-subscribe-exam</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki &lt;a href="/post/rabbitmq-nedir-kurulumu"&gt;RabbitMQ Nedir&lt;/a&gt; yazımızda genel hatlarıyla rabbitmq dan bahsedip windows makina &amp;uuml;zerinde kurulumunu anlatıp kısaca;&amp;nbsp;erişilebilirliği, g&amp;uuml;venilirliği y&amp;uuml;ksek ve &amp;ouml;l&amp;ccedil;eklenebilen loosly-coupled asenkron iletişim sağlayan uygulamalar geliştirmektir diye tanımlamıştık.&lt;/p&gt;
+&lt;p&gt;Bu yazımızda ise Masstransit kullanarak bir Publisher Consumer projesi oluşturacağız ancak&amp;nbsp;makinamızda rabbitmq kurulu &amp;ccedil;alışır vaziyette olduğundan emin olalım.&lt;/p&gt;
+&lt;h3&gt;Enterprise Service Bus (ESB) Nedir ?&lt;/h3&gt;
+&lt;p&gt;Enterprise service bus diğer ismiyle message broker; rabbitmq gibi messaging&amp;nbsp;katmanlarının &amp;uuml;zerinde bulunan ve distributed synchronous yada asynchronous communication sağlayabilen&amp;nbsp;bir middleware' dir. Bize birbirinden tamamen farklı olabilen uygulamalar arasında message-based communication yapabilmemizi sağlayan bir transport gateway'i sağlayan yapıdır. Diğer bir deyişle; message'ları provider ve consumer arasında transport eden bir &amp;ccedil;eşit middleware tool'u dur.&amp;nbsp;&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2017/esb_sample_img.jpg" alt="" width="410" height="67" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi ise masstransit kullanarak bir &amp;ouml;rnek &amp;uuml;zerinden ilerleyelim. &amp;Ouml;rneğimiz şu şekilde olsun; g&amp;uuml;nl&amp;uuml;k şirket b&amp;uuml;ltenini t&amp;uuml;m &amp;ccedil;alışanlara email olarak g&amp;ouml;nderen bir publisher/consumer yapısı tasarlayalım.&lt;/p&gt;
+&lt;p&gt;VS da sırasıyla 3 proje oluşturacağız.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;RMQMessage(class lib.)&lt;/li&gt;
+&lt;li&gt;RMQPublisher(console app.)&lt;/li&gt;
+&lt;li&gt;RMQConsumer(console app.)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;&lt;strong&gt;1-) RMQMessage&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;İlk projemiz olan &lt;strong&gt;RMQMessage&lt;/strong&gt; ile başlayalım. Vs da&amp;nbsp;&lt;strong&gt;RMQMessage&lt;/strong&gt;&amp;nbsp;adından bir class-library oluşturalım. Masstransit'in message-base communication sağladığını s&amp;ouml;ylemiştik ve hem publisher hemde consumer tarafından kullanılacak bu message yada contract diyede&amp;nbsp;adlandırdığımız model ve onun sub-model'lerini oluşturacağız.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;İlk olarak abstract olan&amp;nbsp;BaseMessage.cs'i oluşturalım ve bu model i&amp;ccedil;erisinde ortak olmasını istediğimiz property'ler yer alsın.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public abstract class BaseMessage
+    {
+        public DateTime PublishedTime { get; set; }
+        public DateTime ConsumedTime { get; set; }
+        public Guid QueueId { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Sonrasında yukarıda bahsettiğimiz publisher ve consumer'ın kullanacağı&amp;nbsp;NewsletterMailMessage adında contract'ımızı aşağıdaki oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class NewsletterMailMessage: BaseMessage
+    {
+        public List&amp;lt;string&amp;gt; AddressList { get; set; }
+        public NewsletterModel NewsLetter { get; set; }
+    }
+    public class NewsletterModel
+    {
+        public string MailSubject{ get; set; }
+        public string HtmlContent { get; set; }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda modellerimizi oluşturduk ve RMQMessage projesindeki işimiz bitti. Şimdi sırada 2. projeyi oluşturmak var.&lt;/p&gt;
+&lt;h3&gt;2-)&amp;nbsp;RMQPublisher&lt;/h3&gt;
+&lt;p&gt;Bunun i&amp;ccedil;in aynı solution'da RMQPublisher adında bir console app oluşturalım. Bu proje queue'ya ilgili message'ı publish etmeden sorumlu olacak. Projeyi oluşturduktan sonra nuget &amp;uuml;zerinden package manager console kullanarak aşağıdaki masstransit.rabbitmq paketini&amp;nbsp;y&amp;uuml;kleyelim.&lt;/p&gt;
+&lt;h4&gt;Masstransit.RabbitMQ&lt;/h4&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;nbsp;Install-Package MassTransit.RabbitMQ&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Bu paket ile birlikte rabbitmq i&amp;ccedil;in kullanılan masstransit k&amp;uuml;t&amp;uuml;phanesi onun dependency'leri projemize kurulmuş olacak.&lt;/p&gt;
+&lt;p&gt;Kurulum tamamlandıktan sonra RMQMessage projesini RMQPublisher projesine reference olarak ekleyelim. Ekleme nedenimiz&amp;nbsp;NewsletterMailMessage.cs modelini kullanabilmek.&lt;/p&gt;
+&lt;p&gt;Program.cs i&amp;ccedil;erisine aşağıdaki gibi&amp;nbsp;InitializeBus adında bir metot tanımlayalım ve bu metot IBusControl aray&amp;uuml;z&amp;uuml;n&amp;uuml; initialize etmekten sorumlu olsun.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    static IBusControl InitializeBus()
+    {
+        return Bus.Factory.CreateUsingRabbitMq(cfg =&amp;gt;
+         {
+             cfg.Host(new Uri("rabbitmq://localhost/"), h =&amp;gt;
+             {
+                 h.Username("guest");
+                 h.Password("guest");
+             });
+         });
+    }&lt;/pre&gt;
+&lt;p&gt;local makinada kurulu olan rabbitmq url'i&lt;strong&gt;&amp;nbsp;rabbitmq://localhost/ &lt;/strong&gt;dir ve default username password ise &lt;strong&gt;guest&lt;/strong&gt; olarak tanımlanmıştır.&lt;/p&gt;
+&lt;p&gt;RabbitMQ ya bağlantı kısmını&amp;nbsp;halletik şimdi ise message objemizi initialize edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    static NewsletterMailMessage InitializeMessage()
+    {
+        var message = new NewsletterMailMessage
+        {
+            //AddressList = _customerService.GetAllMailAddresses(), //assume more than 2000
+            NewsLetter = new NewsletterModel
+            {
+                MailSubject = "Daily Newsletter of Contoso Corp.",
+                HtmlContent = "Lorem ipsum dolor sit amet, et nam mucius docendi hendrerit, an usu decore mandamus. Ei qui quod decore, cum nulla nostrud erroribus ut, est eu aperiri interesset. Legere mentitum per an. Hinc legimus nostrum cu vix."
+            },
+            PublishedTime = DateTime.Now,
+            QueueId = Guid.NewGuid()
+        };
+
+        Console.WriteLine("Message published !\nSubject : " + message.NewsLetter.MailSubject + "\nPublished at : " + message.PublishedTime + "\nQueueId : " + message.QueueId);
+        return message;
+    }&lt;/pre&gt;
+&lt;p&gt;Son adım olarak main fonksiyonu i&amp;ccedil;erisinde bu iki metodu call ederek message'ı queue'ya push edip publisher projemizdeki işlemleri bitirelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   static void Main(string[] args)
+   {
+       var busControl = InitializeBus();
+       busControl.Start();
+       Console.WriteLine("Started publishing.");
+
+       var message = InitializeMessage();
+
+       busControl.Publish(message);
+       Console.ReadLine();
+   }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;2-) RMQCosnumer&lt;/h3&gt;
+&lt;p&gt;Sırada son adım olan consumer projesini oluşturma var. Consumer publisher'ın g&amp;ouml;nderdiği message'ları dinleyerek ilgili queue i&amp;ccedil;in consume etmeden sorumlu.&amp;nbsp;Projeyi oluşturduktan sonra nuget &amp;uuml;zerinden package manager console kullanarak aşağıdaki masstransit.rabbitmq paketini&amp;nbsp;y&amp;uuml;kleyelim.&lt;/p&gt;
+&lt;h4&gt;Masstransit.RabbitMQ&lt;/h4&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&amp;nbsp;Install-Package MassTransit.RabbitMQ&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Bu paket ile birlikte rabbitmq i&amp;ccedil;in kullanılan masstransit k&amp;uuml;t&amp;uuml;phanesi onun dependency'leri projemize kurulmuş olacak.&lt;/p&gt;
+&lt;p&gt;Kurulum tamamlandıktan sonra RMQConsumer projesini RMQPublisher projesine reference olarak ekleyelim. Ekleme nedenimiz&amp;nbsp;NewsletterMailMessage.cs modelini kullanabilmek.&lt;/p&gt;
+&lt;p&gt;İlk olarak rabbitmq ile connection sağlama ve hangi queue kullanılacak gibi konfigurasyonları Pragram.cs i&amp;ccedil;erisine tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    static void Main(string[] args)
+    {
+        var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =&amp;gt;
+        {
+            var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =&amp;gt;
+            {
+                h.Username("guest");
+                h.Password("guest");
+            });
+
+            cfg.ReceiveEndpoint(host, "DailyNewsletterMail", e =&amp;gt;
+            e.Consumer&amp;lt;NewsletterMailMessageConsumer&amp;gt;());
+        });
+
+        busControl.Start();
+        Console.WriteLine("Started consuming.");
+        Console.ReadLine();
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki kod bloğu şunu s&amp;ouml;yl&amp;uuml;yor; eğer rabbitmq local makinamızda kurulu ise&amp;nbsp;adresi&amp;nbsp;&lt;strong&gt;rabbitmq://localhost/&lt;/strong&gt; şeklindedir ve default userName-password &lt;strong&gt;guest&lt;/strong&gt; olarak gelmektedir. Queue ismi olarak&amp;nbsp;&lt;strong&gt;DailyNewsletterMail&lt;/strong&gt; verdik ve bu queue i&amp;ccedil;in consume edilecek olan message da&amp;nbsp;&lt;strong&gt;NewsletterMailMessageConsumer&lt;/strong&gt; şeklinde belirttik.&lt;/p&gt;
+&lt;p&gt;Şimdi ise&amp;nbsp;NewsletterMailMessageConsumer.cs adında message objemizi consume edecek olan kısmı&amp;nbsp;geliştirelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class NewsletterMailMessageConsumer : IConsumer&amp;lt;NewsletterMailMessage&amp;gt;
+{
+    public Task Consume(ConsumeContext&amp;lt;NewsletterMailMessage&amp;gt; context)
+    {
+        var message = context.Message;
+        message.ConsumedTime = DateTime.Now;
+
+        Console.WriteLine("Message consumed !\nSubject : " + message.NewsLetter.MailSubject + "\nConsumed at: " + message.ConsumedTime + "\nQueueId : " + message.QueueId);
+
+        //todo send mail impr.
+
+        return context.CompleteTask;
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki kod blou şunu anlatıyor;&amp;nbsp;NewsletterMailMessageConsumer adında IConsumer interface'inin implement eden ve bu implementasyon sonucunda Consume metoduna sahip olan bir consumer'ı mız var. Bu consumer&amp;nbsp;&lt;strong&gt;DailyNewsletterMail &lt;/strong&gt;queue'suna gelen&amp;nbsp;&lt;strong&gt;NewsletterMailMessage&lt;/strong&gt;&amp;nbsp;modelini consume eder.&lt;/p&gt;
+&lt;p&gt;Sırasıyla Consumer'ı ve Publisher'ı&amp;nbsp;run ettiğimizde ilk olarak rmq management-console da&amp;nbsp;DailyNewsletterMail queue'su aşağıdaki gibi listelenecektir.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/rmq_manag_console_dailnewsletter.png" alt="" width="752" height="260" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;Publisher ve Consumer projelerinin ayrı ayrı console &amp;ccedil;ıktıları ise aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2017/rmq_masstransit_publish_consumer_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Yukarıda aynı QueueId ye ait message'ımız publisher dan&amp;nbsp;&amp;ccedil;ıkıp consumer'a ulaştığı bilgisini yukarıdaki gibi g&amp;ouml;r&amp;uuml;yoruz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;&amp;nbsp;&lt;/h3&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;http://looselycoupledlabs.com/2014/06/masstransit-publish-subscribe-example/&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-09-29 21:59:00</pubDate>
+  <lastModified>2017-09-13 05:40:07</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>rabbitmq-nedir-masstransit-kullanarak-publisher-consumer-yapisi</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

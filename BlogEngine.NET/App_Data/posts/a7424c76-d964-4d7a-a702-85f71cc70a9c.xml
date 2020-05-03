@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Sharepoint Callout Position Problem</title>
+  <description>I don't know why but I had this problem when I display Search Results. The position of the callout p</description>
+  <content>&lt;p&gt;I don't know why but I had this problem when I display Search Results. The position of the callout popup did not work what ıt was expected.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="http://cdn-eliostruyf.azureedge.net/wp-content/uploads/2013/01/012313_0821_SearchHover1.png" alt="" width="363" height="174" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;To solve this problem modified "ms-wpContentDivSpace" style in core15.js has &lt;strong&gt;position:relative&lt;/strong&gt;, which breaks the hover placement. Overriding that as &lt;strong&gt;position:inherit&lt;/strong&gt; in custom CSS works around and solved the problem.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="http://cdn-eliostruyf.azureedge.net/wp-content/uploads/2013/01/012313_0821_SearchHover2.png" alt="" width="364" height="171" /&gt;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-05-16 17:13:00</pubDate>
+  <lastModified>2020-01-20 08:22:28</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Sharepoint-Callout-Position-Problem</slug>
+  <tags />
+  <comments />
+  <categories>
+    <category>0b1e407c-eda9-4959-8552-c6da2babf29d</category>
+  </categories>
+  <notifications />
+</post>

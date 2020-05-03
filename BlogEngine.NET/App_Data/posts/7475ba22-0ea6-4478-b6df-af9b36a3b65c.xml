@@ -1,0 +1,493 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>teasdasda 4</title>
+  <description>&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+namespace Halkbank.Common.CoreValidation
+{
+    public interface I</description>
+  <content>&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;using System;
+using System.Linq;
+using System.Threading.Tasks;
+using&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;using System;
+using System.ServiceModel;
+using TestBank.WCF.PartialServices;
+using TestLabLabs.Torc.CoreFramework.Managers;
+
+namespace TestBank.WCF.ServiceOperations
+{
+    public class ServiceOperations&amp;lt;T&amp;gt; where T : IClientBase&amp;lt;T&amp;gt;, ICommunicationObject, new()
+    {
+        private T _client;
+        public ServiceOperations()
+        {
+            _client = new T();
+            _client.Instance();           
+            _client.Open();
+        }
+
+        public TResult Execute&amp;lt;TResult&amp;gt;(Func&amp;lt;T, TResult&amp;gt; operation) where TResult : class
+        {
+            TResult result = default(TResult);
+            try
+            {
+                result = operation(_client);
+                _client.Close();
+            }
+            catch (CommunicationException ex)
+            {
+                Logger("Connection Failed !", ex);
+
+                _client.Abort();
+            }
+            catch (TimeoutException ex)
+            {
+                Logger("Timeout Error !", ex);
+
+                _client.Abort();
+
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                Logger("An error occured !", ex);
+
+                _client.Abort();
+            }
+
+            return result;
+        }
+
+        private void Logger(string message, Exception ex)
+        {
+            LogManager.Instance.Clear();
+            LogManager.Instance.DBlog.Error("HB MobileService Exception : " + message, ex);
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;&lt;br /&gt;k.Common.CoreValidation; using TestBank.Common.Helper; using TestBank.Common.Helper.ResourceHelper; using TestBank.Entity; using TestBank.Manager; using TestBank.Model.Common; using TestBank.WCF.MobileService; using log4net; using Newtonsoft.Json; using PostSharp.Aspects; using TestLabLabs.Torc.CoreFramework.Context; using LogManager = TestLabLabs.Torc.CoreFramework.Managers.LogManager; namespace TestBank.Common.Aspects { [Serializable] public class TracingAttribute : OnMethodBoundaryAspect { private TransactionCallMethodTypeEnum _methodType; public TracingAttribute(TransactionCallMethodTypeEnum type) { _methodType = type; } public TracingAttribute() { _methodType = TransactionCallMethodTypeEnum.Undefined; } public override void OnException(MethodExecutionArgs args) { var serviceContext = args.Arguments.GetArgument(0) as ServiceContext; try { string userId = string.Empty, deviceType = string.Empty; if (serviceContext != null) { serviceContext.Response.Message = ExceptionHelper.GetRelatedExceptionMessage(args); serviceContext.Response.StatusCode = ExceptionHelper.GetRelatedStatusCode(args); if (serviceContext.Session != null) { var session = serviceContext.Session.UserSessionObject as TestBankSession; if (session != null) { ExceptionHelper.ClearSession(args, session, serviceContext); userId = session.MobileTransactionHeader.userField.customerIdField; deviceType = serviceContext.Session.DeviceInformation.DeviceOSType; } } } GlobalContext.Properties["UserId"] = userId; GlobalContext.Properties["DeviceType"] = deviceType; GlobalContext.Properties["MachineName"] = Environment.MachineName; LogManager.Instance.DBlog.Error(ExceptionHelper.GetAllParameters(args), args.Exception); } catch { serviceContext.Response.Message = GlobalResource.GetValue("SystemErrorMessage"); serviceContext.Response.StatusCode = (int)ClientStatusCode.Failure; } } public override void OnEntry(MethodExecutionArgs args) { if (args.Arguments.Any()) { var serviceContext = args.Arguments.GetArgument(0) as ServiceContext; var  = serviceContext.Session.UserSessionObject as TestBankSession; var request = serviceContext.Request.Data[0]; ValidationFluent validtor = new ValidationFluent(serviceContext, , args, request); validtor.CheckSessionExpire() .CheckNullRequestOrSession() .CheckValidRequest(); } AuditLog(args, ServiceType.Request); } public override void OnExit(MethodExecutionArgs args) { var context = args.Arguments.GetArgument(0) as ServiceContext; context.Session.CreatedDate = DateTime.Now; AuditLog(args, ServiceType.Response); } private void AuditLog(MethodExecutionArgs args, ServiceType serviceType) { ServiceLogManager _serviceLogManager = new ServiceLogManager(); var context = args.Arguments.GetArgument(0) as ServiceContext; var session = context.Session.UserSessionObject as TestBankSession; try { if (session != null) { object requestData = context.Request.Data.Any() ? (object)context.Request.Data : context.Request; object responseData = context.Response.Data.Any() ? (object)context.Response.Data : context.Response; ServiceLog entity = new ServiceLog(); entity.UserId = session.MobileTransactionHeader.userField.customerIdField; entity.DeviceType = context.Session.DeviceInformation.DeviceOSType; entity.MethodName = context.Request.Data[0].ToString(); entity.MethodType = _methodType.ToString(); entity.Data = serviceType == ServiceType.Request ? JsonConvert.SerializeObject(requestData) : JsonConvert.SerializeObject(responseData); entity.DataType = serviceType.ToString(); entity.UniqueKey = session.MobileTransactionHeader.uniqueKeyField; entity.MachineName = Environment.MachineName; entity.CreateDate = DateTime.Now; var auditLogger = Task.Factory.StartNew(() =&amp;gt; _serviceLogManager.Add(entity)); auditLogger.Wait(); } } catch (Exception ex) { GlobalContext.Properties["UserId"] = session.MobileTransactionHeader.userField.customerIdField; GlobalContext.Properties["DeviceType"] = context.Session.DeviceInformation.DeviceOSType; GlobalContext.Properties["MachineName"] = Environment.MachineName; LogManager.Instance.DBlog.Error("TestBank AuditLog Exception : " + ex.Message, ex); _serviceLogManager.Dispose(); } } } }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; public partial class MobileServiceClient : IClientBase&amp;lt;MobileServiceClient&amp;gt;
+    {
+        public MobileServiceClient Instance()
+        {            
+            base.ClientCredentials.UserName.UserName = CommonSecurityFunctions.DecryptRijandaelData(ConfigurationManager.AppSettings["userName"]);
+            base.ClientCredentials.UserName.Password = CommonSecurityFunctions.DecryptRijandaelData(ConfigurationManager.AppSettings["password"]);
+
+            return this;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:html;auto-links:false;toolbar:false" contenteditable="false"&gt;    public interface IClientBase&amp;lt;T&amp;gt;
+    {
+        T Instance();
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;namespace TestBank.Common.CoreValidation
+{
+    public interface IValidationFluent&amp;lt;T&amp;gt;
+    {
+        T IsSucceeded();
+
+        T NotNull();
+
+        T IsSuccess();
+
+        T HasWarning();
+
+        T CheckSessionExpire();
+
+        T CheckNullRequestOrSession();
+
+        T CheckValidRequest();
+    }
+}
+
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;using System;
+using System.Linq;
+using TestBank.Common.Exceptions;
+using TestBank.Common.Helper;
+using TestBank.Common.Helper.ResourceHelper;
+using TestBank.Common.Session.Utility;
+using TestBank.Data;
+using PostSharp.Aspects;
+using TestLabLabs.Torc.CoreFramework.Context;
+
+namespace TestBank.Common.CoreValidation
+{
+    public class ValidationFluent : IValidationFluent&amp;lt;ValidationFluent&amp;gt;
+    {
+        private ServiceContext _context { get; set; }
+        private BaseResponse _response { get; set; }
+        private TestBankSession _session { get; set; }
+        private MethodExecutionArgs _args { get; set; }
+        private object _request { get; set; }
+        private dynamic _command { get; set; }
+        public bool IsValid { get; set; }
+
+        public ValidationFluent(ServiceContext context,
+            BaseResponse response,
+            dynamic command)
+        {
+            IsValid = true;
+            _context = context;
+            _command = command;
+            _response = response;
+        }
+
+        public ValidationFluent(ServiceContext context,
+            TestBankSession session,
+            MethodExecutionArgs args, object request)
+        {
+            _context = context;
+            _session = session;
+            _args = args;
+            _request = request;
+        }
+
+        public ValidationFluent IsSucceeded()
+        {
+            if (!_command.Result.Succeeded)
+            {
+                _context.Response.StatusCode = (int)ClientStatusCode.Failure;
+                _context.Response.Message = GlobalResource.GetValue("SystemErrorMessage");
+
+                IsValid = false;
+            }
+            return this;
+        }
+
+        public ValidationFluent NotNull()
+        {
+            if (_response == null)
+            {
+                _context.Response.StatusCode = (int)ClientStatusCode.RedirectToModule;
+                _context.Response.Message = GlobalResource.GetValue("SystemErrorMessage");
+
+                IsValid = false;
+            }
+            return this;
+        }
+
+        /// &amp;lt;summary&amp;gt;
+        /// &amp;lt;para&amp;gt;IsValid might be true.It's not  always false.&amp;lt;/para&amp;gt;
+        /// &amp;lt;para&amp;gt;isValid is default false.&amp;lt;/para&amp;gt;       
+        /// &amp;lt;/summary&amp;gt;
+        public ValidationFluent IsSuccess()
+        {
+            if (!_response.VeriBranch.IsSuccess)
+            {
+                IsValid = ValidationUtility.ParseError(_context, _response, false);
+            }
+
+            return this;
+        }
+
+        public ValidationFluent HasWarning()
+        {
+            if (_response.VeriBranch.Warning.Codes.Any())
+            {
+                ValidationUtility.InitializeWarning(_context, _response); //TODO degistir
+            }
+
+            return this;
+        }
+
+        public ValidationFluent CheckSessionExpire()
+        {
+            if (!EnumHelper.GetNonBankingList().Contains(_context.Request.MethodID))
+            {
+                SessionUtility.CheckSessionDuration(_context);
+            }
+
+            return this;
+        }
+
+        public ValidationFluent CheckNullRequestOrSession()
+        {
+            if (ExceptionHelper.ConvertType(_request, _args) == null || _context.Session == null)
+            {
+                _context.Response.Message = GlobalResource.GetValue("SystemRestartMessage");
+                _context.Response.StatusCode = (int)ClientStatusCode.RedirectSplash;
+
+                throw new NullReferenceException("Request Or Session Data can not be NULL");
+            }
+
+            return this;
+        }
+
+        public ValidationFluent CheckValidRequest()
+        {
+            if (_session != null &amp;amp;&amp;amp; !EnumHelper.GetMethodIdList().Contains(_context.Request.MethodID))
+            {
+                if (!_session.IsLoggedIn)
+                {
+                    throw new InvalidRequestException("Invalid Request.");                    
+                }
+            }
+            else if (_session == null &amp;amp;&amp;amp; !EnumHelper.GetNonBankingList().Contains(_context.Request.MethodID))
+            {
+                throw new InvalidRequestException("Invalid Request.");
+            }
+
+            return this;
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;  [Tracing]
+        public override void MethodBody(ServiceContext context)
+        {
+            var cmd = new AccountListCommand((TestBankSession)context.Session.UserSessionObject);
+            var response = TContext.ExecuteCommand(cmd);
+
+            ValidationFluent validator = new ValidationFluent(context, response.Result, cmd);
+            validator.IsSucceeded()
+                .NotNull()
+                .IsSuccess()
+                .HasWarning();
+
+            if (validator.IsValid)
+            {
+                context.Response.Data.Add(response.Result);
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;using System;
+using TestBank.Entity;
+using TestBank.Repository.ServiceLogRepository;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace TestBank.Manager
+{
+    public class ServiceLogManager : BaseManager&amp;lt;ServiceLog&amp;gt;, IDisposable
+    {
+        private ServiceLogRepository _serviceLogRepository;
+
+        public ServiceLogManager()
+        {
+            _serviceLogRepository = new ServiceLogRepository();
+        }
+
+        public override List&amp;lt;ServiceLog&amp;gt; Select()
+        {
+            return _serviceLogRepository.Select().ToList();
+        }
+        public override void Add(ServiceLog entity)
+        {            
+            _serviceLogRepository.Add(entity);
+        }
+        public override ServiceLog Get(int id)
+        {
+            return _serviceLogRepository.Get(x =&amp;gt; x.ID == id);
+        }
+        public override void Update(ServiceLog entity)
+        {
+            _serviceLogRepository.Update(entity);
+        }
+        public override void Delete(ServiceLog entity)
+        {
+            _serviceLogRepository.Delete(entity);
+        }
+        public void Dispose()
+        {
+            _serviceLogRepository.Dispose();
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using TestBank.Entity;
+using TestBank.Repository.CoreRepository;
+
+namespace TestBank.Repository.ServiceLogRepository
+{
+    public class ServiceLogRepository : BaseRepository&amp;lt;ServiceLog&amp;gt;
+    {
+
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;using System;
+using System.Configuration;
+using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
+using System.Linq;
+using System.Linq.Expressions;
+using TestBank.Entity;
+using TestLabLabs.Torc.Common;
+using System.Threading.Tasks;
+
+namespace TestBank.Repository.CoreRepository
+{
+    public abstract class BaseRepository&amp;lt;T&amp;gt; : IRepository&amp;lt;T&amp;gt; where T : class
+    {
+        private TorcDatabaseEntities _context;
+
+        protected BaseRepository()
+        {
+            _context = new TorcDatabaseEntities
+            (CommonSecurityFunctions.DecryptRijandaelData(ConfigurationManager.ConnectionStrings["TorcDatabaseEntities"].ConnectionString));
+        }
+
+        public virtual void Add(T entity)
+        {
+            _context.Set&amp;lt;T&amp;gt;().Add(entity);
+            _context.SaveChanges();
+        }
+
+        public virtual void Update(T entity)
+        {
+            _context.Entry(entity).State = EntityState.Modified;
+            _context.SaveChanges();
+        }
+
+        public virtual void Delete(T entity)
+        {
+            _context.Entry(entity).State = EntityState.Deleted;
+            _context.SaveChanges();
+        }
+
+        public virtual T Get(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; predicate)
+        {
+            var result = _context.Set&amp;lt;T&amp;gt;().Where(predicate).FirstOrDefault();
+            return result;
+        }
+
+        public virtual IQueryable&amp;lt;T&amp;gt; GetWith(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; predicate, params string[] includededEntities)
+        {
+            var query = _context.Set&amp;lt;T&amp;gt;().AsQueryable&amp;lt;T&amp;gt;();
+
+            query = includededEntities.Aggregate(query, (current, fk) =&amp;gt; current.Include(fk));
+
+            var result = query.Where(predicate);
+
+            return result;
+
+        }
+
+        public IQueryable&amp;lt;T&amp;gt; Select()
+        {
+            var list = _context.Set&amp;lt;T&amp;gt;().Select(x =&amp;gt; x).AsQueryable();
+
+            return list;
+        }
+
+        public virtual void Dispose()
+        {
+            _context.Dispose();
+        }
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+
+namespace TestBank.Repository.CoreRepository
+{
+    public interface IRepository&amp;lt;T&amp;gt; : IDisposable
+    {
+        void Add(T entity);        
+        void Update(T entity);
+        void Delete(T entity);
+        T Get(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; predicate);
+        IQueryable&amp;lt;T&amp;gt; GetWith(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; predicate, params string[] includededEntities);
+        IQueryable&amp;lt;T&amp;gt; Select();
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;using System.Collections.Generic;
+
+namespace TestBank.Manager
+{
+    public abstract class BaseManager&amp;lt;T&amp;gt;
+    {
+        public abstract List&amp;lt;T&amp;gt; Select();
+        public abstract void Add(T entity);
+        public abstract T Get(int id);
+        public abstract void Update(T entity);
+        public abstract void Delete(T entity);
+    }
+}
+&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;namespace TestBank.Entity
+{
+    using System;
+    using System.Collections.Generic;
+    
+    public partial class ServiceLog
+    {
+        public int ID { get; set; }
+        public string UserId { get; set; }
+        public string DeviceType { get; set; }
+        public string MethodName { get; set; }
+        public string MethodType { get; set; }
+        public string Data { get; set; }
+        public string DataType { get; set; }
+        public string UniqueKey { get; set; }
+        public Nullable&amp;lt;System.DateTime&amp;gt; CreateDate { get; set; }
+        public string MachineName { get; set; }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;br /&gt; container.AddFacility&amp;lt;TypedFactoryFacility&amp;gt;();&lt;/p&gt;
+&lt;pre class="brush:html;auto-links:false;toolbar:false" contenteditable="false"&gt;            container.Register(Component.For&amp;lt;IApiServiceFactory&amp;gt;().AsFactory());
+
+
+    /// &amp;lt;summary&amp;gt;
+    /// creates lazy loaded services and automatically releases these after operation completed 
+    /// there is no implementation, windsor creates implementation itself
+    /// &amp;lt;/summary&amp;gt;
+    public interface IApiServiceFactory
+    {
+        /// &amp;lt;summary&amp;gt;
+        /// creates IBankHolidayService
+        /// &amp;lt;/summary&amp;gt;
+        /// &amp;lt;returns&amp;gt;&amp;lt;/returns&amp;gt;
+        IBankHolidayService CreateBankHolidayService();
+
+        /// &amp;lt;summary&amp;gt;
+        /// releases IBankHolidayService
+        /// &amp;lt;/summary&amp;gt;
+        /// &amp;lt;param name="service"&amp;gt;&amp;lt;/param&amp;gt;
+        void Release(IBankHolidayService service);
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-06-22 20:19:00</pubDate>
+  <lastModified>2017-06-25 10:52:40</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>teasdasda</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

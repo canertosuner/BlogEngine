@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>C# Indexer Nedir</title>
+  <description>Indexer özel tanımlı bir property'dir ve sadece class içerisinde tanımlanabilir. Tanımlandığı class'a indexlenebilir özelliği kazandırır. Array işlemlerinde kullandığımız [ ] operatörünü tanımlamış olduğumuz bir</description>
+  <content>&lt;p&gt;Indexer &amp;ouml;zel tanımlı bir property'dir ve sadece class i&amp;ccedil;erisinde tanımlanabilir. Tanımlandığı class'a indexlenebilir &amp;ouml;zelliği kazandırır. Array işlemlerinde kullandığımız &lt;strong&gt;[ ]&lt;/strong&gt;&amp;nbsp;operat&amp;ouml;r&amp;uuml;n&amp;uuml; tanımlamış olduğumuz bir class'ı diziymiş gibi işlemler yapabilmek i&amp;ccedil;inde kullanabiliriz. &amp;Ouml;rneğin Department diye bir class olsun ve departman isimlerini &amp;ouml;nce ayrı bir array i&amp;ccedil;erisinde sonrada indexer yardımıyla class i&amp;ccedil;erisinde tutalım.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;nce &amp;ccedil;alışan isimlerini ayrı bir List array'de kullanmak istediğimizde nasıl yazıyoruz ona bakalım.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;	public static void Main()
+	{
+		var arr = new List&amp;lt;string&amp;gt;();
+		arr[0]="Bilgi İşlem";
+		arr[1]="Proje Y&amp;ouml;netimi";
+		arr[2]="Analiz";
+		arr[3]="İş Geliştirme";
+		arr[4]="Destek Sistemler";	
+	}&lt;/pre&gt;
+&lt;p&gt;Yukarıda da olduğu gibi gayet basit bir şekilde bir List tanımlayıp departman isimlerini bu List'in i&amp;ccedil;ine attık.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Indexer kullanarak bunu nasıl yapardık birde ona bakalım,&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; 	public static void Main()
+	{
+		Department dprt = new Department();
+		
+		dprt[0]="Bilgi İşlem";
+		dprt[1]="Proje Y&amp;ouml;netimi";
+		dprt[2]="Analiz";
+		dprt[3]="İş Geliştirme";
+		dprt[4]="Destek Sistemler";	
+		
+		Console.WriteLine(dprt[4]); //Destek Sistemler
+	}
+
+	public class Department
+	{
+		public string Name { get; set; }
+		public int ID { get; set; }
+
+		//indexer tanımlaması
+		private string []names = new string[5]; 
+		public string this [int index] 
+		{ 
+		   get 
+		   { 
+			   return names[index]; 
+		   } 
+		   set 
+		   { 
+			   names[index] = value; 
+		   } 
+		} 
+	}&lt;/pre&gt;
+&lt;p&gt;Yukarıda da g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre Department class'ımıza indexer kullanarak indexlenebilir &amp;ouml;zelliği kazandırdık ve &lt;strong&gt;[ ] &lt;/strong&gt;kullanarak tıpkı array kullanıyormuş gibi değer atama ve değer okuma işlemlerini yapabildik&lt;/p&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi bir class i&amp;ccedil;erisinde property tanımlar gibi indexer tanımlayabiliyoruz. D&amp;uuml;ş&amp;uuml;n&amp;uuml;ld&amp;uuml;ğ&amp;uuml;nde &amp;ccedil;ok gerek duyulan bir &amp;ouml;zellik değil gibi duruyor &amp;ccedil;&amp;uuml;nk&amp;uuml; genelde başka şekilde ihtiyacımızı g&amp;ouml;r&amp;uuml;yoruz ama ama &amp;ouml;rnek olarak Ado.net ile uğraşan arkadaşlar SqlDataReader class'ını bilirler database'den den belli bir column'da bulunan değeri okumak i&amp;ccedil;in aşağıdaki gibi &lt;strong&gt;dr["Name"]&lt;/strong&gt; yazarak o değere ulaşmamızı sağlar bunu yapabilmemizin sebebi&amp;nbsp;SqlDataReader class'ı i&amp;ccedil;erisinde indexer tanımlandığından dolayı [ ] diyerek get işlemi yapabildik&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;SqlDataReader dr = cmd.ExecuteReader();  
+ArrayList names= new ArrayList();  
+while (dr.Read())  
+{  
+     names.Add(dr["Name"]); //SqlDataReader class'ı i&amp;ccedil;erisinde indexer tanımlandığından dolayı [ ] diyerek get işlemi yapabildik &lt;/pre&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;}  &lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2015-09-17 23:55:00</pubDate>
+  <lastModified>2020-03-11 05:06:15</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>C-Indexer-Nedir</slug>
+  <tags>
+    <tag>indexer</tag>
+    <tag>indexers</tag>
+    <tag>methods</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

@@ -1,0 +1,77 @@
+.widget.administration {
+    ul {
+        li {
+            margin-bottom: .5rem;
+
+            a {
+                &::before {
+                    font-size: 14px !important;
+                    margin-right: 1rem;
+                }
+            }
+
+            &:nth-child(1) {
+                a {
+
+                    &::before {
+                        @include icon("\f009");
+                    }
+                }
+            }
+
+            &:nth-child(2) {
+                a {
+
+                    &::before {
+                        @include icon("\f039");
+                    }
+                }
+            }
+
+            &:nth-child(3) {
+                a {
+
+                    &::before {
+                        @include icon("\f1de");
+                    }
+                }
+            }
+
+            &:nth-child(4) {
+                a {
+
+                    &::before {
+                        @include icon("\f013");
+                    }
+                }
+            }
+
+            &:nth-child(5) {
+                a {
+
+                    &::before {
+                        @include icon("\f007");
+                    }
+                }
+            }
+
+            &:nth-child(6) {
+                a {
+
+                    &::before {
+                        @include icon("\f023");
+                    }
+                }
+            }
+
+            &:nth-child(7) {
+                a {
+
+                    &::before {
+                        @include icon("\f011");
+                    }
+                }
+            }
+        }
+    }
+}

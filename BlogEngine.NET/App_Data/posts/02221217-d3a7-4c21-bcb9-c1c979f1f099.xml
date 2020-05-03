@@ -1,0 +1,281 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Unit Testing Database and Repository, In Memory Database Kullanımı</title>
+  <description>Entity framework core'un klasik entity framework'e kıyasla oldukça performanslı olmasıyla birlikte bazı artılarının olduğundan bahsetmiştik. Bu artılardan birisi de in-memory database option sunması (EF 6.1 ve sonrası içinde mevcut). Bu feature'dan önce repository'ler için unit test..</description>
+  <content>&lt;p&gt;Asp.Net Core uygulamalarında unit test nedir nasl yazılır gibi konulara daha &lt;a href="/post/asp-net-core-unit-test"&gt;&amp;ouml;nceki&amp;nbsp;yazımızda&lt;/a&gt; değinmiştik. O yazıdaki &amp;ouml;rnekte controller ve service layer'lar i&amp;ccedil;in nasıl unit test metotları yazabiliriz &amp;ouml;ğrenmiştik. Bu yazımızda ise bir diğer layer olan repository katmanı i&amp;ccedil;in entity framework kullanılan bir projede nasıl unit test metotları yaratabiliriz inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;Entity framework core'un klasik entity framework'e kıyasla olduk&amp;ccedil;a performanslı olmasıyla birlikte bazı artılarının olduğundan bahsetmiştik. Bu artılardan birisi de in-memory database option sunması (EF 6.1 ve sonrası i&amp;ccedil;inde mevcut). Bu feature'dan &amp;ouml;nce repository'ler i&amp;ccedil;in unit test metotları yazmak istediğimizde Entity'lerin bulunduğu fake DbSet oluşturarak fake database ve tablolarını yaratmamız gerekiyordu. Yukarıda da belirttiğimiz &amp;uuml;zre entity framework core ile birlikte in-memory database oluşturarak kolayca unit test sınıfları oluşturabiliriz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek projemiz &amp;uuml;zerinden ilerleyecek olursak; bir tane asp.net core web application'ımız var ve sahip olduğu&amp;nbsp;CustomerDbContext adında ki dbcontex'i kullanarak dışarıya end-point'ler a&amp;ccedil;makta. Hızlıca&amp;nbsp;CustomerDbContext sınıfına bakacak olursak;&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class CustomerDbContext : DbContext
+{
+    public CustomerDbContext (DbContextOptions&amp;lt;CustomerDbContext &amp;gt; options)
+        : base(options)
+    {
+    }
+
+    public DbSet&amp;lt;Customer&amp;gt; Customer{ get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Startup.cs sınıfı i&amp;ccedil;erisinde bulunan ConfigureServices metodunda ise&amp;nbsp;CustomerDbContext'i constructor inejction uygulayarak base repository sınıfına taşıyacağımızdan context service olarak built-in container'a register edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddDbContext&amp;lt;CustomerDbContext &amp;gt;(options =&amp;gt;
+        options.UseSqlServer(Configuration.GetSection("CustomerDbConnString").Value));
+
+    services.AddScoped&amp;lt;ICustomerRepository, CustomerRepository&amp;gt;();
+
+    services.AddMvc();
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıdaki kod bloğunu basit bir şekilde anlatmak gerekirse,appsettings.json dosyasında yer alan connString adresini kullanarak&amp;nbsp;CustomerDbContext'i bir sqlServer instance'ı ile ilişkilendirerek ayağa kaldırır.&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false"&gt;{
+  "CustomerDbConnString": "Server=.;Initial Catalog=Customerdb;Persist Security Info=False;User ID=Customeruser;Password=qwerty135-;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
+}&lt;/pre&gt;
+&lt;p&gt;Amacımız CustomerRepository sınıfı i&amp;ccedil;in unit testler yazmak. GenericRepository pattern&amp;nbsp;tercih etmiş olalım ve ilgili repository layer sınıflarımız aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface IGenericRepository&amp;lt;T&amp;gt; where T : class, IEntity
+{
+    Guid Save(T entity);
+    T Get(Guid id);
+    void Update(T entity);
+    void Delete(Guid id);
+    IQueryable&amp;lt;T&amp;gt; All();
+    IQueryable&amp;lt;T&amp;gt; Find(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; predicate);
+}&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public abstract class GenericRepository&amp;lt;T&amp;gt; : IGenericRepository&amp;lt;T&amp;gt; where T : Entity
+{
+    private readonly CustomerDbContext _dbContext;
+    private readonly DbSet&amp;lt;T&amp;gt; _dbSet;
+
+    protected GenericRepository(CustomerDbContext dbContext)
+    {
+        this._dbContext = dbContext;
+        this._dbSet = _dbContext.Set&amp;lt;T&amp;gt;();
+    }
+
+    public Guid Save(T entity)
+    {
+        entity.Id = Guid.NewGuid();
+        _dbSet.Add(entity);
+        _dbContext.SaveChanges();
+        return entity.Id;
+    }
+
+    public T Get(Guid id)
+    {
+        return _dbSet.Find(id);
+    }
+
+    public void Update(T entity)
+    {
+        _dbSet.Attach(entity);
+        _dbContext.Entry(entity).State = EntityState.Modified;
+        _dbContext.SaveChanges();
+    }
+
+    public void Delete(Guid id)
+    {
+        var entity = Get(id);
+        _dbSet.Remove(entity);
+        _dbContext.SaveChanges();
+    }
+
+    public IQueryable&amp;lt;T&amp;gt; All()
+    {
+        return _dbSet.AsNoTracking();
+    }
+
+    public IQueryable&amp;lt;T&amp;gt; Find(Expression&amp;lt;Func&amp;lt;T, bool&amp;gt;&amp;gt; predicate)
+    {
+        return _dbSet.Where(predicate);
+    }
+}&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface ICustomerRepository : IGenericRepository&amp;lt;Customer&amp;gt;
+{ }
+public class CustomerRepository : GenericRepository&amp;lt;Customer&amp;gt;, ICustomerRepository
+{
+    public CustomerRepository(CustomerDbContext dbContext) : base(dbContext)
+    {
+    }
+}&lt;/pre&gt;
+&lt;p&gt;CustomerDbContext'i constructor inejction uygulayarak base repository sınıfına taşıdık. G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre CRUD işlemleri i&amp;ccedil;in metotları bulunan&amp;nbsp;repository'nin unit testlerini yazacağız. Bunun i&amp;ccedil;in eski&amp;nbsp;usul bir unit test db'si oluşturmak gibi &amp;ccedil;&amp;ouml;z&amp;uuml;mlere gitmeyeceğiz. Bunun yerine nuget &amp;uuml;zerinden indirip kullanabileceğimiz &lt;a href="https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.InMemory"&gt;Microsoft.EntityFrameworkCore.InMemory&lt;/a&gt;&amp;nbsp;k&amp;uuml;t&amp;uuml;phanesini kullanarak projemizde bir in-memory database ayağa kaldırabiliriz. İlgili k&amp;uuml;t&amp;uuml;phaneyi nuget &amp;uuml;zerinden projemiz referanslarına ekleyelim.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/ef_r_inmmry_db_ngt.png" alt="" width="560" height="256" /&gt;&lt;/p&gt;
+&lt;p&gt;Kurulum tamamlandıktan sonra solution'da yeni bir xUnit test projesi oluşturalım ve ilk olarak repository'de ki Save metodu i&amp;ccedil;in aşağıdaki gibi unit-test metodunu yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Fact]
+public void Save_Should_Save_The_Customer_And_Should_Return_All_Count_As_Two()
+{
+    var customer1 = new Domain.Customer("Caner Tosuner", "IST", DateTime.Today.AddYears(28));
+    var customer2 = new Domain.Customer("Caner Tosuner", "IST", DateTime.Today.AddYears(28));
+
+    var options = new DbContextOptionsBuilder&amp;lt;CustomerDbContext&amp;gt;()
+        .UseInMemoryDatabase("customer_db")
+        .Options;
+
+    using (var context = new CustomerDbContext(options))
+    {
+        var repository = new CustomerRepository(context);
+        repository.Save(customer1);
+        repository.Save(customer2);
+        context.SaveChanges();
+    }
+
+    using (var context = new CustomerDbContext(options))
+    {
+        var repository = new CustomerRepository(context);
+        repository.All().Count().Should().Be(2);
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre nuget'ten eklediğimiz k&amp;uuml;t&amp;uuml;phane ile birlikte&amp;nbsp;DbContextOptionsBuilder sınfınının&amp;nbsp;instance'ını alarak extension metot olarak kullanabileceğimiz&amp;nbsp;&lt;strong&gt;UseInMemoryDatabase()&lt;/strong&gt; metodu yer almakta. Bu metot unit test run edilirken bizim dbContext nesnemizle birebir aynı yeni bir in-memory CustomerDbContext sınıfı oluşturmamıza olanak sağlar. CustomerRepositoryTests sınıfının b&amp;uuml;t&amp;uuml;n test metotları ile birlikte son hali aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class CustomerRepositoryTests
+    {
+        [Fact]
+        public void Save_Should_Save_The_Customer_And_Should_Return_All_Count_As_Two()
+        {
+            var customer1 = new Domain.Customer("Caner Tosuner", "IST", DateTime.Today.AddYears(28));
+            var customer2 = new Domain.Customer("Caner Tosuner", "IST", DateTime.Today.AddYears(28));
+
+            var options = new DbContextOptionsBuilder&amp;lt;CustomerDbContext&amp;gt;()
+                .UseInMemoryDatabase("customer_db")
+                .Options;
+
+            using (var context = new CustomerDbContext(options))
+            {
+                var repository = new CustomerRepository(context);
+                repository.Save(customer1);
+                repository.Save(customer2);
+                context.SaveChanges();
+            }
+
+            using (var context = new CustomerDbContext(options))
+            {
+                var repository = new CustomerRepository(context);
+                repository.All().Count().Should().Be(2);
+            }
+        }
+
+        [Fact]
+        public void Delete_Should_Delete_The_Customer_And_Should_Return_All_Count_As_One()
+        {
+            var customer1 = new Domain.Customer("Caner Tosuner", "IST", DateTime.Today.AddYears(28));
+            var customer2 = new Domain.Customer("Caner Tosuner", "IST", DateTime.Today.AddYears(28));
+
+            var options = new DbContextOptionsBuilder&amp;lt;CustomerDbContext&amp;gt;()
+                .UseInMemoryDatabase("customer_db")
+                .Options;
+
+            using (var context = new CustomerDbContext(options))
+            {
+                var repository = new CustomerRepository(context);
+                repository.Save(customer1);
+                repository.Save(customer2);
+                context.SaveChanges();
+            }
+
+            using (var context = new CustomerDbContext(options))
+            {
+                var repository = new CustomerRepository(context);
+                repository.Delete(customer1.Id);
+                context.SaveChanges();
+            }
+
+            using (var context = new CustomerDbContext(options))
+            {
+                var repository = new CustomerRepository(context);
+                repository.All().Count().Should().Be(1);
+            }
+        }
+
+        [Fact]
+        public void Update_Should_Update_The_Customer()
+        {
+            var customer = new Domain.Customer("Caner Tosuner", "IST", DateTime.Today.AddYears(28));
+
+            var options = new DbContextOptionsBuilder&amp;lt;CustomerDbContext&amp;gt;()
+                .UseInMemoryDatabase("customer_db")
+                .Options;
+
+            using (var context = new CustomerDbContext(options))
+            {
+                var repository = new CustomerRepository(context);
+                repository.Save(customer);
+                context.SaveChanges();
+            }
+
+            customer.SetFields("Caner T", "IZM", customer.BirthDate);
+
+            using (var context = new CustomerDbContext(options))
+            {
+                var repository = new CustomerRepository(context);
+                repository.Update(customer);
+                context.SaveChanges();
+            }
+
+            using (var context = new CustomerDbContext(options))
+            {
+                var repository = new CustomerRepository(context);
+                var result = repository.Get(customer.Id);
+
+                result.Should().NotBe(null);
+                result.FullName.Should().Be(customer.FullName);
+                result.CityCode.Should().Be(customer.CityCode);
+                result.BirthDate.Should().Be(customer.BirthDate);
+            }
+        }
+
+        [Fact]
+        public void Find_Should_Find_The_Customer_And_Should_Return_All_Count_As_One()
+        {
+            var customer1 = new Domain.Customer("Caner Tosuner", "IST", DateTime.Today.AddYears(28));
+            var customer2 = new Domain.Customer("Caner Tosuner", "IZM", DateTime.Today.AddYears(28));
+
+            var options = new DbContextOptionsBuilder&amp;lt;CustomerDbContext&amp;gt;()
+                .UseInMemoryDatabase("customer_db")
+                .Options;
+
+            using (var context = new CustomerDbContext(options))
+            {
+                var repository = new CustomerRepository(context);
+                repository.Save(customer1);
+                repository.Save(customer2);
+                context.SaveChanges();
+            }
+
+            using (var context = new CustomerDbContext(options))
+            {
+                var repository = new CustomerRepository(context);
+                var result = repository.Find(c =&amp;gt; c.CityCode == customer1.CityCode);
+                result.Should().NotBeNull();
+                result.Count().Should().Be(1);
+            }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Testlerimizi run ettiğimizde aşağıdaki gibi b&amp;uuml;t&amp;uuml;n repsoitroy metotlarına ait testlerin success olduğunu g&amp;ouml;rebiliriz.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2018/eqqqq_repo_tst_nq1.png" alt="" width="668" height="340" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/canertosuner/Asp.Net-Core-Entity-Framework-Integration-Test-and-Unit-Test-Using-In-Memory-Database"&gt;Source Code&lt;/a&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-08-31 21:07:00</pubDate>
+  <lastModified>2020-01-20 08:22:11</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>asp-net-core-unit-testing-database-with-in-memeory-database</slug>
+  <tags>
+    <tag>asp.net core unit test</tag>
+    <tag>asp.net core repository unit test</tag>
+    <tag>dbcontext unit test</tag>
+    <tag>unit testing repository</tag>
+    <tag>in memory database</tag>
+    <tag>.net core repository unit test</tag>
+    <tag>entity framework core unit test</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>12fb8d4e-b852-4059-a0cb-9565196e4f88</category>
+    <category>018aedb2-84ba-46ad-89f2-2d551bf7c063</category>
+  </categories>
+  <notifications />
+</post>

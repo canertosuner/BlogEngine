@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Windows Phone Add Page Transition to App.xaml</title>
+  <description>In App.xaml
+&amp;lt;Application.Resources&amp;gt;
+        &amp;lt;Style x:Key="TransitionStyle" TargetType="phon</description>
+  <content>&lt;p&gt;In App.xaml&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;Application.Resources&amp;gt;
+        &amp;lt;Style x:Key="TransitionStyle" TargetType="phone:PhoneApplicationPage"&amp;gt;
+            &amp;lt;Setter Property="toolkit:TransitionService.NavigationInTransition"&amp;gt;
+                &amp;lt;Setter.Value&amp;gt;
+                    &amp;lt;toolkit:NavigationInTransition&amp;gt;
+                        &amp;lt;toolkit:NavigationInTransition.Backward&amp;gt;
+                            &amp;lt;toolkit:SlideTransition Mode="SlideDownFadeIn"/&amp;gt;
+                        &amp;lt;/toolkit:NavigationInTransition.Backward&amp;gt;
+                        &amp;lt;toolkit:NavigationInTransition.Forward&amp;gt;
+                            &amp;lt;toolkit:SlideTransition Mode="SlideRightFadeIn"/&amp;gt;
+                        &amp;lt;/toolkit:NavigationInTransition.Forward&amp;gt;
+                    &amp;lt;/toolkit:NavigationInTransition&amp;gt;
+                &amp;lt;/Setter.Value&amp;gt;
+            &amp;lt;/Setter&amp;gt;
+            &amp;lt;Setter Property="toolkit:TransitionService.NavigationOutTransition"&amp;gt;
+                &amp;lt;Setter.Value&amp;gt;
+                    &amp;lt;toolkit:NavigationOutTransition&amp;gt;
+                        &amp;lt;toolkit:NavigationOutTransition.Backward&amp;gt;
+                            &amp;lt;toolkit:SlideTransition Mode="SlideLeftFadeOut"/&amp;gt;
+                        &amp;lt;/toolkit:NavigationOutTransition.Backward&amp;gt;
+                        &amp;lt;toolkit:NavigationOutTransition.Forward&amp;gt;
+                            &amp;lt;toolkit:SlideTransition Mode="SlideUpFadeOut"/&amp;gt;
+                        &amp;lt;/toolkit:NavigationOutTransition.Forward&amp;gt;
+                    &amp;lt;/toolkit:NavigationOutTransition&amp;gt;
+                &amp;lt;/Setter.Value&amp;gt;
+            &amp;lt;/Setter&amp;gt;
+        &amp;lt;/Style&amp;gt;
+&amp;lt;/Application.Resources&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;span style="font-size: medium;"&gt;In MainPage.xaml&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;phone:PhoneApplicationPage
+    Style="{StaticResource TransitionStyle}"
+    x:Class="AcikOgretimDersleri.Views.Sample"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-11-02 21:54:00</pubDate>
+  <lastModified>2020-01-20 08:22:30</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Windows-Phone-Add-Page-Transition-to-Appxaml</slug>
+  <tags>
+    <tag>transition</tag>
+    <tag>app.xaml</tag>
+    <tag>page transition</tag>
+    <tag>Style</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

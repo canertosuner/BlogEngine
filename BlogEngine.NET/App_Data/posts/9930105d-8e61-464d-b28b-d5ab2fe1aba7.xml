@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core HttpClientFactory Kullanımı</title>
+  <description>https://www.infoworld.com/article/3276007/application-development/how-to-work-with-httpclientfactory</description>
+  <content>&lt;p&gt;Bu yazıda Asp.Net Core 2.1 ile birlikte gelen HttpClientFactory sınıfını inceleyeceğiz. Asp.Net Core 2.0 s&amp;uuml;r&amp;uuml;m&amp;uuml;nde HttpClient sınıfı ile ilgili ciddi sorunlar vardı. Bunlardan en bariz olanı connection&amp;nbsp;mangement kısmında yanlış birşeyler olmasıydı. Herhangi bir .net core 2.0 uygulaması &amp;uuml;zerinde HttpClient sınıfını kullanarak bir loop i&amp;ccedil;erisinde call yapıp&amp;nbsp;&lt;strong&gt;netstat&lt;/strong&gt;&amp;nbsp;kontrol&amp;uuml; yaptığınızda socket'lerde TimeWait'ler oluşturduğunu bununda uygulamalarda ciddi sorunlara sebebiyet verdiği g&amp;ouml;zlemlendi. Github'da a&amp;ccedil;ılan issue'lar vs derken Microsoft tarafında geliştirme yapan team sorunları kabul ederek 2.1 versiyonu ile HttpClient'ı yeniden yazacaklarını belirttiler ve 2.1&amp;nbsp;release'den sonra&amp;nbsp;hayatımıza HttpClientFactory sınıfı girdi.&lt;/p&gt;
+&lt;p&gt;HttpClientFactory, doğru memory management'ı yaparak http istekleri yapmamızı sağlan HttpClient sınıfının instance'ını oluşturmak i&amp;ccedil;in kullanılan sınıftır. HttpClient sınıfının &amp;ccedil;ok fazla instance'ını oluşturmak uygulamalar i&amp;ccedil;in maliyetli bir işlemdir. Her yeni bir instance remote server i&amp;ccedil;in yeni bir connection demektir. &amp;Ccedil;o fazla trafiğin olduğu bir uygulamada ise gerektiğinden fazla httpClient instance'ı oluşturmak uygulama i&amp;ccedil;in&amp;nbsp;kullanılabilecek socket'lerin hepsinin t&amp;uuml;ketilmesi demektir ki bunu istemeyiz.&lt;/p&gt;
+&lt;p&gt;Bu sınıf HttpClient instance'larının doğru y&amp;ouml;netilmesini sağlar ve b&amp;ouml;ylelikle&amp;nbsp;yukarıda bahsettiğimiz sorunları &amp;ccedil;&amp;ouml;zd&amp;uuml;ğ&amp;uuml;nden olduk&amp;ccedil;a &amp;ouml;nemli bir feature dır.&lt;/p&gt;
+&lt;p&gt;3 farklı kullanım şekli sunulmuştur;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;HttpClientFactory doğrudan kullanma&lt;/li&gt;
+&lt;li&gt;Named Clients&lt;/li&gt;
+&lt;li&gt;Typed Clients&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Asp.Net Core 2.1 versiyonu ile birlikte HttpClient kullanımı uygulama servislerinde ayrı bir feature olarak sunulmuştur ve bizimde bu sınıfı kullanabilmek i&amp;ccedil;in bu feature'ı uygulamada kullancağımızı belirttiğimiz aşağıdaki kod satırını Startup.cs i&amp;ccedil;erisinde ConfigureServices metoduna yazalım&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;services.AddHttpClient();&lt;/pre&gt;
+&lt;h3&gt;1) HttpClientFactory Sınıfını Doğrudan Kullanarak&lt;/h3&gt;
+&lt;p&gt;ApiController seviyesinden doğrudan HttpClientFactory sınıfını inject ederek ihtiya&amp;ccedil; duyulan yerde httpClient instance'ı yaratbiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class FooController : ControllerBase
+{
+    private readonly IHttpClientFactory _httpClientFactory;
+  
+    public FooController(IHttpClientFactory httpClientFactory)
+    {
+        _httpClientFactory = httpClientFactory;
+    }
+  
+    [HttpGet]
+    public async Task&amp;lt;ActionResult&amp;gt; GetHomePage()
+    {
+        var client = _httpClientFactory.CreateClient();
+        client.BaseAddress = new Uri("https://www.microsoft.com");
+        string result = await client.GetStringAsync("/");
+        return Ok(result);
+    }
+}&lt;/pre&gt;
+&lt;h3&gt;2)&amp;nbsp;Named Clients&lt;/h3&gt;
+&lt;p&gt;Bir diğer kullanım şekli ise ilgili domain'e &amp;ouml;zel name client'lar oluşturmak. &amp;Ouml;rneğin uygulamada &lt;a href="http://www.microsoft.com"&gt;www.microsoft.com&lt;/a&gt;&amp;nbsp; domaininde bulunan adreslere birden fazla request attığınız bir case i&amp;ccedil;in bu domaine &amp;ouml;zel custom client oluşturmak daha performanslı olmakta. Yukarıda kullanıdğımız AddHttpClient&amp;nbsp;HttpClient sınıfını doğrudan kullanmamızı sağladığı i&amp;ccedil;in yazmıştık. NamedClient i&amp;ccedil;inse yine bu metodu bu sefer "microsoft" ismine &amp;ouml;zel bir client tanımlaması olduğundan aşağıdaki gibi yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;services.AddHttpClient("microsoft", c =&amp;gt;
+{
+    c.BaseAddress = new Uri("https://www.microsoft.com");
+    c.DefaultRequestHeaders.Add("Accept", "application/json");
+    c.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-Sample");
+});&lt;/pre&gt;
+&lt;p&gt;Kullanım olarak ise yine apiController i&amp;ccedil;erisinde aşağıdaki gibi "microsoft" ismindeki client'ı factory'den isteyebiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class FooController : ControllerBase
+{
+    private readonly IHttpClientFactory _httpClientFactory;
+  
+    public FooController(IHttpClientFactory httpClientFactory)
+    {
+        _httpClientFactory = httpClientFactory;
+    }
+  
+    [HttpGet]
+    public async Task&amp;lt;ActionResult&amp;gt; GetHomePage()
+    {
+        var client = _httpClientFactory.CreateClient("microsoft");
+        string result = await client.GetStringAsync("/");
+        return Ok(result);
+    }
+}&lt;/pre&gt;
+&lt;h3&gt;3) Typed Clients&lt;/h3&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Uuml;&amp;ccedil;&amp;uuml;nc&amp;uuml; ve son kullanım şekli ise yine ilgili domain'e &amp;ouml;zel custom typed client sınıfı oluşturabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class MicrosoftHttpClient
+{
+    public HttpClient Client { get; private set; }
+    
+    public MicrosoftHttpClient(HttpClient httpClient)
+    {
+        httpClient.BaseAddress = new Uri("https://www.microsoft.com/");
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-Sample");
+        Client = httpClient;
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda oluşturduğumuz bu custom client sınıfını ConfigureServices metodu i&amp;ccedil;erisinde uygulama servislerine aşağıdaki gibi register ederek&amp;nbsp;ihtiya&amp;ccedil; duyduğumuz yerde kullanabiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;services.AddHttpClient&amp;lt;MicrosoftHttpClient&amp;gt;();&lt;/pre&gt;
+&lt;p&gt;Controller i&amp;ccedil;erisinde ise constructor'a&amp;nbsp;MicrosoftHttpClient sınıfını inject etmemiz yeterli.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class FooController : ControllerBase
+{
+    private readonly MicrosoftHttpClient _microsoftHttpClient;
+  
+    public FooController(MicrosoftHttpClient microsoftHttpClient)
+    {
+        _microsoftHttpClient = microsoftHttpClient;
+    }
+  
+    [HttpGet]
+    public async Task&amp;lt;ActionResult&amp;gt; GetHomePage()
+    {
+        string result = await _microsoftHttpClient.client.GetStringAsync("/");
+        return Ok(result);
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Dilerseniz MicrosoftHttClient sınıfını IMicrosoftHttClient adında bir interface'den t&amp;uuml;retip kullanmak istediğiniz yerde constructor sevisyesinde bu interface'i inject ederek kullanmayı deneyebilirsiniz.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;zellikle trafiğin &amp;ccedil;ok yoğun olduğu uygulamalarda başka bir remote server'a http call&amp;nbsp;yaparak birşeyler consume etmek istediğinizde external connection management'ı olduk&amp;ccedil;a &amp;ouml;nemli bir hal almakta. Her ne kadar microsoftun geliştirdiği &amp;uuml;r&amp;uuml;nlerde bir &amp;ccedil;ok şeyi biz developer'lara bırakmadan arka planda kendisi halletsede asp.net core 2.0 da acı bir şekilde deneyimlediğimiz &amp;uuml;zre bu t&amp;uuml;r sorunlar olabilmekte. HttpClientFactory sınıfının 3 farklı kullanım şeklini ele aldık ve bunlardan herhangi birini ihtiyacınız doğrultusunda kullanarak remote server call işlemlerinizi kolayca g&amp;uuml;venli bir şekilde yapabilirsiniz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2018-07-03 00:15:00</pubDate>
+  <lastModified>2019-01-01 13:50:02</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>asp-net-core-httpclientfactory-kullanimi</slug>
+  <tags />
+  <comments />
+  <categories />
+  <notifications />
+</post>

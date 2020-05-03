@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>C# Custom Exception Oluşturma</title>
+  <description>Exception oluşturmak.. kulağa saçma geliyor dimi :) Heralde yazmış olduğumuz uygulamada bir exception meydana gelmesi en istemediğimiz şey dir. Ama bazen bilinçli olarak uygulamamızda exception fırlatmak isteyebiliriz (tabi handle edilmiş exception).</description>
+  <content>&lt;p&gt;Exception oluşturmak.. kulağa sa&amp;ccedil;ma geliyor dimi :) Heralde yazmış olduğumuz uygulamada bir exception meydana gelmesi&amp;nbsp;en istemediğimiz şey dir. Ama bazen bilin&amp;ccedil;li olarak uygulamamızda exception fırlatmak isteyebiliriz (tabi handle edilmiş exception).&lt;/p&gt;
+&lt;p&gt;Exception uygulama &amp;ccedil;alışırken runtime da meydana gelen hatadır. Exception handling ise runtime da meydana gelen bu exception'ları yazılım tarafında ele alma tekniğidir diyebiliriz. Uygulamanızda bir exception meydana geldiğinde .Net k&amp;uuml;t&amp;uuml;phanesinin direkt olarak fırlattığı stack trace a&amp;ccedil;ıklaması veya tuhaf exception mesajını kulanıcıya/client'a g&amp;ouml;ndermek istemeyiz. Bu gibi durumlar i&amp;ccedil;in Custom Exception kullanımı devreye giriyor. Custom Exception kullanarak daha y&amp;ouml;netilebilir ve daha anlamlı hata mesajları tanımlayabilir client'a d&amp;ouml;nebiliriz veya Log işlemlerinde handle ederken exception t&amp;uuml;r&amp;uuml;ne g&amp;ouml;re daha farklı loglama işlemleri yapmak isteyebiliriz.&lt;/p&gt;
+&lt;p&gt;.Net tarafında b&amp;uuml;t&amp;uuml;n exception'ların base'i System.Exception class'ı dır ve custom tanımlanan exception class'larıda direkt veya dolaylı olarak bu class'tan inherit olmaktadır. Bizde yazacağımız custom exception class'ını System.Exception class'ından inherit edicez.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Custom Exception Tanımlama&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Login işlemlerinde hata exception fırlatmak i&amp;ccedil;in kullanılacak &lt;strong&gt;LoginException&lt;/strong&gt; adında bir custom exception tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class LoginException : System.Exception
+    {
+       //todo
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi uygulama i&amp;ccedil;erisinde kullanımı i&amp;ccedil;in gerekli constructor tanımlamalarını yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   public class LoginException : System.Exception
+    {
+        public LoginException()
+            : base()
+        { }
+
+        public LoginException(String message)
+            : base(message)
+
+        { }
+
+        public LoginException(String message, Exception innerException)
+            : base(message, innerException)
+        { }
+
+        protected LoginException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        { }
+    }&lt;/pre&gt;
+&lt;p&gt;Yukarıda&amp;nbsp;g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre&amp;nbsp;LoginException'nın constructor'larını tanımaldık ve&amp;nbsp;System.Exception class'ı i&amp;ccedil;in&amp;nbsp;yapılacak&amp;nbsp;constructor y&amp;ouml;nlendirmelerini&amp;nbsp;yaptık,&amp;nbsp;b&amp;ouml;ylece&amp;nbsp;LoginException class'ını kullanıma hazır hale getirdik.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Custom Exception&amp;nbsp;Kullanımı&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Yazmış olduğumuz LoginException'ı kullanırken aşağıdaki gibi &lt;strong&gt;try/catch &lt;/strong&gt;i&amp;ccedil;erisinde handle edip kullanabilir veya &lt;a href="/post/PostSharp-Exception-Handling"&gt;Postsharp Exception Handling, Logging&lt;/a&gt;&amp;nbsp;yazısında da olduğu gibi &amp;uuml;st veya ayrı katmanlarda exception'ı handle edebiliriz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; void Login(string userName, string password)
+        {
+            try
+            {
+                if (userName != "canert" &amp;amp;&amp;amp; password != "qwerty123")
+                    throw new LoginException("Invalid login operation");
+            }
+            catch (LoginException loginException)
+            {
+                Console.WriteLine(loginException.Message);
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;İhtiya&amp;ccedil; dahilinde &amp;ccedil;ok daha farklı case'lerde&amp;nbsp;kullanılmak &amp;uuml;zre Custom Exception'lar tanımlayabilirsiniz. Exception fırlatmak d&amp;uuml;z mantıkla d&amp;uuml;ş&amp;uuml;n&amp;uuml;ld&amp;uuml;ğ&amp;uuml;nde tuhaf gelebilir ancak &amp;ccedil;oğu projelerde hayat kurtarır ve yazmış olduğunuz kodları tek bir yerden y&amp;ouml;netebilme veya reusability gibi konuları projelerinizde uygulayabilmek i&amp;ccedil;in tercih&amp;nbsp;edebilirsiniz ancak bu exception'ları handle etmeyi unutmamalıyız.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-08-25 21:36:00</pubDate>
+  <lastModified>2020-01-20 08:22:22</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>c-custom-exception-olusturma</slug>
+  <tags>
+    <tag>custom exception</tag>
+    <tag>exception</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

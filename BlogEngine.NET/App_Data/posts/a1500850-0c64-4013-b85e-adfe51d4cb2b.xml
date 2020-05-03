@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Api Projesinde Help Page - Döküman Aktifleştirme</title>
+  <description>https://blogs.msdn.microsoft.com/webdev/2012/11/08/enabling-asp-net-web-api-help-pages-for-asp-net-w</description>
+  <content>&lt;p&gt;Klasik Web Service geliştirmesi yapıyorsanız yazmış olduğunuz service method'ları ile ilgili d&amp;ouml;k&amp;uuml;mantasyon hazırlamak heralde işin en &amp;ccedil;etrefilli yanıdır diyebiliriz ve biz developer'ların yapmaktan hi&amp;ccedil;&amp;nbsp;hoşlanmadığı bi iştir. Web Api tarafında işler olduk&amp;ccedil;a kolay. Nugetten bir packege indirip projenizde yazılmış olan metotlar i&amp;ccedil;in request ve response bilgisinin &amp;nbsp;bulunduğu aşağıdaki gibi bir d&amp;ouml;k&amp;uuml;man sayfası oluşturabilirsiniz.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/06/web_api_help_page1.png" alt="" width="484" height="346" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;Şimdi adım adım&amp;nbsp;projemize help page ekleyelim.&lt;/p&gt;
+&lt;h3&gt;&lt;span style="text-decoration: underline;"&gt;1.Adım&lt;/span&gt;&lt;/h3&gt;
+&lt;p&gt;İlk olarak proje referanslarına sağ tıkalyıp Manage Nuget Packages deyip aşağıdaki gibi search ksımına "help" yazıp ilk sırada gelen paketi indirelim.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/06/web_api_help_page2.png" alt="" width="517" height="268" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://blogs.msdn.microsoft.com/webdev/2012/11/08/enabling-asp-net-web-api-help-pages-for-asp-net-web-forms-applications/"&gt;https://blogs.msdn.microsoft.com/webdev/2012/11/08/enabling-asp-net-web-api-help-pages-for-asp-net-web-forms-applications/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;http://www.asp.net/web-api/overview/getting-started-with-aspnet-web-api/creating-api-help-pages&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-06-29 07:15:00</pubDate>
+  <lastModified>2016-06-29 14:32:14</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>web-api-projesine-help-page-dokuman-aktiflestirme</slug>
+  <tags />
+  <comments />
+  <categories>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

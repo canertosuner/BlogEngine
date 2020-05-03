@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Design Patterns - ServiceLocator Design Pattern</title>
+  <description>Design pattern'leri spagetti kodlara veya tekrar eden kod bloklarına çözümler olarak ortaya çıkmışlardır. ServiceLocator design pattern ile bağımsız bir şekilde geliştirilebilen, test edilebilen loosely coupled modüller inşa edebilirsiniz. </description>
+  <content>&lt;p&gt;Design pattern'leri spagetti kodlara&amp;nbsp;veya tekrar eden kod bloklarına &amp;ccedil;&amp;ouml;z&amp;uuml;mler olarak ortaya &amp;ccedil;ıkmışlardır. ServiceLocator design pattern ile bağımsız bir şekilde geliştirilebilen, test edilebilen loosely coupled mod&amp;uuml;ller inşa&amp;nbsp;edebilirsiniz. İmplemente ederken bağımlılığı interface ve propertilerden veya&amp;nbsp;constructor seviyesinde inject edilebilirsiniz ve bu pattern server-side geliştirme yapanlar i&amp;ccedil;in olduk&amp;ccedil;a pop&amp;uuml;ler bir pattern dir.&lt;/p&gt;
+&lt;p&gt;ServiceLocator kısaca projede kullanılan service'lerin instance'larını return etmeden sorumludur. Client bir request atar ve projenizde tanımladığınız farklı&amp;nbsp;service'ler var ise bu service'lerin instance'ının alınması gerektiği durumda ServiceLocator devreye girer ve instance'ı size return eder.&lt;/p&gt;
+&lt;p&gt;ServiceLocator'ın temel yapı taşlarını aşağıdaki gibi sıralayabiliriz;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;ServiceLocator ,&lt;/strong&gt;&amp;nbsp;İhtiya&amp;ccedil; duyulan service instance'ının yaratılmasından sorumludur, eğer yaratılmışsa da serviceRepository g&amp;ouml;revi g&amp;ouml;r&amp;uuml;r diyebiliriz,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Initializer&amp;nbsp;,&amp;nbsp;&lt;/strong&gt;&amp;nbsp;Runtime'da service instance'ının yaratılmasından sorumludur.&amp;nbsp;Instance bir kere oluşturulduğunda ServiceLocator i&amp;ccedil;erisinde store edilir,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Client , &lt;/strong&gt;Service consumer'larını&amp;nbsp;veya&amp;nbsp;service client'larını temsil eder,&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Service(s)&amp;nbsp;,&amp;nbsp;&lt;/strong&gt;Service contract'larını ve onların&amp;nbsp;implementasyonunu temsil eder.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;ServiceLocator Patter'nin Implementasyonu&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;İlk olarak VS kullanarak bir tane WCF projesi oluşturalım ve sonrasında CustomerService ve ProductService adında 2 tane service oluşturalım. Bu iki service'in contract interface'leride aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [ServiceContract]
+        public interface ICustomerService
+        {
+            [OperationContract]
+            string GetName();
+        }
+
+        [ServiceContract]
+        public interface IProductService
+        {
+            [OperationContract]
+            string GetName();
+        }&lt;/pre&gt;
+&lt;p&gt;Sırada bu contract'ları service'lere implement etme var.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        public class ProductService : IProductService
+        {
+            public string GetName()
+            {
+                return "Fitbit";
+            }
+        }
+
+        public class CustomerService : ICustomerService
+        {
+            public string GetName()
+            {
+                return "John travolta";
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Şimdi ise sırada ServiceLocator class'ını yaratmak var. Bu class static olacak ve i&amp;ccedil;erisinde service instance'larını tutan bir Dictionary bulunduracak. Bu Dictionary i&amp;ccedil;in get ve set operasyonları kullanılmak &amp;uuml;zre&amp;nbsp;ServiceLocator class&amp;nbsp;i&amp;ccedil;erisinde &lt;strong&gt;RegisterService&lt;/strong&gt; ve &lt;strong&gt;GetService&lt;/strong&gt; adında 2 adet metot tanımlayacağız. RegisterService instance'ları dictionary'e eklemek i&amp;ccedil;in kullanacağımız metot. GetService ise dictionary'de bulunan service instance'ını return eden metot olacak.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public static class ServiceLocator
+    {
+        private static readonly Dictionary&amp;lt;Type, object&amp;gt; registeredServices = new Dictionary&amp;lt;Type, object&amp;gt;();
+
+        public static T GetService&amp;lt;T&amp;gt;()
+        {
+            return (T)registeredServices[typeof(T)];
+        }
+
+        public static void RegisterService&amp;lt;T&amp;gt;(T service)
+        {
+            registeredServices[typeof(T)] = service;
+        }
+
+        public static int Count
+        {
+            get { return registeredServices.Count; }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Bu aşamaya kadar olduk&amp;ccedil;a basit bir ServiceLocator pattern ile projemizi oluşturduk. Şimdi ise sırada oluşturduğumuz bu Locator'ı&amp;nbsp;proje i&amp;ccedil;erisinde kullanmak var.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    static void Main(string[] args)
+       {
+           ICustomerService customerService = new CustomerService();//service instance aldık
+
+           IProductService productService = new ProductService();//service instance aldık
+
+           ServiceLocator.RegisterService(customerService);//service locator'da bulunan dictionary i&amp;ccedil;erisine attık
+
+           ServiceLocator.RegisterService(productService);//service locator'da bulunan dictionary i&amp;ccedil;erisine attık
+
+           ICustomerService customerClientService = ServiceLocator.GetService&amp;lt;ICustomerService&amp;gt;();//dictionary i&amp;ccedil;erisinde bulunan service instance'ını aldık
+
+           string msg = customerClientService.GetName();
+
+           Console.WriteLine(msg);
+       }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;ServiceLocator pattern'i objelerinizi bağımlılıklarından ayırmak istediğinizde veya compile-time'da bağımlılıkları bilinmeyen objeler oluşturmanız gerektiğinde g&amp;uuml;zel bir se&amp;ccedil;enek olabilir.&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-11-18 22:58:00</pubDate>
+  <lastModified>2016-10-12 09:06:52</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>design-patterns-servicelocator-design-pattern</slug>
+  <tags>
+    <tag>design pattern</tag>
+    <tag>service locator</tag>
+    <tag>RegisterService</tag>
+    <tag>GetService</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

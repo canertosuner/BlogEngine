@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>C# Destructor Nedir ?</title>
+  <description>Destructor kısaca constructor'ın tam tersidir.Constructor için bir nesnenin instance'ı alınırken Ram'de ki Heap bölümünde yer ayırmadan önce çağrılan metod diyebiliriz. Destructor tam bu nesne ram'den silinmeden önce çağrılan metod dur.</description>
+  <content>&lt;p&gt;Destructor kısaca constructor'ın tam tersidir.Constructor i&amp;ccedil;in bir nesnenin instance'ı alınırken Ram'de ki Heap b&amp;ouml;l&amp;uuml;m&amp;uuml;nde yer ayırmadan &amp;ouml;nce &amp;ccedil;ağrılan metod diyebiliriz. Destructor tam bu nesne ram'den silinmeden &amp;ouml;nce &amp;ccedil;ağrılan metod dur.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Peki neden buna gerek var dersek;&amp;nbsp;garbage collector sağ olsun bizim i&amp;ccedil;in ram'de işleri bitmiş nesneleri ram'den siliyor ve bazen tam bu silinme anını bilmek isteriz. Aslında C# tarafında &amp;ccedil;ok fazla ihtiya&amp;ccedil; duyulan bir şey değil ancak C-C++ gibi Ram y&amp;ouml;netimini developer'a bırakan programlama dillerinde&amp;nbsp;Destructor'a &amp;ccedil;ok fazla ihtiya&amp;ccedil; duyuluyordu. C# ram y&amp;ouml;netimini tamamiyle developer'a bırakmadığından gerek kalmadık&amp;ccedil;a bu metodu kullanmıyoruz.&lt;/p&gt;
+&lt;h2&gt;Destructor &amp;Ouml;zellikleri&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Her class'ın sadece bir tane&amp;nbsp;Destructor'ı olabilir,&lt;/li&gt;
+&lt;li&gt;Destructor tanımlanırken class ismini başına "&lt;strong&gt;~&lt;/strong&gt;" işareti koyulur,&lt;/li&gt;
+&lt;li&gt;Struct'lar i&amp;ccedil;in tanımlanamaz, sadece class'lar i&amp;ccedil;in tanımlanırlar,&lt;/li&gt;
+&lt;li&gt;Dışarıdan &amp;ccedil;ağrılamaz, otomatik olarak invoke olur,&lt;/li&gt;
+&lt;li&gt;Destructor parametre alamaz.&lt;/li&gt;
+&lt;li&gt;Kalıtım yapılamazlar ve overload edilemezler.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek kullanım olarak;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;	class Person
+	{
+		~Person()  // destructor
+		{
+			// cleanup statements...
+		}
+	}&lt;/pre&gt;
+&lt;p&gt;Kullanımı yukarıda olduğu gibidir. Yazım olarak Constructor tanımlar gibi yazıyoruz ancak isminin başına "&lt;strong&gt;~&lt;/strong&gt;" işaretini koyuyoruz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2014-12-12 23:56:00</pubDate>
+  <lastModified>2020-01-20 08:22:29</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>C-sharp-Destructor</slug>
+  <tags>
+    <tag>Destructor</tag>
+    <tag>Deconstructor</tag>
+    <tag>Finalizer</tag>
+    <tag>C#</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+  </categories>
+  <notifications />
+</post>

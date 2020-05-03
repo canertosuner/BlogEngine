@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Service Nasıl Yazılır ?</title>
+  <description>Web Service günümüz teknolojilerinin olmazsa olmazları arasında yer almaktadır. Bunun en büyük nedeni M2M iletişimin önünü açmak ve back-end</description>
+  <content>&lt;p&gt;&lt;span style="font-size: medium; font-family: verdana, geneva;" data-mce-mark="1"&gt;&lt;strong&gt;Web Service&lt;/strong&gt; g&amp;uuml;n&amp;uuml;m&amp;uuml;z teknolojilerinin olmazsa olmazları arasında yer almaktadır. Bunun en b&amp;uuml;y&amp;uuml;k nedeni &lt;strong&gt;M2M&lt;/strong&gt; iletişimin &amp;ouml;n&amp;uuml;n&amp;uuml; a&amp;ccedil;mak ve &lt;strong&gt;back-end&lt;/strong&gt; sistemde var olan &amp;ccedil;eşitli &lt;strong&gt;database&lt;/strong&gt; yada &lt;strong&gt;enterprise&lt;/strong&gt; yapıların diğer platformlarla iletişimini g&amp;uuml;venli bir şekilde sağlamaktır. &amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium; font-family: verdana, geneva;"&gt;&lt;span data-mce-mark="1"&gt;.Net tarafında &amp;ccedil;eşitli Web Service yazma yolları vardır bunlardan bir tanesi asmx dediğimiz&lt;strong&gt; [WebMethod]&lt;/strong&gt;&amp;rsquo; lar kullanılarak yazılan servislerdir. Aşağıda ki &amp;ouml;rnekte Database&amp;rsquo;den veri &amp;ccedil;ekilerek nasıl bir&amp;nbsp;&lt;/span&gt;&lt;strong style="font-size: small;"&gt;asmx&lt;/strong&gt;&lt;span data-mce-mark="1"&gt; servis yazılıp &amp;ccedil;ekilen veri internet ortamında yayınlanır ona değiniyor olacağız.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="text-decoration: underline;"&gt;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;&lt;span data-mce-mark="1"&gt;1.Adım | Projenin Oluşturulması&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&amp;Ouml;ncelikle aşağıdaki resimde de olduğu gibi ismi "&lt;strong&gt;WebService&lt;/strong&gt;" olan bir adet &lt;strong&gt;Asp.Net Empty Web Application&lt;/strong&gt;&amp;nbsp;oluşturuyoruz&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p style="text-align: justify;"&gt;&lt;img style="font-size: small;" src="/MyImage_Folder/ws_createproject.png" alt="" width="392" height="271" /&gt;&lt;/p&gt;
+&lt;p style="text-align: justify;"&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong style="font-size: medium;"&gt;&lt;span style="font-size: medium;"&gt;2.Adım | Projeye Web Service Sayfası Eklenmesi&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Projeyi oluşturduğumuzda i&amp;ccedil;erisinde default olarak Properties, References ve Web.config sayfalar geliyor. WebMethod yazabilmek i&amp;ccedil;in Proje ismine sağ tıklayıp aşağıda ki resimde de olduğu gibi bir adet ismi &lt;strong&gt;"WebMethods&lt;/strong&gt;" olan WebService sayfası ekliyoruz.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="font-size: small;" data-mce-mark="1"&gt;&lt;img src="/MyImage_Folder/ws_addwebservice.png" alt="" width="385" height="224" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&amp;nbsp;&lt;strong style="font-size: medium; text-decoration: underline;"&gt;&lt;span style="text-decoration: underline;"&gt;3.Adım | WebMethod 'un Anlaşılması&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Service sayfasını ekledikten sonra kodlarını a&amp;ccedil;tığımızda i&amp;ccedil;erisinde default olarak gelen bir adet &lt;strong&gt;HelloWorld()&lt;/strong&gt; metodu bulunmaktadır&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;[WebMethod] // [WebMethod] tag'i altında yazılı olan Metodun bir "Web Method" olduğunu belirten yapıdır. Aslında kabacası bizim internette yayınlayacağımız ve Client tarafında kullanılacak metod olduğunu belirtiyor.
+publicstring HelloWorld()  //Herbir .asmx service sayfasında Default olarak gelen parametre almadan geriye string d&amp;ouml;nen HelloWorld() bulunmaktadır.Browser'da servici &amp;ccedil;alıştırdığınızda aşağıda resimde olduğu gibi metodları g&amp;ouml;r&amp;uuml;yor olacaksınız
+DipNot - [WebMethod] tanımlaması yapılan metodlar Browser'da g&amp;ouml;r&amp;uuml;nmeyecektir, Sadece [WebMethod] etiketine sahip metodlar burda g&amp;ouml;r&amp;uuml;n&amp;uuml;r ve Client tarafından direkt olarak kullanılır
+{
+return"Hello World";
+}&lt;/pre&gt;
+&lt;p class="MsoNormal" style="text-align: justify;"&gt;&lt;span style="font-size: 9.5pt; line-height: 115%; font-family: Consolas; background-position: initial initial; background-repeat: initial initial;"&gt;&lt;img src="/MyImage_Folder/ws_hllwrld.png" alt="" width="310" height="124" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="text-align: justify;"&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong style="text-align: start;"&gt;&lt;span style="font-size: medium;"&gt;4.Adım | Web Service Nasıl Bir İşlem Yapıyor Olacak ?&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Geliştireceğimiz Web Service local'de bulunan &lt;strong&gt;Northwind&lt;/strong&gt; Database'ine bağlanarak &lt;strong&gt;Employees&lt;/strong&gt; tablosunda bulunan &amp;Ccedil;alışanların Ad&lt;strong&gt;(FirstName&lt;/strong&gt;), Soyad(&lt;strong&gt;LastName&lt;/strong&gt;) ve İş Tanımı(&lt;strong&gt;Title&lt;/strong&gt;) bilgilerini yayınlıyor olacak.Bunun i&amp;ccedil;in &amp;ouml;ncelikle pc'nizde Northwind database'i bulunuyor olması gerekli. Olmayan arkadaşlar bu &lt;a href="/MyImage_Folder/northwind.rar"&gt;&lt;strong&gt;Link&lt;/strong&gt;&lt;/a&gt;' teki script'i indirip MS-SQL Management Studio kullanarak kurulum yapabilirler.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong style="font-size: medium; text-decoration: underline;"&gt;&lt;span style="text-decoration: underline;"&gt;5.Adım | Database'den Employees Bilgilerini &amp;Ccedil;eken Metodun Yazılması&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Database ile bağlantı kurmanın &amp;ccedil;eşitli yolları vardır.İster&lt;strong&gt; Entity Framework&lt;/strong&gt; kullanırsınız istersenizde klasik &lt;strong&gt;Ado.Net&lt;/strong&gt; yazarsınız.Ben Ado.Net'in Entity Framework ve yandaşlarına kıyasla &lt;strong&gt;7 kat&lt;/strong&gt; gibi bir hız farkıyla &amp;ccedil;alışmasında dolayı &lt;strong&gt;&lt;span data-mce-mark="1"&gt;Ado.Net kullanıyor olacağım&lt;/span&gt;&lt;/strong&gt;&amp;nbsp;&lt;img title="Smile" src="/editors/tiny_mce_3_5_8/plugins/emotions/img/smiley-smile.gif" alt="Smile" border="0" /&gt;. İlk olarak "Employees" tablosundan "FirstName" ,"LastName" ve "Title" bilgilerini almamız i&amp;ccedil;in bu attributelere sahip "&lt;strong&gt;Employees" class'&lt;/strong&gt;ını aşağıdaki gibi oluşturuyoruz&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class Employees
+{
+public string FirstName { get; set; }
+public string LastName { get; set; }
+public string Title { get; set; }
+ }&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Şimdi ise Ado.Net kullanarak &amp;ccedil;ekeceğimiz bu Employees'leri List&amp;lt;Employees&amp;gt; array'i oluşturup i&amp;ccedil;erisine atıp sonrasında Web Service' imiz ile yayınlıyor olacağız. Geriye &lt;span style="color: #0000ff;" data-mce-mark="1"&gt;&lt;strong&gt;List&amp;lt;Employees&amp;gt;&lt;/strong&gt;&lt;/span&gt; d&amp;ouml;nen &lt;strong&gt;CallEmployees()&lt;/strong&gt; adında bir metod tanımlayalım ve kodlarımızı aşağıda olduğu i&amp;ccedil;erisine yazalım.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;[WebMethod]
+public List&amp;lt;Employees&amp;gt; CallEmployees()
+{
+//Employees'leri i&amp;ccedil;erisine doldurup return ettireceğimiz List&amp;lt;&amp;gt; array
+List&amp;lt;Employees&amp;gt; AllEmployees = new List&amp;lt;Employees&amp;gt;();
+ 
+//Local'de bulunan Northwind database'ine bağlanmamızı sağlayan connectionstring'i
+SqlConnection conn = new SqlConnection("server=.;database=Northwind;trusted_connection=True");
+ 
+//Hangi bilgileri &amp;ccedil;ekeceğimizi belirttiğimiz sql sorgumuz
+SqlCommand cmd = new SqlCommand("select FirstName,LastName,Title from Employees", conn);
+conn.Open(); //Sql bağlantısını a&amp;ccedil;ıyoruz
+SqlDataReader dr = cmd.ExecuteReader();  //DataReader kullanarak verileri alıyoruz
+while (dr.Read())
+{
+//&amp;Ccedil;ektiğimiz verileri Employee nesnesi'nin attrib&amp;uuml;tlerine atayıp sonrasında AllEmployees array'inin i&amp;ccedil;erisine atıyoruz
+AllEmployees.Add(new Employees()
+{
+FirstName = dr.GetString(0),
+LastName = dr.GetString(1),
+Title = dr.GetString(2)
+});
+}
+//Son olarakda doldurduğumuz array'i return ediyoruz
+return AllEmployees;
+}&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Projeyi Run ettiğimizde Browser'da aşağıda olduğu gibi HelloWorld() metoduyla birlikte bizim sonradan tanımladığımız &lt;strong&gt;CallEmployees()&lt;/strong&gt; metodunu g&amp;ouml;r&amp;uuml;yor olacağız. &lt;strong&gt;1.&lt;/strong&gt; resimde bulunan metodumuza tıkladığımızda &lt;strong&gt;2.&lt;/strong&gt; resimde g&amp;ouml;rd&amp;uuml;ğ&amp;uuml;m&amp;uuml;z sayfa a&amp;ccedil;ılıyor olacak ve &lt;strong&gt;&amp;Ccedil;ağır&lt;/strong&gt; butonuna tıkladığımızda son resimde g&amp;ouml;rd&amp;uuml;ğ&amp;uuml;m&amp;uuml;z gibi Database'den gelen veriler XML formatında g&amp;ouml;r&amp;uuml;nt&amp;uuml;leniyor olacak.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="font-size: small;"&gt;&lt;img src="/MyImage_Folder/wc_cllempl.png" alt="" width="283" height="141" /&gt;&amp;nbsp;&lt;img src="/MyImage_Folder/ws_cagir.png" alt="" width="292" height="142" /&gt;-&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;" data-mce-mark="1"&gt;&amp;nbsp;&lt;/span&gt;&lt;strong style="font-size: medium;"&gt;6.Adım | Web Service'in Internet'te Yayınlanması&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;"&gt;Geliştirmiş olduğunuz bu gibi Web Servic'i yayınlamak i&amp;ccedil;in Solution'dan proje &amp;uuml;zerine sağ tıklayıp Publish deyip sonrasında generate edilmiş dosyaları web sitenizin bulunduğu ftp' ye atmanız yeterli olacaktır.&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span style="font-size: medium;"&gt;Yazılmış olan bu web service'i diğer projelerde kullanmak i&amp;ccedil;in ise service'in bulunduğu sayfayı projelerinize&amp;nbsp;&lt;span style="font-size: medium;"&gt;&lt;strong&gt;Reference&lt;/strong&gt;&amp;nbsp;&lt;/span&gt;olarak ekleyip sonrasında i&amp;ccedil;erisinde bulunan metodları kullanabilirsiniz.Biz projede sadece select işlemi yapan bir WebMethod yazdık ama ihtiyaca g&amp;ouml;re &amp;ccedil;ok daha farklı inserti, update, delete gibi işlemler yapan WebMethod'larda yazılabilir.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&amp;nbsp;&lt;/span&gt;&lt;strong style="font-size: medium; text-decoration: underline;"&gt;7.Adım | Web Service' de G&amp;uuml;venlik&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;"&gt;Makalenin başında da bahsettiğimiz gibi Web Service'ler şirketler i&amp;ccedil;in b&amp;uuml;y&amp;uuml;k &amp;ouml;nem taşırlar nedeni ise veri'nin sadece istenilen kişiler tarafından kullanılması. Biz yukarıda geliştirmiş olduğumuz projede g&amp;uuml;venlik olarak hi&amp;ccedil; birşey yapmadık yani siz bu projeyi internette publish ettikten sonra &amp;ccedil;eşitli yazılımlar kullanılarak data-sniffing ile servis'in bulunduğu URL bulunup yazmış olduğunuz metodlar diğer kişiler tarafındanda kullanılabilir.İşte bu gibi durumlarda g&amp;uuml;venlik &amp;ccedil;ok b&amp;uuml;y&amp;uuml;k &amp;ouml;neme sahip oluyor.Konu uzun olduğu i&amp;ccedil;in &lt;strong&gt;Web Service'de G&amp;uuml;venlik Nasıl Sağlanır ?&lt;/strong&gt; bir sonraki makalemizde g&amp;ouml;r&amp;uuml;yor olacağız. Umarım buraya kadar yazdıklarımız yararlı olmuştur, herhangi bir sorunuz olduğunda e-mail ile ulaşabilirsiniz,&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="font-size: medium;"&gt;Projeyi &lt;strong&gt;&lt;a href="/MyImage_Folder/WebMethods.rar"&gt;burdan &lt;/a&gt;&lt;/strong&gt;indirebilirsiniz..&lt;/span&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-06-15 13:00:00</pubDate>
+  <lastModified>2020-01-20 08:22:32</lastModified>
+  <raters>18</raters>
+  <rating>3</rating>
+  <slug>Web-Service-Nasıl-Yazılır</slug>
+  <tags>
+    <tag>asmx</tag>
+    <tag>webservice</tag>
+    <tag>xml</tag>
+    <tag>webmethod</tag>
+    <tag>wcf</tag>
+    <tag>database</tag>
+    <tag>northwind</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>59c799ee-35b7-40dc-911f-1d8613b862f2</category>
+  </categories>
+  <notifications />
+</post>

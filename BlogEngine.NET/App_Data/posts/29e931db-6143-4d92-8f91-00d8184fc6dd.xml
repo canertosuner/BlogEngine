@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>IoC  Container Nedir Ne İşe Yarar</title>
+  <description>IoC container&amp;nbsp;
+&amp;nbsp;
+&amp;nbsp;
+https://timross.wordpress.com/2010/01/21/creating-a-simple-ioc-con</description>
+  <content>&lt;p&gt;IoC den &amp;ouml;nce gerilere gidip Dependency Injection'ın tanımınada değinelim. Dependency Injection kısaca "bağımlılıkların &amp;nbsp;loose coupled yani gevşek bağlı bir şekilde dışarıdan enjecte edilmesi" şeklinde tanımlayabiliriz.&lt;/p&gt;
+&lt;p&gt;Inversion of Control (IoC) bir yazılım tasarım prensibidir ve basit tabiriyle nesnelerin uygulama boyunca ki yaşam d&amp;ouml;ng&amp;uuml;s&amp;uuml;nden sorumludur diyebiliriz. Uygulama i&amp;ccedil;erisinde kullanılan&amp;nbsp;objelerin instance'larının y&amp;ouml;netimi sağlar ve bağımlılığı en aza indirgemeyi ama&amp;ccedil;lar.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Container program i&amp;ccedil;erisinde request edilen nesneleri abstraction'lara bağlı tutarak otomatik olarak oluşturan ve bağımlılıklarını inject eden bir framework diyebiliriz. Oluşturmuş olduğu bu nesneleri kendi i&amp;ccedil;erisinde y&amp;ouml;netimini yaparak tekrardan ihtiya&amp;ccedil; duyulduğunda yeni bir instance oluşturmak yerine mevcut olan nesneyi atar.&lt;/p&gt;
+&lt;p&gt;IoC&amp;nbsp;daha kolay test edilebilir loose coupling dediğimiz gevşek bağlı ve reusable bir yazılım desene oluşturmamızı sağlar.&lt;/p&gt;
+&lt;p&gt;IoC ilk başlarda implementasyonundan dolayı zor ve karmaşık gibi g&amp;ouml;r&amp;uuml;nsede geliştirme yaptık&amp;ccedil;a ve sağladığı kolaylıkları fark ettik&amp;ccedil;e hayran kalınacak bir yazılım tasarım prensibidir. Basit&amp;ccedil;e işleyişini anlatmak&amp;nbsp;gerekirse; soyut tiplerin hangi somut tipler tarafından register edildiği bilgisini tutar. Uygulama i&amp;ccedil;erisinde container'dan abstract bir nesne talebinde bulursunuz ve size register bilgisinde tanımlı olan concrete type'ın instance'ını oluşturup verir. Bir t&amp;uuml;r object factory olarak d&amp;uuml;ş&amp;uuml;nebilirsiniz.&lt;/p&gt;
+&lt;p&gt;IoC i&amp;ccedil;in kullanılabilecek &amp;ccedil;eşitli k&amp;uuml;t&amp;uuml;phaneler bulunmakta. Bunlardan en pop&amp;uuml;ler olanlarını ;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://www.castleproject.org/container/index.html" target="_blank"&gt;Castle Windsor&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://ninject.org/" target="_blank"&gt;Ninject&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://structuremap.sourceforge.net/Default.htm"&gt;StructureMap&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://code.google.com/p/autofac/" target="_blank"&gt;Autofac&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.codeplex.com/unity" target="_blank"&gt;Unity&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;şeklinde sıralayabiliriz. Bu k&amp;uuml;t&amp;uuml;phaneleri kullanmayıp kendi&amp;nbsp;IoC infrastructure'ınızıda yaratabilirsiniz&amp;nbsp;ancak instance y&amp;ouml;netimi dışında bu k&amp;uuml;t&amp;uuml;phanelerin sağladığı aspect oriented &amp;ouml;zellikleri de hayli &amp;ouml;nemli bir diğer &amp;ouml;zelliktir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Framework ler arasından en performanslı olan hangisi sorusunu soracak olursak internette araştırırken bir benchmark testine denk geldiğim. Aşağıdaki koşullar sağlanarak yapılan benchmarks lar sonucuna g&amp;ouml;z atalım.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;Test&amp;nbsp;Verisi&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;8 levels of depth for the dependency tree&lt;/li&gt;
+&lt;li&gt;100 types per level&lt;/li&gt;
+&lt;li&gt;Between 0 and 8 dependencies for each type (excluding level 0)&lt;/li&gt;
+&lt;li&gt;1 in 5 types are registered as singleton (20%)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&amp;nbsp;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2017/ioc_bench_marks_test_data.png" alt="" width="611" height="436" /&gt;&lt;/p&gt;
+&lt;h4&gt;&lt;span style="text-decoration: underline;"&gt;Sonu&amp;ccedil;&lt;/span&gt;&lt;/h4&gt;
+&lt;table class="tg" style="height: 259px;" width="785"&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;th class="tg-e3zv"&gt;Container&lt;/th&gt;
+&lt;th class="tg-e3zv"&gt;2012 Version&lt;/th&gt;
+&lt;th class="tg-e3zv"&gt;2012 Time Elapsed (Sec)&lt;/th&gt;
+&lt;th class="tg-e3zv"&gt;2014 Version&lt;/th&gt;
+&lt;th class="tg-e3zv"&gt;Time Elapsed (Sec)&lt;/th&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-031e"&gt;&lt;strong&gt;Ninject&lt;/strong&gt;&lt;/td&gt;
+&lt;td class="tg-031e"&gt;3.0.1.10&lt;/td&gt;
+&lt;td class="tg-031e"&gt;31.29&lt;/td&gt;
+&lt;td class="tg-031e"&gt;3.2.2.0&lt;/td&gt;
+&lt;td class="tg-031e"&gt;30.84&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-031e"&gt;&lt;strong&gt;StructureMap&lt;/strong&gt;&lt;/td&gt;
+&lt;td class="tg-031e"&gt;2.6.2&lt;/td&gt;
+&lt;td class="tg-031e"&gt;1.98&lt;/td&gt;
+&lt;td class="tg-031e"&gt;3.1.4.143&lt;/td&gt;
+&lt;td class="tg-031e"&gt;1.95&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-031e"&gt;&lt;strong&gt;Autofac&lt;/strong&gt;&lt;/td&gt;
+&lt;td class="tg-031e"&gt;2.6.3.862&lt;/td&gt;
+&lt;td class="tg-031e"&gt;5.56&lt;/td&gt;
+&lt;td class="tg-031e"&gt;3.5.2&lt;/td&gt;
+&lt;td class="tg-031e"&gt;5.19&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-031e"&gt;&lt;strong&gt;Castle Windsor&lt;/strong&gt;&lt;/td&gt;
+&lt;td class="tg-031e"&gt;3.1.0&lt;/td&gt;
+&lt;td class="tg-031e"&gt;5.47&lt;/td&gt;
+&lt;td class="tg-031e"&gt;3.3.0&lt;/td&gt;
+&lt;td class="tg-031e"&gt;5.59&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-031e"&gt;&lt;strong&gt;Unity&lt;/strong&gt;&lt;/td&gt;
+&lt;td class="tg-031e"&gt;2.1.505.2&lt;/td&gt;
+&lt;td class="tg-031e"&gt;7.76&lt;/td&gt;
+&lt;td class="tg-031e"&gt;3.5.1404.0&lt;/td&gt;
+&lt;td class="tg-031e"&gt;3.71&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-031e"&gt;&lt;strong&gt;SimpleInjector&lt;/strong&gt;&lt;/td&gt;
+&lt;td class="tg-031e"&gt;1.5.0.12199&lt;/td&gt;
+&lt;td class="tg-031e"&gt;34.43&lt;/td&gt;
+&lt;td class="tg-031e"&gt;2.5.2&lt;/td&gt;
+&lt;td class="tg-031e"&gt;48.01&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-031e"&gt;&lt;strong&gt;Dynamo&lt;/strong&gt;&lt;/td&gt;
+&lt;td class="tg-031e"&gt;3.0.0.1&lt;/td&gt;
+&lt;td class="tg-031e"&gt;&lt;em&gt;Fail&lt;/em&gt;&lt;/td&gt;
+&lt;td class="tg-031e"&gt;3.0.2&lt;/td&gt;
+&lt;td class="tg-031e"&gt;&lt;em&gt;Fail&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class="tg-031e"&gt;&lt;strong&gt;Hiro&lt;/strong&gt;&lt;/td&gt;
+&lt;td class="tg-031e"&gt;1.0.2&lt;/td&gt;
+&lt;td class="tg-031e"&gt;&lt;em&gt;Fail&lt;/em&gt;&lt;/td&gt;
+&lt;td class="tg-031e"&gt;1.0.2&lt;/td&gt;
+&lt;td class="tg-031e"&gt;&lt;em&gt;Fail&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;G&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre StructureMap b&amp;uuml;t&amp;uuml;n 800 tipi register ve resolve etmede en hızlı olan ancak en &amp;ccedil;ok kullanılan olarak bakacak olursak Castle Windsor galip geliyor.&amp;nbsp;Unity'nin de son s&amp;uuml;r&amp;uuml;m&amp;uuml;yle birlikte&amp;nbsp;bug&amp;uuml;n itibariyle en hızlı olan IoC framework'&amp;uuml; olduğu s&amp;ouml;ylenmekte.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-04-10 21:03:00</pubDate>
+  <lastModified>2017-03-09 14:39:59</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>ioc-container-nedir-nasil</slug>
+  <tags>
+    <tag>IoC nedir</tag>
+    <tag>Inversion Of Control Nedir</tag>
+    <tag>IoC</tag>
+    <tag>Castle Windsor
+Ninject
+StructureMap
+Autofac
+Unity</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>893b792b-cf43-45bb-af68-eecfaf416ddf</category>
+    <category>45609306-8fde-4db1-8d81-7fe1bf2b9738</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

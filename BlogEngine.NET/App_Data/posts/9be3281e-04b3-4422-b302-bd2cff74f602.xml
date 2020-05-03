@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Windows Phone'da Web Service Kullanımı</title>
+  <description>Mobil tarafta uygulama geliştiriyorsanız Web Service&amp;rsquo;den ka&amp;ccedil;ışınız imkansızdır. &amp;Ccedil</description>
+  <content>&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Mobil tarafta uygulama geliştiriyorsanız Web Service&amp;rsquo;den ka&amp;ccedil;ışınız imkansızdır. &amp;Ccedil;&amp;uuml;nk&amp;uuml; database&amp;rsquo;ler ile mobil uygulama arasındaki iletişimi sağlayacak hizmet Web Service tir ve mobil uygulama aktarılacak olan veri XML yada JSON tipinde yayınlamaktadır. Bu makalede IMKB&amp;rsquo;den aldığı sonuclarla anlık D&amp;ouml;viz Verilerini paylaşan bir XML Web Service&amp;rsquo;den gelen verileri alıp Parse işlemi yapıp daha sonrasında WP uygulamamızda g&amp;ouml;steriyor olacağız.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&amp;Ouml;ncelikle ilk olarak Visual Studio&amp;rsquo;yu a&amp;ccedil;ıp 1 adet adı XML_Parse olan Windows Phone Pivot App Projesi oluşturalım.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Design sayfasında Default olarak gelen xaml kodlarını tamamiyle temizleyelim. Bunun i&amp;ccedil;in En dıştaki Grid i&amp;ccedil;erisinde bulunan kodları silmek işimizi g&amp;ouml;recektir. Grid i&amp;ccedil;erisindeki kodları sildiğimizde son hali aşağıda olduğu gibidir.&lt;img src="/MyImage_Folder/p_olustur.png" alt="" width="473" height="321" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;span style="font-family: Consolas;" data-mce-mark="1"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;!--LayoutRoot is the root grid where all page content is placed--&amp;gt;
+    &amp;lt;Grid x:Name="LayoutRoot" Background="Transparent"&amp;gt;
+                  //Bu b&amp;ouml;l&amp;uuml;mdeki kodları temizledik
+    &amp;lt;/Grid&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&amp;nbsp;&lt;/span&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Bir sonraki işlem olarak Design sayfasını istediğimiz şekilde d&amp;uuml;zenleyelim. G&amp;ouml;r&amp;uuml;n&amp;uuml;m olarak daha g&amp;uuml;zel g&amp;ouml;r&amp;uuml;neceğini d&amp;uuml;ş&amp;uuml;nd&amp;uuml;ğ&amp;uuml;mden WrapPanel kullanmayı tercih ettim.WrapPanel sayesinde uygulama ekranına dinamik olarak yerleşecek Buton&amp;rsquo;lar Panorama Page gibi geliştirilmiş uygulama havası katacaktır. WrapPanel kullanmak i&amp;ccedil;in ilk olarak bir dll&amp;rsquo;i projenize referans vermeniz gerekiyor. &lt;/span&gt;&lt;a style="font-size: medium;" href="http://silverlight.codeplex.com/downloads/get/270984"&gt;http://silverlight.codeplex.com/downloads/get/270984&lt;/a&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt; sitesinden Silverlight Toolkit kurup daha sonrasında aşağıda olduğu gibi Solution Explorer&amp;rsquo;da projeniz i&amp;ccedil;erisinde bulunan References&amp;rsquo;a sağ tıklayıp Add Reference diyip aşağıda dosya yolunda bulunan dll&amp;rsquo;i projenize referans olarak ekliyorsunuz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;img src="/MyImage_Folder/p_addref.png" alt="" width="379" height="257" /&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;em style="font-size: medium; line-height: 18pt;"&gt;&lt;strong&gt;&lt;span style="color: red;" data-mce-mark="1"&gt;For 32-bit systems&lt;/span&gt;&lt;/strong&gt;&lt;/em&gt;&lt;strong style="font-size: medium; line-height: 18pt;"&gt;&lt;span style="color: red; font-weight: normal;" data-mce-mark="1"&gt;:&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p style="margin: 0cm 0cm 0.0001pt; line-height: 18pt;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;strong&gt;&lt;em&gt;&lt;span style="color: #606060;" data-mce-mark="1"&gt;C:\Program Files\Microsoft SDKs\Windows Phone\v7.1\Toolkit\Aug11\Bin\Microsoft.Phone.Controls.Toolkit.dll&lt;/span&gt;&lt;/em&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style="margin: 0cm 0cm 0.0001pt; line-height: 18pt;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;em&gt;&lt;strong&gt;&lt;span style="color: red;" data-mce-mark="1"&gt;For 64-bit systems&lt;/span&gt;&lt;/strong&gt;&lt;/em&gt;&lt;strong&gt;&lt;span style="color: red; font-weight: normal;" data-mce-mark="1"&gt;:&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style="margin: 0cm 0cm 0.0001pt; line-height: 18pt;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;strong&gt;&lt;em&gt;&lt;span style="color: #606060;" data-mce-mark="1"&gt;C:\Program Files (x86)\Microsoft SDKs\Windows Phone\v7.1\Toolkit\Aug11\Bin\Microsoft.Phone.Controls.Toolkit.dll&lt;/span&gt;&lt;/em&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Referansı ekledikten sonra uygulamamızın design sayfasına da aşağıda bulunan kod&amp;rsquo;u yazıyoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;" data-mce-mark="1"&gt;xmlns&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;" data-mce-mark="1"&gt;:&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;" data-mce-mark="1"&gt;toolkit&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: blue;" data-mce-mark="1"&gt;="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Şimdi xaml kodlarını yazmaya başlayabiliriz. Design tarafında kullanacağımız kontrollerin kodları aşağıdaki gibi olacaktır.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-family: Consolas;"&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;Grid.Background&amp;gt;
+        &amp;lt;!--Pivot Control--&amp;gt;
+        &amp;lt;controls:Pivot x:Name="dovizpivot"&amp;gt;
+            &amp;lt;!--Pivot item one--&amp;gt;
+            &amp;lt;controls:PivotItem Header="D&amp;ouml;viz Verileri"&amp;gt;
+                &amp;lt;ListBox x:Name="lbdovizler" ScrollViewer.VerticalScrollBarVisibility="Disabled" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"&amp;gt;
+                    &amp;lt;ListBox.ItemsPanel&amp;gt;
+                        &amp;lt;ItemsPanelTemplate&amp;gt;
+                            &amp;lt;toolkit:WrapPanel&amp;gt;&amp;lt;/toolkit:WrapPanel&amp;gt;
+                        &amp;lt;/ItemsPanelTemplate&amp;gt;
+                    &amp;lt;/ListBox.ItemsPanel&amp;gt;
+                    &amp;lt;ListBox.ItemTemplate&amp;gt;
+                        &amp;lt;DataTemplate&amp;gt;
+                            &amp;lt;StackPanel&amp;gt;
+                                &amp;lt;Button x:Name="btndoviz" Content="{Binding ADI}" FontSize="32" Background="#0076dd" FontWeight="Bold" Foreground="White" Height="120" Width="150"&amp;gt;
+                                &amp;lt;/Button&amp;gt;
+                            &amp;lt;/StackPanel&amp;gt;
+                        &amp;lt;/DataTemplate&amp;gt;
+                    &amp;lt;/ListBox.ItemTemplate&amp;gt;
+                &amp;lt;/ListBox&amp;gt;
+            &amp;lt;/controls:PivotItem&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Senaryo şu şekilde işliyor, Xml olarak gelen verileri Parse edip bir array&amp;rsquo;in i&amp;ccedil;erisine atacaz ve o array&amp;rsquo;ide &amp;uuml;stte yazdığımız lbdovizler lsitbox&amp;rsquo;ına ItemsSource olarak verecez. Sonrasında listbox&amp;rsquo;ın ItemTemplate&amp;rsquo;inde bulunan Buton&amp;rsquo;un Content&amp;rsquo;ine Bind olarak oluşturacağımız object&amp;rsquo;in ADI attribute&amp;rsquo;&amp;uuml;n&amp;uuml; verdiğimizden o D&amp;ouml;viz&amp;rsquo;in ismi ekranda g&amp;ouml;r&amp;uuml;necektir.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Şimdi ise CodeBehind&amp;rsquo;a ge&amp;ccedil;elim..&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;Gelen Veriyi Dovizler adında class oluşturarak ona atayacağız, class aşağıdaki şekilde olacaktır.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;span style="font-family: Consolas;" data-mce-mark="1"&gt;&amp;nbsp; &amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;span style="line-height: 115%; font-family: Consolas;" data-mce-mark="1"&gt;//Service&amp;rsquo;in sunduğu Xml formatı aşağıdaki gibi.Bize &lt;/span&gt;&lt;strong&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;" data-mce-mark="1"&gt;DOVIZ&amp;nbsp;&lt;/span&gt;&lt;/strong&gt;&lt;span style="line-height: 115%; font-family: Consolas;" data-mce-mark="1"&gt;t&amp;uuml;r&amp;uuml;nde &lt;/span&gt;&lt;strong&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;" data-mce-mark="1"&gt;ADI&lt;/span&gt;&lt;/strong&gt;&lt;span style="line-height: 115%; font-family: Consolas;" data-mce-mark="1"&gt;,&lt;/span&gt;&lt;strong&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;" data-mce-mark="1"&gt;ALIS&lt;/span&gt;&lt;/strong&gt;&lt;span style="line-height: 115%; font-family: Consolas;" data-mce-mark="1"&gt;,&lt;/span&gt;&lt;strong&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;" data-mce-mark="1"&gt;SATIS&amp;nbsp;&lt;/span&gt;&lt;/strong&gt;&lt;span style="line-height: 115%; font-family: Consolas;" data-mce-mark="1"&gt;attributleri olan &lt;/span&gt;&lt;strong&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;" data-mce-mark="1"&gt;altinkaynak&amp;nbsp;&lt;/span&gt;&lt;/strong&gt;&lt;span style="line-height: 115%; font-family: Consolas;" data-mce-mark="1"&gt;adında &lt;/span&gt;&lt;strong&gt;&lt;span style="line-height: 115%; font-family: Consolas; color: red;" data-mce-mark="1"&gt;array&amp;nbsp;&lt;/span&gt;&lt;/strong&gt;&lt;span style="line-height: 115%; font-family: Consolas;" data-mce-mark="1"&gt;d&amp;ouml;n&amp;uuml;yor&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium; line-height: 115%; font-family: Consolas;"&gt;&lt;img src="/MyImage_Folder/p_xmlservice.png" alt="" width="287" height="336" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; public class Dovizler
+    {
+        public string ADI { get; set; }
+        public string ALIS { get; set; }
+        public string SATIS { get; set; }
+    }
+
+//Dovizleri saklayacağımız List array&amp;rsquo;i tanımladık.
+
+        List&amp;lt;Dovizler&amp;gt; Dovizler = newList&amp;lt;Dovizler&amp;gt;();
+        public MainPage()
+        {
+            InitializeComponent();
+            GetResult();  //GetResult Metodunu &amp;ccedil;ağırıyoruz
+        }
+//GetResult Metodu bize Web Service&amp;rsquo;in bulundu adrese giderek orda XML olarak yayınlanmış verileri getirecektir.
+        publicvoid GetResult()
+        {
+            WebClient wc = newWebClient();
+            wc.DownloadStringCompleted += wc_DownloadStringCompleted;
+            wc.DownloadStringAsync(newUri("http://xml.altinkaynak.com.tr/doviz.xml")); //Service URL&amp;rsquo;i
+        }&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;void wc_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+            if (e.Error != null)// Eğer hata mesajı d&amp;ouml;ner ise metod&amp;rsquo;dan &amp;ccedil;ıkıyoruz
+                return;
+            try
+            {
+                XElement xel = XElement.Parse(e.Result);  //gelen veriyi xel&amp;rsquo;e atıyoruz ve sonrasında nesne haline getirerek array&amp;rsquo;in i&amp;ccedil;erisine insert ediyoruz
+                 Dovizler = from dv in xel.Elements("DOVIZ") //Doviz nesnesine gitmesini s&amp;ouml;yledik
+                           selectnewDovizler()
+                           {
+    //Doviz nesnesinin hangi attributlerini alacağımızı belirtiyoruz
+                               ADI = dv.Element("ADI").Value,
+                               ALIS = dv.Element("ALIS").Value,
+                               SATIS = dv.Element("SATIS").Value
+                           };
+                // Son olarak Array&amp;rsquo;i lbdovizler ListBox&amp;rsquo;ına ItemsSource olarak veriyoruz
+                lbdovizler.ItemsSource = Dovizler;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("L&amp;uuml;tfen Daha Sonra Tekrar Deneyin.", "Bilgilendirme", MessageBoxButton.OK);
+                return;
+            }
+        }&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium; line-height: 115%; font-family: Consolas;" data-mce-mark="1"&gt;Uygulamanın ekran g&amp;ouml;r&amp;uuml;nt&amp;uuml;s&amp;uuml; aşağıda olduğu gibidir.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/MyImage_Folder/p_result.png" alt="" width="223" height="337" /&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-06-06 16:15:00</pubDate>
+  <lastModified>2020-01-20 08:22:32</lastModified>
+  <raters>16</raters>
+  <rating>3.187499</rating>
+  <slug>Windows-Phone-Web-Service-Kullanimi</slug>
+  <tags>
+    <tag>xml</tag>
+    <tag>parse</tag>
+    <tag>xmlparse</tag>
+    <tag>webserivice</tag>
+    <tag>json</tag>
+  </tags>
+  <comments>
+    <comment id="ef92e504-2eba-4f3b-9761-c1716670e171" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2013-06-06 18:43:06</date>
+      <author>selo</author>
+      <email>selo@selo.com</email>
+      <country>tr</country>
+      <ip>88.238.22.241</ip>
+      <moderatedby>caner</moderatedby>
+      <avatar />
+      <content>Tamda aradığım buydu, bide kaynak kodları paylaşırsan dahada s&amp;#252;per olacak.</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

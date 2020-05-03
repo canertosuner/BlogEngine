@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Isolated Storage Kullanımı</title>
+  <description />
+  <content>&lt;p&gt;Windows Phone' uygulama i&amp;ccedil;erisinde veri saklamak i&amp;ccedil;in kullanabileceğimiz &amp;ccedil;eşitli yapılar vardır. Bunlardan birtanesi IsolatedStorage'dır. IsolatedStorage kullanarak uygulamanın kullanıcı tarafından değiştirilmiş ayarlarını, yada uygulamada UserName Password gibi bilgiler gerekli ise bu bilgileri uygulama her a&amp;ccedil;ıldığında s&amp;uuml;rekli kullanıcıya sormak yerine ilk seferde kullanıcıdan bu bilgileri alıp IsolatedStorage i&amp;ccedil;erisine kolayca kaydedebiliriz.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;IsolatedStorage Veri Yazma&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;private void DosyayaYaz(string text)
+{
+IsolatedStorageFile storage= IsolatedStorageFile .GetUserStoreForApplication();
+IsolatedStorageFileStream fs =storage.CreateFile("data.txt");
+StreamWritersw =newStreamWriter(fs);
+sw.Write(text); //Metoda gelen text değişkeni i&amp;ccedil;erisindeki değer IsolatedStorage ile data.txt dosyası i&amp;ccedil;erisine kaydedilir
+sw.Close();
+}&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-top: 0cm; margin-right: 0cm; margin-bottom: .0001pt; margin-left: 34.1pt; line-height: 16.5pt; mso-line-height-rule: exactly; mso-pagination: none; mso-layout-grid-align: none; text-autospace: none;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: .0001pt; line-height: 16.5pt;"&gt;&lt;strong&gt;IsolatedStorage Veri Okuma&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;private string DosyadanOku()
+{
+IsolatedStorageFilestorage= IsolatedStorageFile.GetUserStoreForApplication();
+if (storage.FileExists("data.txt"))  //daha &amp;ouml;ncesinde oluşturduğumuz data.txt adlı dosya varmı diyee kontrol ediyoruz
+{
+IsolatedStorageFileStream fs = storage.OpenFile("data.txt", System.IO.FileMode.Open, System.IO.FileAccess.Read);
+StreamReader sr=new StreamReader(fs);
+string kayitliVeri = sr.ReadToEnd();
+sr.Close();
+}
+else
+{
+return String.Empty; //eğer o isimde bir dosya yok ise boş değer d&amp;ouml;nd&amp;uuml;r&amp;uuml;yoruz
+}
+return kayitliVeri ;
+}&lt;/pre&gt;
+&lt;p class="MsoNormal"&gt;&lt;strong style="font-size: medium; line-height: 16.5pt;"&gt;IsolatedStorage Veri Silme&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;private void DosyaSil()
+{
+IsolatedStorageFile storage= IsolatedStorageFile.GetUserStoreForApplication();
+if(storage.FileExists("data.txt"))
+     storage.DeleteFile("data.txt");
+else
+   return ;
+}&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: .0001pt; line-height: 16.5pt;"&gt;&lt;strong style="margin: 0px; padding: 0px; border: 0px; font-size: large; line-height: 1.5; font-family: calibri, sans-serif; color: #333333;"&gt;&amp;gt;&amp;gt;&amp;nbsp;catch&amp;nbsp;{&lt;img style="margin: 0px; padding: 0px; font-weight: normal; font-size: 18.399999618530273px; line-height: 1.5; font-family: inherit; max-width: 100%;" title="Foot in Mouth" src="http://www.canertosuner.com/editors/tiny_mce_3_5_8/plugins/emotions/img/smiley-foot-in-mouth.gif" alt="Foot in Mouth" border="0" /&gt;}&amp;nbsp;'e&amp;nbsp;d&amp;uuml;şmemeniz&amp;nbsp;dileğiyle..&amp;nbsp;&lt;img style="margin: 0px; padding: 0px; font-weight: normal; font-size: 18.399999618530273px; line-height: 1.5; font-family: inherit; max-width: 100%;" title="Smile" src="http://www.canertosuner.com/editors/tiny_mce_3_5_8/plugins/emotions/img/smiley-smile.gif" alt="Smile" border="0" /&gt;&amp;nbsp;&amp;lt;&amp;lt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: .0001pt; line-height: 16.5pt;"&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-06-06 15:27:00</pubDate>
+  <lastModified>2020-01-20 08:22:32</lastModified>
+  <raters>12</raters>
+  <rating>2.666666</rating>
+  <slug>Isolated-Storage-Kullanımı</slug>
+  <tags>
+    <tag>isolatedstorage</tag>
+    <tag>storage</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

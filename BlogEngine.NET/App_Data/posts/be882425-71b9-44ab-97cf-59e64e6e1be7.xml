@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Windows Phone LightBox(Canvas) Kullanımı</title>
+  <description>&amp;nbsp;
+Web&amp;rsquo;de alışık olduğumuz Lightbox&amp;rsquo;ları Windows Phone&amp;rsquo;da da bi nevi yapmak m&amp;</description>
+  <content>&lt;p&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium; font-family: verdana, geneva;" data-mce-mark="1"&gt;Web&amp;rsquo;de alışık olduğumuz Lightbox&amp;rsquo;ları Windows Phone&amp;rsquo;da da bi nevi yapmak m&amp;uuml;mk&amp;uuml;n. Nasıl mı ? Canvas kontrol&amp;uuml;n&amp;uuml; kullanarak.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium; font-family: verdana, geneva;" data-mce-mark="1"&gt;İlk olarka yeni bir WP projesi a&amp;ccedil;alım ve MainPage.xaml design sayfası i&amp;ccedil;erisindeki Grid&amp;rsquo;in i&amp;ccedil;ine 1 adet Canvas kontrol&amp;uuml; atalım Canvas tagleri i&amp;ccedil;ine StackPanel ve StackPanel&amp;rsquo;inde i&amp;ccedil;ine istediğimiz kontrolleri atalım &amp;nbsp;TextBox,TextBlock, Buton etc. Canvas&amp;rsquo;ın &lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;Visibility&lt;/span&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;=" "&lt;/span&gt; &amp;nbsp;&amp;ouml;zelliğini kullanarak tıpkı bir Lightbox gibi &amp;ccedil;alışmasını sağlayabilriz. Ekranda g&amp;ouml;r&amp;uuml;ns&amp;uuml;n istediğimizde &lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;Visibility&lt;/span&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;="Visible"&lt;/span&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;diyebilir, g&amp;ouml;r&amp;uuml;nmesin istediğimizde &lt;/span&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;Visibility&lt;/span&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;=" Collapsed"&lt;/span&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;yaparak ekrandan kaybolmasını sağlayabiliriz.&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium; line-height: 115%; font-family: verdana, geneva;" data-mce-mark="1"&gt;Yaklaşık 3 ay &amp;ouml;nce geliştirdiğim ve şuan markette bulunan &lt;strong&gt;&lt;a href="http://www.windowsphone.com/tr-tr/store/app/son-depremler/267b5b52-c99a-438b-b409-3e12480d3fb4"&gt;SonDepremler &lt;/a&gt;&lt;/strong&gt;uygulaması i&amp;ccedil;in kullandığım Canvas kontrol&amp;uuml;n&amp;uuml;n kodları aşağıda olduğu gibidir.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium; font-family: verdana, geneva;" data-mce-mark="1"&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;LightBox&amp;rsquo;ın ekranda g&amp;ouml;r&amp;uuml;nmesi i&amp;ccedil;in ekranda bulunana herhangi bir kontrol&amp;rsquo;&amp;uuml;n event&amp;rsquo;i tetiklendiğinde tek yapmanız gereken metod i&amp;ccedil;erisine &lt;span style="color: #ff0000;" data-mce-mark="1"&gt;&lt;strong&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;canvasfiltre&lt;/span&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;.Vi ibility=Visible; &lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;demek&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="text-align: left;"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;&lt;span style="line-height: 115%;" data-mce-mark="1"&gt;Ekrandan kaybolması i&amp;ccedil;in ise Canvas i&amp;ccedil;erisinde bulunan&amp;nbsp;&lt;/span&gt;&lt;span style="line-height: 115%; color: blue;" data-mce-mark="1"&gt;canvasclose&amp;nbsp;&lt;/span&gt;&lt;span style="line-height: 115%;" data-mce-mark="1"&gt;butonunun Click eventinin metoduna&lt;/span&gt;&lt;span style="line-height: 115%; color: blue;" data-mce-mark="1"&gt; canvasfiltre.Visibility=Visibility.Collapsed; &lt;/span&gt;&lt;/span&gt;&lt;span style="line-height: 115%; font-family: Consolas;" data-mce-mark="1"&gt;&lt;span style="font-family: verdana, geneva;" data-mce-mark="1"&gt;demek yeterli olacaktır.&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;" data-mce-mark="1"&gt;&lt;strong&gt;&lt;span style="line-height: 115%; font-family: Consolas;" data-mce-mark="1"&gt;Mainpage.xaml Design Sayfası&lt;/span&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt; text-align: left;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;pre class="brush:xml;auto-links:false;toolbar:false" contenteditable="false"&gt;&amp;lt;Canvas Canvas.ZIndex="1" Visibility="Visible" x:Name="canvasfiltre" Width="400" Background="White"&amp;nbsp;Height="480"&amp;gt;
+&amp;nbsp;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;StackPanel Width="400"&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;HyperlinkButton x:Name="canvasclose" Foreground="#d64300" HorizontalAlignment="Right" Content="X" FontWeight="Bold" Canvas.Left="400" Canvas.Top="10" Click="canvasclose_Click" /&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;StackPanel Orientation="Vertical"&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;TextBlock TextWrapping="Wrap" FontSize="45" FontWeight="Bold" Foreground="#d64300" VerticalAlignment="Top" Text="Sırala" HorizontalAlignment="Center" TextDecorations="Underline"/&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;CheckBox IsChecked="true" Name="chctumdepremler" FontWeight="Bold" FontSize="26" Foreground="#d64300" Background="Red" Content="T&amp;uuml;m Depremler" Click="chctumdepremler_Click"/&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;CheckBox Name="chc_3alti" HorizontalAlignment="Left" Content="Şiddeti 3'ten az olanlar" FontSize="26" Background="Red" Foreground="#d64300" FontWeight="Bold" Click="chc_3alti_Click"/&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;CheckBox Name="chc_3ustu" HorizontalAlignment="Left" Content="Şiddeti 3'ten fazla olanlar" Background="Red" FontSize="26" Foreground="#d64300" FontWeight="Bold" Click="chc_3ustu_Click"/&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;CheckBox Name="chc_5alti" HorizontalAlignment="Left" Content="Şiddeti 5'ten az olanlar" FontSize="26" Background="Red" Foreground="#d64300" FontWeight="Bold" Click="chc_5alti_Click"/&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;lt;CheckBox Name="chc_5ustu" HorizontalAlignment="Left" Content="Şiddeti 5'ten fazla olanlar" Background="Red" FontSize="26" Foreground="#d64300" FontWeight="Bold" Click="chc_5ustu_Click"/&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;/StackPanel&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;/StackPanel&amp;gt;
+&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &amp;lt;/Canvas&amp;gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br /&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=%2f2013%2f05%2f37cdfc59-801b-4c85-afb9-fa5c38b72c44.png" alt="" width="237" height="395" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-02-18 16:58:00</pubDate>
+  <lastModified>2020-01-20 08:22:36</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Windows-Phone-LightBox(Canvas)-Kullanımı</slug>
+  <tags>
+    <tag>lightbox</tag>
+    <tag>canvas</tag>
+    <tag>windowsphone</tag>
+    <tag>wp8</tag>
+    <tag>controls</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

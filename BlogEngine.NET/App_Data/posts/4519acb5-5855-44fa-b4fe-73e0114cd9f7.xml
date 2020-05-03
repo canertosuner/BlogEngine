@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Api Projesi Oluşturma</title>
+  <description>Şöyle bir örnek proje yapalım. TodoApi adında bir WebApi projemiz olsun ve bu Api'a bir tane controller tanımlayıp içerisine TodoList dönen bir metot yazalım.
+
+İlk olarak Visual Studio açıyoruz ve File =&gt; New =&gt; Project diyoruz ve aşağıdaki görselde olduğu gibi Web</description>
+  <content>&lt;p&gt;Ş&amp;ouml;yle bir &amp;ouml;rnek proje yapalım. TodoApi adında bir WebApi projemiz olsun ve bu Api'a bir tane controller tanımlayıp i&amp;ccedil;erisine TodoList d&amp;ouml;nen bir metot yazalım.&lt;/p&gt;
+&lt;p&gt;İlk olarak&amp;nbsp;Visual Studio a&amp;ccedil;ıyoruz ve &lt;strong&gt;File&lt;/strong&gt;&amp;nbsp;=&amp;gt;&amp;nbsp;&lt;strong&gt;New&lt;/strong&gt;&amp;nbsp;=&amp;gt;&amp;nbsp;&lt;strong&gt;Project&lt;/strong&gt;&amp;nbsp;diyoruz ve aşağıdaki g&amp;ouml;rselde olduğu gibi &lt;strong&gt;Web&lt;/strong&gt; kategorisine tıklayıp sonrada &lt;strong&gt;ASP.Net Web Application&lt;/strong&gt;'ı se&amp;ccedil;iyoruz&lt;strong&gt;&amp;nbsp;&lt;/strong&gt;ve projenize bir isim verdikten sonra&lt;strong&gt; OK&lt;/strong&gt;'e tıklıyoruz.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/06/web_api_new_proj.png" alt="" width="733" height="412" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Daha sonra a&amp;ccedil;ılam ekrandan &lt;strong&gt;Empty&lt;/strong&gt; kategorisini tıklayıp&amp;nbsp;ekranın orta kısmında bulunan checkbox'lardan &lt;strong&gt;WebApi&lt;/strong&gt;'ı se&amp;ccedil;iyoruz ve &lt;strong&gt;OK&lt;/strong&gt;'e tıklıyoruz.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/06/web-api-project_select.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Artık solution'da projemiz hazır. Şimdi ilk olarak &lt;strong&gt;Models&lt;/strong&gt; klas&amp;ouml;r&amp;uuml; i&amp;ccedil;erisine&amp;nbsp;&lt;strong&gt;TodoItem&lt;/strong&gt; isminde aşağıdaki gibi bir class tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;namespace TodoApi.Models
+{
+    public class TodoItem
+    {
+        public string Key { get; set; }
+        public string Name { get; set; }
+        public bool IsComplete { get; set; }
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Şimdi ise TodoController adında controller'ımızı tanımlayalım. Bunun i&amp;ccedil;in solution'da bulunan Controller klas&amp;ouml;r&amp;uuml;n&amp;uuml;n &amp;uuml;zerine gelip sağ tıklayıp Add diyelim sonrasında a&amp;ccedil;ılan ekrandan Controller'ı se&amp;ccedil;elim&amp;nbsp;ve Controller'a TodoController ismini verip OK'e tıklayalım.&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/06/web_api_new_proj_add_controller_2.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Artık TodoController'ınıda oluşturduk şimdi sırada &lt;strong&gt;GetAllTodoItems&lt;/strong&gt; isminde &lt;strong&gt;HTTPGET&lt;/strong&gt; request'i atılabilen ve geriye &lt;strong&gt;List&amp;lt;TodoItem&amp;gt;&lt;/strong&gt; d&amp;ouml;nen bir metot yazalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class TodoController : ApiController
+    {
+        [HttpGet]
+        public List&amp;lt;TodoItem&amp;gt; GetAllTodoItems()
+        {
+            var responseList = new List&amp;lt;TodoItem&amp;gt;
+            {
+                new TodoItem{
+                    Key="SD2",
+                    Name="G&amp;ouml;rev1",
+                    IsComplete=true,
+                },
+                new TodoItem{
+                    Key="SD11",
+                    Name="G&amp;ouml;rev2",
+                    IsComplete=true,
+                },
+                new TodoItem{
+                    Key="SD251",
+                    Name="G&amp;ouml;rev3",
+                    IsComplete=true,
+                },
+                new TodoItem{
+                    Key="SD8",
+                    Name="G&amp;ouml;rev4",
+                    IsComplete=true,
+                },
+                new TodoItem{
+                    Key="SD01",
+                    Name="G&amp;ouml;rev5",
+                    IsComplete=true,
+                },
+                new TodoItem{
+                    Key="SD42",
+                    Name="G&amp;ouml;rev6",
+                    IsComplete=true,
+                },
+            };
+
+            return responseList;
+        }&lt;/pre&gt;
+&lt;p&gt;Api projemiz var. Şimdi gelin bu Api'a requestte bulunup ne response d&amp;ouml;n&amp;uuml;yor onu g&amp;ouml;relim. Projeyi &amp;ccedil;alıştıralım ve her hangi bir rest client tool kullanarak aşağıdaki link'e requestte bulunalım.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;http://localhost/api/Todo/GetAllTodoItems&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Ben genelde Postman'i kullanıyorum ve aşağıdaki gibi Postman ile &lt;strong&gt;GET&lt;/strong&gt; request'i atıyoruz.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/06/web_api_new_proj_postman_req.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;D&amp;ouml;nen response'a baktığımızda aşağıdaki gibi json formatında response geldiğini g&amp;ouml;receğiz.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2016/06/web_api_new_proj_postman_resp.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;WebApi candır arkadaşlar ve servis tarafında geliştirme yapıyorsanız da &amp;ccedil;ok ama &amp;ccedil;ok &amp;ouml;nemlidir. Bir Microsoft yetkilisi bir konferansta şuna&amp;nbsp;benzer bir&amp;nbsp;c&amp;uuml;mle kurdu "&lt;strong&gt;Biz daha iyisini yapana kadar en iyisi bu !&lt;/strong&gt;".&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-01-30 17:53:00</pubDate>
+  <lastModified>2020-01-20 08:22:26</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Web-Api-Projesi-Olusturma</slug>
+  <tags>
+    <tag>webapi</tag>
+    <tag>WebApi</tag>
+    <tag>proje oluşturma</tag>
+    <tag>yeni proje</tag>
+    <tag>json</tag>
+    <tag>controller</tag>
+    <tag>request response</tag>
+    <tag>response</tag>
+    <tag>postman</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

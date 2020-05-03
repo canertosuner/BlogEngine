@@ -1,0 +1,62 @@
+﻿.blog-sidebar {
+    .post-item-list {
+        background: #f1f1f1;
+        border-radius: .125rem;
+        overflow: hidden;
+
+        a {
+            display: block;
+
+            &:hover {
+                background-color: $color-theme-primary;
+                color: #fff;
+
+                .post-item-title {
+                    color: #fff;
+                }
+            }
+        }
+
+        .post-item-img {
+            font-size: 0;
+            display: block;
+        }
+
+        .post-item-title {
+            font-size: 1rem;
+            font-weight: 500;
+            position: relative;
+            margin: 0;
+            padding: 1rem;
+            color: $color-theme-primary;
+        }
+
+        .post-item-desc {
+            display: block;
+            margin: 0;
+            color: inherit;
+            font-size: .875rem;
+            padding: 0 1rem .5rem;
+        }
+
+        .post-item-date {
+            padding: 0 1rem 1rem;
+            font-size: .75rem;
+            text-transform: uppercase;
+            display: block;
+
+            &::before {
+                @include icon("\f017");
+                font-size: .75rem;
+                margin-right: .25rem;
+            }
+        }
+    }
+}
+
+
+
+
+.blog-footer {
+
+}

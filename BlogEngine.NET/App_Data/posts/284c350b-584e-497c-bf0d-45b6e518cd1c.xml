@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Postsharp Kullanarak Metot Execution Sürelerini Hesaplama</title>
+  <description>PDaha önceki aspect oriented yazılarımızda ne aspect oriented'ın ne olduğunu ve nasıl kullanıldığını çeşitli örneklerle anlatmıştık ve AOP yaklaşımı ile yapılabileceklerin sınırının olmadığından bahsetmiştik.</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki &lt;a href="/category/Aspect-Oriented-Programming"&gt;aspect oriented&lt;/a&gt; yazılarımızda ne aspect oriented'ın ne olduğunu ve nasıl kullanıldığını &amp;ccedil;eşitli &amp;ouml;rneklerle&amp;nbsp;anlatmıştık ve AOP yaklaşımı ile yapılabileceklerin sınırının olmadığından bahsetmiştik.&amp;nbsp;Bu yazımızda da &amp;ouml;zellikle server-side geliştirme yapanların sık&amp;ccedil;a ihtiya&amp;ccedil; duyduğu metot execution s&amp;uuml;resinin AOP yaklaşımı ile nasıl yapıldığından bahsedeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yazılımda performans bildiğiniz &amp;uuml;zre&amp;nbsp;en &amp;ouml;nemli konuların başında gelir ve b&amp;uuml;y&amp;uuml;k &amp;ccedil;apta 1 den fazla client'ın consume ettiği bir projeniz var ise metot execution s&amp;uuml;relerini bir yerlerde logluyor olmak bizler i&amp;ccedil;in şu gibi durumlarda hayat kurtarıcı bir rol &amp;uuml;stlenir; client der ki "Abi sayfa 8 saniyede a&amp;ccedil;ılıyor bizde bir sıkıntı yok service'den ge&amp;ccedil; geliyor....vs.", server-side'da geliştirme yapan arkadaşta der ki "Yok abi ben 0.2 saniyede response d&amp;ouml;nm&amp;uuml;ş&amp;uuml;m bu bizden değil...vs.". Bu gibi durumlarda eğer siz service olarak&amp;nbsp;projenizden eminseniz bu durumu&amp;nbsp;kanıtlamak i&amp;ccedil;in&amp;nbsp;en g&amp;uuml;zel &amp;ccedil;&amp;ouml;z&amp;uuml;m metot execution s&amp;uuml;relerini hesaplayıp delil olarak ilgili mercilere sunmak. Ya da bu case'i de ge&amp;ccedil;elim bizler developerlar olarak kendimize "arkadaş bi proje yaptık ama işler nasıl gidiyor, yazılımsal olarak performansı yerinde mi.." vs.&amp;nbsp;gibi soruları sorup cevaplarını da biliyor olmamız gerekir.&lt;/p&gt;
+&lt;p&gt;Bunun i&amp;ccedil;in AOP &amp;ccedil;&amp;ouml;z&amp;uuml;mlerinden biri olan Postsharp'dan yararlanacağız. Case şu şekilde olacak; Bir&amp;nbsp;Api projemiz olsun ve MoneyTransfer&amp;nbsp;adında eft-havale-virman işlemlerini yapan&amp;nbsp;end-point geliştirelim ve bu end-point'e gelen request-response'ların execution s&amp;uuml;relerini LoggingAspect kullanarak loglayalım.&lt;br /&gt;&lt;br /&gt;*PostSharp kurulumu vs bilgileri i&amp;ccedil;in &lt;a href="/post/PostSharp-Exception-Handling"&gt;şu &lt;/a&gt;yazıyı inceleyebilirsiniz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    [Serializable]
+    public class LoggingAspect : OnMethodBoundaryAspect
+    {
+        private static readonly Stopwatch timer = new Stopwatch();  
+        private static readonly serializer = new JavaScriptSerializer();
+        public override void OnEntry(MethodExecutionArgs args)
+        {
+            timer.Start();
+        }
+
+        public override void OnExit(MethodExecutionArgs args)
+        {
+           var executionTime = timer.ElapsedMilliseconds;
+            timer.Stop();
+            var logMessage = "Method : " args.Method.Name +  " Execution Time : " + executionTime + " Millisecond";
+            Console.Write(logMessage );
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Sırada &lt;strong&gt;MoneyTransfer&amp;nbsp;&lt;/strong&gt;işlemi yapan metodu yazalım ve bu metot parametre olarak&amp;nbsp;&lt;strong&gt;TransferRequest&lt;/strong&gt; objesi alsın ve response olarak &lt;strong&gt;TransferResponse&lt;/strong&gt; adında bir model d&amp;ouml;ns&amp;uuml;n.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [LoggingAspect]
+        public TransferResponse MoneyTransfer(TransferRequest request)
+        {
+            // back-end kodlarınız
+
+            var resp = new TransferResponse
+            {
+                IsSuccess = true,
+                Message = "Transfer İşleminiz Ger&amp;ccedil;ekleşti."
+            };
+            return resp;
+        }
+
+        public class TransferRequest
+        {
+            public decimal Amount { get; set; }
+            public string SenderIBAN { get; set; }
+            public string ReceiverIBAN { get; set; }
+        }
+
+        public class TransferResponse
+        {
+            public bool IsSuccess { get; set; }
+            public string Message { get; set; }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Hepsi bu kadar artık yazdığımız kodları test edebiliriz. TransferMoney metoduna request yolladığımızda metot scope'ları i&amp;ccedil;erisindeki kodları run etmeden aspect'imiz i&amp;ccedil;erisinde bulunan OnEntry metoduna girecektir ve burada timer'ı start ediyoruz. Sonrasında metot scope'ları i&amp;ccedil;erisinde bulunan kodları &amp;ccedil;alıştırıp metottan &amp;ccedil;ıktıktan sonra OnExit metoduna girip timer'ı stop edip devamında&amp;nbsp;execution s&amp;uuml;resini&amp;nbsp;millisecond cinsinden Console'a yazacaktır.&lt;/p&gt;
+&lt;p&gt;Metot execution s&amp;uuml;resi yukarıda da belirttiğim gibi &amp;ouml;nemli bir konudur ve ne nerde ne kadar s&amp;uuml;re harcayıp client'a gidiyor bunu &amp;ouml;l&amp;ccedil;eklendirebiliyor olmak gerekir.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Not:&lt;/strong&gt;&lt;/span&gt;&amp;nbsp;&amp;Ccedil;ok uzun s&amp;uuml;ren execution s&amp;uuml;relerinin genelde networksel sorunlardan dolayı kaynaklanabileceği ihtimalini de unutmamak gerekir.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-06-03 21:13:00</pubDate>
+  <lastModified>2017-04-27 14:01:03</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>postsharp-kullanarak-metot-execution-surelerini-olcme</slug>
+  <tags>
+    <tag>postsharp</tag>
+    <tag>Logging ASpect</tag>
+    <tag>Logging Interceptor</tag>
+    <tag>Execution Time</tag>
+    <tag>measuring execution time</tag>
+    <tag>Aspect-Oriented Programming</tag>
+    <tag>metot süresi</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>af2ae59a-5e53-4ebf-b52e-cbba606354f4</category>
+  </categories>
+  <notifications />
+</post>

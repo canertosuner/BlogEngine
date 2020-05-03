@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Web Api Exception Handling and Logging</title>
+  <description>Herhangi bir yazılım projesinde Exception alındığında bu exception'nın handle edilip belli başlı bazı süreçlerden geçirilip log atılmasına kadar geçen süreçler oldukça önemlidir ve enterprise bir projede development yapıyor isek ExceptionLog olmazsa olmazlardan biridir.</description>
+  <content>&lt;p&gt;Herhangi bir yazılım projesinde Exception alındığında bu exception'nın handle edilip belli başlı bazı s&amp;uuml;re&amp;ccedil;lerden ge&amp;ccedil;irilip log atılmasına kadar ge&amp;ccedil;en s&amp;uuml;re&amp;ccedil;ler olduk&amp;ccedil;a &amp;ouml;nemlidir ve enterprise bir projede development yapıyor isek ExceptionLog olmazsa olmazlardan biridir. Projeye yeni başlarken mimarisi&amp;nbsp;ilk d&amp;uuml;ş&amp;uuml;n&amp;uuml;l&amp;uuml;p tasarlanması gerekir &amp;ccedil;&amp;uuml;nk&amp;uuml; proje ilerledik&amp;ccedil;e log, exception handling veya cache gibi yapıları entegre etmek biraz daha zorlaşacaktır.&lt;/p&gt;
+&lt;p&gt;Web Api tarafında Exception handling ve log işlemleri yapmak biraz daha keyifli ve basit diyebiliriz &amp;ccedil;&amp;uuml;nk&amp;uuml; Microsoft sağolsun bazı şeyleri bizim yerimize d&amp;uuml;ş&amp;uuml;n&amp;uuml;p kolaylaştırmış.&lt;/p&gt;
+&lt;p&gt;İlk olarak ş&amp;ouml;yle bir controller metodumuz olsun ve bu metoda requestte bulunduğumuzda ne gibi bir response ile karşılaşıyoruz onu g&amp;ouml;relim.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;[HttpGet]
+public IHttpActionResult CheckValue(int value)  
+{
+    if(value &amp;gt; 20)
+    {
+        throw new ArgumentOutOfRangeException();
+    }
+    return Ok(value);
+}&lt;/pre&gt;
+&lt;p&gt;Herhangi bir&amp;nbsp;3th party tool (DHC, Postman etc.) kullanarak ilgili metoda parametresi "10" olacak şekilde request attığımızda respose olarak g&amp;ouml;ndermiş olduğumuz "10" değerini status code&amp;nbsp;&lt;strong&gt;200 - OK&lt;/strong&gt;&amp;nbsp;olacak şekilde d&amp;ouml;ner.&lt;/p&gt;
+&lt;p&gt;Aynı requesti parametre "25" olacak şekilde attığımızda ise yukarıda fırlattığımız "&lt;strong&gt;ArgumentOutOfRangeException&lt;/strong&gt;" hata a&amp;ccedil;ıklamasını status code&amp;nbsp;&lt;strong&gt;500 - Internal Server Error&amp;nbsp;&lt;/strong&gt;olacak şekilde d&amp;ouml;ner.&lt;/p&gt;
+&lt;p&gt;Uygulamada controller seviyesinde bir exception aldığımızda olması gereken exception'nın handle edilip kullanıcıya doğrudan Exception class'ından fırlatılan hata mesajı değilde(ihtiyaca g&amp;ouml;re) ilgili daha anlamlandırılmış bir şekli response'a eklenip client'a d&amp;ouml;n&amp;uuml;yor olması ve bu exception'nın log olarak bir yerde tutuluyor olması gerekir.&lt;/p&gt;
+&lt;p&gt;Yukarıda bahsettiğimiz gibi WebApi i&amp;ccedil;in Exception alındığında Log işleminin yapılmasını i&amp;ccedil;in kullanıma sunulan abstract class ve onun metodlarını inceleyeceğiz.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1.Logging&lt;/strong&gt;&amp;nbsp;ExceptionLogger class Log metodunu kullanarak uygulamadaki herhangi bir exception'nın loglanmasını sağlayabiliriz. Bunun i&amp;ccedil;in aşağıda&amp;nbsp;UnhandledExceptionLogger isimli class'ımızı kullanarak ilerleyeceğiz.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;public class UnhandledExceptionLogger : ExceptionLogger  
+{
+    public override void Log(ExceptionLoggerContext context)
+    {
+        var log = context.Exception.ToString();
+        //Loglama i&amp;ccedil;in ilgili ilemlerin yapıldığı yer (db log, file log vs gibi)
+    }
+}&lt;/pre&gt;
+&lt;p&gt;&amp;Uuml;stte tanımladığımız UnhandledExceptionLogger class'ını Web Api projesinde kullanabilmek i&amp;ccedil;in register etmemiz gerekmekte. Register işlemi ile birlikte WebApi nin otomatik olarak default set ettiği&amp;nbsp;ExceptionLogger'ı kendi yazdığımız UnhandledExceptionLogger class'ı ile değiştiriyoruz. Bu işlem i&amp;ccedil;in aşağıdaki kodu Global.asax.cs i&amp;ccedil;erisindeki Application_Start metoduna yazıyoruz.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;config.Services.Replace(typeof(IExceptionLogger), new UnhandledExceptionLogger());&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu adımdan sonra uygulamada bir unhandled exception fırlatıldığı anda logger'ımız onu yakalayıp yazmak istediğimiz bir yere (db, file etc.) yazmamızı sağlayacaktır.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2.Excepiton Hander&amp;nbsp;&lt;/strong&gt;Bu kısımda uygulamamızda fırlatılmış olan exception'nı yakalayıp response da değiştirmek istediğimiz yerleri değiştirip client'a d&amp;ouml;nme işlemlerini yapacağız. Bunun i&amp;ccedil;in&amp;nbsp;ExceptionHandler class'ından faydalanacağız. Bu class ExceptionLogger ve&amp;nbsp;ExceptionFilter dan sonra eğer ilgili exception handle edilmediyse &amp;ccedil;ağrılır.&amp;nbsp;GlobalExceptionHandler ismindeki class'ımız&amp;nbsp;aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt; public class GlobalExceptionHandler : ExceptionHandler
+    {
+        /// &amp;lt;summary&amp;gt;
+        /// This function is used for to change the response when an exception occurs.
+        /// &amp;lt;/summary&amp;gt;
+        /// &amp;lt;param name="context"&amp;gt;&amp;lt;/param&amp;gt;
+        public override void Handle(ExceptionHandlerContext context)
+        {
+            var result = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+            {
+                Content = new StringContent(context.Exception.Message),
+            };
+            context.Result = new ExceptionActionResult(result);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Yukarıda exception fırlatıldığında yakalaıp client'a d&amp;ouml;nen response'u modify ettik. Bunun i&amp;ccedil;in kendi custom yazdığımız&amp;nbsp;ExceptionActionResult class'ını kullanacağız. O da aşağıdaki gibi olacaktır.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;    /// &amp;lt;summary&amp;gt;
+    /// This class is a kind of Custom Action Result. When we get any exception and want to handle the web api method that returns HttpActionResult, we can use this class and it's functions.
+    /// &amp;lt;/summary&amp;gt;
+    public class ExceptionActionResult : IHttpActionResult
+    {
+        private HttpResponseMessage _httpResponseMessage;
+
+        public ExceptionActionResult(HttpResponseMessage httpResponseMessage)
+        {
+            _httpResponseMessage = httpResponseMessage;
+        }
+
+        public Task&amp;lt;HttpResponseMessage&amp;gt; ExecuteAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(_httpResponseMessage);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Şimdi sırada 1.Adımda da yaptığımız gibi yazış olduğumuz Handler'ı WebApi'nin default set ettiğiyle değiştirme işlemi var bunu da Global.asax.cs i&amp;ccedil;erisindeki Application_Start metodunda aşağıdaki gibi yapıyoruz.&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;config.Services.Replace(typeof(IExceptionHandler), new GlobalExceptionHandler());  &lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Uygulamamız hazır. Bu entegrasyondan sonra uygulamamıza 2 şey kazandırmış olduk.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Exception alındığında Log atma işlemi&lt;/li&gt;
+&lt;li&gt;Fırlatılan unhandled exception'ı yakalayıp kendi yazdığımız custom HttpActionResult ile değiştirip client'a giden respons'u daha anlamlı ve y&amp;ouml;netilebilir bir hale getirmiş olduk.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Yazımızın en başında yazmış olduğumuz&amp;nbsp;&lt;strong&gt;CheckValue&amp;nbsp;&lt;/strong&gt;metoduna veya uygulamada herhangi bir metoda request'te bulunup exception fırlatıldığında artık b&amp;uuml;t&amp;uuml;n response'lar artık şu şekilde olacaktır.&lt;/p&gt;
+&lt;p&gt;StatusCode :&amp;nbsp;&lt;strong&gt;500 Internal Server Error&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Body :&amp;nbsp;&lt;strong&gt;Specified argument was out of the range of valid values.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;G&amp;ouml;rd&amp;uuml;ğ&amp;uuml;n&amp;uuml;z &amp;uuml;zre projede exception alındığında log'umuzu atıp client'a d&amp;ouml;nen response'u da daha anlamlı bir hale getirmiş olduk.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Ben &amp;ouml;rnek uygulamada response d&amp;ouml;nerken statusCode HttpStatusCode.InternalServerError yani 500 set ettim ancak siz projenizde kullanırken daha farklı statusCode'lar da ihtiyaca g&amp;ouml;re client'a d&amp;ouml;nebilirsiniz.&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;=&amp;gt;&amp;nbsp;http://www.exceptionnotfound.net/the-asp-net-web-api-exception-handling-pipeline-a-guided-tour/&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-04-09 23:44:00</pubDate>
+  <lastModified>2020-01-20 08:22:25</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>WebApi-Exception-Handling-Logging</slug>
+  <tags>
+    <tag>webapi</tag>
+    <tag>exception</tag>
+    <tag>log</tag>
+    <tag>IHttpActionResult</tag>
+    <tag>ExceptionHandler</tag>
+    <tag>ExceptionLogger</tag>
+  </tags>
+  <comments>
+    <comment id="d839ce5c-a22e-40c7-b6a4-789b82a8a2e2" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2016-06-03 15:52:10</date>
+      <author>Caner Tosuner</author>
+      <email>trackback</email>
+      <country />
+      <ip>94.102.8.48</ip>
+      <website>http://canertosuner.com/post/Web-Api-Nedir</website>
+      <moderatedby>Rule:white list</moderatedby>
+      <content>Asp .Net Web Api Nedir 
+
+Asp .Net Web Api Nedir </content>
+    </comment>
+    <comment id="8a591e21-e8c0-4771-8a1b-c2b80ba93553" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-01-21 07:19:40</date>
+      <author>Caner Tosuner</author>
+      <email>trackback</email>
+      <country />
+      <ip>191.235.220.16:5259</ip>
+      <website>http://www.canertosuner.com/post/Web-Api-Nedir</website>
+      <content>Asp .Net Web Api Nedir 
+
+Asp .Net Web Api Nedir </content>
+    </comment>
+    <comment id="8ca54448-a51a-49c0-909c-073868404bb6" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2017-04-06 10:58:21</date>
+      <author>Ahmet </author>
+      <email>serix5@gmail.com</email>
+      <country />
+      <ip>213.74.50.180:61292</ip>
+      <avatar />
+      <content>Merhaba, bir projemde gerekti, ufak bir araştırma sonucu burayı gördüm yazı için teşekkürler. 
+Ayrıca bloğu gezme fırsatım oldu gayet başarılı lütfen yazmaya devam et bu ülkenin sizin gibilerine  ihtiyacı var. İyi çalışmalar.</content>
+    </comment>
+    <comment id="a7e4badf-a217-406c-ae93-ec5f7ff2474e" parentid="8ca54448-a51a-49c0-909c-073868404bb6" approved="True" spam="False" deleted="False">
+      <date>2017-04-25 12:44:52</date>
+      <author>caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>31.223.39.215:58891</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Merhaba, yorumlarınız için teşekkürler. Fırsat buldukça yazmaya devam edeceğim :)</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>

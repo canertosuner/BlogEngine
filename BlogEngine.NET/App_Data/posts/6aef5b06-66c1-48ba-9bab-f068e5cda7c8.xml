@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Visual State Nedir ? Nasıl Kullanılır ?</title>
+  <description>Visual State Kavramı blend yardımı ile xaml tarafında oluşturulan arayüzler için belirlenen state’lere göre story board aracılığı ile geçiş efektleri ve animasyonlar yapmamızı sağlayan yapıdır.</description>
+  <content>&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Visual State Kavramı blend yardımı ile xaml tarafında oluşturulan aray&amp;uuml;zler i&amp;ccedil;in belirlenen state&amp;rsquo;lere g&amp;ouml;re story board aracılığı ile ge&amp;ccedil;iş efektleri ve animasyonlar yapmamızı sağlayan yapıdır.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Kısaca ş&amp;ouml;yle &amp;ouml;rnekleyebiliriz; &amp;uuml;zerinde &amp;ldquo;A&amp;ccedil;&amp;rdquo; yazan bir butonumuz var ve kullanıcı bu butona bastığı anda ekranın &amp;uuml;st&amp;uuml;nde bulunup o an kullanıcıya g&amp;ouml;r&amp;uuml;nmeyen bir pop-up&amp;rsquo;ın yukarıdan aşağıya doğru d&amp;uuml;şt&amp;uuml;ğ&amp;uuml;n&amp;uuml; ve o pop-up &amp;uuml;zerinde bulunan &amp;ldquo;Kapat&amp;rdquo; butonuna basıldığında tekrar yukarıya doğru &amp;ccedil;ıkıp sayfa &amp;uuml;zerinden kaybolduğunu d&amp;uuml;ş&amp;uuml;nelim. İ&amp;ccedil;imizden &amp;ldquo;Neden bunu &amp;ccedil;ok rahat bir şekilde story board kullanarak yapmayalım ki ?&amp;rdquo; diye soran arkadaşlar olacaktır ve bunun cevabını ise şu şekilde verebiliriz.&lt;/span&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;span style="font-size: medium;"&gt;Story Board genel olarak uygulama i&amp;ccedil;erisinde animasyonların ve değişik birbirini takip eden efektlerin olduğu yapıların hazırlanması i&amp;ccedil;in kullanılmalıdır.&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;&lt;span style="font-size: medium;"&gt;Visual State ise control&amp;rsquo;&amp;uuml;n yapacağı işlevler sınırlı olduğu durumda yani control&amp;rsquo;&amp;uuml;n stateleri belli olup daha kısıtlayıcı efektlere ihtiya&amp;ccedil; duyulduğunda kullanılması gereken yapıdır.&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p class="MsoListParagraphCxSpLast" style="text-indent: -18.0pt; mso-list: l0 level1 lfo1;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&amp;Uuml;stte verdiğimiz &amp;ouml;rneği d&amp;uuml;ş&amp;uuml;nd&amp;uuml;ğ&amp;uuml;m&amp;uuml;zde bizim 2 adet state&amp;rsquo;imiz bulunmaktadır. &lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; 1-Pop-up&amp;rsquo;ın a&amp;ccedil;ılması,&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; 2-Pop-up&amp;rsquo;ın kapatılması.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;Yani ihtiyacımız olan şey &amp;nbsp;Visual State &amp;lsquo;dir.&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;span style="font-size: medium;"&gt;Gelin şimdi 1 adet windows phone app oluşturarak o &amp;ouml;rneği yapalım&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&lt;span style="font-size: medium;"&gt;&lt;img src="/MyImage_Folder/vstate_1.png" alt="" width="467" height="322" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal"&gt;&amp;nbsp;&lt;span style="font-size: medium;"&gt;Xaml kodları ve ekran g&amp;ouml;r&amp;uuml;nt&amp;uuml;s&amp;uuml; aşağıdaki gibi olan bir aray&amp;uuml;z oluşturduk,&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: xml; first-line: 1; tab-size: 4; toolbar: false; "&gt;&amp;lt;Grid
+        x:Name="ContentPanel"
+        HorizontalAlignment="Stretch"&amp;gt;
+        &amp;lt;StackPanel
+            Margin="0,-200,0,0"
+            x:Name="stackPanel"
+            VerticalAlignment="Top"
+            Background="#f0f0f0"
+            Orientation="Vertical"&amp;gt;
+            &amp;lt;TextBlock
+                Margin="20,40,0,0"
+                Text="Visual State"
+                FontSize="30"
+                FontWeight="SemiBold"
+                Foreground="#373938"/&amp;gt;
+            &amp;lt;Button
+                Width="210"
+                Margin="0,0,0,0"
+                BorderBrush="#F26B28"
+                HorizontalAlignment="Center"
+                Content="kapat"
+                FontWeight="Bold"
+                Foreground="#F26B28"/&amp;gt;
+        &amp;lt;/StackPanel&amp;gt;
+        &amp;lt;Button
+            Width="210"
+            Height="100"
+            Margin="0,-0,0,0"
+            BorderBrush="#F26B28"
+            HorizontalAlignment="Center"
+            Content="A&amp;ccedil;"
+            FontWeight="Bold"
+            Background="White"
+            Foreground="#F26B28"/&amp;gt;
+    &amp;lt;/Grid&amp;gt;&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;&lt;img src="/MyImage_Folder/vstate_2.png" alt="" width="293" height="263" /&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;span style="font-size: medium;"&gt;Şimdi ise sırada Visual State&amp;rsquo;leri oluşturma var. Bunun i&amp;ccedil;in SolutionExplorar&amp;rsquo;dan MainPage.xaml&amp;rsquo;e sağ tıklayıp &amp;ldquo;Open in Blend&amp;rdquo; diyoruz ve sayfamızı Blend Exp.&amp;rsquo;da a&amp;ccedil;ıyoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;span style="font-size: medium;"&gt;A&amp;ccedil;ılan sayfada sol men&amp;uuml;den pop-up&amp;rsquo;ımız olduğu StackPanel kontol&amp;uuml;n&amp;uuml; se&amp;ccedil;ip bir &amp;uuml;stte bulunan State sekmesinden Add state group&amp;rsquo;a tıklayıp bir adet VisualState Group oluşturmuş oluyoruz. Gereken &amp;ldquo;A&amp;ccedil;&amp;rdquo; ve &amp;ldquo;Kapat&amp;rdquo; statelerini ise bu gorup i&amp;ccedil;erisinde tanımlayacağız&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;img src="/MyImage_Folder/vstate_3.png" alt="" width="505" height="267" /&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;İlk olarak VisualStateGroup yazan yerin sağ tarafında bulunan Add State&amp;rsquo;e tıklayarak &amp;ldquo;Kapat&amp;rdquo; state 2imizi belirliyoruz. Aynı şekilde bir adet daha state ekleyerek onun adınada &amp;ldquo;Ac&amp;rdquo; ismini veriyoruz.&amp;nbsp;&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;img src="/MyImage_Folder/vstate_4.png" alt="" width="346" height="207" /&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;Kapat ve Ac statelerini sağ taraflarında bulunan Add Transition&amp;rsquo;a tıklayarak Kapalı durumdan a&amp;ccedil;ık duruma gelirken ne gibi bir ge&amp;ccedil;iş olacak onu belirliyoruz ve aynı şeyi A&amp;ccedil;ık durumdan kapalı duruma ge&amp;ccedil;erkende yapıyoruz. Gerekli margin ve transition değerlerini verdikten sonra iki state&amp;rsquo;in arasındaki ge&amp;ccedil;işi yapacak olan story board&amp;rsquo;a ge&amp;ccedil;iş s&amp;uuml;resini belirtiyoruz ve Blend&amp;rsquo;de bulunan uygulamamızı kaydedip kapatıyoruz ve Visual Studio&amp;rsquo;ya geri d&amp;ouml;n&amp;uuml;yoruz.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;Şimdi ise sırada oluşturmuş olduğumuz state&amp;rsquo;leri gerekli durumlarda &amp;ccedil;ağırma işlemi var.Sayfanın xaml tarafına baktığımızda Visual State kodlarımızın geldiğini g&amp;ouml;receksinizdir.&lt;/span&gt;&lt;/p&gt;
+&lt;pre class="brush: c-sharp; first-line: 1; tab-size: 4; toolbar: false; "&gt;//A&amp;ccedil; butonunun click event&amp;rsquo;ine
+VisualStateManager.GoToState(this, "Ac", true);
+
+//Pop-up &amp;uuml;zerinde bulunan Kapat butonuna ise
+VisualStateManager.GoToState(this, "Kapat", true);&lt;/pre&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;Kodlarını yazdığımızda oluştumuş olduğumuz stateleri &amp;ccedil;ağırıp gerekli transitionları yapacaktır.&lt;/span&gt;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p class="MsoNormal" style="margin-bottom: 0.0001pt;"&gt;&lt;span style="font-size: medium;"&gt;&amp;nbsp;&lt;/span&gt;&lt;strong style="margin: 0px; padding: 0px; border: 0px; font-size: large; line-height: 1.5; font-family: calibri, sans-serif; color: #333333;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-size: medium;"&gt;&lt;span style="font-size: medium;"&gt;&amp;gt;&lt;/span&gt;&amp;gt;&lt;/span&gt;&amp;nbsp;catch&amp;nbsp;&lt;span style="font-size: medium;"&gt;{&lt;img style="margin: 0px; padding: 0px; font-weight: normal; font-size: 18.399999618530273px; line-height: 1.5; font-family: inherit; max-width: 100%;" title="Foot in Mouth" src="/editors/tiny_mce_3_5_8/plugins/emotions/img/smiley-foot-in-mouth.gif" alt="Foot in Mouth" border="0" /&gt;}&lt;/span&gt;&lt;/span&gt;&amp;nbsp;'e&amp;nbsp;&lt;span style="font-size: medium;"&gt;d&amp;uuml;şmemeniz&lt;/span&gt;&amp;nbsp;dileğiyle..&amp;nbsp;&lt;img style="margin: 0px; padding: 0px; font-weight: normal; font-size: 18.399999618530273px; line-height: 1.5; font-family: inherit; max-width: 100%;" title="Smile" src="/editors/tiny_mce_3_5_8/plugins/emotions/img/smiley-smile.gif" alt="Smile" border="0" /&gt;&amp;nbsp;&lt;span style="font-size: medium;"&gt;&amp;lt;&lt;/span&gt;&lt;span style="font-size: medium;"&gt;&amp;lt;&lt;/span&gt;&lt;/strong&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2013-09-08 01:13:00</pubDate>
+  <lastModified>2020-01-20 08:22:31</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>Visual-State-Nedir-Nasıl-Kullanılır-</slug>
+  <tags>
+    <tag>visualstate</tag>
+    <tag>blend</tag>
+    <tag>xaml</tag>
+    <tag>state</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>e8efc70d-b037-4f0c-9301-07808692337b</category>
+  </categories>
+  <notifications />
+</post>

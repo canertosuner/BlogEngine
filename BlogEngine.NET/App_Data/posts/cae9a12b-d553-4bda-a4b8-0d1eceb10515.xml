@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Unit Test Nedir</title>
+  <description>Unit Test günümüz yazılım dünyasında artık olmazsa olmaz bir kural olarak bütün projelerde yazılması zorunlu hale gelmekte. DevOps açısından düşündüğümüzde Continuous Integration ve Continuous Deployment tool'ları yazmış olduğumuz kodları build edip deploy etmeden önce ilk</description>
+  <content>&lt;p&gt;Unit Test g&amp;uuml;n&amp;uuml;m&amp;uuml;z yazılım d&amp;uuml;nyasında artık olmazsa olmaz bir&amp;nbsp;kural&amp;nbsp;olarak b&amp;uuml;t&amp;uuml;n projelerde yazılması&amp;nbsp;zorunlu hale gelmekte. DevOps a&amp;ccedil;ısından d&amp;uuml;ş&amp;uuml;nd&amp;uuml;ğ&amp;uuml;m&amp;uuml;zde Continuous Integration ve Continuous Deployment tool'ları yazmış olduğumuz kodları build edip deploy etmeden &amp;ouml;nce ilk&amp;nbsp;olarak test metotlarını &amp;ccedil;alıştırır ve metotlardan herhangi biri fail verdiğinde deploy'u durdurabilir. B&amp;ouml;ylelikle unit test yazmak artık yazılım geliştirme d&amp;uuml;nyasında N&lt;strong&gt;ice to Have&lt;/strong&gt; olmaktan &amp;ccedil;ıkıp I&lt;strong&gt;s Must&lt;/strong&gt; haline gelmektedir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Bu yazımızda Unit Test nedir, nasıl yazılır gibi sorulara cevap arıyor olacağız.&lt;/p&gt;
+&lt;h3&gt;Unit Test Nedir ?&lt;/h3&gt;
+&lt;p&gt;Unit test geliştirmiş olduğunuz kodu test etmek i&amp;ccedil;in yazdığınız&amp;nbsp;kod bloğudur ve esas olarak kodun veya fonksiyonun belirli bir biriminin davranışını kontrol eder ve geliştirdiğiniz&amp;nbsp;kod dizinindeki akışa dayalı olarak acceptance criteria'ları cover ediyor mu etmiyor mu &amp;ouml;l&amp;ccedil;ebilmek adına da b&amp;uuml;y&amp;uuml;k &amp;ouml;neme sahiptir.&lt;/p&gt;
+&lt;p&gt;&lt;img style="display: block; margin-left: auto; margin-right: auto;" src="/image.axd?picture=/2017/unit_Test_funny_img.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Hi&amp;ccedil;bir kod ilelebet el değmeden yaşamayacaktır, her zaman i&amp;ccedil;in sizden sonra gelen bir developer extra feature'lar ekleyip commit edecektir yada o kodları kullanacak başka&amp;nbsp;ekiplerde olacaktır.&amp;nbsp;Unit test aynı zamanda kodlarınızı kullanacak diğer developer'lar tarafından okunduğunda onların kodları nasıl kullanması gerektiğini anlatması a&amp;ccedil;ısından da &amp;ouml;nemli bir&amp;nbsp;g&amp;ouml;reve sahiptir. Nasıl &amp;ccedil;alıştığını &amp;ouml;ğrenmek i&amp;ccedil;in testleri &amp;ccedil;alıştırıp okuyabilirler. Yada daha &amp;ouml;nce yazılmış bir kod bloğuna k&amp;uuml;&amp;ccedil;&amp;uuml;k bir &amp;ouml;zellik eklemek istiyorsunuz ama bu mevcut kullanıcıları/sistemi bozar mı bozmaz mı diye&amp;nbsp;sorgulamak yerine eğer o kod bloğunun daha &amp;ouml;nceden yazılmış ve her bir satırını cover eden unit-test metotları var ise tek yapmanız gereken o testleri run edip ge&amp;ccedil;ip ge&amp;ccedil;mediğini g&amp;ouml;rmek. Eğer o&amp;nbsp;sonradan yaptığınız geliştirme mevcut'u bozmuyorsa test'ler zaten green stat&amp;uuml;s&amp;uuml;nde passed olacaktır.&lt;/p&gt;
+&lt;p&gt;Unit yazabilmek i&amp;ccedil;in nuget &amp;uuml;zerinden de install edebildiğimiz bir &amp;ccedil;ok k&amp;uuml;t&amp;uuml;phane bulunmakta.&lt;/p&gt;
+&lt;h3&gt;Bazı Unit Test Frameworkleri&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/MSTest"&gt;MSTest&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.nunit.org/"&gt;NUnit&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://xunit.github.io/"&gt;xUnit&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://docs.telerik.com/teststudio/testing-framework/using-mbunit"&gt;MBunit&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&amp;nbsp;Herhangi birini se&amp;ccedil;ip kendi sitelerinde yayınlamış oldukları sample projeler &amp;uuml;zerinden kendi unit test projenizi oluşturabilirsiniz.&amp;nbsp;&lt;/p&gt;
+&lt;h3&gt;&amp;Ouml;rnek Proje&lt;/h3&gt;
+&lt;p&gt;Şimdi k&amp;uuml;&amp;ccedil;&amp;uuml;k bir unit test &amp;ouml;rneği yapalım.&amp;nbsp;Eft işlemi&amp;nbsp;yapan bir mod&amp;uuml;l i&amp;ccedil;in bir Console Application ve bu mod&amp;uuml;l&amp;uuml; basit&amp;ccedil;e test&amp;nbsp;etmek i&amp;ccedil;in bir unit test projesi oluşturalım.&lt;/p&gt;
+&lt;p&gt;İlk olarak VS da EftSample adında bir console projesi oluşturalım ve sonrasında solution'a sağ tıklayıp yeni bir proje ekle diyerek ismi EftSample.Test adında bir UnitTest projesi oluşturalım.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/unit_test_eft_sample_create_proj.png" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Eft işleminde kullanılacak olan TransferRequest ve&amp;nbsp;TransferResponse adında class'larını console uygulamamıza aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;       public class TransferRequest
+       {
+           public decimal Amount { get; set; }
+           public string SenderIBAN { get; set; }
+           public string ReceiverIBAN { get; set; }
+       }
+ 
+       public class TransferResponse
+       {
+           public bool IsSuccess { get; set; }
+           public string Message { get; set; }
+       }&lt;/pre&gt;
+&lt;p&gt;Daha sonra transfer işlemini yapacak olan metodu Transfer adında bir class i&amp;ccedil;erisine TransferMoney adında bir metot aşağıdaki gibi tanımlayalım.&lt;/p&gt;
+&lt;h3&gt;Transfer.cs&lt;/h3&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    public class Transfer
+    {
+        public TransferResponse MoneyTransfer(TransferRequest request)
+        {
+            var response = new TransferResponse();
+            
+            //Aşağıdaki validasyonlar i&amp;ccedil;in farklı y&amp;ouml;ntemler, frameworkler kullanılması daha doğrudur ancak a&amp;ccedil;ık g&amp;ouml;r&amp;uuml;nmesi a&amp;ccedil;ısından bu şekilde yapalım
+            if (request.Amount &amp;lt; 1)
+            {
+                response.IsSuccess = false;
+                response.Message = "Amount must be greater Then 1";
+                return response;
+            }
+            if (string.IsNullOrEmpty(request.SenderIBAN))
+            {
+                response.IsSuccess = false;
+                response.Message = "Sender Account IBAN must not be null or empty.";
+                return response;
+            }
+            if (string.IsNullOrEmpty(request.ReceiverIBAN))
+            {
+                response.IsSuccess = false;
+                response.Message = "Receiver Account IBAN must not be null or empty.";
+                return response;
+            }
+
+            //TODO do process
+            response.IsSuccess = true;
+            response.Message = "Transfer operation is successful.";
+
+            return response;
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Şimdi sıra test metotlarını yazmaya geldi. &lt;strong&gt;EftSample.Test&lt;/strong&gt; adında ki test projemize gidip &lt;strong&gt;EftSample&lt;/strong&gt; projemizi referans olarak ekleyelim. Sonrasında&amp;nbsp;&lt;strong&gt;TransferMoneyTest.cs&lt;/strong&gt; adında test metotlarımızı yazacağımız class'ı oluşturalım.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;span style="text-decoration: underline;"&gt;Not - 1:&lt;/span&gt; &lt;/strong&gt;Unit test yazarken naming olduk&amp;ccedil;a&amp;nbsp;&amp;ouml;nemli bir konudur. Ortak kabul g&amp;ouml;rm&amp;uuml;ş bir standart olan&amp;nbsp;&lt;strong&gt;MethodName_StateUnderTest_ExpectedBehavior&amp;nbsp;&lt;/strong&gt;şeklinde bir isimlendirme&amp;nbsp;&amp;ouml;nerilir ancak her yiğidin yoğurt yiyişi farklıdır tezinden yola &amp;ccedil;ıkarak developer anlaşılır yazdığı s&amp;uuml;rece isimlendirmeyi istediği gibide yapabilmektedir.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Not - 2:&lt;/strong&gt;&lt;/span&gt; Test metotlarını yazdığımız class'ların başında &lt;strong&gt;[TestClass]&lt;/strong&gt; adında bir attribute tanımlaması yapılması zorunludur. Bu attribute ile sistem o class'ın bir test class'ı olduğunu anlamakta.&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Not - 3:&lt;/strong&gt; &lt;/span&gt;Yazılmış olan test metotlarının başında&lt;strong&gt; [TestMethod]&lt;/strong&gt; attribute'&amp;uuml; yazılması gerekir. Bu attribute o metodun bir test metodu olduğunu işaret etmekte.&lt;/p&gt;
+&lt;h3&gt;1- Amount Less Then One Test&lt;/h3&gt;
+&lt;p&gt;İlk test metodumuz Amount = 0 olarak eft işlemi yapmaya &amp;ccedil;alıştığımızda ki case'i test ediyor olsun.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [TestMethod]
+        public void TransferMoney_With_Zero_Amount_Then_Transfer_Failed_Test()
+        {
+            var expected = new TransferResponse
+            {
+                IsSuccess = false,
+                Message = "Amount must be greater Then 1"
+            };
+
+            var transfer = new Transfer();
+
+            var transferRequest = new TransferRequest
+            {
+                Amount = 0,
+                ReceiverIBAN = "TR806541651616516416541",
+                SenderIBAN = "TR13216498468465416"
+            };
+
+            var actual = transfer.MoneyTransfer(transferRequest);
+
+            Assert.AreEqual(expected.IsSuccess, actual.IsSuccess);
+            Assert.AreEqual(expected.Message, actual.Message);
+        }&lt;/pre&gt;
+&lt;h3&gt;2-&amp;nbsp;Sender IBAN Empty Test&lt;/h3&gt;
+&lt;p&gt;İkinci test metodu ise sender iban alanı boş bırakıldığında ki case'i test ediyor olsun.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [TestMethod]
+        public void TransferMoney_With_Empty_Sender_IBAN_Then_Transfer_Failed_Test()
+        {
+            var expected = new TransferResponse
+            {
+                IsSuccess = false,
+                Message = "Sender Account IBAN must not be null or empty."
+            };
+
+            var transfer = new Transfer();
+
+            var transferRequest = new TransferRequest
+            {
+                Amount = 60,
+                SenderIBAN = string.Empty,
+                ReceiverIBAN = "TR13216498468465416"
+            };
+
+            var actual = transfer.MoneyTransfer(transferRequest);
+
+            Assert.AreEqual(expected.IsSuccess, actual.IsSuccess);
+            Assert.AreEqual(expected.Message, actual.Message);
+        }&lt;/pre&gt;
+&lt;h3&gt;3- All Pramters Are Ok Test&lt;/h3&gt;
+&lt;p&gt;Son metodumuz da doğru bilgilerle transfer işlemi yapılmaya &amp;ccedil;alışıldığında ki case'i test ediyor olsun.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;        [TestMethod]
+        public void TransferMoney_With_Correct_Request_Parameter_Then_Transfer_OK_Test()
+        {
+            var expected = new TransferResponse
+            {
+                IsSuccess = true,
+                Message = "Transfer operation is successful."
+            };
+
+            var transfer = new Transfer();
+
+            var transferRequest = new TransferRequest
+            {
+                Amount = 60,
+                ReceiverIBAN = "TR806541651616516416541",
+                SenderIBAN = "TR13216498468465416"
+            };
+
+            var actual = transfer.MoneyTransfer(transferRequest);
+
+            Assert.AreEqual(expected.IsSuccess, actual.IsSuccess);
+            Assert.AreEqual(expected.Message, actual.Message);
+        }&lt;/pre&gt;
+&lt;p&gt;Test metotlarımızı yazdıktan sonra aşağıdaki g&amp;ouml;rselde olduğu gibi VS'da bulunan Test&amp;nbsp;&amp;gt; Run &amp;gt; All Tests dedikten sonra Test Explorer a&amp;ccedil;ılır ve solution da bulunan test metotları &amp;ccedil;alıştırılıp success ve fail durumlarını g&amp;ouml;rebiliriz.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2017/unit_test_run_img.png" alt="" width="723" height="607" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;TransferMoneyTest.cs&lt;/strong&gt; i&amp;ccedil;erisi son olarak aşağıdaki gibidir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;    [TestClass]
+    public class TransferMoneyTest
+    {
+        [TestMethod]
+        public void TransferMoney_With_Zero_Amount_Then_Transfer_Failed_Test()
+        {
+            var expected = new TransferResponse
+            {
+                IsSuccess = false,
+                Message = "Amount must be greater Then 1"
+            };
+
+            var transfer = new Transfer();
+
+            var transferRequest = new TransferRequest
+            {
+                Amount = 0,
+                ReceiverIBAN = "TR806541651616516416541",
+                SenderIBAN = "TR13216498468465416"
+            };
+
+            var actual = transfer.MoneyTransfer(transferRequest);
+
+            Assert.AreEqual(expected.IsSuccess, actual.IsSuccess);
+            Assert.AreEqual(expected.Message, actual.Message);
+        }
+
+        [TestMethod]
+        public void TransferMoney_With_Empty_Sender_IBAN_Then_Transfer_Failed_Test()
+        {
+            var expected = new TransferResponse
+            {
+                IsSuccess = false,
+                Message = "Sender Account IBAN must not be null or empty."
+            };
+
+            var transfer = new Transfer();
+
+            var transferRequest = new TransferRequest
+            {
+                Amount = 60,
+                SenderIBAN = string.Empty,
+                ReceiverIBAN = "TR13216498468465416"
+            };
+
+            var actual = transfer.MoneyTransfer(transferRequest);
+
+            Assert.AreEqual(expected.IsSuccess, actual.IsSuccess);
+            Assert.AreEqual(expected.Message, actual.Message);
+        }
+
+        [TestMethod]
+        public void TransferMoney_With_Correct_Request_Parameter_Then_Transfer_OK_Test()
+        {
+            var expected = new TransferResponse
+            {
+                IsSuccess = true,
+                Message = "Transfer operation is successful."
+            };
+
+            var transfer = new Transfer();
+
+            var transferRequest = new TransferRequest
+            {
+                Amount = 60,
+                ReceiverIBAN = "TR806541651616516416541",
+                SenderIBAN = "TR13216498468465416"
+            };
+
+            var actual = transfer.MoneyTransfer(transferRequest);
+
+            Assert.AreEqual(expected.IsSuccess, actual.IsSuccess);
+            Assert.AreEqual(expected.Message, actual.Message);
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;Yazının başında da belirttiğimiz &amp;uuml;zre unit-test yazmak&amp;nbsp;ilk başlarda maliyet olarak g&amp;ouml;r&amp;uuml;nsede aslında olduk&amp;ccedil;a &amp;ouml;nemli ve hayat kurtarıcı yanları da olabilmekte.&amp;nbsp;&amp;Ccedil;eşitli framework'ler kullanarak &amp;ccedil;ok farklı test yapıları oluşturabilirsiniz. Yaptığımız &amp;ouml;rnekte basit&amp;ccedil;e unit test nasıl yazılır g&amp;ouml;stermeye &amp;ccedil;alıştık. Unit test ile ilgili daha fazla bilgiyi ms'in&amp;nbsp;&lt;a href="https://www.visualstudio.com/en-us/docs/test/developer-testing/getting-started/getting-started-with-developer-testing"&gt;burada &lt;/a&gt;bulunan adresinden de bulabilirsiniz.&amp;nbsp;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2017-02-08 22:39:00</pubDate>
+  <lastModified>2020-01-20 08:22:19</lastModified>
+  <raters>2</raters>
+  <rating>5</rating>
+  <slug>unit-test-nedir</slug>
+  <tags>
+    <tag>unit test nedir</tag>
+    <tag>unit test</tag>
+    <tag>mstest</tag>
+    <tag>unit test nasıl yazılır</tag>
+    <tag>c# unit test nedir</tag>
+    <tag>unit test örnek</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>018aedb2-84ba-46ad-89f2-2d551bf7c063</category>
+  </categories>
+  <notifications />
+</post>

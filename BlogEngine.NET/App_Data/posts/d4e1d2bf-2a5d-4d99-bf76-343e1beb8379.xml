@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Asp.Net Core Uygulamalarında Farklı DI/IoC Containerlar Nasıl Kullanılır, Autofac Kullanımı</title>
+  <description>sp.net core default olarak oldukça lightweight bir sürüm olan built-in dependency injection tool'ı ile birlikte gelmekte ve bu di tool'ını kullanarak basit bir şekilde uygulama genelindeki instance yönetimini sağlayabilmekteyiz.</description>
+  <content>&lt;p&gt;Asp.net core default olarak olduk&amp;ccedil;a lightweight bir s&amp;uuml;r&amp;uuml;m olan built-in dependency injection tool'ı ile birlikte gelmekte ve bu di tool'ını kullanarak basit bir şekilde uygulama genelindeki instance y&amp;ouml;netimini sağlayabilmekteyiz.&amp;nbsp;&lt;a href="/post/asp-net-core-dependency-injection"&gt;Şu yazımızda&lt;/a&gt;&amp;nbsp;built-in DI container nedir nasıl kullanılır değinmiştik. Bununla birlikte asp.net core third-party dependency injection tool'larını da desteklemekte.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2019/aspnetcr_ico.png" alt="" width="437" height="330" /&gt;&lt;/p&gt;
+&lt;p&gt;Bu yazımızda bir asp.net core uygulamasına&amp;nbsp;&lt;a href="https://autofac.org/"&gt;Autofac&amp;nbsp;&lt;/a&gt;k&amp;uuml;t&amp;uuml;phanesini default DI container'ı olarak nasıl implement ederiz inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;Yazımızın başındada bahsettiğimiz gibi asp.net core default built-in DI Container desteği sunmakta ve kullanım olarakta aşağıdaki gibi bağımlılıkları register edebilmekteyiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddTransient&amp;lt;ICustomerRepository, CustomerRepository);
+
+    services.AddMvc();
+}&lt;/pre&gt;
+&lt;p&gt;Ihtiya&amp;ccedil; duyduğumuz yerde de bu bağımlılığı constructor injection y&amp;ouml;ntemiyle inject edip kullanabilmekteyiz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class CustomerController : Controller
+{
+    private readonly ICustomerRepository _customerRepository;
+
+    public HomeController(ICustomerRepository customerRepository)
+    {
+        _customerRepository = customerRepository;
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Aynı bu bağımlılıkları autofac, NInject, Unity StructureMap gibi bir&amp;ccedil;ok DI Container k&amp;uuml;t&amp;uuml;phanesini kullanarakta tanımlayabiliriz. B&amp;uuml;t&amp;uuml;n bu DI Container'ların instance y&amp;ouml;netimi dışında developer'lar tarafından sevilen ve beğenilen bir &amp;ccedil;ok farklı &amp;ouml;zellikleri bulunmakta. Bunu sağlayan şey ise&amp;nbsp;&lt;strong&gt;IServiceProvider&lt;/strong&gt;&amp;nbsp;interface'i. Asp.Net Core yumlu DI k&amp;uuml;t&amp;uuml;phaneleri bu interface'i implement edip bağımlılıkları bu ortak interface &amp;uuml;zerine inşa ettiklerinden asp.net core uygulamalarında third-party DI k&amp;uuml;t&amp;uuml;phanelerini kullanabilmekteyiz. Uygulamaya third-party DI k&amp;uuml;t&amp;uuml;phanesini belirttiğimiz yer ise&amp;nbsp;&lt;strong&gt;Startup.cs&lt;/strong&gt;&amp;nbsp;i&amp;ccedil;erisinde yer alan void&amp;nbsp;&lt;strong&gt;ConfigureServices&lt;/strong&gt;&amp;nbsp;metodunu aşağıdaki gibi&amp;nbsp;IServiceProvider&amp;nbsp;return edecek şekilde değiştirmek.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public IServiceProvider ConfigureServices(IServiceCollection services)
+{
+   // add services
+   
+   // return third-party tool's class which is implemented IServiceProvider
+}&lt;/pre&gt;
+&lt;p&gt;Bizde &amp;ouml;rnek olarak&amp;nbsp;&lt;a href="https://autofac.org/"&gt;Autofac&amp;nbsp;&lt;/a&gt;DI Container k&amp;uuml;t&amp;uuml;phanesini projemize implement edip bağımlılıkları bunun &amp;uuml;zerinden register edicez. Projemize nuget &amp;uuml;zerinden Autofac k&amp;uuml;t&amp;uuml;phanesini install ettiğimizi varsayalım ve autofac builder işlemlerini ConfigureServices metodu i&amp;ccedil;erisinde aşağıki gibi tanımlayalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public IServiceProvider ConfigureServices(IServiceCollection services)
+{
+    services.AddMvc();
+
+    var builder = new ContainerBuilder();
+	
+    builder.RegisterType&amp;lt;CustomerRepository&amp;gt;().As&amp;lt;ICustomerRepository&amp;gt;();
+	
+    builder.Populate(services);
+ 
+    var appContainer = builder.Build();
+ 
+    return new AutofacServiceProvider(appContainer);
+}&lt;/pre&gt;
+&lt;p&gt;Kullanım basit haliyle yukarıdaki gibi&amp;nbsp;Builder oluşturup bağımlılıkları register edip sonrasında&amp;nbsp;IServiceProvider interface'ini implement eden AutofacServiceProbider sınıfını return ettik ve artık uygulamamız i&amp;ccedil;in DI Container built-in container yerine Autofac olarak implement ettik.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Autofac dışında diğer DI Container tool'larını kullanmak isterseniz aynen yukarıdaki gibi Startup.cs i&amp;ccedil;erisinde ConfigureService metodunu kullandığınız DI tool'un da yer alan&amp;nbsp;IServiceProvider interface'ini&amp;nbsp;implement eden sınıfı&amp;nbsp;&amp;nbsp;bağımlılıkları register ettikten sonra return etmeniz yeterli olacaktır.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2019-05-24 16:00:00</pubDate>
+  <lastModified>2020-03-18 15:25:06</lastModified>
+  <raters>1</raters>
+  <rating>5</rating>
+  <slug>asp-net-core-uygulamalarinda-farkli-di-ioc-containerlar-nasil-kullanilir</slug>
+  <tags>
+    <tag>Dependency Inversion </tag>
+    <tag>dependency injection</tag>
+    <tag>IoC nedir</tag>
+    <tag>ioc container nedir</tag>
+    <tag>asp.net core</tag>
+    <tag>Asp.Net Core Dependency Injection</tag>
+    <tag>asp.net core autofac</tag>
+    <tag>autofac</tag>
+    <tag>.net core autofac</tag>
+  </tags>
+  <comments>
+    <comment id="54af69fa-8e25-478a-baee-ef5ff38682d0" parentid="00000000-0000-0000-0000-000000000000" approved="True" spam="False" deleted="False">
+      <date>2020-03-18 13:09:27</date>
+      <author>Hakan</author>
+      <email>developeravci@gmail.com</email>
+      <country />
+      <ip>176.88.31.241</ip>
+      <avatar />
+      <content>Makaleniz için teşekkür ederim. Size bir soru sormak istiyorum.
+ 
+Autofac modullerimizi register ettikten sonra constructor injection kullanarak değil de bir metot içerisinde resolve işlemi nasıl yapılır ?
+
+</content>
+    </comment>
+    <comment id="7dd83350-07a5-4c92-a609-c330c313d938" parentid="54af69fa-8e25-478a-baee-ef5ff38682d0" approved="True" spam="False" deleted="True">
+      <date>2020-03-18 14:48:39</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.132.241</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumun için teşekkürler. Tabiki mümkün,
+Autofac kütüphanesi içerisindeki IContainer interface&amp;#39;inin Resolve&amp;lt;&gt; extension metodunu kullanarak resolve edebilirsin. 
+Örnek kullanım;   ...Container.Resolve&amp;lt;ICustomerRepository&gt;()</content>
+    </comment>
+    <comment id="aea1c2e1-7283-44d3-a081-542e95b4b0c6" parentid="54af69fa-8e25-478a-baee-ef5ff38682d0" approved="True" spam="False" deleted="False">
+      <date>2020-03-18 14:48:41</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>95.70.132.241</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Değerli yorumun için teşekkürler. Tabiki mümkün,
+Autofac kütüphanesi içerisindeki IContainer interface&amp;#39;inin Resolve&amp;lt;&gt; extension metodunu kullanarak resolve edebilirsin. 
+Örnek kullanım;   ...Container.Resolve&amp;lt;ICustomerRepository&gt;()</content>
+    </comment>
+    <comment id="95f62284-ae9b-4bfc-abb3-22f58ea06e71" parentid="aea1c2e1-7283-44d3-a081-542e95b4b0c6" approved="True" spam="False" deleted="False">
+      <date>2020-03-18 15:25:06</date>
+      <author>Hakan</author>
+      <email>developeravci@gmail.com</email>
+      <country />
+      <ip>176.88.31.241</ip>
+      <avatar />
+      <content>Asp.net core 3.1 projesinde program.cs içerisinde böyle bir yapılandırma yaptım.
+
+ .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .ConfigureContainer&amp;lt;ContainerBuilder&gt;(builder =&gt;
+                {
+                    builder.RegisterModule(new BusinessModule());
+                })
+
+Fakat sizin dediğiniz gibi IContainer interface&amp;#39;inin Resolve extension metodu yok. İlgili metot içerisinde 
+var repository = Container.Resolve&amp;lt;ICustomerRepository&gt;();
+gibi birşey yapmaya çalışıyorum ama o sınıfların direkt olarak kullanılabilecek bir extension metodu göremiyorum. 
+Nerede yanlış yapıyorum anlayamadım :)
+
+
+</content>
+    </comment>
+    <comment id="a809342c-cb71-420f-956a-1fe0ffbaf85a" parentid="aea1c2e1-7283-44d3-a081-542e95b4b0c6" approved="True" spam="False" deleted="False">
+      <date>2020-03-21 12:11:48</date>
+      <author>Hakan</author>
+      <email>developeravci@gmail.com</email>
+      <country />
+      <ip>176.88.31.241</ip>
+      <avatar />
+      <content>Teşekkür ederim.</content>
+    </comment>
+    <comment id="532f8986-918a-4939-a745-8b91a0da8012" parentid="95f62284-ae9b-4bfc-abb3-22f58ea06e71" approved="True" spam="False" deleted="False">
+      <date>2020-03-28 13:02:14</date>
+      <author>Caner</author>
+      <email>canertosuner@gmail.com</email>
+      <country />
+      <ip>159.146.45.195</ip>
+      <moderatedby>Rule:authenticated</moderatedby>
+      <content>Şöyle yapabilirsiniz;
+RegisterModule işlemlerini bir bootstrapper sınıfı içerisine alıp ilgili registration işlemlerini orda yapabilirsiniz. Örnek olarak verecek olursak;
+
+
+public static class Bootstrapper
+{
+    public static IContainer Container { get; private set; }
+    public static AutofacServiceProvider InitializeContainer(IServiceCollection services )
+    {
+        var builder = new ContainerBuilder();
+        builder.RegisterModule(new BusinessModule());
+
+        Container = builder.Build();
+
+        return new AutofacServiceProvider(Container);
+    }
+}
+
+Sonrasında InitializeContainer metodunu Startup.cs içerisinde ConfigureServices metodunda aşağıdaki gibi call edebilirsin.
+
+public IServiceProvider ConfigureServices(IServiceCollection services)
+{
+    return Bootstrapper.InitializeContainer(services);
+}
+
+
+Artık dilediğin yerde  Bootstrapper.Container.Resolve&amp;lt;ICustomerService&gt;(); vs gibi resolve işlemlerini yapabilirsin. IContainer interface&amp;#39;i Autofac kütüphanesi içerisinde bulunan bir interface.</content>
+    </comment>
+  </comments>
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>01a365a0-dea4-4805-8375-c19bfa24f287</category>
+  </categories>
+  <notifications />
+</post>

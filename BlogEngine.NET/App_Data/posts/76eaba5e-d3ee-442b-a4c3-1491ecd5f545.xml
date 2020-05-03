@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Parameter Checking with PostSharp</title>
+  <description>http://www.peteonsoftware.com/index.php/2014/02/08/parameter-checking-with-postsharp/</description>
+  <content>&lt;p&gt;Daha &amp;ouml;nceki &lt;a href="/?tag=AOP"&gt;Aspect Oriented Programming&lt;/a&gt;'den ve &lt;a href="/?tag=postsharp"&gt;Postsharp &lt;/a&gt;tool'undan bahsetmiştik. Postsharp ile Log, Exception Handling ve metot bazlı&amp;nbsp;Authentication kontrol&amp;uuml; gibi işlemleri yapabildiğimizden bahsetmiştik. Bu yazımızda ise Postsharp kullanarak metot bazlı parametre kontrol&amp;uuml; (null mı değil i vs. gibi) nasıl yapabiliriz inceleyeceğiz.&lt;/p&gt;
+&lt;p&gt;Server side geliştirmesi yapmış arkadaşlar bilirlerki metotlarda gelen objeler i&amp;ccedil;in validation kontrol&amp;uuml; yapmak bazen bizi &amp;ccedil;ok yorabilir veya tahmin ettiğimizden daha fazla zaman aldırabilir. Postsharp ın OnEntry() metodunu kullarak gelen parametler i&amp;ccedil;in null mı değil mi diye kolayca kontrol edebiliriz.&lt;/p&gt;
+&lt;p&gt;Bunun i&amp;ccedil;in ilk olarak&amp;nbsp;&lt;strong&gt;NullParamsControllingAspect &lt;/strong&gt;adında&amp;nbsp;&lt;strong&gt;OnMethodBoundaryAspect&lt;/strong&gt; ten inherit olan class'ı oluşturalım ve i&amp;ccedil;eriği aşağıdaki gibi olacaktır. Metoda yollanan null parametleri tespit edip string message olarak client'a&amp;nbsp;&lt;strong&gt;ArgumentException&lt;/strong&gt;&amp;nbsp;fıraltarak bilgilendirme mesajını d&amp;ouml;necektir.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[Serializable]
+    public class NullParameterControllerAspect: OnMethodBoundaryAspect
+    {
+        public override void OnEntry(MethodExecutionArgs args)
+        {
+            var messages = new StringBuilder();
+
+            for (int i = 0; i &amp;lt; args.Arguments.Count; i++)
+            {
+                if (args.Arguments.GetArgument(i) == null)
+                {
+                    messages.AppendFormat(args.Method.Name +" metodunda bulunan \"{0}\" parametresi null olamaz.\n", args.Method.GetParameters()[i].Name);
+                }
+            }
+
+            Console.WriteLine(messages);
+
+            if (messages.Length &amp;gt; 0)
+            {
+                throw new ArgumentException(messages.ToString());
+            }
+        }&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; gibi &lt;strong&gt;OnEntry()&lt;/strong&gt; metodunda gelen parametreyi alıp &lt;strong&gt;null&lt;/strong&gt; mı diye kontrol ediyoruz.&lt;/p&gt;
+&lt;p&gt;Test i&amp;ccedil;in aşağıdaki gibi Prgram.cs class'ını oluşturalım. &lt;strong&gt;TransferRequest&lt;/strong&gt; adında bir class'ımız olsun ve bu class'ı null set ederek ve &lt;strong&gt;MoneyTransfer&lt;/strong&gt; metodunu &amp;ccedil;ağıralım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt; class Program
+    {
+        static void Main(string[] args)
+        {
+            TransferRequest req_null = null;
+            MoneyTransfer(req_null, "Test");//null obje kullanarak metot &amp;ccedil;ağırımı
+        }
+
+        [NullParameterControllerAspect]
+        public static void MoneyTransfer(TransferRequest request, string param)
+        {
+            //transfer işlemleri
+        }
+
+        public class TransferRequest
+        {
+            public decimal Amount { get; set; }
+            public string SenderIBAN { get; set; }
+            public string ReceiverIBAN { get; set; }
+        }
+    }&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;Projenizi &amp;ccedil;alıştırdığınızda ekran &amp;ccedil;ıktısı aşağıdaki gibi olacaktır.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2016/06/postsharp_null_param_controller.png" alt="" /&gt;&lt;/p&gt;</content>
+  <ispublished>False</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-07-28 21:05:00</pubDate>
+  <lastModified>2016-06-28 07:37:14</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>parameter-checking-with-postsharp</slug>
+  <tags />
+  <comments />
+  <categories>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+  </categories>
+  <notifications />
+</post>

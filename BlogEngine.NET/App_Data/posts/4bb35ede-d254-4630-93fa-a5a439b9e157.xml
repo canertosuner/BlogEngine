@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>Fluent NHibernate Kullanımı</title>
+  <description>ORM (object relational mappers) uygulamalarınızda CRUD (Create, Read, Update, and Delete) işlemleri için basit bir şekilde data'ya erişimlerimizi sağlayan yapılardır. Çeşitli ORM framework'leri uzun zamandan beri data-model arasındaki veri alış verişini sağlamak için..</description>
+  <content>&lt;h3&gt;ORM Nedir ?&lt;/h3&gt;
+&lt;p&gt;ORMs (object relational mappers) uygulamalarınızda&amp;nbsp;CRUD (Create, Read, Update, and Delete) işlemleri i&amp;ccedil;in basit bir şekilde data'ya erişimlerimizi sağlayan yapılardır. &amp;Ccedil;eşitli ORM framework'leri uzun zamandan beri data-model arasındaki veri alış verişini sağlamak i&amp;ccedil;in kullanılmakta ve ORM ler sql scriptleri execute etmeden CRUD işlemlerini doğrudan yapabilmemiz i&amp;ccedil;in kod yazmamıza olanak sağlarlar. &amp;Ouml;zetle, ORM kullanarak uygulamalarımızdaki data-model ilişkisini(database modellemesini) object-model ilişkisine d&amp;ouml;n&amp;uuml;şt&amp;uuml;rebiliriz.&lt;/p&gt;
+&lt;h3&gt;Neden&amp;nbsp;Fluent NHibernate ?&lt;/h3&gt;
+&lt;p&gt;Klasık NHinernate database de bulunan her bir tablo i&amp;ccedil;in class mapping bilgilerini .hbm uzantılı &amp;nbsp;XML formatındaki dosyalarda saklıyordu ve aslına bakılırsa biraz zahmetli bir işlemdi. Fluent NHibernate'de ise artık .hbm uzantılı mapping bilgilerini i&amp;ccedil;eren XML formatındaki dosyalar kaldırıldı ve bu işlem code-behind'a taşındı ve diğer ORM'lere g&amp;ouml;re daha hızlı olduğu kabul edilir.&lt;/p&gt;
+&lt;p&gt;Kısaca &amp;ouml;zelliklerini sıralamak gerekirse;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Easy data-access and data-mapping,&lt;/li&gt;
+&lt;li&gt;Compile-time name- and type-safety,&lt;/li&gt;
+&lt;li&gt;IntelliSense to show you which fluent methods are available at any point,&lt;/li&gt;
+&lt;li&gt;Automapper impl.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Fluent NHibernate ile kolayca Linq sorguları yapabilir ve b&amp;ouml;ylelikle Fluent bir Api oluşturmada kullanabiliriz. Şimdi ise projemize nasıl Fluent NHibernate&amp;nbsp;entegre edip geliştirme yapabiliriz bunu incelicez.&lt;/p&gt;
+&lt;h3&gt;Fluent NHibernate Kurulum&lt;/h3&gt;
+&lt;p&gt;İlk olarak Visual Studio &amp;uuml;zerinde yeni bir Console Application projesi a&amp;ccedil;alım. Daha sonra Nuget &amp;uuml;zerinden Fluent NHibernate referanslarını projemize indirip kuralım.&lt;strong&gt;&amp;nbsp;Install-Package FluentNHibernate&lt;/strong&gt;&lt;/p&gt;
+&lt;h3&gt;Database Tablo Oluşturulması&lt;/h3&gt;
+&lt;p&gt;Fluent NHibernate kullanabilmek i&amp;ccedil;in &amp;ouml;ncelikle bir database'e ihtiyacımız var. SQL &amp;uuml;zerinde &lt;strong&gt;FNH_Db&lt;/strong&gt; adında adında bir database'imiz olsun ve bu db'ye ait aşağıda bulunduğu gibi &lt;strong&gt;User&lt;/strong&gt; adında bir tablo oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:sql;auto-links:false;toolbar:false" contenteditable="false"&gt;CREATE TABLE dbo.Users  
+(
+    Id int PRIMARY KEY NOT NULL,  
+    Name varchar(25) NOT NULL,  
+    SurName varchar(25) NOT NULL
+)  &lt;/pre&gt;
+&lt;h3&gt;User Tablosuna&amp;nbsp;Karşılık Gelen User.cs Oluşturulması&lt;/h3&gt;
+&lt;p&gt;Yukarıda tanımlamış olduğumuz User tablosuna karşılık gelen User.cs aşağıdaki gibi oluşturuyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class User
+   {
+       public virtual int Id { get; set; }
+       public virtual string Name { get; set; }
+       public virtual string SurName { get; set; }
+   }&lt;/pre&gt;
+&lt;h3&gt;Mapping Class'ının Oluşturulması&lt;/h3&gt;
+&lt;p&gt;Database tablomuz ve buna karşılık gelen class'ımız hazır ancak halen User objesinde bulunan hangi alan tabloda bulunan hangi alana karşılık geliyor bunu belirtmedik. Bunun i&amp;ccedil;in Fluent NHibernate'e ait olan &lt;strong&gt;ClassMap &lt;/strong&gt;adında bir class bulunmakta ve gerekli mapping işlemlerini yapacağımız class &lt;strong&gt;ClassMap&amp;lt;T&amp;gt;&lt;/strong&gt;'den inherit olmuş şekilde oluşturulacak. Burda ki T bizim User class'ımız oluyor.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;UserMap.cs&lt;/strong&gt; adındaki mapping class'ı aşağıdaki gibi olacak şekilde tanımlıyoruz.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;   public class UserMap : ClassMap&amp;lt;User&amp;gt;
+   {
+       public UserMap()
+       {
+           Id(x =&amp;gt; x.Id);
+           Map(x =&amp;gt; x.Name);
+           Map(x =&amp;gt; x.SurName);
+           Table("User");
+       }
+   }&lt;/pre&gt;
+&lt;h3&gt;DB Connection Sağlanması&lt;/h3&gt;
+&lt;p&gt;Şimdiki işlem ise Fluent Nhibernate kullanarak&amp;nbsp;yukarıda tanımlamış olduğumuz&amp;nbsp;&lt;strong&gt;FNH_Db &lt;/strong&gt;isimli database'e bağlanmak. Bunun i&amp;ccedil;in &lt;strong&gt;OpenSession&lt;/strong&gt; adında bir metot oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;       public static ISession OpenSession()
+       {
+           string connectionString = "FNH_Db conn string";
+           var sessionFactory = Fluently.Configure()
+               .Database(MsSqlConfiguration.MsSql2012
+                .ConnectionString(connectionString).ShowSql()
+               )
+               .Mappings(m =&amp;gt;m.FluentMappings.AddFromAssemblyOf&amp;lt;User&amp;gt;())
+               .ExposeConfiguration(cfg =&amp;gt; new SchemaExport(cfg)
+               .Create(false, false))
+               .BuildSessionFactory();
+           return sessionFactory.OpenSession();
+       }&lt;/pre&gt;
+&lt;h3&gt;Tablo'da Bulunan Verileri Alma&lt;/h3&gt;
+&lt;p&gt;Aşağıda yer alan kod bloğu ise db de bulunan tablodaki verileri&amp;nbsp;query etmemizi sağlar.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;using (var session = OpenSession())
+     {
+          var users = session.Query&amp;lt;User&amp;gt;().ToList();
+     }&lt;/pre&gt;
+&lt;p&gt;Yukarıda bulunan geliştirmeleri yaptığınızda db bulunan bir proje geliştirmede basit&amp;ccedil;e connection sağlayarak data-model ilişkisini kurabilirsiniz. &amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Not:&lt;/strong&gt; Yazıyı basit tutmak adına herhangi bir design pattern den bahsetmedim ancak Db olan yerde Crud işlemleri vardır, Crud olan yerde Ado.Net veya ORM vardır, ORM varsa Fluent NHibernate vardır ve Fluent NHibernate de Repository Design Pattern&amp;nbsp;ile birlikte fıstıklı baklava gibi gider :)&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;Fluent NHibernate ile ilgili daha detaylı bilgi almak ve geliştirmeleri takip edebilmek i&amp;ccedil;in&lt;a href="https://github.com/jagregory/fluent-nhibernate"&gt; bu linke&lt;/a&gt; g&amp;ouml;z atabilirsiniz.&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>True</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2016-12-29 22:44:00</pubDate>
+  <lastModified>2016-12-04 07:12:20</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>fluent-nhibernate-kullanimi</slug>
+  <tags>
+    <tag>orm</tag>
+    <tag>nhibernate</tag>
+    <tag>fluent nhibernate nedir</tag>
+    <tag>fluent nhibernate</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>91467d82-b6b4-4b4d-ab9a-f3a25c7c7447</category>
+    <category>8b1fab7b-05eb-4666-b030-503ffa84eea9</category>
+    <category>33191729-e344-4de6-8ecf-6400c88b07e7</category>
+  </categories>
+  <notifications />
+</post>

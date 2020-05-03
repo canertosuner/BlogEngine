@@ -1,0 +1,247 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<post>
+  <author>caner</author>
+  <title>GraphQL Nedir, .Net Core GraphQL Kullanımı</title>
+  <description>GraphQL, Api'larınız için server-side runtime execute edebileceğiniz bir query language'dir. Dil ve teknoloji bağımsız olarak bir çok framework çin desteği bulunmaktadır (asp.net, java, nodejs etc.) ve herhangi bir database yada farklı data-storage engine'lara bağımlı olmaksızın ...</description>
+  <content>&lt;p&gt;GraphQL, Api'larınız i&amp;ccedil;in server-side runtime execute edebileceğiniz bir query language'dir.&amp;nbsp;Dil ve teknoloji bağımsız olarak bir &amp;ccedil;ok framework &amp;ccedil;in desteği bulunmaktadır (asp.net, java,&amp;nbsp;nodejs etc.) ve herhangi bir database yada farklı&amp;nbsp;data-storage engine'lara bağımlı olmaksızın entegre edilebilir bir yapıdır. Klasik api'lardan farklı olarak client retriew etmek istediği alanları ve&amp;nbsp;uygulanacak filtreleri kolayca belirtebilir.&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek verecek olursak; userList d&amp;ouml;nen bir api tasarladınız ve geriye db'de bulunan user'ları belirli filtreler uygulayarak return ediyor. Api v1.0'da request olarak userId ve response olarakda userFullName ve birthDate d&amp;ouml;nen bir dto olarak tasarlandı. v2.0'da dedilerki request'e birthdate ve response'a da zipcode alanları eklenecek. Yani tekrardan bir geliştirme yapmanız gerekmekte. Bir ka&amp;ccedil; hafta sonra dedilerki başka bir ekip daha bu endpoint'i kullanacak ancak onlar şu-şu parametrelere g&amp;ouml;re kullanmak istiyor vs. GraphQl sağladığı fluent yapı ile birlikte isteyene istediğini gibi filtreleyebildiği ve entity'nize g&amp;ouml;re response oluşturabildiği bir yapı tasarlamayı sağlamakta.&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;rnek bir proje &amp;uuml;zerinden anlatmaya devam edelim.&lt;/p&gt;
+&lt;h3&gt;Creating an Asp.Net Core Web Application&amp;nbsp;&lt;/h3&gt;
+&lt;p&gt;İlk olarak vs'da GraphQL_Sample adında bir Asp.net Core WebApp projesi oluşturalım.&amp;nbsp;En son g&amp;uuml;ncel olan .net core versiyonu kurulu olduğundan versiyon 3.1 ile uygulamayı oluşturdum.&lt;/p&gt;
+&lt;p style="text-align: center;"&gt;&lt;img src="/image.axd?picture=/2019/grphqls_img1.PNG" alt="" width="674" height="448" /&gt;&lt;/p&gt;
+&lt;p&gt;Sonrasında nuget &amp;uuml;zerinden GraphQL'in son versiyonu olan 2.4.0 paketini projemize install edelim. Dilerseniz console &amp;uuml;zerindende install komutunu &amp;ccedil;alıştırabilirsiniz.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Install-Package GraphQL -Version 2.4.0&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p style="text-align: center;"&gt;&amp;nbsp;&lt;img src="/image.axd?picture=/2019/grphqls_img2.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;ncelikle projemizde kullanacağımız data-source entity tanımlamalarını yapalım. Projemiz herhangi bir data-soruce'da&amp;nbsp;bulunan Customer tablosundaki kayıtları d&amp;ouml;nen bir api olsun ve bu api'a ait Customer entity'sini aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;h3&gt;Define Entity and Repository&lt;/h3&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class Customer
+{
+    public Guid Id { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public DateTime BirthDate { get; set; }
+    public string ZipCode { get; set; }
+    public bool IsActive { get; set; }
+}&lt;/pre&gt;
+&lt;p&gt;Bu entity'ye ait CustomerRepository ve ICustomerRepository class'larını oluşturup bağımlılığı&amp;nbsp;asp.net core'un default DI tool'una Startup.cs i&amp;ccedil;erisinde register edelim&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public interface ICustomerRepository
+{
+    List&amp;lt;Customer&amp;gt; All();
+}&lt;/pre&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class CustomerRepository : ICustomerRepository
+{
+    public List&amp;lt;Customer&amp;gt; All()
+    {
+        return new List&amp;lt;Customer&amp;gt;
+        {
+            new Customer
+            {
+                Id = new Guid(),
+                FirstName = "Brain",
+                LastName = "Adams",
+                BirthDate = new DateTime(1985,11,20),
+                IsActive = true,
+                ZipCode = "11572"
+            },
+            new Customer
+            {
+                Id = new Guid(),
+                FirstName = "Joe",
+                LastName = "Colmun",
+                BirthDate = new DateTime(1991,1,14),
+                IsActive = true,
+                ZipCode = "22687"
+            },
+            new Customer
+            {
+                Id = new Guid(),
+                FirstName = "Lorena",
+                LastName = "McCarty",
+                BirthDate = new DateTime(1972,7,4),
+                IsActive = true,
+                ZipCode = "11572"
+            },
+            new Customer
+            {
+                Id = new Guid(),
+                FirstName = "Ivan",
+                LastName = "Lopez",
+                BirthDate = new DateTime(1990,2,9),
+                IsActive = true,
+                ZipCode = "56874"
+            },
+            new Customer
+            {
+                Id = new Guid(),
+                FirstName = "Jason",
+                LastName = "Smith",
+                BirthDate = new DateTime(200,8,17),
+                IsActive = true,
+                ZipCode = "96314"
+            },
+            new Customer
+            {
+                Id = new Guid(),
+                FirstName = "Clain",
+                LastName = "Adams",
+                BirthDate = new DateTime(1986,5,5),
+                IsActive = true,
+                ZipCode = "11572"
+            }
+        };
+    }
+}&lt;/pre&gt;
+&lt;p&gt;All() metodu hayali db-storage'da bulunan Customer tablosundaki b&amp;uuml;t&amp;uuml;n kayıtları select eden metod olarak d&amp;uuml;ş&amp;uuml;nebiliriz ve yukarıdaki gibi dummy olarak bir customerList return etmekte.&lt;br /&gt;ICustomerRepository ve CustomerRepository'ye ait dependency injection işlemini aşağıdaki gibi .net core default DI tool'unda tanımlayalım. Bunun i&amp;ccedil;in Startup.cs i&amp;ccedil;erisinde bulunan ConfigureServices emtodunu kullanacağız.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddScoped&amp;lt;ICustomerRepository, CustomerRepository&amp;gt;();
+}&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Schema;&lt;/strong&gt;&lt;br /&gt;Schema, GraphQL API'sinin ana yapı taşlarından biridir.&lt;br /&gt;Schema &amp;ccedil;oğunlukla Query, Mutation, Types bilgilerini i&amp;ccedil;erir. Şemadaki sorgu bir ObjectGraphType'tır.&lt;/p&gt;
+&lt;p&gt;Şimdi sırada GraphQL type'larını oluşturma var. GraphQL doğrudan bizim poco sınıflarımızı alıp mapping işlemi yapamıyor. Bunun i&amp;ccedil;in CustomerType adında&amp;nbsp;&lt;strong&gt;ObjectGraphType&lt;/strong&gt;&amp;nbsp;sınıfını inherit alan bir mapping sınıfı oluşturmamız gerekmekte.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class CustomerType : ObjectGraphType&amp;lt;Customer&amp;gt;
+{
+    public CustomerType()
+    {
+        Field(x =&amp;gt; x.Id, type: typeof(IdGraphType)).Description("Id of the Customer");
+        Field(x =&amp;gt; x.FirstName);
+        Field(x =&amp;gt; x.LastName).Description("Customer's lastName");
+        Field(x =&amp;gt; x.BirthDate);
+        Field(x =&amp;gt; x.IsActive);
+        Field(x =&amp;gt; x.ZipCode);
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Yukarıda g&amp;ouml;r&amp;uuml;ld&amp;uuml;ğ&amp;uuml; &amp;uuml;zre Customer sınıfı i&amp;ccedil;in graphQl da mapping'i bulunan bir sınıf yarattık ve constructor i&amp;ccedil;erisinde bu sınıfa ait field'ların mapping'ini tanımladık ve yine Startup.cs i&amp;ccedil;erisinde container'a register edelim.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;services.AddSingleton&amp;lt;CustomerType&amp;gt;();&lt;/pre&gt;
+&lt;p&gt;Sonraki adım ise AppQuery sınıfını oluşturmak. Bu sınıf query'ler oluşturmamıza yardımcı olacak. GraphQL de "customers" key'ine karşılık b&amp;uuml;t&amp;uuml;n m&amp;uuml;şterileri return eden bir tanım yaptık&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class AppQuery : ObjectGraphType
+{
+    public AppQuery (ICustomerRepository customerRepository)
+    {
+        Field&amp;lt;ListGraphType&amp;lt;CustomerType&amp;gt;&amp;gt;("customers", resolve: context =&amp;gt; customerRepository.All());
+    }
+}&lt;/pre&gt;
+&lt;p&gt;RotQuery sınıfını yine Startup.cs i&amp;ccedil;erisinde DI tool'una register edelim.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;pre class="prettyprint lang-cs prettyprinted"&gt;&lt;span class="pln"&gt;services&lt;/span&gt;&lt;span class="pun"&gt;.&lt;/span&gt;&lt;span class="typ"&gt;AddScoped&lt;/span&gt;&lt;span class="pun"&gt;&amp;lt;AppQuery&lt;/span&gt;&lt;span class="pun"&gt;&amp;gt;();&lt;/span&gt;&lt;/pre&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;AppSchema sınıfı ile GraphQL &amp;ouml;rneğimiz i&amp;ccedil;in kullanacağımız schema anımlamasını yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;public class AppSchema : Schema, ISchema
+{
+    public AppSchema(IDependencyResolver resolver) : base(resolver)
+    {
+        Query = resolver.Resolve&amp;lt;AppQuery&amp;gt;();
+    }
+}&lt;/pre&gt;
+&lt;p&gt;GraphQL NuGet k&amp;uuml;t&amp;uuml;phanesi, build-in DI tool'u&amp;nbsp;ile birlikte gelir. 'Schema' sınıfı 'GraphQL.IDependencyResolver' property'sine sahiptir ve b&amp;ouml;ylece gereken t&amp;uuml;m ObjectGraphType'ı ihtiya&amp;ccedil; durumunda koalyca resolve edebilir.&lt;/p&gt;
+&lt;p&gt;Yine bu yukarıda tanımladığımız Schema&amp;nbsp;i&amp;ccedil;in DI registration'ınını Startup.cs i&amp;ccedil;inde tanımlayalım.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;services.AddScoped&amp;lt;IDependencyResolver&amp;gt;(_ =&amp;gt; new FuncDependencyResolver(_.GetRequiredService));&lt;br /&gt;services.AddScoped&amp;lt;ISchema, AppSchema&amp;gt;();&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Son olarak ise Api'a ait olan CustomerController i&amp;ccedil;erisinde ilgili endpoint'i aşağıdaki gibi oluşturalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;[ApiController]
+[Route("[controller]")]
+public class CustomerController : ControllerBase
+{
+    private readonly ISchema _schema;
+    private readonly IDocumentExecuter _executer;
+
+    public CustomerController(ISchema schema, IDocumentExecuter executer)
+    {
+        _schema = schema;
+        _executer = executer;
+
+    }
+
+    [HttpPost]
+    public async Task&amp;lt;IActionResult&amp;gt; Post([FromBody] CustomerQueryDto query)
+    {
+        var result = await _executer.ExecuteAsync(_ =&amp;gt;
+        {
+            _.Schema = _schema;
+            _.Query = query.Query;
+        }).ConfigureAwait(false);
+		
+		if (result.Errors?.Count &amp;gt; 0)
+        {
+            return BadRequest(result);
+        }
+ 
+        return Ok(result.Data);
+    }
+}&lt;/pre&gt;
+&lt;p&gt;Artık api'ımızı test edebiliriz. Postman &amp;uuml;zerinden aşağıdaki gibi ilk olarak RoorQuery de belirttiğimiz All() metodu i&amp;ccedil;in tanımladığımız query i&amp;ccedil;in spesific field'lar i&amp;ccedil;in bir request atalım ve response'da istekte bulunduğumuz alanların geldiğini g&amp;ouml;relim.&lt;/p&gt;
+&lt;pre class="brush:java;auto-links:false;toolbar:false" contenteditable="false"&gt;{ "query": "query { customers { id firstName } }" }&lt;/pre&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2020/gprg_qll_img2.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;Farklı query'ler yazacak olursak; birka&amp;ccedil; parametreye g&amp;ouml;re filtre uygulayıp sonu&amp;ccedil;ları d&amp;ouml;nen bir query i&amp;ccedil;in aşağıdaki gibi appQuery sınıfının i&amp;ccedil;erisinde field tanımını yapalım.&lt;/p&gt;
+&lt;pre class="brush:csharp;auto-links:false;toolbar:false" contenteditable="false"&gt;Field&amp;lt;ListGraphType&amp;lt;CustomerType&amp;gt;&amp;gt;("filterCustomers",
+    arguments: new QueryArguments
+    {
+        new  QueryArgument&amp;lt;StringGraphType&amp;gt; { Name = "firstName"},
+        new  QueryArgument&amp;lt;StringGraphType&amp;gt; { Name = "lastName"},
+        new  QueryArgument&amp;lt;BooleanGraphType&amp;gt; { Name = "isActive"},
+        new  QueryArgument&amp;lt;DateGraphType&amp;gt; { Name = "birthDate"},
+
+    },
+    resolve: context =&amp;gt;
+      {
+          var firstName = context.GetArgument&amp;lt;string&amp;gt;("firstName");
+          var lastName = context.GetArgument&amp;lt;string&amp;gt;("lastName");
+          var isActive = context.GetArgument&amp;lt;bool&amp;gt;("isActive");
+
+          return customerRepository.All().Where(x =&amp;gt; x.FirstName.ToLower() == firstName.ToLower() &amp;amp;&amp;amp; 
+                                                     x.LastName.ToLower() == lastName.ToLower() &amp;amp;&amp;amp; 
+                                                     x.IsActive == isActive).ToList();
+      });&lt;/pre&gt;
+&lt;p&gt;Tekrardan postman &amp;uuml;zerinden isteği attığımızda response'un d&amp;ouml;nd&amp;uuml;ğ&amp;uuml;n&amp;uuml; g&amp;ouml;rebiliriz.&lt;/p&gt;
+&lt;pre class="brush:java;auto-links:false;toolbar:false" contenteditable="false"&gt;{ "query": "query { filterCustomers(firstName:\"Lorena\",lastName:\"McCarty\", isActive:true) { id firstName lastName } }"}&lt;/pre&gt;
+&lt;p&gt;&lt;img src="/image.axd?picture=/2020/gprg_qll_img3.PNG" alt="" /&gt;&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&lt;span style="text-decoration: underline;"&gt;&lt;strong&gt;Aliases&lt;br /&gt;&lt;/strong&gt;&lt;/span&gt;Api tarafında filteredCustomers şeklinde bir tanımlama yaptığımızdan requestte bulunurkende aynı fieldName'de d&amp;ouml;nmekte. Ancak aliases kullanarak response field'ı modify edebiliriz. Kullanım şekli olarak aşağıdaki gibidir ve graphql api'nize bu isteği attığınızda artık response'da bulunan array'in adı customers olacaktır.&lt;/p&gt;
+&lt;pre class="brush:java;auto-links:false;toolbar:false" contenteditable="false"&gt;query {
+ customers: filteredCustomers(firstName: "Lorena") {
+  id
+  firstName
+ }
+}&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Fragments&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;GraphQL API'sindeki iki kayıt arasında karşılaştırma yapmak i&amp;ccedil;in kullanılır. Aşağıdaki sorgu &amp;ouml;rneğindeki gibi bir fragment query'si oluşturabiliriz.&lt;/p&gt;
+&lt;pre class="brush:java;auto-links:false;toolbar:false" contenteditable="false"&gt;query {
+ customerOne: filterCustomers(firstName: "Lorena") {
+  ...props
+ }
+ customerTwo: filterCustomers(firstName: "Clain") {
+  ...props
+ }
+}
+fragment props on CustomerType {
+ id
+ firstName
+ lastName
+}&lt;/pre&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;&amp;Ouml;zetleyecek olursak; qraphQl'e başlangı&amp;ccedil; seviyesinde değinmiş olmakla beraber .net core ile olduk&amp;ccedil;a basit bir şekilde GraphQl tabanlı api'lar tasarlayabilir&amp;nbsp;ve ihtiyacınıza g&amp;ouml;re complex query tanımlamaları yapabilirsiniz.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href="https://github.com/canertosuner/graphql-api-using-asp.net-core"&gt;Source&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</content>
+  <ispublished>True</ispublished>
+  <isdeleted>False</isdeleted>
+  <iscommentsenabled>True</iscommentsenabled>
+  <pubDate>2020-02-20 17:21:00</pubDate>
+  <lastModified>2020-03-01 14:34:45</lastModified>
+  <raters>0</raters>
+  <rating>0</rating>
+  <slug>graphql-nedir-net-core-graphql-kullanimi</slug>
+  <tags>
+    <tag>graphql </tag>
+    <tag>graphql .net core</tag>
+    <tag>graphql nedir</tag>
+    <tag>graphql web api</tag>
+  </tags>
+  <comments />
+  <categories>
+    <category>b48e5b38-b409-47bf-83e9-c969aff0ddb7</category>
+    <category>ebe6cacc-3d21-4b1a-87de-e73b59b91a82</category>
+    <category>4f7b9b49-03e3-42bc-ba3b-203e3ca707ec</category>
+  </categories>
+  <notifications />
+</post>
