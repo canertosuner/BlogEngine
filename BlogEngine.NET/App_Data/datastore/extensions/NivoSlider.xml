@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ManagedExtension xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="NivoSlider">
+  <AdminPage>~/Custom/Controls/NivoSlider/Admin.aspx</AdminPage>
+  <Author>&lt;a href="http://rtur.net/blog/search.aspx?q=nivoslider"&gt;rtur.net&lt;/a&gt;</Author>
+  <Description>jQuery Image Slider</Description>
+  <Enabled>true</Enabled>
+  <Priority>0</Priority>
+  <SubBlogEnabled>false</SubBlogEnabled>
+  <Settings>
+    <Delimiter>44</Delimiter>
+    <Help />
+    <Hidden>false</Hidden>
+    <Index>0</Index>
+    <IsScalar>false</IsScalar>
+    <KeyField>UID</KeyField>
+    <Name>NivoSlider</Name>
+    <Parameters>
+      <KeyField>false</KeyField>
+      <Label>UID</Label>
+      <MaxLength>100</MaxLength>
+      <Name>UID</Name>
+      <ParamType>String</ParamType>
+      <Required>false</Required>
+      <SelectedValue />
+      <Values>slider1:sample1.png</Values>
+      <Values>slider1:sample2.png</Values>
+    </Parameters>
+    <Parameters>
+      <KeyField>false</KeyField>
+      <Label>Url</Label>
+      <MaxLength>100</MaxLength>
+      <Name>Url</Name>
+      <ParamType>String</ParamType>
+      <Required>false</Required>
+      <SelectedValue />
+      <Values>#</Values>
+      <Values>#</Values>
+    </Parameters>
+    <Parameters>
+      <KeyField>false</KeyField>
+      <Label>Title</Label>
+      <MaxLength>100</MaxLength>
+      <Name>Title</Name>
+      <ParamType>String</ParamType>
+      <Required>false</Required>
+      <SelectedValue />
+      <Values />
+      <Values>sample two</Values>
+    </Parameters>
+    <ShowAdd>true</ShowAdd>
+    <ShowDelete>true</ShowDelete>
+    <ShowEdit>true</ShowEdit>
+    <BlogId>96d5b379-7e1d-4dac-a6ba-1e50db561b04</BlogId>
+  </Settings>
+  <ShowSettings>true</ShowSettings>
+  <Version>3.2.0.0</Version>
+</ManagedExtension>
