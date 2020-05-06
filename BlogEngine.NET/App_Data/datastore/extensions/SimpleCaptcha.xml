@@ -3,7 +3,7 @@
   <AdminPage />
   <Author>&lt;a href="http://www.aaronstannard.com"&gt;Aaron Stannard&lt;/a&gt;</Author>
   <Description>Settings for the SimpleCaptcha control</Description>
-  <Enabled>false</Enabled>
+  <Enabled>true</Enabled>
   <Priority>2</Priority>
   <SubBlogEnabled>true</SubBlogEnabled>
   <Settings>
@@ -43,7 +43,7 @@
       <ParamType>Boolean</ParamType>
       <Required>true</Required>
       <SelectedValue />
-      <Values>False</Values>
+      <Values>True</Values>
     </Parameters>
     <ShowAdd>true</ShowAdd>
     <ShowDelete>true</ShowDelete>

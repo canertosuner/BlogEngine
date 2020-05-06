@@ -83,7 +83,7 @@ You can create your own public key at &lt;a href='http://www.Recaptcha.net'&gt;h
       <ParamType>Boolean</ParamType>
       <Required>true</Required>
       <SelectedValue />
-      <Values>False</Values>
+      <Values>True</Values>
     </Parameters>
     <Parameters>
       <KeyField>false</KeyField>

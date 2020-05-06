@@ -157,7 +157,42 @@
     <Content Include="App_Data\ce843da6-8193-4b52-b3ad-5f20f0387420.xml" />
     <Content Include="App_Data\customfields.xml" />
     <Content Include="App_Data\d6f4cf6f-b14e-459f-84f4-72d054c2c472.xml" />
+    <Content Include="App_Data\datastore\extensions\AddThis.xml" />
+    <Content Include="App_Data\datastore\extensions\AkismetFilter.xml" />
+    <Content Include="App_Data\datastore\extensions\BBCode.xml" />
+    <Content Include="App_Data\datastore\extensions\BreakPost.xml" />
+    <Content Include="App_Data\datastore\extensions\GoogleAsyncAnalytics.xml" />
+    <Content Include="App_Data\datastore\extensions\Jcarousel.xml" />
+    <Content Include="App_Data\datastore\extensions\Logger.xml" />
+    <Content Include="App_Data\datastore\extensions\MediaElementPlayer.xml" />
+    <Content Include="App_Data\datastore\extensions\MetaExtension.xml" />
+    <Content Include="App_Data\datastore\extensions\MoveToTop.xml" />
+    <Content Include="App_Data\datastore\extensions\NivoSlider.xml" />
+    <Content Include="App_Data\datastore\extensions\Recaptcha.xml" />
+    <Content Include="App_Data\datastore\extensions\ResolveLinks.xml" />
+    <Content Include="App_Data\datastore\extensions\SendCommentMail.xml" />
+    <Content Include="App_Data\datastore\extensions\SendNewsletters.xml" />
+    <Content Include="App_Data\datastore\extensions\SendPings.xml" />
+    <Content Include="App_Data\datastore\extensions\SimpleCaptcha.xml" />
+    <Content Include="App_Data\datastore\extensions\Smilies.xml" />
+    <Content Include="App_Data\datastore\extensions\StopForumSpam.xml" />
+    <Content Include="App_Data\datastore\widgets\0ad6064e-6b8a-40b8-89d8-b42bcaf11d2e.xml" />
+    <Content Include="App_Data\datastore\widgets\1314c8d9-24c0-4adf-808b-e9eae585bd6e.xml" />
+    <Content Include="App_Data\datastore\widgets\21108331-e283-4807-a4f6-f1db31163608.xml" />
+    <Content Include="App_Data\datastore\widgets\2fa2f989-9d2b-4c8e-911e-2e1bf967d5e1.xml" />
+    <Content Include="App_Data\datastore\widgets\311.xml" />
+    <Content Include="App_Data\datastore\widgets\4b7cb5e1-b090-4779-b7bc-24898a269477.xml" />
+    <Content Include="App_Data\datastore\widgets\626.xml" />
+    <Content Include="App_Data\datastore\widgets\76fcd9dd-6273-427b-812e-d6868beedfcc.xml" />
+    <Content Include="App_Data\datastore\widgets\776.xml" />
+    <Content Include="App_Data\datastore\widgets\c5535c01-4401-4b71-b9bb-8c3c794029d4.xml" />
+    <Content Include="App_Data\datastore\widgets\cb9e0c01-4491-4010-8015-0ee38cbcab51.xml" />
+    <Content Include="App_Data\datastore\widgets\d8d3a162-c8e2-4188-ba0b-e8e3049987cf.xml" />
     <Content Include="App_Data\datastore\widgets\deb9fd7c-e0f4-4f24-964d-d5f67332bab0.xml" />
+    <Content Include="App_Data\datastore\widgets\e596033f-d133-4a8b-a0ba-c1a3037c6d83.xml" />
+    <Content Include="App_Data\datastore\widgets\Footer_Widget.xml" />
+    <Content Include="App_Data\datastore\widgets\sidebar-Post.xml" />
+    <Content Include="App_Data\datastore\widgets\slider.xml" />
     <Content Include="App_Data\e0a1619a-a0c8-4185-9e7b-912f41892e02.xml" />
     <Content Include="App_Data\e97101c7-d3d5-4cd5-a065-955d56ddd10f.xml" />
     <Content Include="App_Data\ec66a270-2c97-48ca-83ce-4cda67b4b12f.xml" />
@@ -3090,7 +3125,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\datastore\extensions\" />
     <Folder Include="App_Data\packages\" />
     <Folder Include="bin\" />
   </ItemGroup>
