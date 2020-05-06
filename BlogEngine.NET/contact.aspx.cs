@@ -10,38 +10,40 @@ using BlogEngine.Core;
 using BlogEngine.Core.Web.Controls;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 #endregion
 
 public partial class contact : BlogBasePage, ICallbackEventHandler
 {
 
-    protected override void OnLoad(EventArgs e)
-    {
-        base.OnLoad(e);
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
 
-        ClientScript.GetCallbackEventReference(this, "arg", "callback", "context");
-        btnSend.Click += new EventHandler(btnSend_Click);
-        if (!Page.IsPostBack)
-        {
-            txtSubject.Text = Request.QueryString["subject"];
-            txtName.Text = Request.QueryString["name"];
-            txtEmail.Text = Request.QueryString["email"];
+		ClientScript.GetCallbackEventReference(this, "arg", "callback", "context");
+		btnSend.Click += new EventHandler(btnSend_Click);
+		if (!Page.IsPostBack)
+		{
+			txtSubject.Text = Request.QueryString["subject"];
+			txtName.Text = Request.QueryString["name"];
+			txtEmail.Text = Request.QueryString["email"];
 
-            GetCookie();
-            phAttachment.Visible = BlogSettings.Instance.EnableContactAttachments;
-            SetFocus();
-        }
+			GetCookie();
+			phAttachment.Visible = BlogSettings.Instance.EnableContactAttachments;
+			SetFocus();
+		}
 
-        if (!IsPostBack && !IsCallback)
-        {
-            recaptcha.Visible = UseCaptcha;
-            recaptcha.UserUniqueIdentifier = hfCaptcha.Value = Guid.NewGuid().ToString();
-        }
+		if (!IsPostBack && !IsCallback)
+		{
+			recaptcha.Visible = UseCaptcha;
+			recaptcha.UserUniqueIdentifier = hfCaptcha.Value = Guid.NewGuid().ToString();
+		}
 
-        Page.Title = Server.HtmlEncode(Resources.labels.contact);
-        base.AddMetaTag("description", Utils.StripHtml(BlogSettings.Instance.ContactFormMessage));
-    }
+		Page.Title = Server.HtmlEncode(Resources.labels.contact);
+		base.AddMetaTag("description", Utils.StripHtml(BlogSettings.Instance.ContactFormMessage));
+	}
 
 	/// <summary>
 	/// Sets the focus on the first empty textbox.
@@ -75,18 +77,18 @@ public partial class contact : BlogBasePage, ICallbackEventHandler
 	{
 		if (Page.IsValid)
 		{
-            if (!UseCaptcha || IsCaptchaValid)
-            {
-                bool success = SendEmail(txtEmail.Text, txtName.Text, txtSubject.Text, txtMessage.Text);
-                divForm.Visible = !success;
-                lblStatus.Visible = !success;
-                divThank.Visible = success;
-                SetCookie();
-            }
-            else
-            {
-                ClientScript.RegisterStartupScript(this.GetType(), "captcha-incorrect", " displayIncorrectCaptchaMessage(); ", true);
-            }
+			if (!UseCaptcha || IsCaptchaValid)
+			{
+				bool success = SendEmail(txtEmail.Text, txtName.Text, txtSubject.Text, txtMessage.Text);
+				divForm.Visible = !success;
+				lblStatus.Visible = !success;
+				divThank.Visible = success;
+				SetCookie();
+			}
+			else
+			{
+				ClientScript.RegisterStartupScript(this.GetType(), "captcha-incorrect", " displayIncorrectCaptchaMessage(); ", true);
+			}
 		}
 	}
 
@@ -105,21 +107,21 @@ public partial class contact : BlogBasePage, ICallbackEventHandler
 				mail.Body = "<div style=\"font: 11px verdana, arial\">";
 				mail.Body += Server.HtmlEncode(message).Replace("\n", "<br />") + "<br /><br />";
 				mail.Body += "<hr /><br />";
-                		mail.Body += "<h3>" + Resources.labels.contactAuthorInformation + "</h3>";
+				mail.Body += "<h3>" + Resources.labels.contactAuthorInformation + "</h3>";
 				mail.Body += "<div style=\"font-size:10px;line-height:16px\">";
 				mail.Body += "<strong>" + Resources.labels.name + ":</strong> " + Server.HtmlEncode(name) + "<br />";
-                		mail.Body += "<strong>" + Resources.labels.email + ":</strong> " + Server.HtmlEncode(email) + "<br />";
+				mail.Body += "<strong>" + Resources.labels.email + ":</strong> " + Server.HtmlEncode(email) + "<br />";
 
 				if (ViewState["url"] != null)
-                    		mail.Body += string.Format("<strong>" + Resources.labels.website + ":</strong> <a href=\"{0}\">{0}</a><br />", ViewState["url"]);
+					mail.Body += string.Format("<strong>" + Resources.labels.website + ":</strong> <a href=\"{0}\">{0}</a><br />", ViewState["url"]);
 
 				if (ViewState["country"] != null)
-                    		mail.Body += "<strong>" + Resources.labels.countryCode + ":</strong> " + ((string)ViewState["country"]).ToUpperInvariant() + "<br />";
+					mail.Body += "<strong>" + Resources.labels.countryCode + ":</strong> " + ((string)ViewState["country"]).ToUpperInvariant() + "<br />";
 
 				if (HttpContext.Current != null)
 				{
-                    			mail.Body += "<strong>" + Resources.labels.contactIPAddress + ":</strong> " + Utils.GetClientIP() + "<br />";
-                    			mail.Body += "<strong>" + Resources.labels.contactUserAgent + ":</strong> " + HttpContext.Current.Request.UserAgent;
+					mail.Body += "<strong>" + Resources.labels.contactIPAddress + ":</strong> " + Utils.GetClientIP() + "<br />";
+					mail.Body += "<strong>" + Resources.labels.contactUserAgent + ":</strong> " + HttpContext.Current.Request.UserAgent;
 				}
 
 				if (txtAttachment.HasFile)
@@ -128,7 +130,8 @@ public partial class contact : BlogBasePage, ICallbackEventHandler
 					mail.Attachments.Add(attachment);
 				}
 
-				if (Utils.SendMailMessage(mail).Length > 0) {
+				if (Utils.SendMailMessage(mail).Length > 0)
+				{
 					return false;
 				};
 			}
@@ -139,14 +142,14 @@ public partial class contact : BlogBasePage, ICallbackEventHandler
 		{
 			if (Security.IsAuthorizedTo(Rights.ViewDetailedErrorMessages))
 			{
-                if (ex.InnerException != null)
-                {
-                    lblStatus.Text = ex.InnerException.Message;
-                }
-                else
-                {
-                    lblStatus.Text = ex.Message;
-                }
+				if (ex.InnerException != null)
+				{
+					lblStatus.Text = ex.InnerException.Message;
+				}
+				else
+				{
+					lblStatus.Text = ex.Message;
+				}
 			}
 
 			return false;
@@ -154,7 +157,7 @@ public partial class contact : BlogBasePage, ICallbackEventHandler
 	}
 
 	// comment test
-	
+
 	#region Cookies
 
 	/// <summary>
@@ -195,25 +198,25 @@ public partial class contact : BlogBasePage, ICallbackEventHandler
 	/// <summary> 
 	/// Gets whether or not the user is human 
 	/// </summary> 
-    private bool IsCaptchaValid
-    {
-        get
-        {
-            recaptcha.Validate();
-            return recaptcha.IsValid;
-        }
-    }
+	private bool IsCaptchaValid
+	{
+		get
+		{
+			recaptcha.Validate();
+			return recaptcha.IsValid;
+		}
+	}
 
-    private bool UseCaptcha
-    {
-        get
-        {
-            return
-                BlogSettings.Instance.EnableRecaptchaOnContactForm &&
-                recaptcha.RecaptchaEnabled &&
-                recaptcha.RecaptchaNecessary;
-        }
-    }
+	private bool UseCaptcha
+	{
+		get
+		{
+			return
+				BlogSettings.Instance.EnableRecaptchaOnContactForm &&
+				recaptcha.RecaptchaEnabled &&
+				recaptcha.RecaptchaNecessary;
+		}
+	}
 
 	#endregion
 
@@ -227,43 +230,40 @@ public partial class contact : BlogBasePage, ICallbackEventHandler
 		return _Callback;
 	}
 
-    public void RaiseCallbackEvent(string eventArgument)
-    {
-        string[] arg = eventArgument.Split(new string[] { "-||-" }, StringSplitOptions.None);
-        if (arg.Length == 6)
-        {
-            string name = arg[0];
-            string email = arg[1];
-            string subject = arg[2];
-            string message = arg[3];
+	public void RaiseCallbackEvent(string eventArgument)
+	{
+		try
+		{
+			// BillKrat.2018.08.25 - adapted for Google recaptcha V2 ( http://AdventuresOnTheEdge.net )
+			dynamic contact = JObject.Parse(eventArgument);
 
-            string recaptchaResponse = arg[4];
-            string recaptchaChallenge = arg[5];
+			recaptcha.UserUniqueIdentifier = hfCaptcha.Value;
 
-            recaptcha.UserUniqueIdentifier = hfCaptcha.Value;
-            if (UseCaptcha)
-            {
-                if (!recaptcha.ValidateAsync(recaptchaResponse, recaptchaChallenge))
-                {
-                    _Callback = "RecaptchaIncorrect";
-                    return;
-                }
-            }
+			if (UseCaptcha)
+			{
+				if (!recaptcha.ValidateAsync(contact.recaptchaResponse.Value, contact.recaptchaChallenge.Value))
+				{
+					_Callback = "RecaptchaIncorrect";
+					return;
+				}
+			}
 
-            if (SendEmail(email, name, subject, message))
-            {
-                _Callback = BlogSettings.Instance.ContactThankMessage;
-            }
-            else
-            {
-                _Callback = BlogSettings.Instance.ContactErrorMessage;
-            }
-        }
-        else
-        {
-            _Callback = BlogSettings.Instance.ContactErrorMessage;
-        }
-    }
+			if (SendEmail(contact.email.Value, contact.name.Value, contact.subject.Value, contact.message.Value))
+			{
+				_Callback = BlogSettings.Instance.ContactThankMessage;
+			}
+			else
+			{
+				_Callback = BlogSettings.Instance.ContactErrorMessage;
+			}
+
+		}
+		catch (Exception ex)
+		{
+			Debug.WriteLine(ex.Message + ex.StackTrace);
+			_Callback = BlogSettings.Instance.ContactErrorMessage;
+		}
+	}
 
 	#endregion
 

@@ -5,7 +5,7 @@
   <Description>jQuery Image Slider</Description>
   <Enabled>true</Enabled>
   <Priority>0</Priority>
-  <SubBlogEnabled>false</SubBlogEnabled>
+  <SubBlogEnabled>true</SubBlogEnabled>
   <Settings>
     <Delimiter>44</Delimiter>
     <Help />
